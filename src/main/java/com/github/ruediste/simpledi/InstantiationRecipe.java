@@ -14,10 +14,10 @@ public class InstantiationRecipe {
 	public Scope scope;
 
 	/**
-	 * {@link MemberInjector} get called after the instantiation to inject
+	 * {@link MembersInjector} get called after the instantiation to inject
 	 * fields and methods
 	 */
-	public final List<MemberInjector<?>> memberInjectors = new ArrayList<>();
+	public final List<MembersInjector<?>> membersInjectors = new ArrayList<>();
 	public final List<InjectionListener<?>> injectionListeners = new ArrayList<>();
 
 	private boolean isInjectionPointSpecific;

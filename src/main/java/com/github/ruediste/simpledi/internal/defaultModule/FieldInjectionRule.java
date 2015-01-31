@@ -13,7 +13,7 @@ import com.github.ruediste.simpledi.InjectionPoint;
 import com.github.ruediste.simpledi.InstantiationRecipe;
 import com.github.ruediste.simpledi.InstantiationRequest;
 import com.github.ruediste.simpledi.Key;
-import com.github.ruediste.simpledi.MemberInjector;
+import com.github.ruediste.simpledi.MembersInjector;
 import com.github.ruediste.simpledi.RecursiveInjector;
 import com.github.ruediste.simpledi.ReflectionUtil;
 import com.github.ruediste.simpledi.Rule;
@@ -26,7 +26,7 @@ public class FieldInjectionRule implements Rule {
 	public void apply(InstantiationRecipe recipe, Key<?> key,
 			Supplier<InjectionPoint> injectionPoint) {
 
-		ArrayList<MemberInjector<?>> injectors = new ArrayList<>();
+		ArrayList<MembersInjector<?>> injectors = new ArrayList<>();
 
 		TypeToken<?> t = key.type;
 		while (t != null) {
@@ -40,7 +40,7 @@ public class FieldInjectionRule implements Rule {
 									ReflectionUtil.getQualifiers(f)),
 							new DefaultInjectionPoint(f, f));
 
-					injectors.add(new MemberInjector<Object>() {
+					injectors.add(new MembersInjector<Object>() {
 
 						@Override
 						public void injectMembers(Object instance,
@@ -69,7 +69,7 @@ public class FieldInjectionRule implements Rule {
 		// reverse to make sure fields of super classes are injected before
 		// those of the subclasses
 		Collections.reverse(injectors);
-		recipe.memberInjectors.addAll(injectors);
+		recipe.membersInjectors.addAll(injectors);
 	}
 
 }

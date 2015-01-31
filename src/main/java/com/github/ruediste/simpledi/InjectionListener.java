@@ -6,7 +6,7 @@ package com.github.ruediste.simpledi;
  */
 public interface InjectionListener<T> {
 	/**
-	 * Invoked after the {@link MemberInjector}s. Can return the same instance
+	 * Invoked after the {@link MembersInjector}s. Can return the same instance
 	 * or another instance.
 	 * @param injector TODO
 	 */

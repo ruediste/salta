@@ -10,7 +10,7 @@ import com.github.ruediste.simpledi.InstantiationContext;
 import com.github.ruediste.simpledi.InstantiationRecipe;
 import com.github.ruediste.simpledi.InstantiationRequest;
 import com.github.ruediste.simpledi.Key;
-import com.github.ruediste.simpledi.MemberInjector;
+import com.github.ruediste.simpledi.MembersInjector;
 import com.github.ruediste.simpledi.ProvisionException;
 import com.github.ruediste.simpledi.RecursiveInjector;
 import com.github.ruediste.simpledi.Rule;
@@ -59,7 +59,7 @@ public class InjectorImpl implements Injector {
 									this, ctx);
 
 							// inject members
-							for (MemberInjector<?> memberInjector : recipe.memberInjectors) {
+							for (MembersInjector<?> memberInjector : recipe.membersInjectors) {
 								callMemberInjector(memberInjector, instance,
 										injector);
 							}
@@ -74,7 +74,7 @@ public class InjectorImpl implements Injector {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> void callMemberInjector(MemberInjector<T> memberInjector,
+	private <T> void callMemberInjector(MembersInjector<T> memberInjector,
 			Object instance, RecursiveInjector injector) {
 		memberInjector.injectMembers((T) instance, injector);
 	}
