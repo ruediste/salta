@@ -1,9 +1,8 @@
 package com.github.ruediste.simpledi;
 
-import java.util.function.Supplier;
 
 /**
- * A rule defining how to modify an {@link InstantiationRecipe} based on an
+ * A rule defining how to modify an {@link CreationRecipe} based on an
  * {@link InstantiationRequest}. The rules are defined in {@link Module}s
  */
 public interface Rule {
@@ -14,9 +13,6 @@ public interface Rule {
 	 *            recipe to construct
 	 * @param key
 	 *            key beeing requested
-	 * @param injectionPoint
-	 *            if accessed, the receipe is marked as injection point specific
 	 */
-	void apply(InstantiationRecipe recipe, Key<?> key,
-			Supplier<InjectionPoint> injectionPoint);
+	void apply(CreationRecipe recipe, InstanceRequest<?> key);
 }

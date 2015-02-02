@@ -2,7 +2,6 @@ package com.github.ruediste.simpledi;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.function.Supplier;
 
 import com.google.common.primitives.Primitives;
 
@@ -20,8 +19,7 @@ public class ConstantBinder {
 		rules.add(new Rule() {
 
 			@Override
-			public void apply(InstantiationRecipe recipe, Key<?> key,
-					Supplier<InjectionPoint> injectionPoint) {
+			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
 				if (!ReflectionUtil.areQualifiersMatching(presentQualifiers,
 						key.requiredQualifiers)) {
 					return;

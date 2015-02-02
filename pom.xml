@@ -41,6 +41,11 @@
 			<artifactId>cglib-nodep</artifactId>
 			<version>3.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.ruediste</groupId>
+			<artifactId>attached-properties-4j</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 

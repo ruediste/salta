@@ -5,5 +5,5 @@ package com.github.ruediste.simpledi;
  * {@code T}.
  */
 public interface MembersInjector<T> {
-	void injectMembers(T instance, RecursiveInjector injector);
+	void injectMembers(T instance, ContextualInjector injector);
 }

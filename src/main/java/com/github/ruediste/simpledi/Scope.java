@@ -7,5 +7,5 @@ import java.util.function.Supplier;
  * instance or decide to create a new instance.
  */
 public interface Scope {
-	public <T> T scope(InstantiationRequest request, Supplier<T> unscoped);
+	public <T> T scope(InstanceRequest<T> key, Supplier<T> unscoped);
 }

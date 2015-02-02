@@ -1,18 +1,15 @@
 package com.github.ruediste.simpledi.internal;
 
 import java.util.List;
-import java.util.function.Supplier;
 
+import com.github.ruediste.simpledi.ContextualInjector;
+import com.github.ruediste.simpledi.CreationRecipe;
 import com.github.ruediste.simpledi.InjectionListener;
-import com.github.ruediste.simpledi.InjectionPoint;
 import com.github.ruediste.simpledi.Injector;
 import com.github.ruediste.simpledi.InstantiationContext;
-import com.github.ruediste.simpledi.InstantiationRecipe;
-import com.github.ruediste.simpledi.InstantiationRequest;
-import com.github.ruediste.simpledi.Key;
+import com.github.ruediste.simpledi.InstanceRequest;
 import com.github.ruediste.simpledi.MembersInjector;
 import com.github.ruediste.simpledi.ProvisionException;
-import com.github.ruediste.simpledi.RecursiveInjector;
 import com.github.ruediste.simpledi.Rule;
 
 public class InjectorImpl implements Injector {
@@ -21,41 +18,36 @@ public class InjectorImpl implements Injector {
 
 	@Override
 	public <T> T createInstance(Class<T> cls) {
-		return createInstance(new Key<T>(cls));
+		return createInstance(new InstanceRequest<T>(cls));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T createInstance(Key<T> key) {
-		InstantiationRequest request = new InstantiationRequest(key, null);
+	public <T> T createInstance(InstanceRequest<T> key) {
 		InstantiationContext ctx = new InstantiationContext();
-		return (T) createInstance(request, ctx);
+		return (T) createInstance(key, ctx);
 	}
 
 	public InjectorImpl(List<Rule> rules) {
 		this.rules = rules;
 	}
 
-	Object createInstance(InstantiationRequest request, InstantiationContext ctx) {
-		InstantiationRecipe recipe = new InstantiationRecipe();
-		Supplier<InjectionPoint> injectionPointSupplier = () -> {
-			recipe.makeInjectionPointSpecific();
-			return request.injectionPoint;
-		};
+	Object createInstance(InstanceRequest<?> key, InstantiationContext ctx) {
+		CreationRecipe recipe = new CreationRecipe();
 
 		for (Rule rule : rules) {
-			rule.apply(recipe, request.key, injectionPointSupplier);
+			rule.apply(recipe, key);
 		}
 
 		if (recipe.scope == null)
-			throw new ProvisionException("no scope found for " + request);
+			throw new ProvisionException("no scope found for " + key);
 
 		return recipe.scope
-				.scope(request,
+				.scope(key,
 						() -> {
 							Object instance = recipe.instantiator.get();
 
-							RecursiveInjector injector = new RecursiveInjectorImpl(
+							ContextualInjector injector = new RecursiveInjectorImpl(
 									this, ctx);
 
 							// inject members
@@ -75,13 +67,13 @@ public class InjectorImpl implements Injector {
 
 	@SuppressWarnings("unchecked")
 	private <T> void callMemberInjector(MembersInjector<T> memberInjector,
-			Object instance, RecursiveInjector injector) {
+			Object instance, ContextualInjector injector) {
 		memberInjector.injectMembers((T) instance, injector);
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> T callInjectionLIstener(InjectionListener<T> injectionListener,
-			Object instance, RecursiveInjector injector) {
+			Object instance, ContextualInjector injector) {
 		return injectionListener.afterInjection((T) instance, injector);
 	}
 }

@@ -4,7 +4,14 @@ import java.lang.reflect.Constructor;
 
 import javax.inject.Provider;
 
-import com.github.ruediste.simpledi.Key;
+import com.github.ruediste.simpledi.ContextualInjector;
+import com.github.ruediste.simpledi.CreationRecipe;
+import com.github.ruediste.simpledi.InjectorConfiguration;
+import com.github.ruediste.simpledi.InstantiationResult;
+import com.github.ruediste.simpledi.Instantiator;
+import com.github.ruediste.simpledi.InstanceRequest;
+import com.github.ruediste.simpledi.Rule;
+import com.github.ruediste.simpledi.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -12,67 +19,179 @@ import com.google.common.reflect.TypeToken;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
+public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
+
+	public LinkedBindingBuilder(Matcher<InstanceRequest<?>> keyMatcher,
+			InstanceRequest<?> eagerInstantiationKey, InjectorConfiguration config) {
+		super(keyMatcher, eagerInstantiationKey, config);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	ScopedBindingBuilder to(Class<? extends T> implementation);
+	public ScopedBindingBuilder to(Class<? extends T> implementation) {
+		return to(TypeToken.of(implementation));
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	ScopedBindingBuilder to(TypeToken<? extends T> implementation);
+	public ScopedBindingBuilder to(TypeToken<? extends T> implementation) {
+		return to(InstanceRequest.of(implementation));
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	ScopedBindingBuilder to(Key<? extends T> targetKey);
+	public ScopedBindingBuilder to(InstanceRequest<? extends T> targetKey) {
+		config.addRule(new Rule() {
+
+			@Override
+			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+				if (keyMatcher.matches(key))
+					recipe.instantiator = new Instantiator<T>() {
+
+						@Override
+						public InstantiationResult<T> instantiate(InstanceRequest<T> key,
+								ContextualInjector injector) {
+							return InstantiationResult.of(
+									injector.createInstance(targetKey), true);
+						}
+					};
+			}
+		});
+
+		return new ScopedBindingBuilder(keyMatcher, eagerInstantiationKey,
+				config);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 *
 	 * @see com.google.inject.Injector#injectMembers
 	 */
-	void toInstance(T instance);
+	public void toInstance(T instance) {
+		config.requestedMemberInjections.put(instance, instance);
+		config.addRule(new Rule() {
+
+			@Override
+			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+				if (keyMatcher.matches(key))
+					recipe.instantiator = new Instantiator<T>() {
+
+						@Override
+						public InstantiationResult<T> instantiate(InstanceRequest<T> key,
+								ContextualInjector injector) {
+							return InstantiationResult.of(instance, true);
+						}
+					};
+			}
+		});
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 *
 	 * @see com.google.inject.Injector#injectMembers
 	 */
-	ScopedBindingBuilder toProvider(Provider<? extends T> provider);
+	public ScopedBindingBuilder toProvider(Provider<? extends T> provider) {
+		config.requestedMemberInjections.put(provider, provider);
+		config.addRule(new Rule() {
+
+			@Override
+			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+				if (keyMatcher.matches(key))
+					recipe.instantiator = new Instantiator<T>() {
+
+						@Override
+						public InstantiationResult<T> instantiate(InstanceRequest<T> key,
+								ContextualInjector injector) {
+							return InstantiationResult.of(provider.get(), true);
+						}
+					};
+			}
+		});
+
+		return new ScopedBindingBuilder(keyMatcher, eagerInstantiationKey,
+				config);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	ScopedBindingBuilder toProvider(
-			Class<? extends javax.inject.Provider<? extends T>> providerType);
+	public ScopedBindingBuilder toProvider(
+			Class<? extends javax.inject.Provider<? extends T>> providerType) {
+		return toProvider(InstanceRequest.of(providerType));
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	ScopedBindingBuilder toProvider(
-			TypeToken<? extends javax.inject.Provider<? extends T>> providerType);
+	public ScopedBindingBuilder toProvider(
+			TypeToken<? extends javax.inject.Provider<? extends T>> providerType) {
+		return toProvider(InstanceRequest.of(providerType));
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	ScopedBindingBuilder toProvider(
-			Key<? extends javax.inject.Provider<? extends T>> providerKey);
+	public ScopedBindingBuilder toProvider(
+			InstanceRequest<? extends javax.inject.Provider<? extends T>> providerKey) {
+		config.addRule(new Rule() {
+
+			@Override
+			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+				if (keyMatcher.matches(key))
+					recipe.instantiator = new Instantiator<T>() {
+
+						Provider<? extends T> provider;
+
+						@Override
+						public synchronized InstantiationResult<T> instantiate(
+								InstanceRequest<T> key, ContextualInjector injector) {
+							if (provider == null)
+								provider = injector.createInstance(providerKey);
+							return InstantiationResult.of(provider.get(), true);
+						}
+					};
+			}
+		});
+
+		return new ScopedBindingBuilder(keyMatcher, eagerInstantiationKey,
+				config);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 * 
 	 * @since 3.0
 	 */
-	<S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor);
+	public <S extends T> ScopedBindingBuilder toConstructor(
+			Constructor<S> constructor) {
+		return toConstructor(constructor, null);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 * 
 	 * @since 3.0
 	 */
-	<S extends T> ScopedBindingBuilder toConstructor(
-			Constructor<S> constructor, TypeToken<? extends S> type);
+	public <S extends T> ScopedBindingBuilder toConstructor(
+			Constructor<S> constructor, TypeToken<? extends S> type) {
+		config.addRule(new Rule() {
+
+			@Override
+			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+				if (keyMatcher.matches(key)) {
+					recipe.constructor = constructor;
+					if (type != null)
+						recipe.constructorTypeToken = type;
+				}
+			}
+		});
+
+		return new ScopedBindingBuilder(keyMatcher, eagerInstantiationKey,
+				config);
+
+	}
 }

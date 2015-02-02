@@ -10,5 +10,5 @@ public interface InjectionListener<T> {
 	 * or another instance.
 	 * @param injector TODO
 	 */
-	T afterInjection(T injectee, RecursiveInjector injector);
+	T afterInjection(T injectee, ContextualInjector injector);
 }

@@ -4,17 +4,15 @@ import java.lang.reflect.Field;
 import java.security.ProviderException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
 import com.github.ruediste.simpledi.DefaultInjectionPoint;
-import com.github.ruediste.simpledi.InjectionPoint;
-import com.github.ruediste.simpledi.InstantiationRecipe;
+import com.github.ruediste.simpledi.CreationRecipe;
 import com.github.ruediste.simpledi.InstantiationRequest;
-import com.github.ruediste.simpledi.Key;
+import com.github.ruediste.simpledi.InstanceRequest;
 import com.github.ruediste.simpledi.MembersInjector;
-import com.github.ruediste.simpledi.RecursiveInjector;
+import com.github.ruediste.simpledi.ContextualInjector;
 import com.github.ruediste.simpledi.ReflectionUtil;
 import com.github.ruediste.simpledi.Rule;
 import com.google.common.reflect.TypeToken;
@@ -23,8 +21,7 @@ public class FieldInjectionRule implements Rule {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void apply(InstantiationRecipe recipe, Key<?> key,
-			Supplier<InjectionPoint> injectionPoint) {
+	public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
 
 		ArrayList<MembersInjector<?>> injectors = new ArrayList<>();
 
@@ -36,7 +33,7 @@ public class FieldInjectionRule implements Rule {
 
 					// prepare request
 					InstantiationRequest request = new InstantiationRequest(
-							new Key(t.resolveType(f.getGenericType()),
+							new InstanceRequest(t.resolveType(f.getGenericType()),
 									ReflectionUtil.getQualifiers(f)),
 							new DefaultInjectionPoint(f, f));
 
@@ -44,7 +41,7 @@ public class FieldInjectionRule implements Rule {
 
 						@Override
 						public void injectMembers(Object instance,
-								RecursiveInjector injector) {
+								ContextualInjector injector) {
 							try {
 								Object value = injector.createInstance(request);
 								f.set(instance, value);

@@ -23,4 +23,11 @@ public interface InjectionPoint {
 	 * case of constructor parameter injection.
 	 * */
 	Member getMember();
+
+	/**
+	 * Returns the index of this dependency in the method or constructor's
+	 * parameter list, or null if this dependency does not belong to a parameter
+	 * list.
+	 */
+	Integer getParameterIndex();
 }

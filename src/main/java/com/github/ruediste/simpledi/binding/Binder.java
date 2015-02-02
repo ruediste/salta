@@ -36,11 +36,15 @@ import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.proxy.ProxyRefDispatcher;
 
 import com.github.ruediste.simpledi.AbstractModule;
+import com.github.ruediste.simpledi.CreationRecipe;
 import com.github.ruediste.simpledi.Injector;
-import com.github.ruediste.simpledi.Key;
+import com.github.ruediste.simpledi.InjectorConfiguration;
+import com.github.ruediste.simpledi.InstanceRequest;
 import com.github.ruediste.simpledi.MembersInjector;
 import com.github.ruediste.simpledi.Module;
+import com.github.ruediste.simpledi.Rule;
 import com.github.ruediste.simpledi.Scope;
+import com.github.ruediste.simpledi.matchers.AbstractMatcher;
 import com.github.ruediste.simpledi.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
 
@@ -160,8 +164,9 @@ import com.google.common.reflect.TypeToken;
  * this single instance to fulfill all {@code Service} injection requests. When
  * the {@link Injector} is created, it will automatically perform field and
  * method injection for this instance, but any injectable constructor on
- * {@code ServiceImpl} is simply ignored. Note that using this approach results
- * in "eager loading" behavior that you can't control.
+ * {@code ServiceImpl} is simply ignored. Every object instance is injected only
+ * once, even if it is bound multiple times. Note that using this approach
+ * results in "eager loading" behavior that you can't control.
  *
  * <pre>
  * bindConstant().annotatedWith(ServerHost.class).to(args[0]);
@@ -229,7 +234,21 @@ import com.google.common.reflect.TypeToken;
  * @author jessewilson@google.com (Jesse Wilson)
  * @author kevinb@google.com (Kevin Bourrillion)
  */
-public interface Binder {
+public class Binder {
+
+	private InjectorConfiguration config;
+
+	public Binder(InjectorConfiguration config) {
+		this.config = config;
+
+	}
+
+	/**
+	 * Return the configuration modified by this Binde
+	 */
+	public InjectorConfiguration getConfiguration() {
+		return config;
+	}
 
 	/**
 	 * Binds method interceptor[s] to methods matched by class and method
@@ -254,33 +273,72 @@ public interface Binder {
 	 *            {@link MethodInterceptor}, {@link NoOp},
 	 *            {@link ProxyRefDispatcher}
 	 */
-	void bindInterceptor(Matcher<? super Class<?>> classMatcher,
-			Matcher<? super Method> methodMatcher, Callback... interceptors);
+	public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
+			Matcher<? super Method> methodMatcher, Callback... interceptors) {
+		// TODO
+		throw new UnsupportedOperationException();
+	}
 
 	/**
 	 * Binds a scope to an annotation.
 	 */
-	void bindScope(Class<? extends Annotation> annotationType, Scope scope);
+	public void bindScope(Class<? extends Annotation> annotationType,
+			Scope scope) {
+
+		// by default, set the scope based on the presence of the scope
+		// annotation
+		config.addRule(new Rule() {
+
+			@Override
+			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+				if (recipe.scope == null
+						&& key.type.getRawType().isAnnotationPresent(
+								annotationType))
+					recipe.scope = scope;
+			}
+		});
+
+		// put the annotation to the map for further use by other binders
+		config.scopeAnnotationMap.put(annotationType, scope);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	<T> LinkedBindingBuilder<T> bind(Key<T> key);
+	public <T> LinkedBindingBuilder<T> bind(Matcher<InstanceRequest<?>> keyMatcher) {
+		return new LinkedBindingBuilder<T>(keyMatcher, null, config);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	<T> AnnotatedBindingBuilder<T> bind(TypeToken<T> typeLiteral);
+	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> typeLiteral) {
+		return new AnnotatedBindingBuilder<>(new AbstractMatcher<InstanceRequest<?>>() {
+
+			@Override
+			public boolean matches(InstanceRequest<?> t) {
+				return typeLiteral.equals(t.type);
+			}
+		}, InstanceRequest.of(typeLiteral), config);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	<T> AnnotatedBindingBuilder<T> bind(Class<T> type);
+	public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
+		return new AnnotatedBindingBuilder<>(new AbstractMatcher<InstanceRequest<?>>() {
+
+			@Override
+			public boolean matches(InstanceRequest<?> t) {
+				return type.equals(t.type.getRawType());
+			}
+		}, InstanceRequest.of(type), config);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	AnnotatedConstantBindingBuilder bindConstant();
+	public AnnotatedConstantBindingBuilder bindConstant();
 
 	/**
 	 * Upon successful creation, the {@link Injector} will inject instance
@@ -292,7 +350,7 @@ public interface Binder {
 	 *            for which members will be injected
 	 * @since 2.0
 	 */
-	<T> void requestInjection(TypeToken<T> type, T instance);
+	public <T> void requestInjection(TypeToken<T> type, T instance);
 
 	/**
 	 * Upon successful creation, the {@link Injector} will inject instance
@@ -302,7 +360,7 @@ public interface Binder {
 	 *            for which members will be injected
 	 * @since 2.0
 	 */
-	void requestInjection(Object instance);
+	public void requestInjection(Object instance);
 
 	/**
 	 * Upon successful creation, the {@link Injector} will inject static fields
@@ -311,17 +369,17 @@ public interface Binder {
 	 * @param types
 	 *            for which static members will be injected
 	 */
-	void requestStaticInjection(Class<?>... types);
+	public void requestStaticInjection(Class<?>... types);
 
 	/**
 	 * Uses the given module to configure more bindings.
 	 */
-	void install(Module module);
+	public void install(Module module);
 
 	/**
 	 * Gets the current stage.
 	 */
-	Stage currentStage();
+	public Stage currentStage();
 
 	/**
 	 * Records an error message which will be presented to the user at a later
@@ -330,7 +388,7 @@ public interface Binder {
 	 * {@link String#format(String, Object[])} to insert the arguments into the
 	 * message.
 	 */
-	void addError(String message, Object... arguments);
+	public void addError(String message, Object... arguments);
 
 	/**
 	 * Records an exception, the full details of which will be logged, and the
@@ -338,14 +396,14 @@ public interface Binder {
 	 * Module calls something that you worry may fail, you should catch the
 	 * exception and pass it into this.
 	 */
-	void addError(Throwable t);
+	public void addError(Throwable t);
 
 	/**
 	 * Records an error message to be presented to the user at a later time.
 	 *
 	 * @since 2.0
 	 */
-	void addError(Message message);
+	public void addError(Message message);
 
 	/**
 	 * Returns the provider used to obtain instances for the given injection
@@ -355,7 +413,7 @@ public interface Binder {
 	 *
 	 * @since 2.0
 	 */
-	<T> Provider<T> getProvider(Key<T> key);
+	public <T> Provider<T> getProvider(InstanceRequest<T> key);
 
 	/**
 	 * Returns the provider used to obtain instances for the given injection
@@ -365,7 +423,7 @@ public interface Binder {
 	 *
 	 * @since 2.0
 	 */
-	<T> Provider<T> getProvider(Class<T> type);
+	public <T> Provider<T> getProvider(Class<T> type);
 
 	/**
 	 * Returns the members injector used to inject dependencies into methods and
@@ -378,7 +436,7 @@ public interface Binder {
 	 *            type to get members injector for
 	 * @since 2.0
 	 */
-	<T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral);
+	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral);
 
 	/**
 	 * Returns the members injector used to inject dependencies into methods and
@@ -391,7 +449,7 @@ public interface Binder {
 	 *            type to get members injector for
 	 * @since 2.0
 	 */
-	<T> MembersInjector<T> getMembersInjector(Class<T> type);
+	public <T> MembersInjector<T> getMembersInjector(Class<T> type);
 
 	/**
 	 * Prevents Guice from constructing a {@link Proxy} when a circular
@@ -406,7 +464,7 @@ public interface Binder {
 	 * 
 	 * @since 3.0
 	 */
-	void disableCircularProxies();
+	public void disableCircularProxies();
 
 	/**
 	 * Requires that a {@literal @}{@link Inject} annotation exists on a
@@ -420,6 +478,6 @@ public interface Binder {
 	 *
 	 * @since 4.0
 	 */
-	void requireAtInjectOnConstructors();
+	public void requireAtInjectOnConstructors();
 
 }
