@@ -28,12 +28,12 @@ import javax.inject.Provider;
 
 import net.sf.cglib.proxy.Callback;
 
-import com.github.ruediste.simpledi.binding.AnnotatedBindingBuilder;
-import com.github.ruediste.simpledi.binding.AnnotatedConstantBindingBuilder;
-import com.github.ruediste.simpledi.binding.Binder;
-import com.github.ruediste.simpledi.binding.LinkedBindingBuilder;
-import com.github.ruediste.simpledi.binding.Message;
-import com.github.ruediste.simpledi.binding.Stage;
+import com.github.ruediste.simpledi.binder.AnnotatedBindingBuilder;
+import com.github.ruediste.simpledi.binder.AnnotatedConstantBindingBuilder;
+import com.github.ruediste.simpledi.binder.Binder;
+import com.github.ruediste.simpledi.binder.LinkedBindingBuilder;
+import com.github.ruediste.simpledi.binder.Message;
+import com.github.ruediste.simpledi.binder.Stage;
 import com.github.ruediste.simpledi.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
 
@@ -95,9 +95,9 @@ public abstract class AbstractModule implements Module {
 	}
 
 	/**
-	 * @see Binder#bind(InstanceRequest)
+	 * @see Binder#bind(Dependency)
 	 */
-	protected <T> LinkedBindingBuilder<T> bind(InstanceRequest<T> key) {
+	protected <T> LinkedBindingBuilder<T> bind(Dependency<T> key) {
 		return binder().bind(key);
 	}
 
@@ -170,10 +170,10 @@ public abstract class AbstractModule implements Module {
 	}
 
 	/**
-	 * @see Binder#getProvider(InstanceRequest)
+	 * @see Binder#getProvider(Dependency)
 	 * @since 2.0
 	 */
-	protected <T> Provider<T> getProvider(InstanceRequest<T> key) {
+	protected <T> Provider<T> getProvider(Dependency<T> key) {
 		return binder().getProvider(key);
 	}
 

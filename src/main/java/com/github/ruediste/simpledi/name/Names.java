@@ -6,8 +6,8 @@ import java.util.Properties;
 
 import javax.inject.Named;
 
-import com.github.ruediste.simpledi.InstanceRequest;
-import com.github.ruediste.simpledi.binding.Binder;
+import com.github.ruediste.simpledi.Dependency;
+import com.github.ruediste.simpledi.binder.Binder;
 
 /**
  * Utility methods for use with {@code @}{@link Named}.
@@ -35,7 +35,7 @@ public class Names {
 		for (Map.Entry<String, String> entry : properties.entrySet()) {
 			String key = entry.getKey();
 			String value = entry.getValue();
-			binder.bind(new InstanceRequest<String>(String.class, new NamedImpl(key)))
+			binder.bind(new Dependency<String>(String.class, new NamedImpl(key)))
 					.toInstance(value);
 		}
 	}
@@ -52,7 +52,7 @@ public class Names {
 			String propertyName = (String) e.nextElement();
 			String value = properties.getProperty(propertyName);
 			binder.bind(
-					new InstanceRequest<String>(String.class, new NamedImpl(propertyName)))
+					new Dependency<String>(String.class, new NamedImpl(propertyName)))
 					.toInstance(value);
 		}
 	}

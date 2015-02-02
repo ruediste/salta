@@ -1,11 +1,11 @@
-package com.github.ruediste.simpledi.binding;
+package com.github.ruediste.simpledi.binder;
 
 import java.lang.annotation.Annotation;
 
 import com.github.ruediste.simpledi.CreationRecipe;
 import com.github.ruediste.simpledi.Injector;
 import com.github.ruediste.simpledi.InjectorConfiguration;
-import com.github.ruediste.simpledi.InstanceRequest;
+import com.github.ruediste.simpledi.Dependency;
 import com.github.ruediste.simpledi.ProvisionException;
 import com.github.ruediste.simpledi.Rule;
 import com.github.ruediste.simpledi.Scope;
@@ -18,12 +18,12 @@ import com.github.ruediste.simpledi.matchers.Matcher;
  */
 public class ScopedBindingBuilder {
 
-	protected Matcher<InstanceRequest<?>> keyMatcher;
+	protected Matcher<Dependency<?>> keyMatcher;
 	protected InjectorConfiguration config;
-	protected InstanceRequest<?> eagerInstantiationKey;
+	protected Dependency<?> eagerInstantiationKey;
 
-	public ScopedBindingBuilder(Matcher<InstanceRequest<?>> keyMatcher,
-			InstanceRequest<?> eagerInstantiationKey, InjectorConfiguration config) {
+	public ScopedBindingBuilder(Matcher<Dependency<?>> keyMatcher,
+			Dependency<?> eagerInstantiationKey, InjectorConfiguration config) {
 		this.keyMatcher = keyMatcher;
 		this.eagerInstantiationKey = eagerInstantiationKey;
 		this.config = config;
@@ -37,7 +37,7 @@ public class ScopedBindingBuilder {
 		config.addRule(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (keyMatcher.matches(key)) {
 					Scope scope = config.scopeAnnotationMap
 							.get(scopeAnnotation);
@@ -57,7 +57,7 @@ public class ScopedBindingBuilder {
 		config.addRule(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (keyMatcher.matches(key))
 					recipe.scope = scope;
 			}
@@ -77,7 +77,7 @@ public class ScopedBindingBuilder {
 		config.addRule(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (keyMatcher.matches(key))
 					recipe.scope = config.singletonScope;
 			}

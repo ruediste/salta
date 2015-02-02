@@ -3,14 +3,14 @@ package com.github.ruediste.simpledi.internal.defaultModule;
 import java.lang.reflect.Modifier;
 
 import com.github.ruediste.simpledi.CreationRecipe;
-import com.github.ruediste.simpledi.InstanceRequest;
+import com.github.ruediste.simpledi.Dependency;
 import com.github.ruediste.simpledi.ProvisionException;
 import com.github.ruediste.simpledi.Rule;
 
 public class ConstructorRule implements Rule {
 
 	@Override
-	public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+	public void apply(CreationRecipe recipe, Dependency<?> key) {
 		if (recipe.instantiator != null)
 			return;
 		Class<?> rawType = key.type.getRawType();

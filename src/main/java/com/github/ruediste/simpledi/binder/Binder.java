@@ -16,11 +16,17 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.simpledi.binding;
+package com.github.ruediste.simpledi.binder;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.security.ProviderException;
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -37,12 +43,12 @@ import net.sf.cglib.proxy.ProxyRefDispatcher;
 
 import com.github.ruediste.simpledi.AbstractModule;
 import com.github.ruediste.simpledi.CreationRecipe;
+import com.github.ruediste.simpledi.Dependency;
 import com.github.ruediste.simpledi.Injector;
 import com.github.ruediste.simpledi.InjectorConfiguration;
-import com.github.ruediste.simpledi.InstanceRequest;
+import com.github.ruediste.simpledi.InstantiatorImpl;
 import com.github.ruediste.simpledi.MembersInjector;
 import com.github.ruediste.simpledi.Module;
-import com.github.ruediste.simpledi.Rule;
 import com.github.ruediste.simpledi.Scope;
 import com.github.ruediste.simpledi.matchers.AbstractMatcher;
 import com.github.ruediste.simpledi.matchers.Matcher;
@@ -285,54 +291,88 @@ public class Binder {
 	public void bindScope(Class<? extends Annotation> annotationType,
 			Scope scope) {
 
-		// by default, set the scope based on the presence of the scope
-		// annotation
-		config.addRule(new Rule() {
-
-			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
-				if (recipe.scope == null
-						&& key.type.getRawType().isAnnotationPresent(
-								annotationType))
-					recipe.scope = scope;
-			}
-		});
-
 		// put the annotation to the map for further use by other binders
 		config.scopeAnnotationMap.put(annotationType, scope);
 	}
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	public <T> LinkedBindingBuilder<T> bind(Matcher<InstanceRequest<?>> keyMatcher) {
-		return new LinkedBindingBuilder<T>(keyMatcher, null, config);
+	private BinderBinding createDefaultBinding(TypeToken<?> type) {
+		BinderBinding binding = new BinderBinding();
+		binding.type = type;
+		binding.recipeCreationSteps.add(new Consumer<CreationRecipe>() {
+			@Override
+			public void accept(CreationRecipe recipe) {
+				if (recipe.instantiator != null) {
+					Constructor<?> noArgsConstructor = null;
+					Constructor<?> constructor = null;
+					for (Constructor<?> c : type.getRawType()
+							.getDeclaredConstructors()) {
+						if (Modifier.isStatic(c.getModifiers()))
+							continue;
+
+						if (c.isAnnotationPresent(Inject.class)) {
+							if (constructor != null)
+								throw new ProviderException(
+										"Multiple constructors annotated with @Inject found");
+							constructor = c;
+						}
+						if (c.getParameterCount() == 0
+								&& !Modifier.isPrivate(c.getModifiers())) {
+							noArgsConstructor = c;
+						}
+					}
+
+					if (constructor == null)
+						constructor = noArgsConstructor;
+
+					if (constructor == null) {
+						throw new ProviderException(
+								"No suitable constructor found for type "
+										+ type);
+					}
+
+					ArrayList<Dependency<?>> args = new ArrayList<>();
+					for (Type parameterType : constructor
+							.getGenericParameterTypes()) {
+						// TODO
+					}
+
+					recipe.instantiator = new InstantiatorImpl(constructor,
+							args);
+				}
+			}
+		});
+		return binding;
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> typeLiteral) {
-		return new AnnotatedBindingBuilder<>(new AbstractMatcher<InstanceRequest<?>>() {
+		BinderBinding binding = new BinderBinding();
+		binding.type = typeLiteral;
 
-			@Override
-			public boolean matches(InstanceRequest<?> t) {
-				return typeLiteral.equals(t.type);
-			}
-		}, InstanceRequest.of(typeLiteral), config);
+		return new AnnotatedBindingBuilder<>(
+				new AbstractMatcher<Dependency<?>>() {
+
+					@Override
+					public boolean matches(Dependency<?> t) {
+						return typeLiteral.equals(t.type);
+					}
+				}, Dependency.of(typeLiteral), config);
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
-		return new AnnotatedBindingBuilder<>(new AbstractMatcher<InstanceRequest<?>>() {
+		return new AnnotatedBindingBuilder<>(
+				new AbstractMatcher<Dependency<?>>() {
 
-			@Override
-			public boolean matches(InstanceRequest<?> t) {
-				return type.equals(t.type.getRawType());
-			}
-		}, InstanceRequest.of(type), config);
+					@Override
+					public boolean matches(Dependency<?> t) {
+						return type.equals(t.type.getRawType());
+					}
+				}, Dependency.of(type), config);
 	}
 
 	/**
@@ -413,7 +453,7 @@ public class Binder {
 	 *
 	 * @since 2.0
 	 */
-	public <T> Provider<T> getProvider(InstanceRequest<T> key);
+	public <T> Provider<T> getProvider(Dependency<T> key);
 
 	/**
 	 * Returns the provider used to obtain instances for the given injection

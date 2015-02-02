@@ -19,7 +19,7 @@ public class ConstantBinder {
 		rules.add(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (!ReflectionUtil.areQualifiersMatching(presentQualifiers,
 						key.requiredQualifiers)) {
 					return;

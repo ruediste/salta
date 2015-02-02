@@ -1,6 +1,8 @@
 package com.github.ruediste.simpledi;
 
+/**
+ * Instantiate an instance
+ */
 public interface Instantiator<T> {
-
-	InstantiationResult<T> instantiate(InstanceRequest<T> key, ContextualInjector injector);
+	T instantiate(Dependency<T> key, ContextualInjector injector);
 }

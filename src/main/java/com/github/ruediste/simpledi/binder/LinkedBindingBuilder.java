@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.binding;
+package com.github.ruediste.simpledi.binder;
 
 import java.lang.reflect.Constructor;
 
@@ -9,7 +9,7 @@ import com.github.ruediste.simpledi.CreationRecipe;
 import com.github.ruediste.simpledi.InjectorConfiguration;
 import com.github.ruediste.simpledi.InstantiationResult;
 import com.github.ruediste.simpledi.Instantiator;
-import com.github.ruediste.simpledi.InstanceRequest;
+import com.github.ruediste.simpledi.Dependency;
 import com.github.ruediste.simpledi.Rule;
 import com.github.ruediste.simpledi.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
@@ -21,8 +21,8 @@ import com.google.common.reflect.TypeToken;
  */
 public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 
-	public LinkedBindingBuilder(Matcher<InstanceRequest<?>> keyMatcher,
-			InstanceRequest<?> eagerInstantiationKey, InjectorConfiguration config) {
+	public LinkedBindingBuilder(Matcher<Dependency<?>> keyMatcher,
+			Dependency<?> eagerInstantiationKey, InjectorConfiguration config) {
 		super(keyMatcher, eagerInstantiationKey, config);
 	}
 
@@ -37,22 +37,22 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public ScopedBindingBuilder to(TypeToken<? extends T> implementation) {
-		return to(InstanceRequest.of(implementation));
+		return to(Dependency.of(implementation));
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	public ScopedBindingBuilder to(InstanceRequest<? extends T> targetKey) {
+	public ScopedBindingBuilder to(Dependency<? extends T> targetKey) {
 		config.addRule(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (keyMatcher.matches(key))
 					recipe.instantiator = new Instantiator<T>() {
 
 						@Override
-						public InstantiationResult<T> instantiate(InstanceRequest<T> key,
+						public InstantiationResult<T> instantiate(Dependency<T> key,
 								ContextualInjector injector) {
 							return InstantiationResult.of(
 									injector.createInstance(targetKey), true);
@@ -75,12 +75,12 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 		config.addRule(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (keyMatcher.matches(key))
 					recipe.instantiator = new Instantiator<T>() {
 
 						@Override
-						public InstantiationResult<T> instantiate(InstanceRequest<T> key,
+						public InstantiationResult<T> instantiate(Dependency<T> key,
 								ContextualInjector injector) {
 							return InstantiationResult.of(instance, true);
 						}
@@ -99,12 +99,12 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 		config.addRule(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (keyMatcher.matches(key))
 					recipe.instantiator = new Instantiator<T>() {
 
 						@Override
-						public InstantiationResult<T> instantiate(InstanceRequest<T> key,
+						public InstantiationResult<T> instantiate(Dependency<T> key,
 								ContextualInjector injector) {
 							return InstantiationResult.of(provider.get(), true);
 						}
@@ -121,7 +121,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 	 */
 	public ScopedBindingBuilder toProvider(
 			Class<? extends javax.inject.Provider<? extends T>> providerType) {
-		return toProvider(InstanceRequest.of(providerType));
+		return toProvider(Dependency.of(providerType));
 	}
 
 	/**
@@ -129,18 +129,18 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 	 */
 	public ScopedBindingBuilder toProvider(
 			TypeToken<? extends javax.inject.Provider<? extends T>> providerType) {
-		return toProvider(InstanceRequest.of(providerType));
+		return toProvider(Dependency.of(providerType));
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public ScopedBindingBuilder toProvider(
-			InstanceRequest<? extends javax.inject.Provider<? extends T>> providerKey) {
+			Dependency<? extends javax.inject.Provider<? extends T>> providerKey) {
 		config.addRule(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (keyMatcher.matches(key))
 					recipe.instantiator = new Instantiator<T>() {
 
@@ -148,7 +148,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 
 						@Override
 						public synchronized InstantiationResult<T> instantiate(
-								InstanceRequest<T> key, ContextualInjector injector) {
+								Dependency<T> key, ContextualInjector injector) {
 							if (provider == null)
 								provider = injector.createInstance(providerKey);
 							return InstantiationResult.of(provider.get(), true);
@@ -181,7 +181,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 		config.addRule(new Rule() {
 
 			@Override
-			public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+			public void apply(CreationRecipe recipe, Dependency<?> key) {
 				if (keyMatcher.matches(key)) {
 					recipe.constructor = constructor;
 					if (type != null)

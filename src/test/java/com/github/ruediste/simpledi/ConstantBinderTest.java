@@ -31,7 +31,7 @@ public class ConstantBinderTest {
 
 	@Test
 	public void testDirect() {
-		assertEquals("bar", injector.createInstance(new InstanceRequest<String>(
+		assertEquals("bar", injector.createInstance(new Dependency<String>(
 				String.class, ReflectionUtil.createNamed("foo"))));
 	}
 

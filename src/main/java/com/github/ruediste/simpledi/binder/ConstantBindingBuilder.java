@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.ruediste.simpledi.binding;
+package com.github.ruediste.simpledi.binder;
 
 /**
  * Binds to a constant value.

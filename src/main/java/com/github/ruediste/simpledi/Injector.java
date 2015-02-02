@@ -7,6 +7,6 @@ public interface Injector {
 	 */
 	<T> T createInstance(Class<T> cls);
 
-	<T> T createInstance(InstanceRequest<T> key);
+	<T> T createInstance(Dependency<T> key);
 
 }

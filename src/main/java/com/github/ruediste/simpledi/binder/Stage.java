@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.simpledi.binding;
+package com.github.ruediste.simpledi.binder;
 
 /**
  * The stage we're running in.

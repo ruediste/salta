@@ -1,5 +1,6 @@
 package com.github.ruediste.simpledi;
 
+@Deprecated
 public class InstantiationResult<T> {
 
 	T value;

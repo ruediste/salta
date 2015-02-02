@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import com.github.ruediste.simpledi.DefaultInjectionPoint;
 import com.github.ruediste.simpledi.CreationRecipe;
 import com.github.ruediste.simpledi.InstantiationRequest;
-import com.github.ruediste.simpledi.InstanceRequest;
+import com.github.ruediste.simpledi.Dependency;
 import com.github.ruediste.simpledi.MembersInjector;
 import com.github.ruediste.simpledi.ContextualInjector;
 import com.github.ruediste.simpledi.ReflectionUtil;
@@ -21,7 +21,7 @@ public class FieldInjectionRule implements Rule {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void apply(CreationRecipe recipe, InstanceRequest<?> key) {
+	public void apply(CreationRecipe recipe, Dependency<?> key) {
 
 		ArrayList<MembersInjector<?>> injectors = new ArrayList<>();
 
@@ -33,7 +33,7 @@ public class FieldInjectionRule implements Rule {
 
 					// prepare request
 					InstantiationRequest request = new InstantiationRequest(
-							new InstanceRequest(t.resolveType(f.getGenericType()),
+							new Dependency(t.resolveType(f.getGenericType()),
 									ReflectionUtil.getQualifiers(f)),
 							new DefaultInjectionPoint(f, f));
 
