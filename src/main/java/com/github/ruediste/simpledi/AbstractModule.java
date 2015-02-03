@@ -28,16 +28,16 @@ import javax.inject.Provider;
 
 import net.sf.cglib.proxy.Callback;
 
-import com.github.ruediste.simpledi.binder.AnnotatedBindingBuilder;
-import com.github.ruediste.simpledi.binder.AnnotatedConstantBindingBuilder;
-import com.github.ruediste.simpledi.binder.Binder;
-import com.github.ruediste.simpledi.binder.LinkedBindingBuilder;
-import com.github.ruediste.simpledi.binder.Message;
-import com.github.ruediste.simpledi.binder.Stage;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.MembersInjector;
 import com.github.ruediste.simpledi.core.Scope;
 import com.github.ruediste.simpledi.matchers.Matcher;
+import com.github.ruediste.simpledi.standard.binder.AnnotatedBindingBuilder;
+import com.github.ruediste.simpledi.standard.binder.AnnotatedConstantBindingBuilder;
+import com.github.ruediste.simpledi.standard.binder.Binder;
+import com.github.ruediste.simpledi.standard.binder.LinkedBindingBuilder;
+import com.github.ruediste.simpledi.standard.binder.Message;
+import com.github.ruediste.simpledi.standard.binder.Stage;
 import com.google.common.reflect.TypeToken;
 
 /**

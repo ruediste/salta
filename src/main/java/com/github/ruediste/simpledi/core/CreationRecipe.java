@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
-import com.github.ruediste.simpledi.Rule;
+import com.github.ruediste.simpledi.standard.Instantiator;
 
 /**
  * Describes how to fulfill a {@link InstantiationRequest}. Created using the

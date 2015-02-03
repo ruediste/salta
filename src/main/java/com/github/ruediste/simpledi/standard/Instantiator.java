@@ -1,4 +1,6 @@
-package com.github.ruediste.simpledi.core;
+package com.github.ruediste.simpledi.standard;
+
+import com.github.ruediste.simpledi.core.ContextualInjector;
 
 
 

@@ -7,8 +7,8 @@ import java.util.List;
 
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.Dependency;
-import com.github.ruediste.simpledi.core.Instantiator;
 import com.github.ruediste.simpledi.core.ProvisionException;
+import com.github.ruediste.simpledi.standard.Instantiator;
 
 /**
  * Instantiate a fixed class using a fixed constructor

@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.binder;
+package com.github.ruediste.simpledi.standard.binder;
 
 import java.lang.annotation.Annotation;
 

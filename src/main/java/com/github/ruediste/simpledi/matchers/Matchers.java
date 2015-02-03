@@ -15,8 +15,75 @@ import java.lang.reflect.Method;
  *
  * @author crazybob@google.com (Bob Lee)
  */
+@SuppressWarnings("rawtypes")
 public class Matchers {
 	private Matchers() {
+	}
+
+	static class AndMatcher<T> implements Matcher<T>, Serializable {
+		private final Matcher<? super T> a, b;
+
+		public AndMatcher(Matcher<? super T> a, Matcher<? super T> b) {
+			this.a = a;
+			this.b = b;
+		}
+
+		@Override
+		public boolean matches(T t) {
+			return a.matches(t) && b.matches(t);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return other instanceof AndMatcher
+					&& ((AndMatcher) other).a.equals(a)
+					&& ((AndMatcher) other).b.equals(b);
+		}
+
+		@Override
+		public int hashCode() {
+			return 41 * (a.hashCode() ^ b.hashCode());
+		}
+
+		@Override
+		public String toString() {
+			return "and(" + a + ", " + b + ")";
+		}
+
+		private static final long serialVersionUID = 0;
+	}
+
+	static class OrMatcher<T> implements Matcher<T>, Serializable {
+		private final Matcher<? super T> a, b;
+
+		public OrMatcher(Matcher<? super T> a, Matcher<? super T> b) {
+			this.a = a;
+			this.b = b;
+		}
+
+		@Override
+		public boolean matches(T t) {
+			return a.matches(t) || b.matches(t);
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			return other instanceof OrMatcher
+					&& ((OrMatcher) other).a.equals(a)
+					&& ((OrMatcher) other).b.equals(b);
+		}
+
+		@Override
+		public int hashCode() {
+			return 37 * (a.hashCode() ^ b.hashCode());
+		}
+
+		@Override
+		public String toString() {
+			return "or(" + a + ", " + b + ")";
+		}
+
+		private static final long serialVersionUID = 0;
 	}
 
 	/**
@@ -28,8 +95,8 @@ public class Matchers {
 
 	private static final Matcher<Object> ANY = new Any();
 
-	private static class Any extends AbstractMatcher<Object> implements
-			Serializable {
+	private static class Any implements Matcher<Object>, Serializable {
+		@Override
 		public boolean matches(Object o) {
 			return true;
 		}
@@ -53,14 +120,14 @@ public class Matchers {
 		return new Not<T>(p);
 	}
 
-	private static class Not<T> extends AbstractMatcher<T> implements
-			Serializable {
+	private static class Not<T> implements Matcher<T>, Serializable {
 		final Matcher<? super T> delegate;
 
 		private Not(Matcher<? super T> delegate) {
 			this.delegate = checkNotNull(delegate, "delegate");
 		}
 
+		@Override
 		public boolean matches(T t) {
 			return !delegate.matches(t);
 		}
@@ -102,8 +169,8 @@ public class Matchers {
 		return new AnnotatedWithType(annotationType);
 	}
 
-	private static class AnnotatedWithType extends
-			AbstractMatcher<AnnotatedElement> implements Serializable {
+	private static class AnnotatedWithType implements
+			Matcher<AnnotatedElement>, Serializable {
 		private final Class<? extends Annotation> annotationType;
 
 		public AnnotatedWithType(Class<? extends Annotation> annotationType) {
@@ -112,6 +179,7 @@ public class Matchers {
 			checkForRuntimeRetention(annotationType);
 		}
 
+		@Override
 		public boolean matches(AnnotatedElement element) {
 			return element.isAnnotationPresent(annotationType);
 		}
@@ -146,8 +214,8 @@ public class Matchers {
 		return new AnnotatedWith(annotation);
 	}
 
-	private static class AnnotatedWith extends
-			AbstractMatcher<AnnotatedElement> implements Serializable {
+	private static class AnnotatedWith implements Matcher<AnnotatedElement>,
+			Serializable {
 		private final Annotation annotation;
 
 		public AnnotatedWith(Annotation annotation) {
@@ -155,6 +223,7 @@ public class Matchers {
 			checkForRuntimeRetention(annotation.annotationType());
 		}
 
+		@Override
 		public boolean matches(AnnotatedElement element) {
 			Annotation fromElement = element.getAnnotation(annotation
 					.annotationType());
@@ -188,14 +257,14 @@ public class Matchers {
 		return new SubclassesOf(superclass);
 	}
 
-	private static class SubclassesOf extends AbstractMatcher<Class> implements
-			Serializable {
+	private static class SubclassesOf implements Matcher<Class>, Serializable {
 		private final Class<?> superclass;
 
 		public SubclassesOf(Class<?> superclass) {
 			this.superclass = checkNotNull(superclass, "superclass");
 		}
 
+		@Override
 		public boolean matches(Class subclass) {
 			return superclass.isAssignableFrom(subclass);
 		}
@@ -226,14 +295,14 @@ public class Matchers {
 		return new Only(value);
 	}
 
-	private static class Only extends AbstractMatcher<Object> implements
-			Serializable {
+	private static class Only implements Matcher<Object>, Serializable {
 		private final Object value;
 
 		public Only(Object value) {
 			this.value = checkNotNull(value, "value");
 		}
 
+		@Override
 		public boolean matches(Object other) {
 			return value.equals(other);
 		}
@@ -263,14 +332,14 @@ public class Matchers {
 		return new IdenticalTo(value);
 	}
 
-	private static class IdenticalTo extends AbstractMatcher<Object> implements
-			Serializable {
+	private static class IdenticalTo implements Matcher<Object>, Serializable {
 		private final Object value;
 
 		public IdenticalTo(Object value) {
 			this.value = checkNotNull(value, "value");
 		}
 
+		@Override
 		public boolean matches(Object other) {
 			return value == other;
 		}
@@ -303,8 +372,7 @@ public class Matchers {
 		return new InPackage(targetPackage);
 	}
 
-	private static class InPackage extends AbstractMatcher<Class> implements
-			Serializable {
+	private static class InPackage implements Matcher<Class>, Serializable {
 		private final transient Package targetPackage;
 		private final String packageName;
 
@@ -313,6 +381,7 @@ public class Matchers {
 			this.packageName = targetPackage.getName();
 		}
 
+		@Override
 		public boolean matches(Class c) {
 			return c.getPackage().equals(targetPackage);
 		}
@@ -351,14 +420,14 @@ public class Matchers {
 		return new InSubpackage(targetPackageName);
 	}
 
-	private static class InSubpackage extends AbstractMatcher<Class> implements
-			Serializable {
+	private static class InSubpackage implements Matcher<Class>, Serializable {
 		private final String targetPackageName;
 
 		public InSubpackage(String targetPackageName) {
 			this.targetPackageName = targetPackageName;
 		}
 
+		@Override
 		public boolean matches(Class c) {
 			String classPackageName = c.getPackage().getName();
 			return classPackageName.equals(targetPackageName)
@@ -393,14 +462,14 @@ public class Matchers {
 		return new Returns(returnType);
 	}
 
-	private static class Returns extends AbstractMatcher<Method> implements
-			Serializable {
+	private static class Returns implements Matcher<Method>, Serializable {
 		private final Matcher<? super Class<?>> returnType;
 
 		public Returns(Matcher<? super Class<?>> returnType) {
 			this.returnType = checkNotNull(returnType, "return type matcher");
 		}
 
+		@Override
 		public boolean matches(Method m) {
 			return returnType.matches(m.getReturnType());
 		}

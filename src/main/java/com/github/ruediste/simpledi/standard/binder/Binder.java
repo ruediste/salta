@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.simpledi.binder;
+package com.github.ruediste.simpledi.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -42,12 +42,11 @@ import com.github.ruediste.simpledi.core.CreationRecipe;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.Injector;
 import com.github.ruediste.simpledi.core.InjectorConfiguration;
-import com.github.ruediste.simpledi.core.Instantiator;
-import com.github.ruediste.simpledi.core.InstantiatorRule;
 import com.github.ruediste.simpledi.core.MembersInjector;
 import com.github.ruediste.simpledi.core.Scope;
-import com.github.ruediste.simpledi.matchers.AbstractMatcher;
 import com.github.ruediste.simpledi.matchers.Matcher;
+import com.github.ruediste.simpledi.standard.StandardInjectorConfiguration;
+import com.github.ruediste.simpledi.standard.StandardStaticBinding;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -238,9 +237,9 @@ import com.google.common.reflect.TypeToken;
  */
 public class Binder {
 
-	private InjectorConfiguration config;
+	private StandardInjectorConfiguration config;
 
-	public Binder(InjectorConfiguration config) {
+	public Binder(StandardInjectorConfiguration config) {
 		this.config = config;
 
 	}
@@ -291,21 +290,15 @@ public class Binder {
 		config.scopeAnnotationMap.put(annotationType, scope);
 	}
 
-	private BinderBinding createDefaultBinding(TypeToken<?> type) {
-		BinderBinding binding = new BinderBinding();
-		binding.type = type;
+	private StandardStaticBinding createDefaultBinding(TypeToken<?> type) {
+		StandardStaticBinding binding = new StandardStaticBinding();
 		binding.recipeCreationSteps.add(new Consumer<CreationRecipe>() {
 			@Override
 			public void accept(CreationRecipe recipe) {
 				if (recipe.instantiator != null) {
-					for (InstantiatorRule foo : config.instantiatorRules) {
-						Instantiator<?> instantiator = foo.apply(type);
-						if (instantiator != null) {
-							recipe.instantiator = instantiator;
-							break;
-						}
-					}
+					recipe.instantiator = config.createInstantiator(type);
 				}
+
 			}
 		});
 		return binding;
@@ -315,16 +308,10 @@ public class Binder {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
-		BinderBinding binding = createDefaultBinding(type);
+		StandardStaticBinding binding = createDefaultBinding(type);
+		binding.dependencyMatcher = x -> x.type.equals(type);
 
-		return new AnnotatedBindingBuilder<>(
-				new AbstractMatcher<Dependency<?>>() {
-
-					@Override
-					public boolean matches(Dependency<?> t) {
-						return type.equals(t.type);
-					}
-				}, Dependency.of(type), config);
+		return new AnnotatedBindingBuilder<>(binding, config);
 	}
 
 	/**

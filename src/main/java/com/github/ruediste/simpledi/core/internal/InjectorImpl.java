@@ -14,8 +14,6 @@ import com.github.ruediste.simpledi.core.Injector;
 import com.github.ruediste.simpledi.core.InjectorConfiguration;
 import com.github.ruediste.simpledi.core.InstanceCreationRule;
 import com.github.ruediste.simpledi.core.InstantiationContext;
-import com.github.ruediste.simpledi.core.Instantiator;
-import com.github.ruediste.simpledi.core.InstantiatorRule;
 import com.github.ruediste.simpledi.core.JITBinding;
 import com.github.ruediste.simpledi.core.JITBindingKeyRule;
 import com.github.ruediste.simpledi.core.JITBindingRule;
@@ -24,7 +22,6 @@ import com.github.ruediste.simpledi.core.ProvisionException;
 import com.github.ruediste.simpledi.core.StaticBinding;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.reflect.TypeToken;
 
 public class InjectorImpl implements Injector {
 
@@ -56,15 +53,6 @@ public class InjectorImpl implements Injector {
 
 	public InjectorImpl(InjectorConfiguration config) {
 		this.config = config;
-	}
-
-	public <T> Instantiator<T> createInstantiator(TypeToken<T> type) {
-		for (InstantiatorRule rule : config.instantiatorRules) {
-			Instantiator<T> result = rule.apply(type);
-			if (result != null)
-				return result;
-		}
-		return null;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

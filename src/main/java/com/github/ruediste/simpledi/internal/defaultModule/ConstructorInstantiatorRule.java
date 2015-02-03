@@ -10,8 +10,8 @@ import javax.inject.Inject;
 
 import com.github.ruediste.simpledi.InstantiatorImpl;
 import com.github.ruediste.simpledi.core.Dependency;
-import com.github.ruediste.simpledi.core.Instantiator;
-import com.github.ruediste.simpledi.core.InstantiatorRule;
+import com.github.ruediste.simpledi.standard.Instantiator;
+import com.github.ruediste.simpledi.standard.InstantiatorRule;
 import com.google.common.reflect.TypeToken;
 
 public class ConstructorInstantiatorRule implements InstantiatorRule {

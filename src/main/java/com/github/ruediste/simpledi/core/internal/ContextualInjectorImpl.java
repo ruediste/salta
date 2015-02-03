@@ -3,8 +3,6 @@ package com.github.ruediste.simpledi.core.internal;
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.InstantiationContext;
-import com.github.ruediste.simpledi.core.Instantiator;
-import com.google.common.reflect.TypeToken;
 
 public class ContextualInjectorImpl implements ContextualInjector {
 
@@ -23,8 +21,4 @@ public class ContextualInjectorImpl implements ContextualInjector {
 		return (T) injector.createInstance(dependency, ctx);
 	}
 
-	@Override
-	public <T> Instantiator<T> createInstantiator(TypeToken<T> type) {
-		return injector.createInstantiator(type);
-	}
 }
