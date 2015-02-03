@@ -3,6 +3,8 @@ package com.github.ruediste.simpledi;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
+import com.github.ruediste.simpledi.core.CreationRecipe;
+import com.github.ruediste.simpledi.core.Dependency;
 import com.google.common.primitives.Primitives;
 
 public class ConstantBinder {

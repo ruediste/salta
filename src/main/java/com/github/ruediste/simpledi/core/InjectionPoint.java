@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;

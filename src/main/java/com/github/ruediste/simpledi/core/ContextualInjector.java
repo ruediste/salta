@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
 
 import com.google.common.reflect.TypeToken;
 

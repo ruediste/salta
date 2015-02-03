@@ -1,4 +1,5 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
+
 
 /**
  * Listens for injections into instances of type {@code I}. Useful for

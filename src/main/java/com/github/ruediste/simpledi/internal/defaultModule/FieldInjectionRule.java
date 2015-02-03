@@ -8,13 +8,13 @@ import java.util.Collections;
 import javax.inject.Inject;
 
 import com.github.ruediste.simpledi.DefaultInjectionPoint;
-import com.github.ruediste.simpledi.CreationRecipe;
 import com.github.ruediste.simpledi.InstantiationRequest;
-import com.github.ruediste.simpledi.Dependency;
-import com.github.ruediste.simpledi.MembersInjector;
-import com.github.ruediste.simpledi.ContextualInjector;
 import com.github.ruediste.simpledi.ReflectionUtil;
 import com.github.ruediste.simpledi.Rule;
+import com.github.ruediste.simpledi.core.ContextualInjector;
+import com.github.ruediste.simpledi.core.CreationRecipe;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.MembersInjector;
 import com.google.common.reflect.TypeToken;
 
 public class FieldInjectionRule implements Rule {

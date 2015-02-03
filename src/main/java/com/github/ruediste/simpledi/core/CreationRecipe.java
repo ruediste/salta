@@ -1,9 +1,10 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
+import com.github.ruediste.simpledi.Rule;
 
 /**
  * Describes how to fulfill a {@link InstantiationRequest}. Created using the

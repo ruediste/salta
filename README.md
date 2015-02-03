@@ -16,14 +16,26 @@ So the goal for SimpleDI is to provide an API close to Guice, while focusing on 
 ## Bindings
 Bindings are a central element of SimpleDI. 
 
-First, if a binding itself is requested again by a dependency while resolving the binding, we call it a circular dependency. A circular dependency is resolved by satisfying the recursive request with a circular proxy, which is late bound to the final instance.  
+First, if a binding itself is requested again by a dependency while resolving the binding, we call it a circular dependency. A circular dependency is resolved by satisfying the recursive request with a circular proxy, which is later bound to the final instance.  
 
 Second, bindings are used as keys when applying a scope. Based on the binding, the scope determines whether to return a previously created instance or a new one.
 
 In the following paragraphs, various properties of bindings will be derived from design goals concerning the robustness of application built with SimpleDI.
 
-Consider a singleton which is injected into two different classes A and B. If the instance created by the binding would depend on the injection point, it would make a difference whether A or B is created first. Therefore the instances created by bindings may not depend on the injection point.
+Each binding B is used to satisfy a set of injection points IP(B). Due to the scope, an instance created for one injection point can be used for any other other injection point in IP(B). If the instance created by B would depend on the actual injection point, a different instance would be used depending on which injection point is triggered first. For example consider a singleton which is injected into two different classes A and B. If the instance created by the binding would depend on the injection point, it would make a difference whether A or B is created first. 
 
-If no binding is found for an injection point, it is attempted to create a just in time (JIT) binding. The JIT binding may never be used instead of any existing binding. Otherwise, an injection point bound to a certain binding would suddenly be bound to the JIT binding once it is used. 
+Therefore the instances created by bindings may not depend on the injection point.
 
-Consider an interface I and two classes A and B implementing the interface. If a JIT binding for A or B also matches I, it would make a difference whether A or B are used first when injecting I later. Therefore, we allow JIT bindings only to match the type requested at an injection point. For symmetry reason, the same applies to statically created bindings.
+If multiple bindings match for a single injection point, we can not just arbitrarily choose one binding. Either we have to define a precedence among the bindings or we fail. SimpleDI fails in this situation. 
+
+If no binding is found for an injection point, it is attempted to create a just in time (JIT) binding. The JIT binding may never be used instead of any existing binding. Otherwise, an injection point bound to a certain binding would suddenly be bound to the JIT binding once the JIT binding is created.
+
+Depending on the input data or requests of an application, the order in which JIT bindings are requested and thus created varies highly. For the robustness of the application it is important that the bindings used for an injection point does not vary on this order.
+
+As long as no injection point can be served by more than one JIT binding, this is not an issue. However, as soon as the sets of injection points served by the JIT bindings overlaps, we are in trouble.  
+
+Consider a new JIT binding B which is getting created. To make sure no injection would have been bound to B if B would have been present already at the time the injection, all we have to check if any of the already injected injection points matches B. If any matches, we detected an error. We cannot let B beeing created. However, depending on the JIT binding creation order, different bindings can reveal the conflicts, or the conflict can not be revealed at all.
+
+This behaviour is clearly not an option. Therefore we split the injection points for JIT bindings into non-overlapping regions.
+
+This is achieved by creating a key from the injection point. A JIT binding is only used to satisfy injection points with a key equal to the one used to create the binding.

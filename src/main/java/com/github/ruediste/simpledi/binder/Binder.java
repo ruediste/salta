@@ -19,13 +19,8 @@
 package com.github.ruediste.simpledi.binder;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
-import java.security.ProviderException;
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -42,14 +37,15 @@ import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.proxy.ProxyRefDispatcher;
 
 import com.github.ruediste.simpledi.AbstractModule;
-import com.github.ruediste.simpledi.CreationRecipe;
-import com.github.ruediste.simpledi.Dependency;
-import com.github.ruediste.simpledi.Injector;
-import com.github.ruediste.simpledi.InjectorConfiguration;
-import com.github.ruediste.simpledi.InstantiatorImpl;
-import com.github.ruediste.simpledi.MembersInjector;
 import com.github.ruediste.simpledi.Module;
-import com.github.ruediste.simpledi.Scope;
+import com.github.ruediste.simpledi.core.CreationRecipe;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.Injector;
+import com.github.ruediste.simpledi.core.InjectorConfiguration;
+import com.github.ruediste.simpledi.core.Instantiator;
+import com.github.ruediste.simpledi.core.InstantiatorRule;
+import com.github.ruediste.simpledi.core.MembersInjector;
+import com.github.ruediste.simpledi.core.Scope;
 import com.github.ruediste.simpledi.matchers.AbstractMatcher;
 import com.github.ruediste.simpledi.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
@@ -302,42 +298,13 @@ public class Binder {
 			@Override
 			public void accept(CreationRecipe recipe) {
 				if (recipe.instantiator != null) {
-					Constructor<?> noArgsConstructor = null;
-					Constructor<?> constructor = null;
-					for (Constructor<?> c : type.getRawType()
-							.getDeclaredConstructors()) {
-						if (Modifier.isStatic(c.getModifiers()))
-							continue;
-
-						if (c.isAnnotationPresent(Inject.class)) {
-							if (constructor != null)
-								throw new ProviderException(
-										"Multiple constructors annotated with @Inject found");
-							constructor = c;
-						}
-						if (c.getParameterCount() == 0
-								&& !Modifier.isPrivate(c.getModifiers())) {
-							noArgsConstructor = c;
+					for (InstantiatorRule foo : config.instantiatorRules) {
+						Instantiator<?> instantiator = foo.apply(type);
+						if (instantiator != null) {
+							recipe.instantiator = instantiator;
+							break;
 						}
 					}
-
-					if (constructor == null)
-						constructor = noArgsConstructor;
-
-					if (constructor == null) {
-						throw new ProviderException(
-								"No suitable constructor found for type "
-										+ type);
-					}
-
-					ArrayList<Dependency<?>> args = new ArrayList<>();
-					for (Type parameterType : constructor
-							.getGenericParameterTypes()) {
-						// TODO
-					}
-
-					recipe.instantiator = new InstantiatorImpl(constructor,
-							args);
 				}
 			}
 		});
@@ -347,18 +314,17 @@ public class Binder {
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> typeLiteral) {
-		BinderBinding binding = new BinderBinding();
-		binding.type = typeLiteral;
+	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
+		BinderBinding binding = createDefaultBinding(type);
 
 		return new AnnotatedBindingBuilder<>(
 				new AbstractMatcher<Dependency<?>>() {
 
 					@Override
 					public boolean matches(Dependency<?> t) {
-						return typeLiteral.equals(t.type);
+						return type.equals(t.type);
 					}
-				}, Dependency.of(typeLiteral), config);
+				}, Dependency.of(type), config);
 	}
 
 	/**

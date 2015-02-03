@@ -4,13 +4,13 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;
 
-import com.github.ruediste.simpledi.Binding;
-import com.github.ruediste.simpledi.CreationRecipe;
+import com.github.ruediste.simpledi.core.CreationRecipe;
+import com.github.ruediste.simpledi.core.StaticBinding;
 
 /**
- * {@link Binding} implementation used by these binding builders
+ * {@link StaticBinding} implementation used by these binding builders
  */
-public class BinderBinding extends Binding {
+public class BinderBinding extends StaticBinding {
 
 	Deque<Consumer<CreationRecipe>> recipeCreationSteps = new ArrayDeque<>();
 

@@ -9,6 +9,10 @@ public class DefaultModule extends AbstractModule {
 		addRule(new ConstructorRule());
 		addRule(new FieldInjectionRule());
 		addRule(new DefaultScopeRule());
+
+		binder().getConfiguration().instantiatorRules
+				.add(new ConstructorInstantiatorRule());
+
 	}
 
 }

@@ -1,6 +1,9 @@
 package com.github.ruediste.simpledi;
 
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
+import com.github.ruediste.simpledi.core.CreationRecipe;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.InjectionPoint;
 
 /**
  * Enrich a {@link Dependency} based on an injection point. The goal is typically to

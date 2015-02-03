@@ -2,13 +2,13 @@ package com.github.ruediste.simpledi.binder;
 
 import java.lang.annotation.Annotation;
 
-import com.github.ruediste.simpledi.CreationRecipe;
-import com.github.ruediste.simpledi.Injector;
-import com.github.ruediste.simpledi.InjectorConfiguration;
-import com.github.ruediste.simpledi.Dependency;
-import com.github.ruediste.simpledi.ProvisionException;
 import com.github.ruediste.simpledi.Rule;
-import com.github.ruediste.simpledi.Scope;
+import com.github.ruediste.simpledi.core.CreationRecipe;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.Injector;
+import com.github.ruediste.simpledi.core.InjectorConfiguration;
+import com.github.ruediste.simpledi.core.ProvisionException;
+import com.github.ruediste.simpledi.core.Scope;
 import com.github.ruediste.simpledi.matchers.Matcher;
 
 /**

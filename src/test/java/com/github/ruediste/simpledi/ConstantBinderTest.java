@@ -8,6 +8,9 @@ import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.Injector;
+
 public class ConstantBinderTest {
 
 	private Injector injector;

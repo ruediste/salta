@@ -3,10 +3,10 @@ package com.github.ruediste.simpledi.binder;
 import java.lang.annotation.Annotation;
 
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
-import com.github.ruediste.simpledi.InjectionPoint;
-import com.github.ruediste.simpledi.InjectorConfiguration;
-import com.github.ruediste.simpledi.Dependency;
 import com.github.ruediste.simpledi.InstanceRequestEnricher;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.InjectionPoint;
+import com.github.ruediste.simpledi.core.InjectorConfiguration;
 import com.github.ruediste.simpledi.matchers.AbstractMatcher;
 import com.github.ruediste.simpledi.matchers.Matcher;
 

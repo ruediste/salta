@@ -3,8 +3,8 @@ package com.github.ruediste.simpledi.internal.defaultModule;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.simpledi.Injector;
 import com.github.ruediste.simpledi.SimpleDi;
+import com.github.ruediste.simpledi.core.Injector;
 
 public class ConstructorRuleTest {
 

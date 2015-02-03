@@ -2,10 +2,10 @@ package com.github.ruediste.simpledi.internal.defaultModule;
 
 import java.lang.reflect.Modifier;
 
-import com.github.ruediste.simpledi.CreationRecipe;
-import com.github.ruediste.simpledi.Dependency;
-import com.github.ruediste.simpledi.ProvisionException;
 import com.github.ruediste.simpledi.Rule;
+import com.github.ruediste.simpledi.core.CreationRecipe;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.ProvisionException;
 
 public class ConstructorRule implements Rule {
 

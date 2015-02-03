@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
+import com.github.ruediste.simpledi.InstanceRequestEnricher;
+import com.github.ruediste.simpledi.Module;
 
 /**
  * Contains the whole configuration of an injector. Passed to all {@link Module}
@@ -18,18 +20,11 @@ public class InjectorConfiguration extends AttachedPropertyBearerBase {
 
 	public final List<InstanceCreationRule> creationRules = new ArrayList<>();
 	public final List<JITBindingRule> jitBindingRules = new ArrayList<>();
-	public final List<Binding> bindings = new ArrayList<>();
+	public final List<JITBindingKeyRule> jitBindingKeyRules = new ArrayList<>();
+	public final List<StaticBinding> staticBindings = new ArrayList<>();
 	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
 
-	@Deprecated
-	public final List<Rule> rules = new ArrayList<>();
-
 	public final List<InstanceRequestEnricher> keyEnrichers = new ArrayList<>();
-
-	@Deprecated
-	public void addRule(Rule rule) {
-		rules.add(rule);
-	}
 
 	public void addKeyEnricher(InstanceRequestEnricher enricher) {
 		keyEnrichers.add(enricher);

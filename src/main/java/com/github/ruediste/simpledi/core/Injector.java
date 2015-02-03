@@ -1,4 +1,5 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
+
 
 public interface Injector {
 

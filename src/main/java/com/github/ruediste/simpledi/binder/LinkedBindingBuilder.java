@@ -4,13 +4,13 @@ import java.lang.reflect.Constructor;
 
 import javax.inject.Provider;
 
-import com.github.ruediste.simpledi.ContextualInjector;
-import com.github.ruediste.simpledi.CreationRecipe;
-import com.github.ruediste.simpledi.InjectorConfiguration;
 import com.github.ruediste.simpledi.InstantiationResult;
-import com.github.ruediste.simpledi.Instantiator;
-import com.github.ruediste.simpledi.Dependency;
 import com.github.ruediste.simpledi.Rule;
+import com.github.ruediste.simpledi.core.ContextualInjector;
+import com.github.ruediste.simpledi.core.CreationRecipe;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.InjectorConfiguration;
+import com.github.ruediste.simpledi.core.Instantiator;
 import com.github.ruediste.simpledi.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
 
@@ -52,8 +52,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 					recipe.instantiator = new Instantiator<T>() {
 
 						@Override
-						public InstantiationResult<T> instantiate(Dependency<T> key,
-								ContextualInjector injector) {
+						public InstantiationResult<T> instantiate(ContextualInjector injector) {
 							return InstantiationResult.of(
 									injector.createInstance(targetKey), true);
 						}
@@ -68,7 +67,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 *
-	 * @see com.google.inject.Injector#injectMembers
+	 * @see com.github.ruediste.simpledi.core.inject.Injector#injectMembers
 	 */
 	public void toInstance(T instance) {
 		config.requestedMemberInjections.put(instance, instance);
@@ -80,8 +79,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 					recipe.instantiator = new Instantiator<T>() {
 
 						@Override
-						public InstantiationResult<T> instantiate(Dependency<T> key,
-								ContextualInjector injector) {
+						public InstantiationResult<T> instantiate(ContextualInjector injector) {
 							return InstantiationResult.of(instance, true);
 						}
 					};
@@ -92,7 +90,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 *
-	 * @see com.google.inject.Injector#injectMembers
+	 * @see com.github.ruediste.simpledi.core.inject.Injector#injectMembers
 	 */
 	public ScopedBindingBuilder toProvider(Provider<? extends T> provider) {
 		config.requestedMemberInjections.put(provider, provider);
@@ -104,8 +102,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 					recipe.instantiator = new Instantiator<T>() {
 
 						@Override
-						public InstantiationResult<T> instantiate(Dependency<T> key,
-								ContextualInjector injector) {
+						public InstantiationResult<T> instantiate(ContextualInjector injector) {
 							return InstantiationResult.of(provider.get(), true);
 						}
 					};
@@ -148,7 +145,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 
 						@Override
 						public synchronized InstantiationResult<T> instantiate(
-								Dependency<T> key, ContextualInjector injector) {
+								ContextualInjector injector) {
 							if (provider == null)
 								provider = injector.createInstance(providerKey);
 							return InstantiationResult.of(provider.get(), true);

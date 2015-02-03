@@ -19,6 +19,7 @@
 package com.github.ruediste.simpledi;
 
 import com.github.ruediste.simpledi.binder.Binder;
+import com.github.ruediste.simpledi.core.Injector;
 
 /**
  * A module contributes configuration information, typically interface bindings,

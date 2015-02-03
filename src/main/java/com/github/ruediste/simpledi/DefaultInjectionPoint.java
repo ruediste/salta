@@ -3,6 +3,8 @@ package com.github.ruediste.simpledi;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 
+import com.github.ruediste.simpledi.core.InjectionPoint;
+
 public class DefaultInjectionPoint implements InjectionPoint {
 
 	final private Member member;

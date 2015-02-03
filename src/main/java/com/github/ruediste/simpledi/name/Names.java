@@ -6,8 +6,8 @@ import java.util.Properties;
 
 import javax.inject.Named;
 
-import com.github.ruediste.simpledi.Dependency;
 import com.github.ruediste.simpledi.binder.Binder;
+import com.github.ruediste.simpledi.core.Dependency;
 
 /**
  * Utility methods for use with {@code @}{@link Named}.

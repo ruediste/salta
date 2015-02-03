@@ -9,8 +9,8 @@ import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.simpledi.Injector;
 import com.github.ruediste.simpledi.SimpleDi;
+import com.github.ruediste.simpledi.core.Injector;
 
 public class FieldInjectionRuleTest {
 

@@ -1,4 +1,5 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
+
 
 /**
  * Injects dependencies into the fields and methods on instances of type

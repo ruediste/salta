@@ -1,20 +1,20 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
 
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
+import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 import com.google.common.reflect.TypeToken;
 
 /**
  * The type and required qualifiers to lookup an instance.
  */
-public class Dependency<T> {
+public class Dependency<T> extends AttachedPropertyBearerBase {
 	public final TypeToken<T> type;
-	public Set<Annotation> requiredQualifiers = new HashSet<>();
 
-	InjectionPoint injectionPoint;
+	/**
+	 * Injection point to satisfy, can be null
+	 */
+	public final InjectionPoint injectionPoint;
 
 	public Dependency(Class<T> type) {
 		this(TypeToken.of(type));
@@ -26,6 +26,7 @@ public class Dependency<T> {
 
 	public Dependency(TypeToken<T> type) {
 		this.type = type;
+		this.injectionPoint = null;
 	}
 
 	public static <T> Dependency<T> of(TypeToken<T> type) {
@@ -34,13 +35,12 @@ public class Dependency<T> {
 
 	@Override
 	public String toString() {
-		return "(" + type + "/" + requiredQualifiers + "/" + injectionPoint
-				+ ")";
+		return "(" + type + "/" + injectionPoint + ")";
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(type, requiredQualifiers, injectionPoint);
+		return Objects.hash(type, injectionPoint, getAttachedPropertyMap());
 	}
 
 	@Override
@@ -55,7 +55,8 @@ public class Dependency<T> {
 
 		Dependency<?> other = (Dependency<?>) obj;
 		return Objects.equals(type, other.type)
-				&& Objects.equals(requiredQualifiers, other.requiredQualifiers)
+				&& Objects.equals(getAttachedPropertyMap(),
+						other.getAttachedPropertyMap())
 				&& Objects.equals(injectionPoint, other.injectionPoint);
 	}
 }

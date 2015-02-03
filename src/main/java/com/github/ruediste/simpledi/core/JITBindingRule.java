@@ -1,4 +1,6 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.core;
+
+import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 
 /**
  * Rule used by the {@link Injector} if no {@link InstanceCreationRule} matches
@@ -6,5 +8,5 @@ package com.github.ruediste.simpledi;
  */
 public interface JITBindingRule {
 
-	Binding apply(Dependency<?> dependency);
+	JITBinding apply(AttachedPropertyBearerBase key);
 }

@@ -1,9 +1,9 @@
-package com.github.ruediste.simpledi.internal;
+package com.github.ruediste.simpledi.core.internal;
 
-import com.github.ruediste.simpledi.ContextualInjector;
-import com.github.ruediste.simpledi.Dependency;
-import com.github.ruediste.simpledi.InstantiationContext;
-import com.github.ruediste.simpledi.Instantiator;
+import com.github.ruediste.simpledi.core.ContextualInjector;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.InstantiationContext;
+import com.github.ruediste.simpledi.core.Instantiator;
 import com.google.common.reflect.TypeToken;
 
 public class ContextualInjectorImpl implements ContextualInjector {

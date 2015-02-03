@@ -34,6 +34,9 @@ import com.github.ruediste.simpledi.binder.Binder;
 import com.github.ruediste.simpledi.binder.LinkedBindingBuilder;
 import com.github.ruediste.simpledi.binder.Message;
 import com.github.ruediste.simpledi.binder.Stage;
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.MembersInjector;
+import com.github.ruediste.simpledi.core.Scope;
 import com.github.ruediste.simpledi.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
 
