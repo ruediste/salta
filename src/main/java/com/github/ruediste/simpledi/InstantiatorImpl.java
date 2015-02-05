@@ -20,6 +20,7 @@ public class InstantiatorImpl<T> implements Instantiator<T> {
 
 	public InstantiatorImpl(Constructor<?> constructor,
 			List<Dependency<?>> argumentDependencies) {
+		constructor.setAccessible(true);
 		this.constructor = constructor;
 		this.argumentDependencies = argumentDependencies;
 	}

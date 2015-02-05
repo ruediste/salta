@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.name;
+package com.github.ruediste.simpledi.jsr330;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

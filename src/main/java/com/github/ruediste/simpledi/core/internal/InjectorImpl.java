@@ -4,12 +4,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-import com.github.ruediste.attachedProperties4J.AttachedPropertyBearer;
-import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.CreationRecipe;
 import com.github.ruediste.simpledi.core.Dependency;
-import com.github.ruediste.simpledi.core.InjectionListener;
 import com.github.ruediste.simpledi.core.Injector;
 import com.github.ruediste.simpledi.core.InjectorConfiguration;
 import com.github.ruediste.simpledi.core.InstanceCreationRule;
@@ -17,11 +14,12 @@ import com.github.ruediste.simpledi.core.InstantiationContext;
 import com.github.ruediste.simpledi.core.JITBinding;
 import com.github.ruediste.simpledi.core.JITBindingKeyRule;
 import com.github.ruediste.simpledi.core.JITBindingRule;
-import com.github.ruediste.simpledi.core.MembersInjector;
+import com.github.ruediste.simpledi.core.JitBindingKey;
 import com.github.ruediste.simpledi.core.ProvisionException;
 import com.github.ruediste.simpledi.core.StaticBinding;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.reflect.TypeToken;
 
 public class InjectorImpl implements Injector {
 
@@ -36,8 +34,8 @@ public class InjectorImpl implements Injector {
 		}
 	};
 
-	Cache<AttachedPropertyBearer, JITBinding> jitBindings = CacheBuilder
-			.newBuilder().build();
+	Cache<JitBindingKey, JITBinding> jitBindings = CacheBuilder.newBuilder()
+			.build();
 
 	@Override
 	public <T> T createInstance(Class<T> cls) {
@@ -79,7 +77,7 @@ public class InjectorImpl implements Injector {
 			}
 			if (binding != null) {
 				CreationRecipe recipe = binding.createRecipe();
-				return recipe.scope.scope((Dependency) dependency,
+				return recipe.scope.scope(binding,
 						() -> createInstance(recipe, ctx));
 			}
 		}
@@ -87,7 +85,7 @@ public class InjectorImpl implements Injector {
 		// create JIT binding
 		{
 			// create key
-			AttachedPropertyBearerBase key = new AttachedPropertyBearerBase();
+			JitBindingKey key = new JitBindingKey();
 			for (JITBindingKeyRule rule : config.jitBindingKeyRules) {
 				rule.apply(dependency, key);
 			}
@@ -117,43 +115,31 @@ public class InjectorImpl implements Injector {
 			// use binding if available
 			if (jitBinding != nullJitBinding) {
 				CreationRecipe recipe = jitBinding.createRecipe();
-				return recipe.scope.scope((Dependency) dependency,
+				return recipe.scope.scope(jitBinding,
 						() -> createInstance(recipe, ctx));
 			}
 		}
 
-		throw new ProvisionException("Dependency cannot be resolved: "
+		throw new ProvisionException("Dependency cannot be resolved:\n"
 				+ dependency);
 
 	}
 
-	protected Object createInstance(CreationRecipe recipe,
+	private Object createInstance(CreationRecipe recipe,
 			InstantiationContext ctx) {
 		ContextualInjector injector = new ContextualInjectorImpl(this, ctx);
 
-		Object instance = recipe.instantiator.instantiate(injector);
-
-		// inject members
-		for (MembersInjector<?> memberInjector : recipe.membersInjectors) {
-			callMemberInjector(memberInjector, instance, injector);
-		}
-
-		// notify listeners
-		for (InjectionListener<?> listener : recipe.injectionListeners) {
-			instance = callInjectionLIstener(listener, instance, injector);
-		}
-		return instance;
+		return recipe.createInstance(injector);
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T> void callMemberInjector(MembersInjector<T> memberInjector,
-			Object instance, ContextualInjector injector) {
-		memberInjector.injectMembers((T) instance, injector);
+	@Override
+	public void injectMembers(Object instance) {
+		config.memberInjectionStrategy.injectMembers(
+				TypeToken.of(instance.getClass()), instance);
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T> T callInjectionLIstener(InjectionListener<T> injectionListener,
-			Object instance, ContextualInjector injector) {
-		return injectionListener.afterInjection((T) instance, injector);
+	@Override
+	public <T> void injectMembers(TypeToken<T> type, T instance) {
+		config.memberInjectionStrategy.injectMembers(type, instance);
 	}
 }

@@ -8,7 +8,7 @@ public class ProvisionException extends RuntimeException {
 	}
 
 	public ProvisionException(String message) {
-		super(message);
+		super("\n" + message);
 	}
 
 	public ProvisionException(Throwable cause) {
@@ -16,7 +16,7 @@ public class ProvisionException extends RuntimeException {
 	}
 
 	public ProvisionException(String message, Throwable cause) {
-		super(message, cause);
+		super("\n" + message, cause);
 	}
 
 }

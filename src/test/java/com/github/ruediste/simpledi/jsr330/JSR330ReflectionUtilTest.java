@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.jsr330;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,7 +11,9 @@ import javax.inject.Qualifier;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ReflectionUtilTest {
+import com.github.ruediste.simpledi.jsr330.JSR330ReflectionUtil;
+
+public class JSR330ReflectionUtilTest {
 
 	@Before
 	public void setUp() throws Exception {
@@ -38,14 +40,17 @@ public class ReflectionUtilTest {
 
 	@Test
 	public void getQualifiers() throws Exception {
-		assertEquals(1,
-				ReflectionUtil.getQualifiers(TestClass.class.getField("a"))
-						.size());
-		assertEquals(1,
-				ReflectionUtil.getQualifiers(TestClass.class.getField("b"))
-						.size());
-		assertEquals(0,
-				ReflectionUtil.getQualifiers(TestClass.class.getField("c"))
-						.size());
+		assertEquals(
+				1,
+				JSR330ReflectionUtil.getQualifiers(
+						TestClass.class.getField("a")).size());
+		assertEquals(
+				1,
+				JSR330ReflectionUtil.getQualifiers(
+						TestClass.class.getField("b")).size());
+		assertEquals(
+				0,
+				JSR330ReflectionUtil.getQualifiers(
+						TestClass.class.getField("c")).size());
 	}
 }

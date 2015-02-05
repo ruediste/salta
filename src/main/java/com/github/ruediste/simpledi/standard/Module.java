@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.standard;
 
+import com.github.ruediste.simpledi.AbstractModule;
 import com.github.ruediste.simpledi.core.Injector;
 import com.github.ruediste.simpledi.standard.binder.Binder;
 

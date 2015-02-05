@@ -1,13 +1,10 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.jsr330;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,9 +12,9 @@ import java.util.Objects;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 
-public class ReflectionUtil {
+public class JSR330ReflectionUtil {
 
-	private ReflectionUtil() {
+	private JSR330ReflectionUtil() {
 	}
 
 	public static List<Annotation> getQualifiers(AnnotatedElement annotated) {
@@ -45,20 +42,6 @@ public class ReflectionUtil {
 			return false;
 		}
 		return true;
-	}
-
-	public static Annotation createAnnotation(Class<?> annotationClass) {
-		return (Annotation) Proxy.newProxyInstance(
-				annotationClass.getClassLoader(),
-				new Class[] { Annotation.class }, new InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method,
-							Object[] args) {
-						return annotationClass; // only getClass() or
-												// annotationType()
-						// should be called.
-					}
-				});
 	}
 
 	@SuppressWarnings("all")

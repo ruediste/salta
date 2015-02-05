@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.name;
+package com.github.ruediste.simpledi.jsr330;
 
 import java.util.Enumeration;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.Properties;
 
 import javax.inject.Named;
 
-import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.standard.binder.Binder;
 
 /**
@@ -35,7 +34,7 @@ public class Names {
 		for (Map.Entry<String, String> entry : properties.entrySet()) {
 			String key = entry.getKey();
 			String value = entry.getValue();
-			binder.bind(new Dependency<String>(String.class, new NamedImpl(key)))
+			binder.bind(String.class).annotatedWith(new NamedImpl(key))
 					.toInstance(value);
 		}
 	}
@@ -51,8 +50,8 @@ public class Names {
 		for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
 			String propertyName = (String) e.nextElement();
 			String value = properties.getProperty(propertyName);
-			binder.bind(
-					new Dependency<String>(String.class, new NamedImpl(propertyName)))
+			binder.bind(String.class)
+					.annotatedWith(new NamedImpl(propertyName))
 					.toInstance(value);
 		}
 	}

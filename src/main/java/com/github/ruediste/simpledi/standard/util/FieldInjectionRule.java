@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.internal.defaultModule;
+package com.github.ruediste.simpledi.standard.util;
 
 import java.lang.reflect.Field;
 import java.security.ProviderException;
@@ -7,14 +7,14 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-import com.github.ruediste.simpledi.DefaultInjectionPoint;
 import com.github.ruediste.simpledi.InstantiationRequest;
-import com.github.ruediste.simpledi.ReflectionUtil;
 import com.github.ruediste.simpledi.Rule;
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.CreationRecipe;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.MembersInjector;
+import com.github.ruediste.simpledi.standard.ReflectionUtil;
+import com.github.ruediste.simpledi.standard.StandardInjectionPoint;
 import com.google.common.reflect.TypeToken;
 
 public class FieldInjectionRule implements Rule {
@@ -35,7 +35,7 @@ public class FieldInjectionRule implements Rule {
 					InstantiationRequest request = new InstantiationRequest(
 							new Dependency(t.resolveType(f.getGenericType()),
 									ReflectionUtil.getQualifiers(f)),
-							new DefaultInjectionPoint(f, f));
+							new StandardInjectionPoint(f, f));
 
 					injectors.add(new MembersInjector<Object>() {
 

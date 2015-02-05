@@ -6,15 +6,24 @@ import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 import com.google.common.reflect.TypeToken;
 
 /**
- * The type and required qualifiers to lookup an instance.
+ * The type and {@link InjectionPoint} to lookup an instance.
  */
 public class Dependency<T> extends AttachedPropertyBearerBase {
+	/**
+	 * Type of the dependency
+	 */
 	public final TypeToken<T> type;
 
 	/**
 	 * Injection point to satisfy, can be null
 	 */
 	public final InjectionPoint injectionPoint;
+
+	public Dependency(Dependency<T> other) {
+		type = other.type;
+		injectionPoint = other.injectionPoint;
+		getAttachedPropertyMap().putAll(other);
+	}
 
 	public Dependency(Class<T> type) {
 		this(TypeToken.of(type));
@@ -27,6 +36,11 @@ public class Dependency<T> extends AttachedPropertyBearerBase {
 	public Dependency(TypeToken<T> type) {
 		this.type = type;
 		this.injectionPoint = null;
+	}
+
+	public Dependency(TypeToken<T> type, InjectionPoint injectionPoint) {
+		this.type = type;
+		this.injectionPoint = injectionPoint;
 	}
 
 	public static <T> Dependency<T> of(TypeToken<T> type) {

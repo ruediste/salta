@@ -30,14 +30,14 @@ import net.sf.cglib.proxy.Callback;
 
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.MembersInjector;
+import com.github.ruediste.simpledi.core.Message;
 import com.github.ruediste.simpledi.core.Scope;
+import com.github.ruediste.simpledi.core.Stage;
 import com.github.ruediste.simpledi.matchers.Matcher;
+import com.github.ruediste.simpledi.standard.Module;
 import com.github.ruediste.simpledi.standard.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.simpledi.standard.binder.AnnotatedConstantBindingBuilder;
 import com.github.ruediste.simpledi.standard.binder.Binder;
-import com.github.ruediste.simpledi.standard.binder.LinkedBindingBuilder;
-import com.github.ruediste.simpledi.standard.binder.Message;
-import com.github.ruediste.simpledi.standard.binder.Stage;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -95,13 +95,6 @@ public abstract class AbstractModule implements Module {
 	protected void bindScope(Class<? extends Annotation> scopeAnnotation,
 			Scope scope) {
 		binder().bindScope(scopeAnnotation, scope);
-	}
-
-	/**
-	 * @see Binder#bind(Dependency)
-	 */
-	protected <T> LinkedBindingBuilder<T> bind(Dependency<T> key) {
-		return binder().bind(key);
 	}
 
 	/**

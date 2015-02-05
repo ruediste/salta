@@ -2,6 +2,7 @@ package com.github.ruediste.simpledi;
 
 import com.github.ruediste.simpledi.core.CreationRecipe;
 import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.standard.Module;
 
 /**
  * A rule defining how to modify an {@link CreationRecipe} based on an

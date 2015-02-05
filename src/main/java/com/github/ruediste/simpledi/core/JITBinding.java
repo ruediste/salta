@@ -1,8 +1,5 @@
 package com.github.ruediste.simpledi.core;
 
-
-public interface JITBinding {
-
-	CreationRecipe createRecipe();
+public interface JITBinding extends Binding {
 
 }

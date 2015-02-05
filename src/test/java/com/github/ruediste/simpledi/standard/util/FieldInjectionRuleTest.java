@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.internal.defaultModule;
+package com.github.ruediste.simpledi.standard.util;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

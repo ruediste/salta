@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.standard.binder;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,10 +8,13 @@ import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.ruediste.simpledi.AbstractModule;
+import com.github.ruediste.simpledi.SimpleDi;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.Injector;
+import com.github.ruediste.simpledi.jsr330.Names;
 
-public class ConstantBinderTest {
+public class ConstantBindingBuilderTest {
 
 	private Injector injector;
 
@@ -21,7 +24,7 @@ public class ConstantBinderTest {
 
 			@Override
 			protected void configure() {
-				bindConstant().named("foo").to("bar");
+				bindConstant().annotatedWith(Names.named("foo")).to("bar");
 			}
 		});
 	}
@@ -34,8 +37,9 @@ public class ConstantBinderTest {
 
 	@Test
 	public void testDirect() {
-		assertEquals("bar", injector.createInstance(new Dependency<String>(
-				String.class, ReflectionUtil.createNamed("foo"))));
+		Dependency<String> key = new Dependency<String>(String.class);
+		Annotations.dependencyAnnotation.set(key, Names.named("foo"));
+		assertEquals("bar", injector.createInstance(key));
 	}
 
 	@Test

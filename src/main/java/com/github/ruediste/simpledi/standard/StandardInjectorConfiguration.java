@@ -11,7 +11,13 @@ import com.github.ruediste.simpledi.core.InjectorConfiguration;
 import com.github.ruediste.simpledi.core.Scope;
 import com.google.common.reflect.TypeToken;
 
-public class StandardInjectorConfiguration extends InjectorConfiguration {
+public class StandardInjectorConfiguration {
+	public InjectorConfiguration config;
+
+	public StandardInjectorConfiguration(InjectorConfiguration config) {
+		this.config = config;
+	}
+
 	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
 
 	public Scope singletonScope;
@@ -23,9 +29,9 @@ public class StandardInjectorConfiguration extends InjectorConfiguration {
 	 * Create an {@link Instantiator} using the {@link #instantiatorRules}
 	 */
 	public <T> Instantiator<T> createInstantiator(TypeToken<?> type) {
-		for (InstantiatorRule foo : instantiatorRules) {
+		for (InstantiatorRule rule : instantiatorRules) {
 			@SuppressWarnings("unchecked")
-			Instantiator<T> instantiator = (Instantiator<T>) foo.apply(type);
+			Instantiator<T> instantiator = (Instantiator<T>) rule.apply(type);
 			if (instantiator != null) {
 				return instantiator;
 			}

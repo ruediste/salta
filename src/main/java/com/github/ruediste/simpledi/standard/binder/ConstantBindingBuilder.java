@@ -1,81 +1,107 @@
-/*
- * Copyright (C) 2014 Ruedi Steinmann
- * 
- * Copyright (C) 2007 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.github.ruediste.simpledi.standard.binder;
 
-/**
- * Binds to a constant value.
- */
-public interface ConstantBindingBuilder {
+import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.matchers.Matcher;
+import com.github.ruediste.simpledi.standard.StandardInjectorConfiguration;
+import com.github.ruediste.simpledi.standard.StandardStaticBinding;
+
+public class ConstantBindingBuilder {
+
+	private StandardInjectorConfiguration config;
+	private Matcher<Dependency<?>> annotationMatcher;
+
+	public ConstantBindingBuilder(StandardInjectorConfiguration config,
+			Matcher<Dependency<?>> annotationMatcher) {
+		this.config = config;
+		this.annotationMatcher = annotationMatcher;
+	}
+
+	private void bind(Class<?> cls, Object value) {
+		StandardStaticBinding binding = new StandardStaticBinding();
+		binding.dependencyMatcher = annotationMatcher.and(d -> d.type
+				.isAssignableFrom(cls));
+		binding.recipeCreationSteps
+				.add(r -> r.instantiator = injector -> value);
+		config.config.staticBindings.add(binding);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(String value);
+	public void to(String value) {
+		bind(String.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(int value);
+	public void to(int value) {
+		bind(Integer.class, value);
+
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(long value);
+	public void to(long value) {
+		bind(Long.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(boolean value);
+	public void to(boolean value) {
+		bind(Boolean.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(double value);
+	public void to(double value) {
+		bind(Double.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(float value);
+	public void to(float value) {
+		bind(Float.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(short value);
+	public void to(short value) {
+		bind(Short.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(char value);
+	public void to(char value) {
+		bind(Character.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 * 
 	 * @since 3.0
 	 */
-	void to(byte value);
+	public void to(byte value) {
+		bind(Byte.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	void to(Class<?> value);
+	public void to(Class<?> value) {
+		bind(Class.class, value);
+	}
 
 	/**
 	 * Binds constant to the given value.
 	 */
-	<E extends Enum<E>> void to(E value);
+	public <E extends Enum<E>> void to(E value) {
+		bind(Enum.class, value);
+	}
 }

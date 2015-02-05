@@ -1,5 +1,6 @@
 package com.github.ruediste.simpledi.core;
 
+import com.google.common.reflect.TypeToken;
 
 public interface Injector {
 
@@ -9,5 +10,9 @@ public interface Injector {
 	<T> T createInstance(Class<T> cls);
 
 	<T> T createInstance(Dependency<T> key);
+
+	void injectMembers(Object instance);
+
+	<T> void injectMembers(TypeToken<T> type, T instance);
 
 }

@@ -1,18 +1,21 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.standard;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 
 import com.github.ruediste.simpledi.core.InjectionPoint;
 
-public class DefaultInjectionPoint implements InjectionPoint {
+public class StandardInjectionPoint implements InjectionPoint {
 
 	final private Member member;
 	final private AnnotatedElement annotated;
+	final private Integer parameterIndex;
 
-	public DefaultInjectionPoint(Member member, AnnotatedElement annotated) {
+	public StandardInjectionPoint(Member member, AnnotatedElement annotated,
+			Integer parameterIndex) {
 		this.member = member;
 		this.annotated = annotated;
+		this.parameterIndex = parameterIndex;
 	}
 
 	@Override
@@ -28,5 +31,10 @@ public class DefaultInjectionPoint implements InjectionPoint {
 	@Override
 	public String toString() {
 		return member.toString();
+	}
+
+	@Override
+	public Integer getParameterIndex() {
+		return parameterIndex;
 	}
 }

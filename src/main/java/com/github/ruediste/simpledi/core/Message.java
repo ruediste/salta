@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.standard.binder;
+package com.github.ruediste.simpledi.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
