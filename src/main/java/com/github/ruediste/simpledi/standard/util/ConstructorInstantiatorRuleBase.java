@@ -1,57 +1,81 @@
 package com.github.ruediste.simpledi.standard.util;
 
+import static java.util.stream.Collectors.joining;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.security.ProviderException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import com.github.ruediste.simpledi.InstantiatorImpl;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.ProvisionException;
-import com.github.ruediste.simpledi.standard.Instantiator;
 import com.github.ruediste.simpledi.standard.InstantiatorRule;
 import com.github.ruediste.simpledi.standard.StandardInjectionPoint;
+import com.github.ruediste.simpledi.standard.recipe.FixedConstructorRecipeInstantiator;
+import com.github.ruediste.simpledi.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
+/**
+ * Base class for {@link InstantiatorRule}s which use a constructor to
+ * instantiate a class (Probably the majority of cases)
+ */
 public abstract class ConstructorInstantiatorRuleBase implements
 		InstantiatorRule {
 
-	private boolean allowNoArgsConstructor;
-
-	protected ConstructorInstantiatorRuleBase(boolean allowNoArgsConstructor) {
-		this.allowNoArgsConstructor = allowNoArgsConstructor;
-
-	}
-
 	@Override
-	public <T> Instantiator<T> apply(TypeToken<T> type) {
-		Constructor<?> noArgsConstructor = null;
-		Constructor<?> constructor = null;
-		for (Constructor<?> c : type.getRawType().getDeclaredConstructors()) {
+	public <T> RecipeInstantiator<T> apply(TypeToken<T> typeToken) {
+		Type type = typeToken.getType();
+		Class<?> clazz;
+		if (type instanceof Class) {
+			clazz = (Class<?>) type;
+		} else if (type instanceof ParameterizedType) {
+			clazz = (Class<?>) ((ParameterizedType) type).getRawType();
+		} else
+			throw new ProvisionException("Unknown type " + typeToken);
+
+		ArrayList<Constructor<?>> highestPriorityConstructors = new ArrayList<>();
+		Integer highestPriority = null;
+		for (Constructor<?> c : clazz.getDeclaredConstructors()) {
 			if (Modifier.isStatic(c.getModifiers()))
 				continue;
 
-			if (isInjectableConstructor(c)) {
-				if (constructor != null)
-					throw new ProvisionException(
-							"Multiple constructors annotated with @Inject found on type\n"
-									+ type);
-				constructor = c;
+			Integer constructorPriority = getConstructorPriority(c);
+
+			if (constructorPriority == null)
+				// constructor should not be used
+				continue;
+
+			if (highestPriority != null
+					&& highestPriority > constructorPriority)
+				// highest priority is higher than priority of current
+				// constructor
+				continue;
+
+			if (highestPriority == null
+					|| highestPriority < constructorPriority) {
+				// we have to increase the priority
+				highestPriority = constructorPriority;
 			}
-			if (allowNoArgsConstructor && c.getParameterCount() == 0
-					&& !Modifier.isPrivate(c.getModifiers())) {
-				noArgsConstructor = c;
-			}
+
+			highestPriorityConstructors.add(c);
+		}
+		if (highestPriorityConstructors.size() > 1)
+			throw new ProvisionException(
+					"Ambigous eligible constructors found on type\n"
+							+ typeToken
+							+ "\nConstructors:\n"
+							+ highestPriorityConstructors.stream()
+									.map(Object::toString)
+									.collect(joining("\n->", "->", "")));
+
+		if (highestPriorityConstructors.isEmpty()) {
+			throw new ProvisionException(
+					"No suitable constructor found for type " + typeToken);
 		}
 
-		if (constructor == null)
-			constructor = noArgsConstructor;
-
-		if (constructor == null) {
-			throw new ProviderException(
-					"No suitable constructor found for type " + type);
-		}
+		Constructor<?> constructor = highestPriorityConstructors.get(0);
 
 		ArrayList<Dependency<?>> args = new ArrayList<>();
 
@@ -60,15 +84,21 @@ public abstract class ConstructorInstantiatorRuleBase implements
 			Parameter parameter = parameters[i];
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			Dependency<Object> dependency = new Dependency<Object>(
-					(TypeToken) type.resolveType(parameter
+					(TypeToken) typeToken.resolveType(parameter
 							.getParameterizedType()),
 					new StandardInjectionPoint(constructor, parameter, i));
 			args.add(dependency);
 		}
 
-		return new InstantiatorImpl<T>(constructor, args);
+		return new FixedConstructorRecipeInstantiator<T>(constructor, args);
 	}
 
-	protected abstract boolean isInjectableConstructor(Constructor<?> c);
+	/**
+	 * Calculate the priority of the constructor. if null is returned, the
+	 * constructor is not used for injection. Otherwise the constructor with the
+	 * highest priority is used (highest number). If multiple highest-priority
+	 * constructors exist, an error is raised.
+	 */
+	protected abstract Integer getConstructorPriority(Constructor<?> c);
 
 }

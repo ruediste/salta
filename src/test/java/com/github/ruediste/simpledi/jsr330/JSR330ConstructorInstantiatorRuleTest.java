@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.standard.util;
+package com.github.ruediste.simpledi.jsr330;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -10,16 +10,17 @@ import org.junit.Test;
 import com.github.ruediste.simpledi.SimpleDi;
 import com.github.ruediste.simpledi.core.Injector;
 import com.github.ruediste.simpledi.core.ProvisionException;
-import com.github.ruediste.simpledi.jsr330.JSR330Module;
 
-public class ConstructorInstantiatorRuleBaseTest {
+public class JSR330ConstructorInstantiatorRuleTest {
 
 	private Injector injector;
 
-	public static class NoParameter {
+	static class NoParameter {
+		public NoParameter() {
+		}
 	}
 
-	private static class OneParameter {
+	static class OneParameter {
 		private NoParameter noParameter;
 
 		@Inject
@@ -29,7 +30,8 @@ public class ConstructorInstantiatorRuleBaseTest {
 		}
 	}
 
-	private static class Ambigous {
+	static class Ambigous {
+		@SuppressWarnings("unused")
 		private NoParameter noParameter;
 
 		@Inject
@@ -64,7 +66,6 @@ public class ConstructorInstantiatorRuleBaseTest {
 
 	@Test(expected = ProvisionException.class)
 	public void ambigous() {
-		Ambigous instance = injector.createInstance(Ambigous.class);
-		assertNotNull(instance);
+		injector.createInstance(Ambigous.class);
 	}
 }

@@ -7,5 +7,6 @@ import com.google.common.reflect.TypeToken;
  */
 public interface MemberInjectionStrategy {
 
-	void injectMembers(TypeToken<?> type, Object instance);
+	void injectMembers(TypeToken<?> type, Object instance,
+			ContextualInjector injectorImpl);
 }

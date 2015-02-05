@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.Test;
 
 import com.github.ruediste.simpledi.core.Scope;
+import com.github.ruediste.simpledi.standard.recipe.StandardCreationRecipe;
 
 public class FillDefaultsRecipeCreationStepTest {
 

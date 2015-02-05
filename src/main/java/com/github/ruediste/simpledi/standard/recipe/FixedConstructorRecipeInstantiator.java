@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi;
+package com.github.ruediste.simpledi.standard.recipe;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -8,17 +8,19 @@ import java.util.List;
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.ProvisionException;
-import com.github.ruediste.simpledi.standard.Instantiator;
+import com.github.ruediste.simpledi.standard.util.ConstructorInstantiatorRuleBase;
 
 /**
- * Instantiate a fixed class using a fixed constructor
+ * Instantiate a fixed class using a fixed constructor. Use a subclass of
+ * {@link ConstructorInstantiatorRuleBase} to create an instance
  */
-public class InstantiatorImpl<T> implements Instantiator<T> {
+public class FixedConstructorRecipeInstantiator<T> implements
+		RecipeInstantiator<T> {
 
 	Constructor<?> constructor;
 	List<Dependency<?>> argumentDependencies;
 
-	public InstantiatorImpl(Constructor<?> constructor,
+	public FixedConstructorRecipeInstantiator(Constructor<?> constructor,
 			List<Dependency<?>> argumentDependencies) {
 		constructor.setAccessible(true);
 		this.constructor = constructor;

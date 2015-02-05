@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.standard;
+package com.github.ruediste.simpledi.standard.recipe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import com.github.ruediste.simpledi.core.MembersInjector;
  */
 public class StandardCreationRecipe extends CreationRecipe {
 
-	public Instantiator<?> instantiator;
+	public RecipeInstantiator<?> instantiator;
 	/**
 	 * {@link MembersInjector} get called after the instantiation to inject
 	 * fields and methods

@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
+import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.InjectorConfiguration;
 import com.github.ruediste.simpledi.core.Scope;
+import com.github.ruediste.simpledi.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjectorConfiguration {
@@ -18,20 +21,27 @@ public class StandardInjectorConfiguration {
 		this.config = config;
 	}
 
-	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
-
 	public Scope singletonScope;
 	public Scope defaultScope;
-
 	public final Map<Class<? extends Annotation>, Scope> scopeAnnotationMap = new HashMap<>();
 
 	/**
-	 * Create an {@link Instantiator} using the {@link #instantiatorRules}
+	 * Strategy to instantiate an instance using a fixed constructor. The
+	 * members are injected afterwards by the calling code
 	 */
-	public <T> Instantiator<T> createInstantiator(TypeToken<?> type) {
+	public BiFunction<Constructor<?>, TypeToken<?>, Object> fixedConstructorInstantiationStrategy;
+
+	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
+	public final List<MembersInjectorRule> membersInjectorRules = new ArrayList<>();
+
+	/**
+	 * Create an {@link RecipeInstantiator} using the {@link #instantiatorRules}
+	 */
+	public <T> RecipeInstantiator<T> createRecipeInstantiator(TypeToken<?> type) {
 		for (InstantiatorRule rule : instantiatorRules) {
 			@SuppressWarnings("unchecked")
-			Instantiator<T> instantiator = (Instantiator<T>) rule.apply(type);
+			RecipeInstantiator<T> instantiator = (RecipeInstantiator<T>) rule
+					.apply(type);
 			if (instantiator != null) {
 				return instantiator;
 			}
@@ -39,8 +49,17 @@ public class StandardInjectorConfiguration {
 		return null;
 	}
 
-	public <T> Instantiator<T> createInstantiator(Constructor<?> constructor,
-			TypeToken<?> type) {
-		throw new UnsupportedOperationException("Not Yet Implemented");
+	public <T> RecipeInstantiator<T> createInstantiator(
+			Constructor<?> constructor, TypeToken<?> type) {
+		return new RecipeInstantiator<T>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public T instantiate(ContextualInjector injector) {
+				return (T) fixedConstructorInstantiationStrategy.apply(
+						constructor, type);
+			}
+		};
+
 	}
 }

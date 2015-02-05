@@ -1,4 +1,4 @@
-package com.github.ruediste.simpledi.standard;
+package com.github.ruediste.simpledi.standard.recipe;
 
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.MembersInjector;

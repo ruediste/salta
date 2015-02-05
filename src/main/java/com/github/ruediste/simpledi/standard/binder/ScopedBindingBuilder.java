@@ -1,15 +1,15 @@
 package com.github.ruediste.simpledi.standard.binder;
 
 import java.lang.annotation.Annotation;
-import java.util.function.Consumer;
 
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.Injector;
 import com.github.ruediste.simpledi.core.ProvisionException;
 import com.github.ruediste.simpledi.core.Scope;
-import com.github.ruediste.simpledi.standard.StandardCreationRecipe;
 import com.github.ruediste.simpledi.standard.StandardInjectorConfiguration;
 import com.github.ruediste.simpledi.standard.StandardStaticBinding;
+import com.github.ruediste.simpledi.standard.recipe.RecipeCreationStep;
+import com.github.ruediste.simpledi.standard.recipe.StandardCreationRecipe;
 
 /**
  * See the EDSL examples at {@link Binder}.
@@ -39,38 +39,34 @@ public class ScopedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public void in(Class<? extends Annotation> scopeAnnotation) {
-		binding.recipeCreationSteps
-				.addFirst(new Consumer<StandardCreationRecipe>() {
+		binding.recipeCreationSteps.addFirst(new RecipeCreationStep() {
 
-					@Override
-					public void accept(StandardCreationRecipe recipe) {
-						if (recipe.scope != null)
-							return;
-						Scope scope = config.scopeAnnotationMap
-								.get(scopeAnnotation);
-						if (scope == null)
-							throw new ProvisionException(
-									"Unknown scope annotation "
-											+ scopeAnnotation);
-						recipe.scope = scope;
-					}
-				});
+			@Override
+			public void accept(StandardCreationRecipe recipe) {
+				if (recipe.scope != null)
+					return;
+				Scope scope = config.scopeAnnotationMap.get(scopeAnnotation);
+				if (scope == null)
+					throw new ProvisionException("Unknown scope annotation "
+							+ scopeAnnotation);
+				recipe.scope = scope;
+			}
+		});
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public void in(Scope scope) {
-		binding.recipeCreationSteps
-				.addFirst(new Consumer<StandardCreationRecipe>() {
+		binding.recipeCreationSteps.addFirst(new RecipeCreationStep() {
 
-					@Override
-					public void accept(StandardCreationRecipe recipe) {
-						if (recipe.scope != null)
-							return;
-						recipe.scope = scope;
-					}
-				});
+			@Override
+			public void accept(StandardCreationRecipe recipe) {
+				if (recipe.scope != null)
+					return;
+				recipe.scope = scope;
+			}
+		});
 	}
 
 	/**
@@ -83,17 +79,16 @@ public class ScopedBindingBuilder<T> {
 			throw new ProvisionException(
 					"class to bind as eager singleton not known");
 		}
-		binding.recipeCreationSteps
-				.addFirst(new Consumer<StandardCreationRecipe>() {
+		binding.recipeCreationSteps.addFirst(new RecipeCreationStep() {
 
-					@Override
-					public void accept(StandardCreationRecipe recipe) {
-						if (recipe.scope != null)
-							return;
+			@Override
+			public void accept(StandardCreationRecipe recipe) {
+				if (recipe.scope != null)
+					return;
 
-						recipe.scope = config.singletonScope;
-					}
-				});
+				recipe.scope = config.singletonScope;
+			}
+		});
 
 		config.config.dynamicInitializers.add(x -> x
 				.createInstance(eagerInstantiationDependency));

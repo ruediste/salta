@@ -52,6 +52,12 @@
 			<artifactId>attached-properties-4j</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject-tck</artifactId>
+			<version>1</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 

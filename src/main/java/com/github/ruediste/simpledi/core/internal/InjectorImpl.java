@@ -53,71 +53,77 @@ public class InjectorImpl implements Injector {
 		this.config = config;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	Object createInstance(Dependency<?> dependency, InstantiationContext ctx) {
-		// check rules
-		for (InstanceCreationRule rule : config.creationRules) {
-			Supplier<?> supplier = rule.apply(dependency);
-			if (supplier != null)
-				return supplier.get();
-		}
+	public Object createInstance(Dependency<?> dependency,
+			InstantiationContext ctx) {
+		try {
+			// check rules
+			for (InstanceCreationRule rule : config.creationRules) {
+				Supplier<?> supplier = rule.apply(dependency);
+				if (supplier != null)
+					return supplier.get();
+			}
 
-		// check static bindings
-		{
-			StaticBinding binding = null;
-			for (StaticBinding b : config.staticBindings) {
-				if (b.matches(dependency)) {
-					if (binding != null)
-						throw new ProvisionException(
-								"multiple bindings match dependency "
-										+ dependency + ": " + binding + ", "
-										+ b);
-					binding = b;
+			// check static bindings
+			{
+				StaticBinding binding = null;
+				for (StaticBinding b : config.staticBindings) {
+					if (b.matches(dependency)) {
+						if (binding != null)
+							throw new ProvisionException(
+									"multiple bindings match dependency "
+											+ dependency + ": " + binding
+											+ ", " + b);
+						binding = b;
+					}
+				}
+				if (binding != null) {
+					CreationRecipe recipe = binding.createRecipe();
+					return recipe.scope.scope(binding,
+							() -> createInstance(recipe, ctx));
 				}
 			}
-			if (binding != null) {
-				CreationRecipe recipe = binding.createRecipe();
-				return recipe.scope.scope(binding,
-						() -> createInstance(recipe, ctx));
-			}
-		}
 
-		// create JIT binding
-		{
-			// create key
-			JitBindingKey key = new JitBindingKey();
-			for (JITBindingKeyRule rule : config.jitBindingKeyRules) {
-				rule.apply(dependency, key);
-			}
+			// create JIT binding
+			{
+				// create key
+				JitBindingKey key = new JitBindingKey();
+				for (JITBindingKeyRule rule : config.jitBindingKeyRules) {
+					rule.apply(dependency, key);
+				}
 
-			// check existing bindings and create new one if necessary
-			JITBinding jitBinding;
-			try {
-				jitBinding = jitBindings.get(key, new Callable<JITBinding>() {
+				// check existing bindings and create new one if necessary
+				JITBinding jitBinding;
+				try {
+					jitBinding = jitBindings.get(key,
+							new Callable<JITBinding>() {
 
-					@Override
-					public JITBinding call() throws Exception {
-						for (JITBindingRule rule : config.jitBindingRules) {
-							JITBinding binding = rule.apply(key);
-							if (binding != null) {
-								return binding;
-							}
-						}
-						return nullJitBinding;
-					}
-				});
-			} catch (ExecutionException e) {
-				throw new ProvisionException(
-						"Error while evaluating JIT binding rules",
-						e.getCause());
-			}
+								@Override
+								public JITBinding call() throws Exception {
+									for (JITBindingRule rule : config.jitBindingRules) {
+										JITBinding binding = rule.apply(key);
+										if (binding != null) {
+											return binding;
+										}
+									}
+									return nullJitBinding;
+								}
+							});
+				} catch (ExecutionException e) {
+					throw new ProvisionException(
+							"Error while evaluating JIT binding rules",
+							e.getCause());
+				}
 
-			// use binding if available
-			if (jitBinding != nullJitBinding) {
-				CreationRecipe recipe = jitBinding.createRecipe();
-				return recipe.scope.scope(jitBinding,
-						() -> createInstance(recipe, ctx));
+				// use binding if available
+				if (jitBinding != nullJitBinding) {
+					CreationRecipe recipe = jitBinding.createRecipe();
+					return recipe.scope.scope(jitBinding,
+							() -> createInstance(recipe, ctx));
+				}
 			}
+		} catch (Exception e) {
+			throw new ProvisionException("Error while creating instance for "
+					+ dependency, e);
 		}
 
 		throw new ProvisionException("Dependency cannot be resolved:\n"
@@ -134,12 +140,16 @@ public class InjectorImpl implements Injector {
 
 	@Override
 	public void injectMembers(Object instance) {
+		InstantiationContext ctx = new InstantiationContext();
 		config.memberInjectionStrategy.injectMembers(
-				TypeToken.of(instance.getClass()), instance);
+				TypeToken.of(instance.getClass()), instance,
+				new ContextualInjectorImpl(this, ctx));
 	}
 
 	@Override
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
-		config.memberInjectionStrategy.injectMembers(type, instance);
+		InstantiationContext ctx = new InstantiationContext();
+		config.memberInjectionStrategy.injectMembers(type, instance,
+				new ContextualInjectorImpl(this, ctx));
 	}
 }

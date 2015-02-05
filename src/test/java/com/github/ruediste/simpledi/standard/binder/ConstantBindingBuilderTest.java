@@ -12,6 +12,7 @@ import com.github.ruediste.simpledi.AbstractModule;
 import com.github.ruediste.simpledi.SimpleDi;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.Injector;
+import com.github.ruediste.simpledi.jsr330.JSR330Module;
 import com.github.ruediste.simpledi.jsr330.Names;
 
 public class ConstantBindingBuilderTest {
@@ -26,7 +27,7 @@ public class ConstantBindingBuilderTest {
 			protected void configure() {
 				bindConstant().annotatedWith(Names.named("foo")).to("bar");
 			}
-		});
+		}, new JSR330Module());
 	}
 
 	public static class TestClass {

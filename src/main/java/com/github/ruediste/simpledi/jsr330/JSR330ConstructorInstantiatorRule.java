@@ -1,6 +1,7 @@
 package com.github.ruediste.simpledi.jsr330;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 
 import javax.inject.Inject;
 
@@ -9,13 +10,13 @@ import com.github.ruediste.simpledi.standard.util.ConstructorInstantiatorRuleBas
 public class JSR330ConstructorInstantiatorRule extends
 		ConstructorInstantiatorRuleBase {
 
-	public JSR330ConstructorInstantiatorRule() {
-		super(true);
-	}
-
 	@Override
-	protected boolean isInjectableConstructor(Constructor<?> c) {
-		return c.isAnnotationPresent(Inject.class);
+	protected Integer getConstructorPriority(Constructor<?> c) {
+		if (c.isAnnotationPresent(Inject.class))
+			return 2;
+		if (c.getParameterCount() == 0 && Modifier.isPublic(c.getModifiers()))
+			return 1;
+		return null;
 	}
 
 }

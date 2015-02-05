@@ -20,8 +20,10 @@ public class ConstantBindingBuilder {
 		StandardStaticBinding binding = new StandardStaticBinding();
 		binding.dependencyMatcher = annotationMatcher.and(d -> d.type
 				.isAssignableFrom(cls));
-		binding.recipeCreationSteps
-				.add(r -> r.instantiator = injector -> value);
+		binding.recipeCreationSteps.add(r -> {
+			r.instantiator = injector -> value;
+			r.scope = config.defaultScope;
+		});
 		config.config.staticBindings.add(binding);
 	}
 
