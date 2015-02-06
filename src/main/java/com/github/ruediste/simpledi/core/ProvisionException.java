@@ -19,4 +19,12 @@ public class ProvisionException extends RuntimeException {
 		super("\n" + message, cause);
 	}
 
+	@Override
+	public String getMessage() {
+		if (getCause() instanceof ProvisionException)
+			return super.getMessage() + getCause().getMessage();
+		else
+			return super.getMessage();
+	}
+
 }

@@ -11,6 +11,7 @@ public class JSR330Module extends AbstractModule {
 		config.instantiatorRules.add(new JSR330ConstructorInstantiatorRule());
 		config.membersInjectorRules.add(new JSR330FieldMembersInjectorRule());
 		config.membersInjectorRules.add(new JSR330MethodMembersInjectorRule());
+		config.config.creationRules.add(new ProviderCreationRule());
 	}
 
 }

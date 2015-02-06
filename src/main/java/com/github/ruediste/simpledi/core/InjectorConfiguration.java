@@ -26,7 +26,7 @@ public class InjectorConfiguration extends AttachedPropertyBearerBase {
 	/**
 	 * Rules to instantiate dependencies without bindings
 	 */
-	public final List<InstanceCreationRule> creationRules = new ArrayList<>();
+	public final List<NoBindingInstanceCreationRule> creationRules = new ArrayList<>();
 
 	/**
 	 * Statically defined bindings

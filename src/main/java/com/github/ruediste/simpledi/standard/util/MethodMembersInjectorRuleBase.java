@@ -9,7 +9,6 @@ import com.github.ruediste.simpledi.standard.MembersInjectorRule;
 import com.github.ruediste.simpledi.standard.StandardInjectionPoint;
 import com.github.ruediste.simpledi.standard.recipe.FixedMethodRecipeMembersInjector;
 import com.github.ruediste.simpledi.standard.recipe.StandardCreationRecipe;
-import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
 public abstract class MethodMembersInjectorRuleBase implements
@@ -19,12 +18,12 @@ public abstract class MethodMembersInjectorRuleBase implements
 	public void addMembersInjectors(TypeToken<?> typeToken,
 			StandardCreationRecipe recipe) {
 
+		MethodOverrideIndex overrideIndex = new MethodOverrideIndex(typeToken);
 		// iterate over super types, always processing supertypes before
 		// subtypes
-		for (TypeToken<?> t : Lists.reverse(new ArrayList<>(typeToken
-				.getTypes()))) {
+		for (TypeToken<?> t : overrideIndex.getAncestors()) {
 			for (Method method : t.getRawType().getDeclaredMethods()) {
-				if (isInjectableMethod(t, method)) {
+				if (isInjectableMethod(t, method, overrideIndex)) {
 					method.setAccessible(true);
 
 					// create dependencies
@@ -50,5 +49,5 @@ public abstract class MethodMembersInjectorRuleBase implements
 	}
 
 	protected abstract boolean isInjectableMethod(TypeToken<?> declaringType,
-			Method method);
+			Method method, MethodOverrideIndex overrideIndex);
 }

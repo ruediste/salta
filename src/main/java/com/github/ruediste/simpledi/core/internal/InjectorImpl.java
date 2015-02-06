@@ -2,19 +2,19 @@ package com.github.ruediste.simpledi.core.internal;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Supplier;
 
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.CreationRecipe;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.Injector;
 import com.github.ruediste.simpledi.core.InjectorConfiguration;
-import com.github.ruediste.simpledi.core.InstanceCreationRule;
 import com.github.ruediste.simpledi.core.InstantiationContext;
 import com.github.ruediste.simpledi.core.JITBinding;
 import com.github.ruediste.simpledi.core.JITBindingKeyRule;
 import com.github.ruediste.simpledi.core.JITBindingRule;
 import com.github.ruediste.simpledi.core.JitBindingKey;
+import com.github.ruediste.simpledi.core.NoBindingInstanceCreationRule;
+import com.github.ruediste.simpledi.core.NoBindingInstanceCreator;
 import com.github.ruediste.simpledi.core.ProvisionException;
 import com.github.ruediste.simpledi.core.StaticBinding;
 import com.google.common.cache.Cache;
@@ -56,11 +56,12 @@ public class InjectorImpl implements Injector {
 	public Object createInstance(Dependency<?> dependency,
 			InstantiationContext ctx) {
 		try {
+			ContextualInjector injector = new ContextualInjectorImpl(this, ctx);
 			// check rules
-			for (InstanceCreationRule rule : config.creationRules) {
-				Supplier<?> supplier = rule.apply(dependency);
-				if (supplier != null)
-					return supplier.get();
+			for (NoBindingInstanceCreationRule rule : config.creationRules) {
+				NoBindingInstanceCreator<?> creator = rule.apply(dependency);
+				if (creator != null)
+					return creator.createInstance(injector);
 			}
 
 			// check static bindings
@@ -79,7 +80,7 @@ public class InjectorImpl implements Injector {
 				if (binding != null) {
 					CreationRecipe recipe = binding.createRecipe();
 					return recipe.scope.scope(binding,
-							() -> createInstance(recipe, ctx));
+							() -> recipe.createInstance(injector));
 				}
 			}
 
@@ -118,7 +119,7 @@ public class InjectorImpl implements Injector {
 				if (jitBinding != nullJitBinding) {
 					CreationRecipe recipe = jitBinding.createRecipe();
 					return recipe.scope.scope(jitBinding,
-							() -> createInstance(recipe, ctx));
+							() -> recipe.createInstance(injector));
 				}
 			}
 		} catch (Exception e) {
@@ -129,13 +130,6 @@ public class InjectorImpl implements Injector {
 		throw new ProvisionException("Dependency cannot be resolved:\n"
 				+ dependency);
 
-	}
-
-	private Object createInstance(CreationRecipe recipe,
-			InstantiationContext ctx) {
-		ContextualInjector injector = new ContextualInjectorImpl(this, ctx);
-
-		return recipe.createInstance(injector);
 	}
 
 	@Override

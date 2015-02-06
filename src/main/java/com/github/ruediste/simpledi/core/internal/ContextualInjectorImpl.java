@@ -2,6 +2,7 @@ package com.github.ruediste.simpledi.core.internal;
 
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.Dependency;
+import com.github.ruediste.simpledi.core.Injector;
 import com.github.ruediste.simpledi.core.InstantiationContext;
 import com.google.common.reflect.TypeToken;
 
@@ -26,6 +27,11 @@ public class ContextualInjectorImpl implements ContextualInjector {
 	@Override
 	public void injectMembers(TypeToken<?> type, Object value) {
 		injector.injectMembers((TypeToken) type, value);
+	}
+
+	@Override
+	public Injector getInjector() {
+		return injector;
 	}
 
 }

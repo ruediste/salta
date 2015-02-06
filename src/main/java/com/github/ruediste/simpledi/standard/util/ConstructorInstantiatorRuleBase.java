@@ -35,6 +35,12 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		} else
 			throw new ProvisionException("Unknown type " + typeToken);
 
+		if (clazz.isInterface()) {
+			throw new ProvisionException("Cannot instantiate " + clazz);
+		}
+		if (Modifier.isAbstract(clazz.getModifiers())) {
+			throw new ProvisionException("Cannot instantiate abstract " + clazz);
+		}
 		ArrayList<Constructor<?>> highestPriorityConstructors = new ArrayList<>();
 		Integer highestPriority = null;
 		for (Constructor<?> c : clazz.getDeclaredConstructors()) {

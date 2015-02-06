@@ -32,6 +32,6 @@ public class JSR330TckTest {
 				requestStaticInjection(SpareTire.class);
 			}
 		}, new JSR330Module()).createInstance(Car.class);
-		return Tck.testsFor(car, true, true);
+		return Tck.testsFor(car, false, true);
 	}
 }
