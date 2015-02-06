@@ -1,5 +1,6 @@
 package com.github.ruediste.simpledi.standard.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -7,11 +8,12 @@ import java.util.ArrayList;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.standard.MembersInjectorRule;
 import com.github.ruediste.simpledi.standard.StandardInjectionPoint;
+import com.github.ruediste.simpledi.standard.recipe.FixedFieldRecipeMembersInjector;
 import com.github.ruediste.simpledi.standard.recipe.FixedMethodRecipeMembersInjector;
 import com.github.ruediste.simpledi.standard.recipe.StandardCreationRecipe;
 import com.google.common.reflect.TypeToken;
 
-public abstract class MethodMembersInjectorRuleBase implements
+public abstract class MembersInjectorRuleBase implements
 		MembersInjectorRule {
 
 	@Override
@@ -22,7 +24,24 @@ public abstract class MethodMembersInjectorRuleBase implements
 		// iterate over super types, always processing supertypes before
 		// subtypes
 		for (TypeToken<?> t : overrideIndex.getAncestors()) {
+			for (Field f : t.getRawType().getDeclaredFields()) {
+				if (isInjectableField(t, f)) {
+					f.setAccessible(true);
+
+					// create dependency
+					Dependency<?> dependency = new Dependency<>(t.resolveType(f
+							.getGenericType()), new StandardInjectionPoint(f,
+							f, null));
+
+					// add injector
+					recipe.membersInjectors
+							.add(new FixedFieldRecipeMembersInjector<Object>(f,
+									dependency));
+				}
+			}
+
 			for (Method method : t.getRawType().getDeclaredMethods()) {
+
 				if (isInjectableMethod(t, method, overrideIndex)) {
 					method.setAccessible(true);
 
@@ -47,6 +66,9 @@ public abstract class MethodMembersInjectorRuleBase implements
 			}
 		}
 	}
+
+	protected abstract boolean isInjectableField(TypeToken<?> declaringType,
+			Field f);
 
 	protected abstract boolean isInjectableMethod(TypeToken<?> declaringType,
 			Method method, MethodOverrideIndex overrideIndex);

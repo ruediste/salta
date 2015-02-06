@@ -23,15 +23,15 @@ public class StandardModuleTest {
 		injector = SimpleDi.createInjector(new JSR330Module());
 	}
 
-	private static class TestClassA {
+	public static class TestClassA {
 	}
 
-	static class TestClassB {
+	public static class TestClassB {
 		@Inject
 		TestClassA a;
 	}
 
-	static class TestClassGeneric<T> {
+	public static class TestClassGeneric<T> {
 		@Inject
 		T other;
 	}

@@ -1,10 +1,7 @@
 package com.github.ruediste.simpledi.standard;
 
-import java.util.function.Supplier;
-
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
 import com.github.ruediste.simpledi.AbstractModule;
-import com.github.ruediste.simpledi.core.Binding;
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.Dependency;
 import com.github.ruediste.simpledi.core.JITBinding;
@@ -12,7 +9,6 @@ import com.github.ruediste.simpledi.core.JITBindingKeyRule;
 import com.github.ruediste.simpledi.core.JITBindingRule;
 import com.github.ruediste.simpledi.core.JitBindingKey;
 import com.github.ruediste.simpledi.core.MemberInjectionStrategy;
-import com.github.ruediste.simpledi.core.Scope;
 import com.github.ruediste.simpledi.standard.recipe.RecipeMembersInjector;
 import com.github.ruediste.simpledi.standard.recipe.StandardCreationRecipe;
 import com.google.common.reflect.TypeToken;
@@ -50,13 +46,6 @@ public class StandardModule extends AbstractModule {
 			}
 		});
 
-		config.defaultScope = new Scope() {
-
-			@Override
-			public <T> T scope(Binding key, Supplier<T> unscoped) {
-				return unscoped.get();
-			}
-		};
 		config.config.memberInjectionStrategy = new MemberInjectionStrategy() {
 
 			@SuppressWarnings({ "rawtypes", "unchecked" })

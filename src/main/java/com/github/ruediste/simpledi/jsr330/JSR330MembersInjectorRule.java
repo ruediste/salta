@@ -1,5 +1,6 @@
 package com.github.ruediste.simpledi.jsr330;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -7,12 +8,12 @@ import javax.inject.Inject;
 
 import com.github.ruediste.simpledi.core.ProvisionException;
 import com.github.ruediste.simpledi.standard.recipe.StandardCreationRecipe;
-import com.github.ruediste.simpledi.standard.util.MethodMembersInjectorRuleBase;
+import com.github.ruediste.simpledi.standard.util.MembersInjectorRuleBase;
 import com.github.ruediste.simpledi.standard.util.MethodOverrideIndex;
 import com.google.common.reflect.TypeToken;
 
-public class JSR330MethodMembersInjectorRule extends
-		MethodMembersInjectorRuleBase {
+public class JSR330MembersInjectorRule extends
+		MembersInjectorRuleBase {
 
 	@Override
 	public void addMembersInjectors(TypeToken<?> typeToken,
@@ -23,6 +24,8 @@ public class JSR330MethodMembersInjectorRule extends
 	@Override
 	protected boolean isInjectableMethod(TypeToken<?> declaringType,
 			Method method, MethodOverrideIndex index) {
+		if (!method.isAnnotationPresent(Inject.class))
+			return false;
 		if (Modifier.isAbstract(method.getModifiers()))
 			return false;
 		if (method.getTypeParameters().length > 0) {
@@ -32,7 +35,15 @@ public class JSR330MethodMembersInjectorRule extends
 		}
 		if (index.isOverridden(method))
 			return false;
-		return method.isAnnotationPresent(Inject.class);
+		return true;
 	}
 
+	@Override
+	protected boolean isInjectableField(TypeToken<?> declaringType, Field f) {
+		boolean annotationPresent = f.isAnnotationPresent(Inject.class);
+		if (annotationPresent && Modifier.isFinal(f.getModifiers())) {
+			throw new ProvisionException("Final field annotated with @Inject");
+		}
+		return annotationPresent;
+	}
 }
