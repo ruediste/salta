@@ -4,8 +4,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -37,6 +39,7 @@ public class StandardInjectorConfiguration {
 	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
 	public final List<MembersInjectorRule> membersInjectorRules = new ArrayList<>();
 	public final List<ScopeRule> scopeRules = new ArrayList<>();
+	public final Set<Class<?>> requestedStaticInjections = new HashSet<>();
 
 	/**
 	 * Create an {@link RecipeInstantiator} using the {@link #instantiatorRules}

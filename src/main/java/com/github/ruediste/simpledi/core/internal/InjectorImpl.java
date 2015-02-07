@@ -2,6 +2,7 @@ package com.github.ruediste.simpledi.core.internal;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import com.github.ruediste.simpledi.core.ContextualInjector;
 import com.github.ruediste.simpledi.core.CreationRecipe;
@@ -37,6 +38,19 @@ public class InjectorImpl implements Injector {
 	Cache<JitBindingKey, JITBinding> jitBindings = CacheBuilder.newBuilder()
 			.build();
 
+	/**
+	 * Create and initialize this injector
+	 */
+	public InjectorImpl(InjectorConfiguration config) {
+		this.config = config;
+		for (Consumer<Injector> i : config.staticInitializers) {
+			i.accept(this);
+		}
+		for (Consumer<Injector> i : config.dynamicInitializers) {
+			i.accept(this);
+		}
+	}
+
 	@Override
 	public <T> T createInstance(Class<T> cls) {
 		return createInstance(new Dependency<T>(cls));
@@ -47,10 +61,6 @@ public class InjectorImpl implements Injector {
 	public <T> T createInstance(Dependency<T> key) {
 		InstantiationContext ctx = new InstantiationContext();
 		return (T) createInstance(key, ctx);
-	}
-
-	public InjectorImpl(InjectorConfiguration config) {
-		this.config = config;
 	}
 
 	public Object createInstance(Dependency<?> dependency,

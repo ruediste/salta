@@ -392,7 +392,7 @@ public class Binder {
 	 */
 	public void requestStaticInjection(Class<?>... types) {
 		for (Class<?> type : types) {
-			config.config.dynamicInitializers.add(x -> x.createInstance(type));
+			config.requestedStaticInjections.add(type);
 		}
 	}
 

@@ -12,8 +12,7 @@ import com.github.ruediste.simpledi.standard.util.MembersInjectorRuleBase;
 import com.github.ruediste.simpledi.standard.util.MethodOverrideIndex;
 import com.google.common.reflect.TypeToken;
 
-public class JSR330MembersInjectorRule extends
-		MembersInjectorRuleBase {
+public class JSR330MembersInjectorRule extends MembersInjectorRuleBase {
 
 	@Override
 	public void addMembersInjectors(TypeToken<?> typeToken,
@@ -26,7 +25,8 @@ public class JSR330MembersInjectorRule extends
 			Method method, MethodOverrideIndex index) {
 		if (!method.isAnnotationPresent(Inject.class))
 			return false;
-		if (Modifier.isAbstract(method.getModifiers()))
+		if (Modifier.isAbstract(method.getModifiers())
+				|| Modifier.isStatic(method.getModifiers()))
 			return false;
 		if (method.getTypeParameters().length > 0) {
 			throw new ProvisionException(
@@ -44,6 +44,8 @@ public class JSR330MembersInjectorRule extends
 		if (annotationPresent && Modifier.isFinal(f.getModifiers())) {
 			throw new ProvisionException("Final field annotated with @Inject");
 		}
+		if (Modifier.isStatic(f.getModifiers()))
+			return false;
 		return annotationPresent;
 	}
 }
