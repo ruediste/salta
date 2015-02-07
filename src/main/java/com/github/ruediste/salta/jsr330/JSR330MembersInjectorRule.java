@@ -1,0 +1,51 @@
+package com.github.ruediste.salta.jsr330;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import javax.inject.Inject;
+
+import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.standard.recipe.StandardCreationRecipe;
+import com.github.ruediste.salta.standard.util.MembersInjectorRuleBase;
+import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
+import com.google.common.reflect.TypeToken;
+
+public class JSR330MembersInjectorRule extends MembersInjectorRuleBase {
+
+	@Override
+	public void addMembersInjectors(TypeToken<?> typeToken,
+			StandardCreationRecipe recipe) {
+		super.addMembersInjectors(typeToken, recipe);
+	}
+
+	@Override
+	protected boolean isInjectableMethod(TypeToken<?> declaringType,
+			Method method, MethodOverrideIndex index) {
+		if (!method.isAnnotationPresent(Inject.class))
+			return false;
+		if (Modifier.isAbstract(method.getModifiers())
+				|| Modifier.isStatic(method.getModifiers()))
+			return false;
+		if (method.getTypeParameters().length > 0) {
+			throw new ProvisionException(
+					"Method is annotated with @Inject but declares type parameters. Method:\n"
+							+ method);
+		}
+		if (index.isOverridden(method))
+			return false;
+		return true;
+	}
+
+	@Override
+	protected boolean isInjectableField(TypeToken<?> declaringType, Field f) {
+		boolean annotationPresent = f.isAnnotationPresent(Inject.class);
+		if (annotationPresent && Modifier.isFinal(f.getModifiers())) {
+			throw new ProvisionException("Final field annotated with @Inject");
+		}
+		if (Modifier.isStatic(f.getModifiers()))
+			return false;
+		return annotationPresent;
+	}
+}

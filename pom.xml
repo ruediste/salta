@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.github.ruediste</groupId>
-	<artifactId>simpledi</artifactId>
+	<artifactId>salta</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>Simple DI</name>
-	<url>http://maven.apache.org</url>
+	<name>Salta</name>
+	<url>https://github.com/ruediste/salta</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

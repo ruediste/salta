@@ -1,0 +1,71 @@
+package com.github.ruediste.salta.standard.util;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
+import com.github.ruediste.simpledi.standard.util.testPackageA.TestClassA;
+import com.github.ruediste.simpledi.standard.util.testPackageA.TestClassC;
+import com.github.ruediste.simpledi.standard.util.testPackageB.TestClassB;
+import com.github.ruediste.simpledi.standard.util.testPackageB.TestClassD;
+
+public class MethodOverrideIndexTest {
+
+	private abstract class MyTestA {
+		abstract void a();
+
+		abstract void b();
+
+		abstract void d(int i);
+	}
+
+	private abstract class MyTestB extends MyTestA {
+		@Override
+		abstract void b();
+
+		abstract void c();
+
+		abstract void d(long i);
+	}
+
+	@Test
+	public void testMy() throws NoSuchMethodException, SecurityException {
+		MethodOverrideIndex idx = new MethodOverrideIndex(MyTestB.class);
+		assertFalse(idx.isOverridden(MyTestA.class.getDeclaredMethod("a")));
+		assertTrue(idx.isOverridden(MyTestA.class.getDeclaredMethod("b")));
+		assertFalse(idx.isOverridden(MyTestA.class.getDeclaredMethod("d",
+				int.class)));
+
+		assertFalse(idx.isOverridden(MyTestB.class.getDeclaredMethod("b")));
+		assertFalse(idx.isOverridden(MyTestB.class.getDeclaredMethod("c")));
+		assertFalse(idx.isOverridden(MyTestB.class.getDeclaredMethod("d",
+				long.class)));
+	}
+
+	@Test
+	public void testPackages() throws NoSuchMethodException, SecurityException {
+		MethodOverrideIndex idx = new MethodOverrideIndex(TestClassD.class);
+
+		assertFalse(idx.isOverridden(TestClassA.class.getDeclaredMethod("a")));
+		assertFalse(idx.isOverridden(TestClassA.class.getDeclaredMethod("ab")));
+		assertTrue(idx.isOverridden(TestClassA.class.getDeclaredMethod("ac")));
+		assertFalse(idx.isOverridden(TestClassA.class.getDeclaredMethod("ad")));
+
+		assertFalse(idx.isOverridden(TestClassB.class.getDeclaredMethod("ab")));
+		assertFalse(idx.isOverridden(TestClassB.class.getDeclaredMethod("b")));
+		assertFalse(idx.isOverridden(TestClassB.class.getDeclaredMethod("bc")));
+		assertTrue(idx.isOverridden(TestClassB.class.getDeclaredMethod("bd")));
+
+		assertFalse(idx.isOverridden(TestClassC.class.getDeclaredMethod("ac")));
+		assertFalse(idx.isOverridden(TestClassC.class.getDeclaredMethod("bc")));
+		assertFalse(idx.isOverridden(TestClassC.class.getDeclaredMethod("c")));
+		assertFalse(idx.isOverridden(TestClassC.class.getDeclaredMethod("cd")));
+
+		assertFalse(idx.isOverridden(TestClassD.class.getDeclaredMethod("ad")));
+		assertFalse(idx.isOverridden(TestClassD.class.getDeclaredMethod("bd")));
+		assertFalse(idx.isOverridden(TestClassD.class.getDeclaredMethod("cd")));
+		assertFalse(idx.isOverridden(TestClassD.class.getDeclaredMethod("d")));
+	}
+}
