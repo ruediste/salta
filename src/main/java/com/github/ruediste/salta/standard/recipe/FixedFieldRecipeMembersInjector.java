@@ -3,16 +3,16 @@ package com.github.ruediste.salta.standard.recipe;
 import java.lang.reflect.Field;
 
 import com.github.ruediste.salta.core.ContextualInjector;
-import com.github.ruediste.salta.core.Dependency;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.ProvisionException;
 
 public class FixedFieldRecipeMembersInjector<T> implements
 		RecipeMembersInjector<T> {
 
 	private Field field;
-	private Dependency<?> dependency;
+	private CoreDependencyKey<?> dependency;
 
-	public FixedFieldRecipeMembersInjector(Field field, Dependency<?> dependency) {
+	public FixedFieldRecipeMembersInjector(Field field, CoreDependencyKey<?> dependency) {
 		this.field = field;
 		field.setAccessible(true);
 		this.dependency = dependency;

@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.standard;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

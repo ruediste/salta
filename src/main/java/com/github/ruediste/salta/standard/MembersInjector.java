@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.standard;
 
 /**
  * Injects dependencies into the fields and methods on instances of type

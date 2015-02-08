@@ -9,11 +9,11 @@ import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.SimpleDi;
-import com.github.ruediste.salta.core.Injector;
+import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.standard.Injector;
 
-public class JSR330MembersInjectorRuleTest {
+public class JSR330MembersInjectorFactoryTest {
 
 	public static class TestClassA {
 		private TestClassB b;
@@ -44,18 +44,18 @@ public class JSR330MembersInjectorRuleTest {
 
 	@Before
 	public void before() {
-		injector = SimpleDi.createInjector(new JSR330Module());
+		injector = Salta.createInjector(new JSR330Module());
 	}
 
 	@Test
 	public void testInjectInjected() {
-		TestClassA a = injector.createInstance(TestClassA.class);
+		TestClassA a = injector.getInstance(TestClassA.class);
 		assertNotNull(a.b);
 	}
 
 	@Test
 	public void testNoInjectAnnotation() {
-		TestClassA a = injector.createInstance(TestClassA.class);
+		TestClassA a = injector.getInstance(TestClassA.class);
 		assertNull(a.b1);
 		assertNull(a.c);
 	}

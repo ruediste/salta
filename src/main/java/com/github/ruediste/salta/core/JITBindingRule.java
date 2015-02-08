@@ -1,11 +1,13 @@
 package com.github.ruediste.salta.core;
 
+import com.github.ruediste.salta.standard.Injector;
+
 
 /**
- * Rule used by the {@link Injector} if no {@link NoBindingInstanceCreationRule} matches
+ * Rule used by the {@link Injector} if no {@link DependencyFactoryRule} matches
  * and no binding is found to create a new binding.
  */
 public interface JITBindingRule {
 
-	JITBinding apply(JitBindingKey key);
+	JITBinding apply(JITBindingKey key);
 }

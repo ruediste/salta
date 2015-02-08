@@ -28,13 +28,13 @@ import javax.inject.Provider;
 
 import net.sf.cglib.proxy.Callback;
 
-import com.github.ruediste.salta.core.Dependency;
-import com.github.ruediste.salta.core.MembersInjector;
-import com.github.ruediste.salta.core.Message;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.Scope;
-import com.github.ruediste.salta.core.Stage;
 import com.github.ruediste.salta.matchers.Matcher;
+import com.github.ruediste.salta.standard.MembersInjector;
+import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Module;
+import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
 import com.github.ruediste.salta.standard.binder.Binder;
@@ -166,10 +166,10 @@ public abstract class AbstractModule implements Module {
 	}
 
 	/**
-	 * @see Binder#getProvider(Dependency)
+	 * @see Binder#getProvider(CoreDependencyKey)
 	 * @since 2.0
 	 */
-	protected <T> Provider<T> getProvider(Dependency<T> key) {
+	protected <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
 		return binder().getProvider(key);
 	}
 

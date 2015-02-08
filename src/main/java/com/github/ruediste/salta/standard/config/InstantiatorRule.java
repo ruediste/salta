@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.standard;
+package com.github.ruediste.salta.standard.config;
 
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;

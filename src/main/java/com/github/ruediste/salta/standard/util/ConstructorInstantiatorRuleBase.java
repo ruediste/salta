@@ -9,10 +9,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import com.github.ruediste.salta.core.Dependency;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.ProvisionException;
-import com.github.ruediste.salta.standard.InstantiatorRule;
-import com.github.ruediste.salta.standard.StandardInjectionPoint;
+import com.github.ruediste.salta.standard.InjectionPoint;
+import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
@@ -83,16 +83,15 @@ public abstract class ConstructorInstantiatorRuleBase implements
 
 		Constructor<?> constructor = highestPriorityConstructors.get(0);
 
-		ArrayList<Dependency<?>> args = new ArrayList<>();
+		ArrayList<CoreDependencyKey<?>> args = new ArrayList<>();
 
 		Parameter[] parameters = constructor.getParameters();
 		for (int i = 0; i < parameters.length; i++) {
 			Parameter parameter = parameters[i];
 			@SuppressWarnings({ "unchecked", "rawtypes" })
-			Dependency<Object> dependency = new Dependency<Object>(
-					(TypeToken) typeToken.resolveType(parameter
-							.getParameterizedType()),
-					new StandardInjectionPoint(constructor, parameter, i));
+			CoreDependencyKey<Object> dependency = new InjectionPoint(
+					typeToken.resolveType(parameter.getParameterizedType()),
+					constructor, parameter, i);
 			args.add(dependency);
 		}
 

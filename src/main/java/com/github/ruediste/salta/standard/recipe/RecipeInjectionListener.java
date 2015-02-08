@@ -1,7 +1,7 @@
 package com.github.ruediste.salta.standard.recipe;
 
 import com.github.ruediste.salta.core.ContextualInjector;
-import com.github.ruediste.salta.core.MembersInjector;
+import com.github.ruediste.salta.standard.MembersInjector;
 
 /**
  * Listens for injections into instances of type {@code T}. Useful for

@@ -10,10 +10,10 @@ import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.SimpleDi;
-import com.github.ruediste.salta.core.Injector;
+import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.standard.Injector;
 
 public class JSR330FieldMembersInjectorRuleTest {
 
@@ -42,25 +42,25 @@ public class JSR330FieldMembersInjectorRuleTest {
 
 	@Before
 	public void before() {
-		injector = SimpleDi.createInjector(new JSR330Module());
+		injector = Salta.createInjector(new JSR330Module());
 	}
 
 	@Test
 	public void testInjectInjected() {
-		TestClassA a = injector.createInstance(TestClassA.class);
+		TestClassA a = injector.getInstance(TestClassA.class);
 		assertNotNull(a.b);
 	}
 
 	@Test
 	public void testNoInjectAnnotation() {
-		TestClassA a = injector.createInstance(TestClassA.class);
+		TestClassA a = injector.getInstance(TestClassA.class);
 		assertNull(a.b1);
 		assertNull(a.c);
 	}
 
 	@Test(expected = ProvisionException.class)
 	public void testFinalNotInjected() {
-		injector.createInstance(TestClassC.class);
+		injector.getInstance(TestClassC.class);
 		fail();
 	}
 }

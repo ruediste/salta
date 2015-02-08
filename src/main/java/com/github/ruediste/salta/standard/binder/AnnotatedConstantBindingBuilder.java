@@ -2,7 +2,7 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 
-import com.github.ruediste.salta.standard.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 
 /**
  * See the EDSL examples at {@link Binder}.

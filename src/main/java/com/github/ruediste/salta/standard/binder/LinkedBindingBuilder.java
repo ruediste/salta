@@ -1,17 +1,19 @@
 package com.github.ruediste.salta.standard.binder;
 
 import java.lang.reflect.Constructor;
+import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.ContextualInjector;
-import com.github.ruediste.salta.core.Dependency;
-import com.github.ruediste.salta.core.InjectorConfiguration.MemberInjectionToken;
-import com.github.ruediste.salta.standard.FillDefaultsRecipeCreationStep;
-import com.github.ruediste.salta.standard.StandardInjectorConfiguration;
+import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.standard.DefaultCreationRecipeFactory;
+import com.github.ruediste.salta.standard.DependencyKey;
+import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
-import com.github.ruediste.salta.standard.recipe.RecipeCreationStep;
-import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
+import com.github.ruediste.salta.standard.config.MemberInjectionToken;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.StandardCreationRecipe;
 import com.google.common.reflect.TypeToken;
 
@@ -22,10 +24,11 @@ import com.google.common.reflect.TypeToken;
  */
 public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 
-	public LinkedBindingBuilder(StandardStaticBinding binding,
-			Dependency<T> eagerInstantiationKey,
+	public LinkedBindingBuilder(Injector injector,
+			StandardStaticBinding binding,
+			DependencyKey<T> eagerInstantiationKey,
 			StandardInjectorConfiguration config) {
-		super(binding, eagerInstantiationKey, config);
+		super(injector, binding, eagerInstantiationKey, config);
 	}
 
 	/**
@@ -39,43 +42,28 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public ScopedBindingBuilder<T> to(TypeToken<? extends T> implementation) {
+		binding.recipeFactory = new DefaultCreationRecipeFactory(config,
+				implementation);
 
-		binding.recipeCreationSteps.clear();
-		binding.recipeCreationSteps.add(new RecipeCreationStep() {
-
-			@Override
-			public void accept(StandardCreationRecipe recipe) {
-				if (recipe.instantiator != null)
-					return;
-				recipe.instantiator = config
-						.createRecipeInstantiator(implementation);
-			}
-		});
-		binding.recipeCreationSteps.add(new FillDefaultsRecipeCreationStep(
-				config, implementation));
-
-		return new ScopedBindingBuilder<>(binding,
+		return new ScopedBindingBuilder<>(injector, binding,
 				eagerInstantiationDependency, config);
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 *
-	 * @see com.github.ruediste.simpledi.core.inject.Injector#injectMembers
+	 * @see com.github.ruediste.salta.standard.core.inject.Injector#injectMembers
 	 */
 	public void toInstance(T instance) {
-		MemberInjectionToken<T> token = config.config
-				.getMemberInjectionToken(instance);
-		binding.recipeCreationSteps.clear();
-		binding.recipeCreationSteps.add(new RecipeCreationStep() {
+		MemberInjectionToken<T> token = MemberInjectionToken
+				.getMemberInjectionToken(injector, instance);
+		binding.recipeFactory = () -> new CreationRecipe() {
 
 			@Override
-			public void accept(StandardCreationRecipe recipe) {
-				if (recipe.instantiator != null)
-					return;
-				recipe.instantiator = injector -> token.getValue(injector);
+			public Object createInstance(ContextualInjector injector) {
+				return token.getValue(injector);
 			}
-		});
+		};
 
 	}
 
@@ -84,20 +72,17 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 *
 	 */
 	public ScopedBindingBuilder<T> toProvider(Provider<? extends T> provider) {
-		MemberInjectionToken<Provider<? extends T>> token = config.config
-				.getMemberInjectionToken(provider);
-		binding.recipeCreationSteps.clear();
-		binding.recipeCreationSteps.add(new RecipeCreationStep() {
+		MemberInjectionToken<Provider<? extends T>> token = MemberInjectionToken
+				.getMemberInjectionToken(injector, provider);
+		binding.recipeFactory = () -> new CreationRecipe() {
 
 			@Override
-			public void accept(StandardCreationRecipe recipe) {
-				if (recipe.instantiator != null)
-					return;
-				recipe.instantiator = x -> token.getValue(x).get();
+			public Object createInstance(ContextualInjector injector) {
+				return token.getValue(injector).get();
 			}
-		});
+		};
 
-		return new ScopedBindingBuilder<>(binding,
+		return new ScopedBindingBuilder<>(injector, binding,
 				eagerInstantiationDependency, config);
 	}
 
@@ -106,7 +91,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 */
 	public ScopedBindingBuilder<T> toProvider(
 			Class<? extends javax.inject.Provider<? extends T>> providerType) {
-		return toProvider(Dependency.of(providerType));
+		return toProvider(DependencyKey.of(providerType));
 	}
 
 	/**
@@ -114,38 +99,29 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 */
 	public ScopedBindingBuilder<T> toProvider(
 			TypeToken<? extends javax.inject.Provider<? extends T>> providerType) {
-		return toProvider(Dependency.of(providerType));
+		return toProvider(DependencyKey.of(providerType));
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public ScopedBindingBuilder<T> toProvider(
-			Dependency<? extends javax.inject.Provider<? extends T>> providerKey) {
+			CoreDependencyKey<? extends javax.inject.Provider<? extends T>> providerKey) {
 
-		binding.recipeCreationSteps.clear();
-		binding.recipeCreationSteps.add(new RecipeCreationStep() {
+		binding.recipeFactory = () -> new CreationRecipe() {
+			Provider<? extends T> provider;
 
 			@Override
-			public void accept(StandardCreationRecipe recipe) {
-				if (recipe.instantiator != null)
-					return;
-				recipe.instantiator = new RecipeInstantiator<Object>() {
-					Provider<? extends T> provider;
-
-					@Override
-					public Object instantiate(ContextualInjector injector) {
-						synchronized (this) {
-							if (provider == null)
-								provider = injector.createInstance(providerKey);
-						}
-						return provider.get();
-					}
-				};
+			public Object createInstance(ContextualInjector injector) {
+				synchronized (this) {
+					if (provider == null)
+						provider = injector.createInstance(providerKey);
+				}
+				return provider.get();
 			}
-		});
+		};
 
-		return new ScopedBindingBuilder<>(binding,
+		return new ScopedBindingBuilder<>(injector, binding,
 				eagerInstantiationDependency, config);
 
 	}
@@ -168,20 +144,18 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 */
 	public <S extends T> ScopedBindingBuilder<T> toConstructor(
 			Constructor<S> constructor, TypeToken<? extends S> type) {
-		binding.recipeCreationSteps.clear();
-		binding.recipeCreationSteps.add(new RecipeCreationStep() {
+		binding.recipeFactory = new Supplier<CreationRecipe>() {
 
 			@Override
-			public void accept(StandardCreationRecipe recipe) {
-				if (recipe.instantiator != null)
-					return;
-				recipe.instantiator = x -> config.createInstantiator(
-						constructor, type);
+			public CreationRecipe get() {
+				StandardCreationRecipe recipe = new DefaultCreationRecipeFactory(
+						config, type).get();
+				recipe.instantiator = x -> config.fixedConstructorInstantiatorFactory
+						.apply(constructor, type);
+				return recipe;
 			}
-		});
-		binding.recipeCreationSteps.add(new FillDefaultsRecipeCreationStep(
-				config, type));
-		return new ScopedBindingBuilder<>(binding,
+		};
+		return new ScopedBindingBuilder<>(injector, binding,
 				eagerInstantiationDependency, config);
 
 	}

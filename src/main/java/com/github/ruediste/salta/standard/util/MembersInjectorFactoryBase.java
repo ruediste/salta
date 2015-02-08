@@ -4,21 +4,23 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.List;
 
-import com.github.ruediste.salta.core.Dependency;
-import com.github.ruediste.salta.standard.MembersInjectorRule;
-import com.github.ruediste.salta.standard.StandardInjectionPoint;
+import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.recipe.FixedFieldRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeMembersInjector;
-import com.github.ruediste.salta.standard.recipe.StandardCreationRecipe;
+import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
+import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.google.common.reflect.TypeToken;
 
-public abstract class MembersInjectorRuleBase implements
-		MembersInjectorRule {
+public abstract class MembersInjectorFactoryBase implements
+		RecipeMembersInjectorFactory {
 
 	@Override
-	public void addMembersInjectors(TypeToken<?> typeToken,
-			StandardCreationRecipe recipe) {
+	public <T> List<RecipeMembersInjector<T>> createInjectors(
+			TypeToken<T> typeToken) {
+		ArrayList<RecipeMembersInjector<T>> result = new ArrayList<>();
 
 		MethodOverrideIndex overrideIndex = new MethodOverrideIndex(typeToken);
 		// iterate over super types, always processing supertypes before
@@ -29,14 +31,12 @@ public abstract class MembersInjectorRuleBase implements
 					f.setAccessible(true);
 
 					// create dependency
-					Dependency<?> dependency = new Dependency<>(t.resolveType(f
-							.getGenericType()), new StandardInjectionPoint(f,
-							f, null));
+					CoreDependencyKey<?> dependency = new InjectionPoint<>(
+							t.resolveType(f.getGenericType()), f, f, null);
 
 					// add injector
-					recipe.membersInjectors
-							.add(new FixedFieldRecipeMembersInjector<Object>(f,
-									dependency));
+					result.add(new FixedFieldRecipeMembersInjector<T>(f,
+							dependency));
 				}
 			}
 
@@ -46,25 +46,25 @@ public abstract class MembersInjectorRuleBase implements
 					method.setAccessible(true);
 
 					// create dependencies
-					ArrayList<Dependency<?>> args = new ArrayList<>();
+					ArrayList<CoreDependencyKey<?>> args = new ArrayList<>();
 					Parameter[] parameters = method.getParameters();
 					for (int i = 0; i < parameters.length; i++) {
 						Parameter parameter = parameters[i];
 						@SuppressWarnings({ "unchecked", "rawtypes" })
-						Dependency<Object> dependency = new Dependency<Object>(
+						CoreDependencyKey<Object> dependency = new InjectionPoint<>(
 								(TypeToken) t.resolveType(parameter
-										.getParameterizedType()),
-								new StandardInjectionPoint(method, parameter, i));
+										.getParameterizedType()), method,
+								parameter, i);
 						args.add(dependency);
 					}
 
 					// add injector
-					recipe.membersInjectors
-							.add(new FixedMethodRecipeMembersInjector<Object>(
-									method, args));
+					result.add(new FixedMethodRecipeMembersInjector<T>(method,
+							args));
 				}
 			}
 		}
+		return result;
 	}
 
 	protected abstract boolean isInjectableField(TypeToken<?> declaringType,
@@ -72,4 +72,5 @@ public abstract class MembersInjectorRuleBase implements
 
 	protected abstract boolean isInjectableMethod(TypeToken<?> declaringType,
 			Method method, MethodOverrideIndex overrideIndex);
+
 }

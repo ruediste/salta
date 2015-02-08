@@ -21,6 +21,8 @@ package com.github.ruediste.salta.standard.binder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -36,18 +38,18 @@ import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.proxy.ProxyRefDispatcher;
 
 import com.github.ruediste.salta.AbstractModule;
-import com.github.ruediste.salta.core.Dependency;
-import com.github.ruediste.salta.core.Injector;
-import com.github.ruediste.salta.core.MembersInjector;
-import com.github.ruediste.salta.core.Message;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.Scope;
-import com.github.ruediste.salta.core.Stage;
 import com.github.ruediste.salta.matchers.Matcher;
-import com.github.ruediste.salta.standard.FillDefaultsRecipeCreationStep;
+import com.github.ruediste.salta.standard.DefaultCreationRecipeFactory;
+import com.github.ruediste.salta.standard.DependencyKey;
+import com.github.ruediste.salta.standard.Injector;
+import com.github.ruediste.salta.standard.MembersInjector;
+import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Module;
-import com.github.ruediste.salta.standard.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -238,47 +240,12 @@ import com.google.common.reflect.TypeToken;
  */
 public class Binder {
 
-	private final class MembersInjectorImpl<T> implements MembersInjector<T> {
-		public Injector injector;
-		private TypeToken<T> typeLiteral;
-
-		public MembersInjectorImpl(TypeToken<T> typeLiteral) {
-			this.typeLiteral = typeLiteral;
-		}
-
-		@Override
-		public void injectMembers(T instance) {
-
-			if (injector == null) {
-				throw new ProvisionException(
-						"Injector has to be created before using this MembersProvider");
-			}
-			injector.injectMembers(typeLiteral, instance);
-		}
-	}
-
-	private final class ProviderImpl<T> implements Provider<T> {
-		public Injector injector;
-		private Dependency<T> dependendcy;
-
-		public ProviderImpl(Dependency<T> dependendcy) {
-			this.dependendcy = dependendcy;
-		}
-
-		@Override
-		public T get() {
-			if (injector == null) {
-				throw new ProvisionException(
-						"Injector has to be created before using this provider");
-			}
-			return injector.createInstance(dependendcy);
-		}
-	}
-
 	private StandardInjectorConfiguration config;
+	private Injector injector;
 
-	public Binder(StandardInjectorConfiguration config) {
+	public Binder(StandardInjectorConfiguration config, Injector injector) {
 		this.config = config;
+		this.injector = injector;
 
 	}
 
@@ -331,15 +298,14 @@ public class Binder {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
-		StandardStaticBinding binding1 = new StandardStaticBinding();
-		binding1.dependencyMatcher = x -> x.type.equals(type);
-		binding1.recipeCreationSteps.add(new FillDefaultsRecipeCreationStep(
-				config, type));
-		StandardStaticBinding binding = binding1;
+		StandardStaticBinding binding = new StandardStaticBinding();
+		binding.dependencyMatcher = key -> Objects.equals(key.getType(), type);
+		binding.possibleTypes = Collections.singleton(type);
+		binding.recipeFactory = new DefaultCreationRecipeFactory(config, type);
 		config.config.staticBindings.add(binding);
 
-		return new AnnotatedBindingBuilder<>(binding, Dependency.of(type),
-				config);
+		return new AnnotatedBindingBuilder<>(injector, binding,
+				DependencyKey.of(type), config);
 	}
 
 	/**
@@ -367,8 +333,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public <T> void requestInjection(TypeToken<T> type, T instance) {
-		config.config.dynamicInitializers.add(x -> x.injectMembers(type,
-				instance));
+		config.dynamicInitializers.add(x -> x.injectMembers(type, instance));
 	}
 
 	/**
@@ -380,7 +345,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public void requestInjection(Object instance) {
-		config.config.dynamicInitializers.add(x -> x.injectMembers(instance));
+		config.dynamicInitializers.add(x -> x.injectMembers(instance));
 	}
 
 	/**
@@ -407,7 +372,7 @@ public class Binder {
 	 * Gets the current stage.
 	 */
 	public Stage currentStage() {
-		return config.config.stage;
+		return config.stage;
 	}
 
 	/**
@@ -418,8 +383,8 @@ public class Binder {
 	 * message.
 	 */
 	public void addError(String message, Object... arguments) {
-		config.config.errorMessages.add(new Message(String.format(message,
-				arguments)));
+		config.errorMessages
+				.add(new Message(String.format(message, arguments)));
 	}
 
 	/**
@@ -429,7 +394,7 @@ public class Binder {
 	 * exception and pass it into this.
 	 */
 	public void addError(Throwable t) {
-		config.config.errorMessages.add(new Message("", t));
+		config.errorMessages.add(new Message("", t));
 	}
 
 	/**
@@ -438,7 +403,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public void addError(Message message) {
-		config.config.errorMessages.add(message);
+		config.errorMessages.add(message);
 
 	}
 
@@ -450,10 +415,8 @@ public class Binder {
 	 *
 	 * @since 2.0
 	 */
-	public <T> Provider<T> getProvider(Dependency<T> key) {
-		ProviderImpl<T> provider = new ProviderImpl<T>(key);
-		config.config.staticInitializers.add(x -> provider.injector = x);
-		return provider;
+	public <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
+		return injector.getProvider(key);
 	}
 
 	/**
@@ -465,7 +428,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public <T> Provider<T> getProvider(Class<T> type) {
-		return getProvider(Dependency.of(type));
+		return getProvider(DependencyKey.of(type));
 	}
 
 	/**
@@ -480,11 +443,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-		MembersInjectorImpl<T> membersInjector = new MembersInjectorImpl<T>(
-				typeLiteral);
-		config.config.staticInitializers
-				.add(injector -> membersInjector.injector = injector);
-		return membersInjector;
+		return injector.getMembersInjector(typeLiteral);
 	}
 
 	/**
@@ -516,7 +475,7 @@ public class Binder {
 	 * @since 3.0
 	 */
 	public void disableCircularProxies() {
-		config.config.disableCircularProxies = true;
+		config.disableCircularProxies = true;
 	}
 
 	/**
@@ -532,7 +491,7 @@ public class Binder {
 	 * @since 4.0
 	 */
 	public void requireAtInjectOnConstructors() {
-		config.config.requireAtInjectOnConstructors = true;
+		config.requireAtInjectOnConstructors = true;
 	}
 
 }

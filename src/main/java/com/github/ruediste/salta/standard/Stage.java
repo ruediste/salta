@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.standard;
 
 /**
  * The stage we're running in.

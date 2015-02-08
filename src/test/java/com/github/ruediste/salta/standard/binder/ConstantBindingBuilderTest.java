@@ -9,12 +9,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.AbstractModule;
-import com.github.ruediste.salta.SimpleDi;
-import com.github.ruediste.salta.core.Dependency;
-import com.github.ruediste.salta.core.Injector;
+import com.github.ruediste.salta.Salta;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
-import com.github.ruediste.salta.standard.binder.Annotations;
+import com.github.ruediste.salta.standard.DependencyKey;
+import com.github.ruediste.salta.standard.Injector;
 
 public class ConstantBindingBuilderTest {
 
@@ -22,7 +22,7 @@ public class ConstantBindingBuilderTest {
 
 	@Before
 	public void before() {
-		injector = SimpleDi.createInjector(new AbstractModule() {
+		injector = Salta.createInjector(new AbstractModule() {
 
 			@Override
 			protected void configure() {
@@ -39,14 +39,14 @@ public class ConstantBindingBuilderTest {
 
 	@Test
 	public void testDirect() {
-		Dependency<String> key = new Dependency<String>(String.class);
-		Annotations.dependencyAnnotation.set(key, Names.named("foo"));
-		assertEquals("bar", injector.createInstance(key));
+		CoreDependencyKey<String> key = DependencyKey.of(String.class)
+				.addAnnotation(Names.named("foo"));
+		assertEquals("bar", injector.getInstance(key));
 	}
 
 	@Test
 	public void testFieldInject() {
-		TestClass a = injector.createInstance(TestClass.class);
+		TestClass a = injector.getInstance(TestClass.class);
 		assertEquals("bar", a.c);
 	}
 

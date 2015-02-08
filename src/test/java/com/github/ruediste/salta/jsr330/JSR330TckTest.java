@@ -12,14 +12,14 @@ import org.atinject.tck.auto.V8Engine;
 import org.atinject.tck.auto.accessories.SpareTire;
 
 import com.github.ruediste.salta.AbstractModule;
-import com.github.ruediste.salta.SimpleDi;
+import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
 
 public class JSR330TckTest {
 
 	public static junit.framework.Test suite() {
-		Car car = SimpleDi.createInjector(new AbstractModule() {
+		Car car = Salta.createInjector(new AbstractModule() {
 
 			@Override
 			protected void configure() {
@@ -33,7 +33,7 @@ public class JSR330TckTest {
 				requestStaticInjection(Tire.class);
 				requestStaticInjection(SpareTire.class);
 			}
-		}, new JSR330Module()).createInstance(Car.class);
+		}, new JSR330Module()).getInstance(Car.class);
 		return Tck.testsFor(car, true, true);
 	}
 }

@@ -7,10 +7,10 @@ import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.SimpleDi;
-import com.github.ruediste.salta.core.Injector;
+import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.standard.Injector;
 
 public class JSR330ConstructorInstantiatorRuleTest {
 
@@ -49,24 +49,24 @@ public class JSR330ConstructorInstantiatorRuleTest {
 
 	@Before
 	public void before() {
-		injector = SimpleDi.createInjector(new JSR330Module());
+		injector = Salta.createInjector(new JSR330Module());
 	}
 
 	@Test
 	public void noParameter() {
-		NoParameter instance = injector.createInstance(NoParameter.class);
+		NoParameter instance = injector.getInstance(NoParameter.class);
 		assertNotNull(instance);
 	}
 
 	@Test
 	public void oneParameter() {
-		OneParameter instance = injector.createInstance(OneParameter.class);
+		OneParameter instance = injector.getInstance(OneParameter.class);
 		assertNotNull(instance);
 		assertNotNull(instance.noParameter);
 	}
 
 	@Test(expected = ProvisionException.class)
 	public void ambigous() {
-		injector.createInstance(Ambigous.class);
+		injector.getInstance(Ambigous.class);
 	}
 }

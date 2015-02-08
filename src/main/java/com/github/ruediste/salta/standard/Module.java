@@ -19,7 +19,6 @@
 package com.github.ruediste.salta.standard;
 
 import com.github.ruediste.salta.AbstractModule;
-import com.github.ruediste.salta.core.Injector;
 import com.github.ruediste.salta.standard.binder.Binder;
 
 /**

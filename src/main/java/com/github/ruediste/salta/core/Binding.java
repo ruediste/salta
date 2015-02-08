@@ -1,11 +1,18 @@
 package com.github.ruediste.salta.core;
 
-public interface Binding {
+public abstract class Binding {
+
+	private volatile CreationRecipe recipe;
+
+	public final synchronized CreationRecipe getCreationRecipe() {
+		if (recipe == null)
+			recipe = createRecipe();
+		return recipe;
+	}
 
 	/**
-	 * Create a recipe for this binding. If any configuration information is
-	 * required to crate the binding, the binding must be created when this
-	 * method is called to make sure up-to-date information is used.
+	 * Create a recipe for this binding. This method will only be called once
+	 * per binding instance.
 	 */
-	CreationRecipe createRecipe();
+	protected abstract CreationRecipe createRecipe();
 }

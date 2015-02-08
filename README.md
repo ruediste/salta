@@ -1,4 +1,4 @@
-# SimpleDi
+# Salta
 
 A dependency injection framework inspired by [Guice](https://github.com/google/guice). The configuration EDSL is copied almost 1-1, but the inner workings are completely different.
 
@@ -7,7 +7,7 @@ A dependency injection framework inspired by [Guice](https://github.com/google/g
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## Design Overview
-SimpleDI was created as a response to shortcomings of both (JavaEE CDI)[http://docs.oracle.com/javaee/6/tutorial/doc/giwhl.html] and (Guice)[https://github.com/google/guice]. 
+Salta was created as a response to shortcomings of both (JavaEE CDI)[http://docs.oracle.com/javaee/6/tutorial/doc/giwhl.html] and (Guice)[https://github.com/google/guice]. 
 
 In CDI, the set of available beans (the counterpart of bindings in Guice) is determined when the container is initialized and cannot be changed afterwards. This implies that the available classes are scanned during startup, which results in slow startup speeds.
 

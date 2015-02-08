@@ -7,18 +7,11 @@ import java.lang.reflect.Modifier;
 import javax.inject.Inject;
 
 import com.github.ruediste.salta.core.ProvisionException;
-import com.github.ruediste.salta.standard.recipe.StandardCreationRecipe;
-import com.github.ruediste.salta.standard.util.MembersInjectorRuleBase;
+import com.github.ruediste.salta.standard.util.MembersInjectorFactoryBase;
 import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
 import com.google.common.reflect.TypeToken;
 
-public class JSR330MembersInjectorRule extends MembersInjectorRuleBase {
-
-	@Override
-	public void addMembersInjectors(TypeToken<?> typeToken,
-			StandardCreationRecipe recipe) {
-		super.addMembersInjectors(typeToken, recipe);
-	}
+public class JSR330MembersInjectorFactory extends MembersInjectorFactoryBase {
 
 	@Override
 	protected boolean isInjectableMethod(TypeToken<?> declaringType,

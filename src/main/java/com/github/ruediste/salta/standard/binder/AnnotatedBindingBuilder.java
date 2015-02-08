@@ -2,9 +2,10 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 
-import com.github.ruediste.salta.core.Dependency;
-import com.github.ruediste.salta.standard.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.DependencyKey;
+import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 
 /**
  * See the EDSL examples at {@link Binder}.
@@ -13,10 +14,11 @@ import com.github.ruediste.salta.standard.StandardStaticBinding;
  */
 public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 
-	public AnnotatedBindingBuilder(StandardStaticBinding binding,
-			Dependency<T> eagerInstantiationKey,
+	public AnnotatedBindingBuilder(Injector injector,
+			StandardStaticBinding binding,
+			DependencyKey<T> eagerInstantiationKey,
 			StandardInjectorConfiguration config) {
-		super(binding, eagerInstantiationKey, config);
+		super(injector, binding, eagerInstantiationKey, config);
 	}
 
 	/**
@@ -27,12 +29,10 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 		binding.dependencyMatcher = binding.dependencyMatcher.and(Annotations
 				.matcher(annotationType));
 
-		Dependency<T> newDependency = new Dependency<T>(
-				eagerInstantiationDependency);
-		Annotations.dependencyAnnotationClass
-				.set(newDependency, annotationType);
+		eagerInstantiationDependency.addAnnotation(annotationType);
 
-		return new LinkedBindingBuilder<>(binding, newDependency, config);
+		return new LinkedBindingBuilder<>(injector, binding,
+				eagerInstantiationDependency, config);
 	}
 
 	/**
@@ -42,11 +42,10 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 		binding.dependencyMatcher = binding.dependencyMatcher.and(Annotations
 				.matcher(annotation));
 
-		Dependency<T> newDependency = new Dependency<T>(
-				eagerInstantiationDependency);
-		Annotations.dependencyAnnotation.set(newDependency, annotation);
+		eagerInstantiationDependency.addAnnotation(annotation);
 
-		return new LinkedBindingBuilder<>(binding, newDependency, config);
+		return new LinkedBindingBuilder<>(injector, binding,
+				eagerInstantiationDependency, config);
 	}
 
 }

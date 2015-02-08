@@ -1,29 +1,44 @@
 package com.github.ruediste.salta.standard.binder;
 
-import com.github.ruediste.salta.core.Dependency;
+import java.util.function.Supplier;
+
+import com.github.ruediste.salta.core.ContextualInjector;
+import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
-import com.github.ruediste.salta.standard.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 
 public class ConstantBindingBuilder {
 
 	private StandardInjectorConfiguration config;
-	private Matcher<Dependency<?>> annotationMatcher;
+	private Matcher<CoreDependencyKey<?>> annotationMatcher;
 
 	public ConstantBindingBuilder(StandardInjectorConfiguration config,
-			Matcher<Dependency<?>> annotationMatcher) {
+			Matcher<CoreDependencyKey<?>> annotationMatcher) {
 		this.config = config;
 		this.annotationMatcher = annotationMatcher;
 	}
 
 	private void bind(Class<?> cls, Object value) {
 		StandardStaticBinding binding = new StandardStaticBinding();
-		binding.dependencyMatcher = annotationMatcher.and(d -> d.type
+		binding.dependencyMatcher = annotationMatcher.and(d -> d.getType()
 				.isAssignableFrom(cls));
-		binding.recipeCreationSteps.add(r -> {
-			r.instantiator = injector -> value;
-			r.scope = config.defaultScope;
-		});
+		binding.recipeFactory = new Supplier<CreationRecipe>() {
+
+			@Override
+			public CreationRecipe get() {
+				CreationRecipe recipe = new CreationRecipe() {
+
+					@Override
+					public Object createInstance(ContextualInjector injector) {
+						return value;
+					}
+				};
+				recipe.scope = config.defaultScope;
+				return recipe;
+			}
+		};
 		config.config.staticBindings.add(binding);
 	}
 

@@ -4,14 +4,14 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import com.github.ruediste.salta.SimpleDi;
-import com.github.ruediste.salta.core.Injector;
+import com.github.ruediste.salta.Salta;
+import com.github.ruediste.salta.standard.Injector;
 
-public class SimpleDiTest {
+public class SaltaTest {
 
 	@Test
 	public void emptyInjector() {
-		Injector injector = SimpleDi.createInjector();
+		Injector injector = Salta.createInjector();
 		assertNotNull(injector);
 	}
 }

@@ -8,8 +8,7 @@ import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.SimpleDi;
-import com.github.ruediste.salta.core.Injector;
+import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.google.common.reflect.TypeToken;
@@ -20,7 +19,7 @@ public class StandardModuleTest {
 
 	@Before
 	public void setup() {
-		injector = SimpleDi.createInjector(new JSR330Module());
+		injector = Salta.createInjector(new JSR330Module());
 	}
 
 	public static class TestClassA {

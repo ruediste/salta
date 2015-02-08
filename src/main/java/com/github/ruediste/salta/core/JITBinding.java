@@ -1,5 +1,5 @@
 package com.github.ruediste.salta.core;
 
-public interface JITBinding extends Binding {
+public abstract class JITBinding extends Binding {
 
 }

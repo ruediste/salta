@@ -2,7 +2,11 @@ package com.github.ruediste.salta.core;
 
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 
-public class JitBindingKey extends AttachedPropertyBearerBase {
+/**
+ * Key created from the {@link CoreDependencyKey} using the
+ * {@link JITBindingKeyRule}s
+ */
+public class JITBindingKey extends AttachedPropertyBearerBase {
 
 	@Override
 	public int hashCode() {
@@ -17,7 +21,7 @@ public class JitBindingKey extends AttachedPropertyBearerBase {
 			return false;
 		if (!getClass().equals(obj.getClass()))
 			return false;
-		JitBindingKey other = (JitBindingKey) obj;
+		JITBindingKey other = (JITBindingKey) obj;
 		return getAttachedPropertyMap().equals(other.getAttachedPropertyMap());
 	}
 }

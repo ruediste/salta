@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.MembersInjector;
+import com.github.ruediste.salta.standard.MembersInjector;
 
 /**
  * Describes how to fulfill a {@link InstantiationRequest}. Created using the

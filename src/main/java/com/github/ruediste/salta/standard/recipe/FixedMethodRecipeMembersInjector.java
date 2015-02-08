@@ -5,17 +5,17 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import com.github.ruediste.salta.core.ContextualInjector;
-import com.github.ruediste.salta.core.Dependency;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.ProvisionException;
 
 public class FixedMethodRecipeMembersInjector<T> implements
 		RecipeMembersInjector<T> {
 
 	private Method method;
-	private ArrayList<Dependency<?>> argumentDependencies;
+	private ArrayList<CoreDependencyKey<?>> argumentDependencies;
 
 	public FixedMethodRecipeMembersInjector(Method method,
-			ArrayList<Dependency<?>> argumentDependencies) {
+			ArrayList<CoreDependencyKey<?>> argumentDependencies) {
 		this.method = method;
 		this.argumentDependencies = argumentDependencies;
 		method.setAccessible(true);
@@ -27,7 +27,7 @@ public class FixedMethodRecipeMembersInjector<T> implements
 
 		// resolve dependencies
 		ArrayList<Object> args = new ArrayList<>();
-		for (Dependency<?> dependency : argumentDependencies) {
+		for (CoreDependencyKey<?> dependency : argumentDependencies) {
 			args.add(injector.createInstance(dependency));
 		}
 

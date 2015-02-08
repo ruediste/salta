@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.ruediste.salta.core.ContextualInjector;
-import com.github.ruediste.salta.core.Dependency;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
 
@@ -18,10 +18,10 @@ public class FixedConstructorRecipeInstantiator<T> implements
 		RecipeInstantiator<T> {
 
 	Constructor<?> constructor;
-	List<Dependency<?>> argumentDependencies;
+	List<CoreDependencyKey<?>> argumentDependencies;
 
 	public FixedConstructorRecipeInstantiator(Constructor<?> constructor,
-			List<Dependency<?>> argumentDependencies) {
+			List<CoreDependencyKey<?>> argumentDependencies) {
 		constructor.setAccessible(true);
 		this.constructor = constructor;
 		this.argumentDependencies = argumentDependencies;
@@ -32,7 +32,7 @@ public class FixedConstructorRecipeInstantiator<T> implements
 	public T instantiate(ContextualInjector injector) {
 		// resolve dependencies
 		ArrayList<Object> args = new ArrayList<>();
-		for (Dependency<?> dependency : argumentDependencies) {
+		for (CoreDependencyKey<?> dependency : argumentDependencies) {
 			args.add(injector.createInstance(dependency));
 		}
 

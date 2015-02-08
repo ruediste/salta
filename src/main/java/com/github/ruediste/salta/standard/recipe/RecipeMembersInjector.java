@@ -5,4 +5,5 @@ import com.github.ruediste.salta.core.ContextualInjector;
 public interface RecipeMembersInjector<T> {
 
 	void injectMembers(T instance, ContextualInjector injector);
+
 }
