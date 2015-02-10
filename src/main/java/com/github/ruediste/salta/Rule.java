@@ -1,7 +1,7 @@
 package com.github.ruediste.salta;
 
-import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.standard.Module;
 
 /**
@@ -18,5 +18,5 @@ public interface Rule {
 	 * @param key
 	 *            key beeing requested
 	 */
-	void apply(CreationRecipe recipe, CoreDependencyKey<?> key);
+	void apply(CreationRecipe<?> recipe, CoreDependencyKey<?> key);
 }

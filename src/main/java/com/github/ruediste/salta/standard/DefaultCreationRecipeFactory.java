@@ -7,7 +7,8 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.StandardCreationRecipe;
 import com.google.common.reflect.TypeToken;
 
-public class DefaultCreationRecipeFactory implements Supplier<CreationRecipe> {
+public class DefaultCreationRecipeFactory implements
+		Supplier<CreationRecipe<?>> {
 
 	private StandardInjectorConfiguration config;
 	private TypeToken<?> type;

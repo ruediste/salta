@@ -1,10 +1,13 @@
 package com.github.ruediste.salta.core;
 
+/**
+ * Base class for bindings
+ */
 public abstract class Binding {
 
-	private volatile CreationRecipe recipe;
+	private volatile CreationRecipe<?> recipe;
 
-	public final synchronized CreationRecipe getCreationRecipe() {
+	public final synchronized CreationRecipe<?> getCreationRecipe() {
 		if (recipe == null)
 			recipe = createRecipe();
 		return recipe;
@@ -14,5 +17,5 @@ public abstract class Binding {
 	 * Create a recipe for this binding. This method will only be called once
 	 * per binding instance.
 	 */
-	protected abstract CreationRecipe createRecipe();
+	protected abstract CreationRecipe<?> createRecipe();
 }

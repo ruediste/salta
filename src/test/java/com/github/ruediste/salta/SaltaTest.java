@@ -59,32 +59,25 @@ public class SaltaTest {
 								getfield(className, "target",
 										Type.getType(TestClass.class)
 												.getDescriptor());
-								// iload(5);
 								ldc(5);
 
-								if (true)
-									invokedynamic(
-											"foobar",
-											sig(void.class, TestClass.class,
-													int.class),
-											new Handle(
-													H_INVOKESTATIC,
-													Type.getType(
-															SaltaTest.class)
-															.getInternalName(),
-													"bootstrap",
-													sig(CallSite.class,
-															MethodHandles.Lookup.class,
-															String.class,
-															MethodType.class,
-															Class.class,
-															String.class)),
-											Type.getType(TestClass.class),
-											"field");
-								else {
-									pop();
-									pop();
-								}
+								invokedynamic(
+										"foobar",
+										sig(void.class, TestClass.class,
+												int.class),
+										new Handle(
+												H_INVOKESTATIC,
+												Type.getType(SaltaTest.class)
+														.getInternalName(),
+												"bootstrap",
+												sig(CallSite.class,
+														MethodHandles.Lookup.class,
+														String.class,
+														MethodType.class,
+														Class.class,
+														String.class)), Type
+												.getType(TestClass.class),
+										"field");
 								voidreturn();
 							}
 						});

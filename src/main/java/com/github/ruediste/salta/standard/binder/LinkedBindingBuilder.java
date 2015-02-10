@@ -162,10 +162,10 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 */
 	public <S extends T> ScopedBindingBuilder<T> toConstructor(
 			Constructor<S> constructor, TypeToken<? extends S> type) {
-		binding.recipeFactory = new Supplier<CreationRecipe>() {
+		binding.recipeFactory = new Supplier<CreationRecipe<?>>() {
 
 			@Override
-			public CreationRecipe get() {
+			public CreationRecipe<?> get() {
 				StandardCreationRecipe recipe = new DefaultCreationRecipeFactory(
 						config, type).get();
 				recipe.instantiator = x -> config.fixedConstructorInstantiatorFactory

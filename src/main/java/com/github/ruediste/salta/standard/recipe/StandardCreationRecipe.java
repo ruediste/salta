@@ -11,7 +11,7 @@ import com.github.ruediste.salta.standard.MembersInjector;
  * Describes how to fulfill a {@link InstantiationRequest}. Created using the
  * {@link Rule}s
  */
-public class StandardCreationRecipe extends CreationRecipe {
+public class StandardCreationRecipe extends CreationRecipe<Object> {
 
 	public RecipeInstantiator<?> instantiator;
 	/**
@@ -33,7 +33,7 @@ public class StandardCreationRecipe extends CreationRecipe {
 		for (RecipeMembersInjector<?> memberInjector : membersInjectors) {
 			callMemberInjector(memberInjector, instance, injector);
 		}
-	
+
 		// notify listeners
 		for (RecipeInjectionListener<?> listener : injectionListeners) {
 			instance = callInjectionLIstener(listener, instance, injector);

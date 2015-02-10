@@ -1,13 +1,16 @@
 package com.github.ruediste.salta.core;
 
 import java.util.HashMap;
-import java.util.function.Supplier;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.LazyLoader;
 
 import com.google.common.reflect.TypeToken;
 
+/**
+ * Contains the instances which are currently beeing constructed and is used for
+ * circular dependency detection.
+ */
 public class InstantiationContext {
 
 	private static class Entry {
@@ -95,8 +98,8 @@ public class InstantiationContext {
 		return entry.proxy;
 	}
 
-	private Object createInstance(Binding binding, CreationRecipe recipe) {
-		Object result = recipe.createInstance(injector);
+	private <T> T createInstance(Binding binding, CreationRecipe<T> recipe) {
+		T result = recipe.createInstance(injector);
 		setInstance(binding, result);
 		recipe.injectMembers(result, injector);
 		return result;
@@ -104,27 +107,18 @@ public class InstantiationContext {
 
 	@SuppressWarnings("unchecked")
 	public <T> T getInstance(Binding binding, TypeToken<?> type,
-			CreationRecipe recipe) {
+			CreationRecipe<T> recipe) {
 
-		return getInstance(binding, type, () -> {
-			return (T) recipe.scope.scope(binding,
-					() -> createInstance(binding, recipe));
-		});
-	}
-
-	/**
-	 * Create an
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T getInstance(Binding binding, TypeToken<?> type,
-			Supplier<T> supplier) {
 		if (isCircular(binding))
 			return (T) getInstanceOrProxy(binding);
 		addBinding(type.getRawType(), binding);
 		try {
-			return supplier.get();
+
+			return recipe.scope.scope(binding,
+					() -> createInstance(binding, recipe));
 		} finally {
 			removeBinding(binding);
 		}
 	}
+
 }

@@ -24,11 +24,11 @@ public class ConstantBindingBuilder {
 		StandardStaticBinding binding = new StandardStaticBinding();
 		binding.dependencyMatcher = annotationMatcher.and(d -> d.getType()
 				.isAssignableFrom(cls));
-		binding.recipeFactory = new Supplier<CreationRecipe>() {
+		binding.recipeFactory = new Supplier<CreationRecipe<?>>() {
 
 			@Override
-			public CreationRecipe get() {
-				CreationRecipe recipe = new CreationRecipe() {
+			public CreationRecipe<?> get() {
+				CreationRecipe<Object> recipe = new CreationRecipe<Object>() {
 
 					@Override
 					public Object createInstance(ContextualInjector injector) {

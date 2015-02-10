@@ -22,7 +22,7 @@ public class CoreInjector {
 	private final JITBinding nullJitBinding = new JITBinding() {
 
 		@Override
-		public CreationRecipe createRecipe() {
+		public CreationRecipe<?> createRecipe() {
 			throw new UnsupportedOperationException(
 					"Called createRecipe() of null binding");
 		}
@@ -119,10 +119,10 @@ public class CoreInjector {
 				}
 
 				if (binding != null) {
-					CreationRecipe recipe = binding.createRecipe();
+					CreationRecipe<?> recipe = binding.createRecipe();
 					StaticBinding tmp = binding;
 					return ctx -> {
-						return ctx.getInstance(tmp, key.getType(), recipe);
+						return (T) ctx.getInstance(tmp, key.getType(), recipe);
 
 					};
 				}
@@ -161,9 +161,9 @@ public class CoreInjector {
 
 				// use binding if available
 				if (jitBinding != nullJitBinding) {
-					CreationRecipe recipe = jitBinding.createRecipe();
-					return ctx -> ctx.getInstance(jitBinding, key.getType(),
-							recipe);
+					CreationRecipe<?> recipe = jitBinding.createRecipe();
+					return ctx -> (T) ctx.getInstance(jitBinding,
+							key.getType(), recipe);
 				}
 			}
 		} catch (ProvisionException e) {

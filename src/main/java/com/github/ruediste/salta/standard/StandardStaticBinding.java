@@ -15,7 +15,7 @@ import com.google.common.reflect.TypeToken;
 public class StandardStaticBinding extends StaticBinding {
 	public Matcher<CoreDependencyKey<?>> dependencyMatcher;
 	public Set<TypeToken<?>> possibleTypes;
-	public Supplier<CreationRecipe> recipeFactory;
+	public Supplier<CreationRecipe<?>> recipeFactory;
 
 	@Override
 	public Set<TypeToken<?>> getPossibleTypes() {
@@ -28,7 +28,7 @@ public class StandardStaticBinding extends StaticBinding {
 	}
 
 	@Override
-	protected CreationRecipe createRecipe() {
+	protected CreationRecipe<?> createRecipe() {
 		return recipeFactory.get();
 	}
 

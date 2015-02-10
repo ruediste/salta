@@ -10,7 +10,7 @@ import com.github.ruediste.salta.core.JITBinding;
  */
 public class StandardJitBinding extends JITBinding {
 
-	public Supplier<CreationRecipe> recipeFactory;
+	public Supplier<CreationRecipe<?>> recipeFactory;
 
 	@Override
 	protected CreationRecipe createRecipe() {
