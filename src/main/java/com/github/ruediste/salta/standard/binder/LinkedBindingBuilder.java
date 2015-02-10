@@ -63,6 +63,12 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			public Object createInstance(ContextualInjector injector) {
 				return token.getValue(injector);
 			}
+
+			@Override
+			public void injectMembers(Object instance,
+					ContextualInjector injector) {
+				// NOP
+			}
 		};
 
 	}
@@ -79,6 +85,12 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			@Override
 			public Object createInstance(ContextualInjector injector) {
 				return token.getValue(injector).get();
+			}
+
+			@Override
+			public void injectMembers(Object instance,
+					ContextualInjector injector) {
+				// NOP
 			}
 		};
 
@@ -115,9 +127,15 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			public Object createInstance(ContextualInjector injector) {
 				synchronized (this) {
 					if (provider == null)
-						provider = injector.createInstance(providerKey);
+						provider = injector.getInstance(providerKey);
 				}
 				return provider.get();
+			}
+
+			@Override
+			public void injectMembers(Object instance,
+					ContextualInjector injector) {
+				// NOP
 			}
 		};
 

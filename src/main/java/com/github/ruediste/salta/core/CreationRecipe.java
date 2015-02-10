@@ -17,4 +17,7 @@ public abstract class CreationRecipe extends AttachedPropertyBearerBase {
 
 	public abstract Object createInstance(ContextualInjector injector);
 
+	public abstract void injectMembers(Object instance,
+			ContextualInjector injector);
+
 }

@@ -24,18 +24,20 @@ public class StandardCreationRecipe extends CreationRecipe {
 	@Override
 	public Object createInstance(ContextualInjector injector) {
 
-		Object instance = instantiator.instantiate(injector);
+		return instantiator.instantiate(injector);
+	}
 
+	@Override
+	public void injectMembers(Object instance, ContextualInjector injector) {
 		// inject members
 		for (RecipeMembersInjector<?> memberInjector : membersInjectors) {
 			callMemberInjector(memberInjector, instance, injector);
 		}
-
+	
 		// notify listeners
 		for (RecipeInjectionListener<?> listener : injectionListeners) {
 			instance = callInjectionLIstener(listener, instance, injector);
 		}
-		return instance;
 	}
 
 	@SuppressWarnings("unchecked")

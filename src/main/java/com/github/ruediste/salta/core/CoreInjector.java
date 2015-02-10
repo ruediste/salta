@@ -28,7 +28,7 @@ public class CoreInjector {
 		}
 	};
 
-	private Cache<CoreDependencyKey<?>, Function<ContextualInjector, ?>> keyBasedCache = CacheBuilder
+	private Cache<CoreDependencyKey<?>, Function<InstantiationContext, ?>> keyBasedCache = CacheBuilder
 			.newBuilder().build();
 
 	private Cache<JITBindingKey, JITBinding> jitBindings = CacheBuilder
@@ -62,19 +62,18 @@ public class CoreInjector {
 	}
 
 	public <T> T getInstance(CoreDependencyKey<T> key) {
-		return getInstance(key, createContextualInjector());
+		return getInstance(key, new InstantiationContext(this));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getInstance(CoreDependencyKey<T> key,
-			ContextualInjector injector) {
-		Function<ContextualInjector, ?> factory;
+	public <T> T getInstance(CoreDependencyKey<T> key, InstantiationContext ctx) {
+		Function<InstantiationContext, ?> factory;
 		try {
 			factory = keyBasedCache.get(key,
-					new Callable<Function<ContextualInjector, ?>>() {
+					new Callable<Function<InstantiationContext, ?>>() {
 
 						@Override
-						public Function<ContextualInjector, ?> call()
+						public Function<InstantiationContext, ?> call()
 								throws Exception {
 							return getInstanceFactory(key);
 						}
@@ -85,19 +84,19 @@ public class CoreInjector {
 			throw new ProvisionException("Error looking up dependency " + key,
 					e.getCause());
 		}
-		return (T) factory.apply(injector);
+		return (T) factory.apply(ctx);
 
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> Function<ContextualInjector, T> getInstanceFactory(
+	public <T> Function<InstantiationContext, T> getInstanceFactory(
 			CoreDependencyKey<T> key) {
 		try {
 			// check rules
 			for (DependencyFactoryRule rule : config.creationRules) {
 				DependencyFactory<?> factory = rule.apply(key);
 				if (factory != null)
-					return i -> (T) factory.createInstance(i);
+					return ctx -> (T) factory.createInstance(ctx.injector);
 			}
 
 			// check static bindings
@@ -122,8 +121,10 @@ public class CoreInjector {
 				if (binding != null) {
 					CreationRecipe recipe = binding.createRecipe();
 					StaticBinding tmp = binding;
-					return injector -> (T) recipe.scope.scope(tmp,
-							() -> recipe.createInstance(injector));
+					return ctx -> {
+						return ctx.getInstance(tmp, key.getType(), recipe);
+
+					};
 				}
 			}
 
@@ -161,8 +162,8 @@ public class CoreInjector {
 				// use binding if available
 				if (jitBinding != nullJitBinding) {
 					CreationRecipe recipe = jitBinding.createRecipe();
-					return injector -> (T) recipe.scope.scope(jitBinding,
-							() -> recipe.createInstance(injector));
+					return ctx -> ctx.getInstance(jitBinding, key.getType(),
+							recipe);
 				}
 			}
 		} catch (ProvisionException e) {
@@ -177,7 +178,7 @@ public class CoreInjector {
 	}
 
 	public ContextualInjector createContextualInjector() {
-		return new ContextualInjectorImpl(this, new InstantiationContext());
+		return new InstantiationContext(this).injector;
 	}
 
 }

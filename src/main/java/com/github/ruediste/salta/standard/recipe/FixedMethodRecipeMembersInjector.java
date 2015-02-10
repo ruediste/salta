@@ -28,7 +28,7 @@ public class FixedMethodRecipeMembersInjector<T> implements
 		// resolve dependencies
 		ArrayList<Object> args = new ArrayList<>();
 		for (CoreDependencyKey<?> dependency : argumentDependencies) {
-			args.add(injector.createInstance(dependency));
+			args.add(injector.getInstance(dependency));
 		}
 
 		// call method

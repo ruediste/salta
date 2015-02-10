@@ -4,14 +4,20 @@ import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.DependencyFactory;
 import com.github.ruediste.salta.core.DependencyFactoryRule;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.InjectionPoint;
+import com.github.ruediste.salta.standard.Injector;
 import com.google.common.reflect.TypeToken;
 
 public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
+
+	private Injector injector;
+
+	public ProviderDependencyFactoryRule(Injector injector) {
+		this.injector = injector;
+	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
@@ -36,7 +42,6 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 				@Override
 				public Provider createInstance(
 						ContextualInjector contextualInjector) {
-					CoreInjector injector = contextualInjector.getInjector();
 					return new Provider() {
 
 						@Override

@@ -257,6 +257,15 @@ public class Binder {
 	}
 
 	/**
+	 * Return the injector of this Binder. The injector is not initialized
+	 * during configuration, so it can not be used to create or inject
+	 * instances. But it is possible to store a reference for later use.
+	 */
+	public Injector getInjector() {
+		return injector;
+	}
+
+	/**
 	 * Binds method interceptor[s] to methods matched by class and method
 	 * matchers. A method is eligible for interception if:
 	 *

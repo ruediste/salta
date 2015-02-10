@@ -10,6 +10,7 @@ import javax.inject.Provider;
 import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
+import com.github.ruediste.salta.core.InstantiationContext;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
@@ -19,7 +20,7 @@ public class StandardInjector implements Injector {
 
 	private final class ProviderImpl<T> implements Provider<T> {
 
-		private Function<ContextualInjector, T> factoryFunction;
+		private Function<InstantiationContext, T> factoryFunction;
 
 		public ProviderImpl(CoreDependencyKey<T> key) {
 			config.staticInitializers.add(i -> factoryFunction = injector
@@ -29,7 +30,7 @@ public class StandardInjector implements Injector {
 		@Override
 		public T get() {
 			checkInitialized();
-			return factoryFunction.apply(injector.createContextualInjector());
+			return factoryFunction.apply(new InstantiationContext(injector));
 		}
 	}
 

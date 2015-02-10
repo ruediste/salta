@@ -34,6 +34,12 @@ public class ConstantBindingBuilder {
 					public Object createInstance(ContextualInjector injector) {
 						return value;
 					}
+
+					@Override
+					public void injectMembers(Object instance,
+							ContextualInjector injector) {
+						// NOP
+					}
 				};
 				recipe.scope = config.defaultScope;
 				return recipe;

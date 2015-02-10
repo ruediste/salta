@@ -3,15 +3,17 @@ package com.github.ruediste.salta.core;
 public class ContextualInjectorImpl implements ContextualInjector {
 
 	private CoreInjector injector;
+	private InstantiationContext ctx;
 
 	public ContextualInjectorImpl(CoreInjector injector,
 			InstantiationContext ctx) {
 		this.injector = injector;
+		this.ctx = ctx;
 	}
 
 	@Override
-	public <T> T createInstance(CoreDependencyKey<T> key) {
-		return injector.getInstance(key, this);
+	public <T> T getInstance(CoreDependencyKey<T> key) {
+		return injector.getInstance(key, ctx);
 	}
 
 	@Override
@@ -19,4 +21,8 @@ public class ContextualInjectorImpl implements ContextualInjector {
 		return injector;
 	}
 
+	@Override
+	public InstantiationContext getInstantiationContext() {
+		return ctx;
+	}
 }

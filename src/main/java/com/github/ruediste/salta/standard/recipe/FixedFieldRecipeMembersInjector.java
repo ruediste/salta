@@ -22,7 +22,7 @@ public class FixedFieldRecipeMembersInjector<T> implements
 	@Override
 	public void injectMembers(T instance, ContextualInjector injector) {
 
-		Object value = injector.createInstance(dependency);
+		Object value = injector.getInstance(dependency);
 		try {
 			field.set(instance, value);
 		} catch (IllegalArgumentException | IllegalAccessException e) {

@@ -22,7 +22,7 @@ First, if a binding itself is requested again by a dependency while resolving th
 
 Second, bindings are used as keys when applying a scope. Based on the binding, the scope determines whether to return a previously created instance or a new one.
 
-In the following paragraphs, various properties of bindings will be derived from design goals concerning the robustness of application built with SimpleDI.
+We want the dependencies injected to be predictable. In the following paragraphs, various properties of bindings will be derived from this goal.
 
 Each binding B is used to satisfy a set of injection points IP(B). Due to the scope, an instance created for one injection point can be used for any other other injection point in IP(B). If the instance created by B would depend on the actual injection point, a different instance would be used depending on which injection point is triggered first. For example consider a singleton which is injected into two different classes A and B. If the instance created by the binding would depend on the injection point, it would make a difference whether A or B is created first. 
 
@@ -32,7 +32,7 @@ If multiple bindings match for a single injection point, we can not just arbitra
 
 If no binding is found for an injection point, it is attempted to create a just in time (JIT) binding. The JIT binding may never be used instead of any existing binding. Otherwise, an injection point bound to a certain binding would suddenly be bound to the JIT binding once the JIT binding is created.
 
-Depending on the input data or requests of an application, the order in which JIT bindings are requested and thus created varies highly. For the robustness of the application it is important that the bindings used for an injection point does not vary on this order.
+Depending on the input data or requests of an application, the order in which JIT bindings are requested and thus created varies highly. For the predictability of the dependency injection it is important that the bindings used for an injection point does not vary on this order.
 
 As long as no injection point can be served by more than one JIT binding, this is not an issue. However, as soon as the sets of injection points served by the JIT bindings overlaps, we are in trouble.  
 
