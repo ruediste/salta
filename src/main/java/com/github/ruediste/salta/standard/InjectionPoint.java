@@ -18,13 +18,18 @@ public class InjectionPoint<T> extends CoreDependencyKey<T> {
 	private final Member member;
 	private final AnnotatedElement annotated;
 	private final Integer parameterIndex;
+	private Class<T> rawType;
+	private final int hashCode;
 
+	@SuppressWarnings("unchecked")
 	public InjectionPoint(TypeToken<T> type, Member member,
 			AnnotatedElement annotated, Integer parameterIndex) {
 		this.type = type;
+		this.rawType = (Class<T>) type.getRawType();
 		this.member = member;
 		this.annotated = annotated;
 		this.parameterIndex = parameterIndex;
+		this.hashCode = Objects.hash(type, member, annotated, parameterIndex);
 	}
 
 	/**
@@ -67,8 +72,7 @@ public class InjectionPoint<T> extends CoreDependencyKey<T> {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(type, member, annotated, parameterIndex,
-				getAttachedPropertyMap());
+		return hashCode;
 	}
 
 	@Override
@@ -83,8 +87,11 @@ public class InjectionPoint<T> extends CoreDependencyKey<T> {
 		return Objects.equals(type, other.type)
 				&& Objects.equals(member, other.member)
 				&& Objects.equals(annotated, other.annotated)
-				&& Objects.equals(parameterIndex, other.parameterIndex)
-				&& Objects.equals(getAttachedPropertyMap(),
-						other.getAttachedPropertyMap());
+				&& Objects.equals(parameterIndex, other.parameterIndex);
+	}
+
+	@Override
+	public Class<T> getRawType() {
+		return rawType;
 	}
 }

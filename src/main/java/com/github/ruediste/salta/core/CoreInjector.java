@@ -122,7 +122,8 @@ public class CoreInjector {
 					CreationRecipe<?> recipe = binding.createRecipe();
 					StaticBinding tmp = binding;
 					return ctx -> {
-						return (T) ctx.getInstance(tmp, key.getType(), recipe);
+						return (T) ctx.getInstance(tmp, key.getRawType(),
+								recipe);
 
 					};
 				}
@@ -163,7 +164,7 @@ public class CoreInjector {
 				if (jitBinding != nullJitBinding) {
 					CreationRecipe<?> recipe = jitBinding.createRecipe();
 					return ctx -> (T) ctx.getInstance(jitBinding,
-							key.getType(), recipe);
+							key.getRawType(), recipe);
 				}
 			}
 		} catch (ProvisionException e) {

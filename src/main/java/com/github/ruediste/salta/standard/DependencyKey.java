@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -15,18 +16,28 @@ import com.google.common.reflect.TypeToken;
  */
 public class DependencyKey<T> extends CoreDependencyKey<T> {
 	private final TypeToken<T> type;
-	private final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+	private Class<T> rawType;
+	private final Map<Class<? extends Annotation>, Annotation> annotations;
+	private final int hashCode;
 
 	public static <T> DependencyKey<T> of(TypeToken<T> type) {
-		return new DependencyKey<>(type);
+		return new DependencyKey<>(type, null, new HashMap<>());
+	}
+
+	public static <T> DependencyKey<T> of(TypeToken<T> type, Class<T> rawType) {
+		return new DependencyKey<>(type, rawType, new HashMap<>());
 	}
 
 	public static <T> DependencyKey<T> of(Class<T> type) {
-		return new DependencyKey<>(TypeToken.of(type));
+		return new DependencyKey<>(TypeToken.of(type), type, new HashMap<>());
 	}
 
-	private DependencyKey(TypeToken<T> type) {
+	private DependencyKey(TypeToken<T> type, Class<T> rawType,
+			Map<Class<? extends Annotation>, Annotation> annotations) {
 		this.type = type;
+		this.rawType = rawType;
+		this.annotations = annotations;
+		this.hashCode = Objects.hash(type, annotations);
 	}
 
 	@Override
@@ -58,29 +69,25 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 	}
 
 	public Map<Class<? extends Annotation>, Annotation> getAnnotations() {
-		return annotations;
-	}
-
-	public DependencyKey<T> addAnnotation(Annotation a) {
-		annotations.put(a.annotationType(), a);
-		return this;
+		return Collections.unmodifiableMap(annotations);
 	}
 
 	public DependencyKey<T> addAnnotation(Class<? extends Annotation> cls) {
-		annotations.put(cls, AnnotationProxy.newProxy(cls)
+		return withAnnotations(AnnotationProxy.newProxy(cls)
 				.getProxedAnnotation());
-		return this;
 	}
 
-	public CoreDependencyKey<T> addAnnotations(Annotation... as) {
-		for (Annotation a : as)
-			addAnnotation(a);
-		return this;
+	public DependencyKey<T> withAnnotations(Annotation... additionalAnnotations) {
+		HashMap<Class<? extends Annotation>, Annotation> tmp = new HashMap<>(
+				annotations);
+		for (Annotation a : additionalAnnotations)
+			tmp.put(a.annotationType(), a);
+		return new DependencyKey<>(type, rawType, tmp);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(type, annotations, getAttachedPropertyMap());
+		return hashCode;
 	}
 
 	@Override
@@ -93,8 +100,17 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 			return false;
 		DependencyKey<?> other = (DependencyKey<?>) obj;
 		return Objects.equals(type, other.type)
-				&& Objects.equals(annotations, other.annotations)
-				&& Objects.equals(getAttachedPropertyMap(),
-						other.getAttachedPropertyMap());
+				&& Objects.equals(annotations, other.annotations);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Class<T> getRawType() {
+		// no synchronization required. In the worst case, multiple
+		// threads will compute the value and overwrite each other's result,
+		// which is No Problem
+		if (rawType == null)
+			rawType = (Class<T>) type.getRawType();
+		return rawType;
 	}
 }

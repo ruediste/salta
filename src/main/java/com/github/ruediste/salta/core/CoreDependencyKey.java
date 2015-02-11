@@ -4,17 +4,19 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 
-import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 import com.google.common.reflect.TypeToken;
 
 /**
  * Key to lookup a dependency.
  */
-public abstract class CoreDependencyKey<T> extends AttachedPropertyBearerBase {
+public abstract class CoreDependencyKey<T> {
+
 	/**
 	 * Get the required type the looked up dependency
 	 */
 	public abstract TypeToken<T> getType();
+
+	public abstract Class<T> getRawType();
 
 	/**
 	 * Get the {@link AnnotatedElement} representing the annotations affecting
@@ -23,4 +25,5 @@ public abstract class CoreDependencyKey<T> extends AttachedPropertyBearerBase {
 	 * injector, this can also be a synthetic implementation.
 	 */
 	public abstract AnnotatedElement getAnnotatedElement();
+
 }

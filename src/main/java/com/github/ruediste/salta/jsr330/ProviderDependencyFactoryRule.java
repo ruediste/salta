@@ -22,7 +22,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public <T> DependencyFactory<T> apply(CoreDependencyKey<T> dependency) {
-		if (Provider.class.equals(dependency.getType().getRawType())) {
+		if (Provider.class.equals(dependency.getRawType())) {
 			TypeToken<?> providedType = dependency.getType().resolveType(
 					Provider.class.getTypeParameters()[0]);
 
@@ -33,7 +33,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 						p.getAnnotatedElement(), p.getParameterIndex());
 
 			} else {
-				dep = DependencyKey.of(providedType).addAnnotations(
+				dep = DependencyKey.of(providedType).withAnnotations(
 						dependency.getAnnotatedElement().getAnnotations());
 			}
 

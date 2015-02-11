@@ -5,8 +5,6 @@ import java.util.HashMap;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.LazyLoader;
 
-import com.google.common.reflect.TypeToken;
-
 /**
  * Contains the instances which are currently beeing constructed and is used for
  * circular dependency detection.
@@ -106,12 +104,12 @@ public class InstantiationContext {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getInstance(Binding binding, TypeToken<?> type,
+	public <T> T getInstance(Binding binding, Class<?> type,
 			CreationRecipe<T> recipe) {
 
 		if (isCircular(binding))
 			return (T) getInstanceOrProxy(binding);
-		addBinding(type.getRawType(), binding);
+		addBinding(type, binding);
 		try {
 
 			return recipe.scope.scope(binding,
