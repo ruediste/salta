@@ -5,17 +5,12 @@ package com.github.ruediste.salta.core;
  */
 public abstract class Binding {
 
-	private volatile CreationRecipe<?> recipe;
-
-	public final synchronized CreationRecipe<?> getCreationRecipe() {
-		if (recipe == null)
-			recipe = createRecipe();
-		return recipe;
-	}
+	public abstract CreationRecipeFactory getRecipeFactory();
 
 	/**
-	 * Create a recipe for this binding. This method will only be called once
-	 * per binding instance.
+	 * Create a recipe for this binding. The result will typically be cached.
+	 * Any expensive operations to create the recipe should be done in this
+	 * method
 	 */
-	protected abstract CreationRecipe<?> createRecipe();
+	public abstract CreationRecipe<?> createRecipe();
 }

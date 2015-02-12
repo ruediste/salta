@@ -1,10 +1,9 @@
 package com.github.ruediste.salta.standard.binder;
 
-import java.util.function.Supplier;
-
 import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.CreationRecipeFactory;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
@@ -24,10 +23,10 @@ public class ConstantBindingBuilder {
 		StandardStaticBinding binding = new StandardStaticBinding();
 		binding.dependencyMatcher = annotationMatcher.and(d -> d.getType()
 				.isAssignableFrom(cls));
-		binding.recipeFactory = new Supplier<CreationRecipe<?>>() {
+		binding.recipeFactory = new CreationRecipeFactory() {
 
 			@Override
-			public CreationRecipe<?> get() {
+			public CreationRecipe<?> createRecipe() {
 				CreationRecipe<Object> recipe = new CreationRecipe<Object>() {
 
 					@Override

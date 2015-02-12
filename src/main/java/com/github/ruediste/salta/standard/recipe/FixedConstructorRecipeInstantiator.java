@@ -7,7 +7,9 @@ import java.util.List;
 
 import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.InstantiationContext;
 import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.TransitiveCreationRecipe;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
 
 /**
@@ -48,4 +50,33 @@ public class FixedConstructorRecipeInstantiator<T> implements
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public TransitiveRecipeInstantiator createTransitive(
+			InstantiationContext ctx) {
+		ArrayList<TransitiveCreationRecipe> argRecipes = new ArrayList<>();
+		for (CoreDependencyKey<?> dependency : argumentDependencies) {
+			argRecipes.add(ctx.getTransitiveRecipe(dependency));
+		}
+
+		return injector -> {
+			// create dependencies
+			ArrayList<Object> args = new ArrayList<>();
+			for (TransitiveCreationRecipe recipe : argRecipes) {
+				args.add(recipe.createInstance(injector));
+			}
+
+			// call constructor
+			try {
+				return constructor.newInstance(args.toArray());
+			} catch (InvocationTargetException e) {
+				throw new ProvisionException("Error in constructor "
+						+ constructor, e.getCause());
+			} catch (InstantiationException | IllegalAccessException
+					| IllegalArgumentException e) {
+				throw new ProvisionException("Error while calling constructor",
+						e);
+			}
+		};
+	}
 }

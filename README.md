@@ -18,7 +18,7 @@ So the goal for SimpleDI is to provide an API close to Guice, while focusing on 
 ## Bindings
 Bindings are a central element of SimpleDI. 
 
-First, if a binding itself is requested again by a dependency while resolving the binding, we call it a circular dependency. A circular dependency is resolved by satisfying the recursive request with a circular proxy, which is later bound to the final instance.  
+First, if a binding itself is requested again by a dependency while resolving the binding, we call it a circular dependency. We do not allow circular dependencies due to predictability issues. See further down. 
 
 Second, bindings are used as keys when applying a scope. Based on the binding, the scope determines whether to return a previously created instance or a new one.
 
@@ -38,6 +38,15 @@ As long as no injection point can be served by more than one JIT binding, this i
 
 Consider a new JIT binding B which is getting created. To make sure no injection would have been bound to B if B would have been present already at the time the injection, all we have to check if any of the already injected injection points matches B. If any matches, we detected an error. We cannot let B beeing created. However, depending on the JIT binding creation order, different bindings can reveal the conflicts, or the conflict can not be revealed at all.
 
-This behaviour is clearly not an option. Therefore we split the injection points for JIT bindings into non-overlapping regions.
+This behavior is clearly not an option. Therefore we split the injection points for JIT bindings into non-overlapping regions.
 
 This is achieved by creating a key from the injection point. A JIT binding is only used to satisfy injection points with a key equal to the one used to create the binding.
+
+## Circular Dependencies
+Consider a class A with a constructor parameter of type B, and a class B with a constructor parameter of type A. 
+
+If A is requested, a circular proxy of A could be used to create the instance of B. But if B accesses the proxy from within the constructor, expecting a fully initialized instance of A, an exception will be thrown.
+
+In the same setup, given A does not access the passed instance of B in the constructor, B can be created. If B is a singleton as well, if the application first requests a B it will run happily, even using instances of A. If it first requests an instance of A an error will occur.
+
+This is certainly not a stable and predictable behavior. Therefore Salta does not support circular dependencies.

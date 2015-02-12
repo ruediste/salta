@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.standard.recipe;
 
 import com.github.ruediste.salta.core.ContextualInjector;
+import com.github.ruediste.salta.core.InstantiationContext;
 
 /**
  * Instantiate an instance for a {@link StandardCreationRecipe}. The
@@ -9,4 +10,6 @@ import com.github.ruediste.salta.core.ContextualInjector;
  */
 public interface RecipeInstantiator<T> {
 	T instantiate(ContextualInjector injector);
+
+	TransitiveRecipeInstantiator createTransitive(InstantiationContext ctx);
 }

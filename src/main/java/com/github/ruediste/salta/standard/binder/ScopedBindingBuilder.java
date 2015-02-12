@@ -40,8 +40,8 @@ public class ScopedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public void in(Class<? extends Annotation> scopeAnnotation) {
-		binding.recipeFactory = () -> binding.recipeFactory.get().withScope(
-				config.getScope(scopeAnnotation));
+		binding.recipeFactory = () -> binding.recipeFactory.createRecipe()
+				.withScope(config.getScope(scopeAnnotation));
 
 	}
 
@@ -49,8 +49,8 @@ public class ScopedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public void in(Scope scope) {
-		binding.recipeFactory = () -> binding.recipeFactory.get().withScope(
-				scope);
+		binding.recipeFactory = () -> binding.recipeFactory.createRecipe()
+				.withScope(scope);
 	}
 
 	/**
@@ -63,8 +63,8 @@ public class ScopedBindingBuilder<T> {
 			throw new ProvisionException(
 					"class to bind as eager singleton not known");
 		}
-		binding.recipeFactory = () -> binding.recipeFactory.get().withScope(
-				config.singletonScope);
+		binding.recipeFactory = () -> binding.recipeFactory.createRecipe()
+				.withScope(config.singletonScope);
 
 		config.dynamicInitializers.add(x -> x
 				.getInstance(eagerInstantiationDependency));

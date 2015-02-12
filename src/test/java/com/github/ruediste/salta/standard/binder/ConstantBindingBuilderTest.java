@@ -40,7 +40,7 @@ public class ConstantBindingBuilderTest {
 	@Test
 	public void testDirect() {
 		CoreDependencyKey<String> key = DependencyKey.of(String.class)
-				.addAnnotation(Names.named("foo"));
+				.withAnnotations(Names.named("foo"));
 		assertEquals("bar", injector.getInstance(key));
 	}
 

@@ -26,6 +26,11 @@ public class InstantiationContext {
 		this.injector = new ContextualInjectorImpl(coreInjector, this);
 	}
 
+	public InstantiationContext(InstantiationContext other) {
+		this.injector = other.injector;
+		this.currentBindings.putAll(other.currentBindings);
+	}
+
 	public void removeBinding(Binding b) {
 		currentBindings.remove(b);
 	}
@@ -69,7 +74,6 @@ public class InstantiationContext {
 		if (entry == null)
 			throw new ProvisionException(
 					"Should Not Happen. Cannot get instance of binding without adding it to the context before");
-		System.out.println("getInstOrProxy: " + entry.instance);
 		if (entry.instanceSet)
 			return entry.instance;
 
@@ -117,6 +121,12 @@ public class InstantiationContext {
 		} finally {
 			removeBinding(binding);
 		}
+	}
+
+	public TransitiveCreationRecipe getTransitiveRecipe(
+			CoreDependencyKey<?> dependency) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

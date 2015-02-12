@@ -1,8 +1,7 @@
 package com.github.ruediste.salta.standard;
 
-import java.util.function.Supplier;
-
 import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.CreationRecipeFactory;
 import com.github.ruediste.salta.core.JITBinding;
 
 /**
@@ -10,11 +9,16 @@ import com.github.ruediste.salta.core.JITBinding;
  */
 public class StandardJitBinding extends JITBinding {
 
-	public Supplier<CreationRecipe<?>> recipeFactory;
+	public CreationRecipeFactory recipeFactory;
 
 	@Override
-	protected CreationRecipe createRecipe() {
-		return recipeFactory.get();
+	public CreationRecipe<?> createRecipe() {
+		return recipeFactory.createRecipe();
+	}
+
+	@Override
+	public CreationRecipeFactory getRecipeFactory() {
+		return recipeFactory;
 	}
 
 }

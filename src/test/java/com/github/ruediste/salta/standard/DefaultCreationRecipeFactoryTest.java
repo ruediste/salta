@@ -18,7 +18,7 @@ public class DefaultCreationRecipeFactoryTest {
 		config.defaultScope = mock(Scope.class);
 		DefaultCreationRecipeFactory factory = new DefaultCreationRecipeFactory(
 				config, null);
-		StandardCreationRecipe recipe = factory.get();
+		StandardCreationRecipe recipe = factory.createRecipe();
 		assertNotNull(recipe.scope);
 	}
 }

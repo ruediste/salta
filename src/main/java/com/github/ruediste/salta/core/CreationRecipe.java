@@ -19,4 +19,7 @@ public abstract class CreationRecipe<T> extends AttachedPropertyBearerBase {
 
 	public abstract void injectMembers(T instance, ContextualInjector injector);
 
+	public abstract TransitiveCreationRecipe createTransitive(
+			InstantiationContext ctx);
+
 }

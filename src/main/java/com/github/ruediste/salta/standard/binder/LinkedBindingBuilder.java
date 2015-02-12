@@ -1,13 +1,13 @@
 package com.github.ruediste.salta.standard.binder;
 
 import java.lang.reflect.Constructor;
-import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeFactory;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
@@ -162,13 +162,13 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 */
 	public <S extends T> ScopedBindingBuilder<T> toConstructor(
 			Constructor<S> constructor, TypeToken<? extends S> type) {
-		binding.recipeFactory = new Supplier<CreationRecipe<?>>() {
+		binding.recipeFactory = new CreationRecipeFactory() {
 
 			@Override
-			public CreationRecipe<?> get() {
+			public CreationRecipe<?> createRecipe() {
 				StandardCreationRecipe recipe = new DefaultCreationRecipeFactory(
-						config, type).get();
-				recipe.instantiator = x -> config.fixedConstructorInstantiatorFactory
+						config, type).createRecipe();
+				recipe.instantiator = config.fixedConstructorInstantiatorFactory
 						.apply(constructor, type);
 				return recipe;
 			}

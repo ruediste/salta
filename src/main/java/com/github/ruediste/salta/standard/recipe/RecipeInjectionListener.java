@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.standard.recipe;
 
 import com.github.ruediste.salta.core.ContextualInjector;
+import com.github.ruediste.salta.core.InstantiationContext;
 import com.github.ruediste.salta.standard.MembersInjector;
 
 /**
@@ -13,4 +14,6 @@ public interface RecipeInjectionListener<T> {
 	 * or another instance.
 	 */
 	T afterInjection(T injectee, ContextualInjector injector);
+
+	TransitiveRecipeInjectionListener createTransitive(InstantiationContext ctx);
 }

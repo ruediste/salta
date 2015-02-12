@@ -42,10 +42,9 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 		binding.dependencyMatcher = binding.dependencyMatcher.and(Annotations
 				.matcher(annotation));
 
-		eagerInstantiationDependency.addAnnotation(annotation);
-
 		return new LinkedBindingBuilder<>(injector, binding,
-				eagerInstantiationDependency, config);
+				eagerInstantiationDependency.withAnnotations(annotation),
+				config);
 	}
 
 }

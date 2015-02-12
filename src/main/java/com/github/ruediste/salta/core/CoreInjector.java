@@ -26,6 +26,12 @@ public class CoreInjector {
 			throw new UnsupportedOperationException(
 					"Called createRecipe() of null binding");
 		}
+
+		@Override
+		public CreationRecipeFactory getRecipeFactory() {
+			throw new UnsupportedOperationException(
+					"Called getRecipeFactory() of null binding");
+		}
 	};
 
 	private Cache<CoreDependencyKey<?>, Function<InstantiationContext, ?>> keyBasedCache = CacheBuilder
