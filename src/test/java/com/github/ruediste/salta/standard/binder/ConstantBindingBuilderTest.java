@@ -11,10 +11,13 @@ import org.junit.Test;
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRecipeCompiler;
+import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
+import com.github.ruediste.salta.standard.StandardStaticBinding;
 
 public class ConstantBindingBuilderTest {
 
@@ -35,6 +38,19 @@ public class ConstantBindingBuilderTest {
 		@Inject
 		@Named("foo")
 		String c;
+	}
+
+	@Test
+	public void testCompilation() {
+		ConstantBindingBuilder builder = new ConstantBindingBuilder(null,
+				d -> true);
+		StandardStaticBinding binding = builder.createBinding(Integer.class, 3);
+		CreationRecipeCompiler compiler = new CreationRecipeCompiler();
+		assertEquals(
+				3,
+				compiler.compile(
+						binding.createRecipe(new RecipeCreationContextImpl(null)))
+						.get());
 	}
 
 	@Test

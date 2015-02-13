@@ -1,7 +1,7 @@
 package com.github.ruediste.salta.standard;
 
 import com.github.ruediste.salta.core.Binding;
-import com.github.ruediste.salta.core.BindingContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.CreationRecipe;
 
 /**
@@ -14,6 +14,6 @@ public interface CreationRecipeFactory {
 	 * method
 	 * @param ctx TODO
 	 */
-	public CreationRecipe createRecipe(BindingContext ctx);
+	public CreationRecipe createRecipe(RecipeCreationContext ctx);
 
 }

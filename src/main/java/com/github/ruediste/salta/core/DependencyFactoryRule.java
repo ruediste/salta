@@ -1,7 +1,5 @@
 package com.github.ruediste.salta.core;
 
-import java.util.function.Function;
-
 /**
  * When looking up a key, the {@link CoreInjector} first checks these rules (or
  * {@link DependencyFactory}s previously created). If a matching rule is found,
@@ -9,5 +7,5 @@ import java.util.function.Function;
  */
 public interface DependencyFactoryRule {
 
-	Function<BindingContext, CreationRecipe> apply(CoreDependencyKey<?> key);
+	CreationRecipe apply(CoreDependencyKey<?> key, RecipeCreationContext ctx);
 }

@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.core;
 
+import org.objectweb.asm.commons.GeneratorAdapter;
+
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 
 /**
@@ -7,6 +9,6 @@ import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
  */
 public abstract class CreationRecipe extends AttachedPropertyBearerBase {
 
-	public abstract Object createInstance();
-
+	public abstract void compile(GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext);
 }

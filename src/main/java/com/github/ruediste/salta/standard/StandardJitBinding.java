@@ -1,6 +1,6 @@
 package com.github.ruediste.salta.standard;
 
-import com.github.ruediste.salta.core.BindingContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.JITBinding;
 import com.google.common.reflect.TypeToken;
@@ -18,7 +18,7 @@ public class StandardJitBinding extends JITBinding {
 	}
 
 	@Override
-	public CreationRecipe createRecipe(BindingContext ctx) {
+	public CreationRecipe createRecipe(RecipeCreationContext ctx) {
 		return recipeFactory.createRecipe(ctx);
 	}
 

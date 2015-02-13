@@ -9,7 +9,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import com.github.ruediste.salta.core.BindingContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
@@ -27,7 +27,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		InstantiatorRule {
 
 	@Override
-	public RecipeInstantiator apply(BindingContext ctx,
+	public RecipeInstantiator apply(RecipeCreationContext ctx,
 			TypeToken<?> typeToken) {
 
 		Type type = typeToken.getType();

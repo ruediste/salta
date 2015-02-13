@@ -15,12 +15,15 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.objectweb.asm.commons.GeneratorAdapter;
+
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
 import com.github.ruediste.salta.core.Binding;
-import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.RecipeCompilationContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Message;
@@ -72,7 +75,7 @@ public class StandardInjectorConfiguration {
 	 * {@link #defaultMembersInjectorFactories}
 	 */
 	public List<RecipeMembersInjector> createRecipeMembersInjectors(
-			BindingContext ctx, TypeToken<?> type) {
+			RecipeCreationContext ctx, TypeToken<?> type) {
 		// test rules
 		for (MembersInjectorRule rule : membersInjectorRules) {
 			List<RecipeMembersInjector> membersInjectors = rule
@@ -92,7 +95,7 @@ public class StandardInjectorConfiguration {
 	public final List<InjectionListenerRule> injectionListenerRules = new ArrayList<>();
 
 	public List<RecipeInjectionListener> createInjectionListeners(
-			BindingContext ctx, TypeToken<?> type) {
+			RecipeCreationContext ctx, TypeToken<?> type) {
 		return injectionListenerRules.stream()
 				.map(r -> r.getListener(ctx, type)).filter(x -> x != null)
 				.collect(toList());
@@ -110,8 +113,8 @@ public class StandardInjectorConfiguration {
 	 * 
 	 * @param ctx
 	 */
-	public <T> RecipeInstantiator createRecipeInstantiator(BindingContext ctx,
-			TypeToken<?> type) {
+	public <T> RecipeInstantiator createRecipeInstantiator(
+			RecipeCreationContext ctx, TypeToken<?> type) {
 		for (InstantiatorRule rule : instantiatorRules) {
 			RecipeInstantiator instantiator = rule.apply(ctx, type);
 			if (instantiator != null) {
@@ -169,6 +172,13 @@ public class StandardInjectorConfiguration {
 		public String toString() {
 			return "Default";
 		}
+
+		@Override
+		public void compile(GeneratorAdapter mv,
+				RecipeCompilationContext compilationContext,
+				Runnable instantiationCompilation) {
+			instantiationCompilation.run();
+		}
 	}
 
 	private static final class SingletonScope implements Scope {
@@ -197,6 +207,14 @@ public class StandardInjectorConfiguration {
 		@Override
 		public String toString() {
 			return "Singleton";
+		}
+
+		@Override
+		public void compile(GeneratorAdapter mv,
+				RecipeCompilationContext compilationContext,
+				Runnable instantiationCompilation) {
+			// TODO Auto-generated method stub
+
 		}
 	}
 

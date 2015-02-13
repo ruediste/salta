@@ -2,7 +2,7 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.reflect.Constructor;
 
-import com.github.ruediste.salta.core.BindingContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
@@ -29,7 +29,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 		}
 
 		@Override
-		public CreationRecipe createRecipe(BindingContext ctx) {
+		public CreationRecipe createRecipe(RecipeCreationContext ctx) {
 			return new CreationRecipe() {
 
 				@Override
@@ -154,7 +154,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 		data.binding.recipeFactory = new CreationRecipeFactory() {
 
 			@Override
-			public CreationRecipe createRecipe(BindingContext ctx) {
+			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
 				return builder.build(ctx);
 			}
 		};

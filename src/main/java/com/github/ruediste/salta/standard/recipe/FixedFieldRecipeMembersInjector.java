@@ -2,11 +2,14 @@ package com.github.ruediste.salta.standard.recipe;
 
 import java.lang.reflect.Field;
 
-import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.ProvisionException;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 
-public class FixedFieldRecipeMembersInjector implements
-		RecipeMembersInjector {
+import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.RecipeCompilationContext;
+
+public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
 
 	private Field field;
 	private CreationRecipe recipe;
@@ -19,15 +22,15 @@ public class FixedFieldRecipeMembersInjector implements
 	}
 
 	@Override
-	public void injectMembers(Object instance) {
-		Object value = recipe.createInstance();
-		try {
-			field.set(instance, value);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new ProvisionException("Error while setting field " + field,
-					e);
-		}
+	public void compile(GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext) {
+		mv.dup();
+		compilationContext.addAndLoad(Type.getDescriptor(Field.class), field);
+		mv.swap();
+		recipe.compile(mv, compilationContext);
+
+		mv.invokeVirtual(Type.getType(Field.class), new Method("set",
+				"(Ljava/lang/Object;Ljava/lang/Object;)V"));
 
 	}
-
 }

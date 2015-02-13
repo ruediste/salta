@@ -1,13 +1,11 @@
 package com.github.ruediste.salta.jsr330;
 
-import java.util.function.Function;
-
 import javax.inject.Provider;
 
-import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.DependencyFactoryRule;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.Injector;
@@ -23,8 +21,8 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Function<BindingContext, CreationRecipe> apply(
-			CoreDependencyKey<?> dependency) {
+	public CreationRecipe apply(CoreDependencyKey<?> dependency,
+			RecipeCreationContext ctx) {
 
 		if (Provider.class.equals(dependency.getRawType())) {
 			TypeToken<?> providedType = dependency.getType().resolveType(
@@ -41,7 +39,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 						dependency.getAnnotatedElement().getAnnotations());
 			}
 
-			return ctx -> new CreationRecipe() {
+			return new CreationRecipe() {
 
 				@Override
 				public Object createInstance() {

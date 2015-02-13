@@ -12,6 +12,6 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	 * Any expensive operations to create the recipe should be done in this
 	 * method
 	 */
-	public abstract CreationRecipe createRecipe(BindingContext ctx);
+	public abstract CreationRecipe createRecipe(RecipeCreationContext ctx);
 
 }

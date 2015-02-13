@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -17,22 +19,26 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class CoreInjector {
 
-	CoreInjectorConfiguration config;
+	private CoreInjectorConfiguration config;
+
+	private CreationRecipeCompiler compiler = new CreationRecipeCompiler();
 
 	private final JITBinding nullJitBinding = new JITBinding() {
 
 		@Override
-		public CreationRecipe createRecipe(BindingContext ctx) {
+		public CreationRecipe createRecipe(RecipeCreationContext ctx) {
 			throw new UnsupportedOperationException(
 					"Called createRecipe() of null binding");
 		}
 
 	};
 
-	private Cache<CoreDependencyKey<?>, CreationRecipe> rootRecipeCache = CacheBuilder
-			.newBuilder().build();
+	// private Cache<CoreDependencyKey<?>, Supplier<?>> compiledRecipeCache =
+	// CacheBuilder
+	// .newBuilder().build();
+	private Map<CoreDependencyKey<?>, Supplier<?>> compiledRecipeCache = new ConcurrentHashMap<>();
 
-	private Cache<CoreDependencyKey<?>, Function<BindingContext, CreationRecipe>> recipeFactoryCache = CacheBuilder
+	private Cache<CoreDependencyKey<?>, CreationRecipe> recipeCache = CacheBuilder
 			.newBuilder().build();
 
 	private Cache<JITBindingKey, JITBinding> jitBindings = CacheBuilder
@@ -67,54 +73,40 @@ public class CoreInjector {
 
 	@SuppressWarnings("unchecked")
 	public <T> T getInstance(CoreDependencyKey<T> key) {
-		CreationRecipe creationRecipe;
-		try {
-			creationRecipe = rootRecipeCache.get(key,
-					new Callable<CreationRecipe>() {
-
-						@Override
-						public CreationRecipe call() throws Exception {
-							return getRecipe(key, new BindingContextImpl(
-									CoreInjector.this));
-						}
-					});
-		} catch (UncheckedExecutionException | ExecutionException e) {
-			if (e.getCause() instanceof ProvisionException)
-				throw (ProvisionException) e.getCause();
-			throw new ProvisionException("Error looking up dependency " + key,
-					e.getCause());
-		}
-
-		return (T) creationRecipe.createInstance();
-	}
-
-	public <T> T getInstance(CoreDependencyKey<T> key, BindingContext ctx) {
-		return getInstanceFactory(key).apply(ctx);
-
+		return (T) getCompiledRecipe(key).get();
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> Function<BindingContext, T> getInstanceFactory(
-			CoreDependencyKey<T> key) {
-		return ctx -> (T) getRecipe(key, ctx).createInstance();
+	public <T> Supplier<T> getInstanceSupplier(CoreDependencyKey<T> key) {
+		Supplier<?> compiledRecipe = getCompiledRecipe(key);
+		return (Supplier<T>) compiledRecipe;
 	}
 
-	public CreationRecipe getRecipe(CoreDependencyKey<?> key, BindingContext ctx) {
-		return getRecipeFactory(key).apply(ctx);
+	public Supplier<?> getCompiledRecipe(CoreDependencyKey<?> key) {
+		Supplier<?> supplier = compiledRecipeCache.get(key);
+		if (supplier != null)
+			return supplier;
+
+		// todo: locking
+		supplier = compiler.compile(getRecipe(key));
+		compiledRecipeCache.put(key, supplier);
+		return supplier;
 	}
 
-	private Function<BindingContext, CreationRecipe> getRecipeFactory(
-			CoreDependencyKey<?> key) {
+	public CreationRecipe getRecipe(CoreDependencyKey<?> key) {
+		return getRecipe(key, new RecipeCreationContextImpl(CoreInjector.this));
+	}
+
+	public CreationRecipe getRecipe(CoreDependencyKey<?> key,
+			RecipeCreationContext ctx) {
 		try {
-			return recipeFactoryCache.get(key,
-					new Callable<Function<BindingContext, CreationRecipe>>() {
+			return recipeCache.get(key, new Callable<CreationRecipe>() {
 
-						@Override
-						public Function<BindingContext, CreationRecipe> call()
-								throws Exception {
-							return getRecipeFactoryInner(key);
-						}
-					});
+				@Override
+				public CreationRecipe call() throws Exception {
+					return getRecipeInner(key, ctx);
+				}
+			});
 		} catch (UncheckedExecutionException | ExecutionException e) {
 			if (e.getCause() instanceof ProvisionException)
 				throw (ProvisionException) e.getCause();
@@ -123,14 +115,14 @@ public class CoreInjector {
 		}
 	}
 
-	private Function<BindingContext, CreationRecipe> getRecipeFactoryInner(
-			CoreDependencyKey<?> key) {
+	private CreationRecipe getRecipeInner(CoreDependencyKey<?> key,
+			RecipeCreationContext ctx) {
 		try {
 			// check rules
 			for (DependencyFactoryRule rule : config.creationRules) {
-				Function<BindingContext, CreationRecipe> f = rule.apply(key);
-				if (f != null)
-					return f;
+				CreationRecipe recipe = rule.apply(key, ctx);
+				if (recipe != null)
+					return recipe;
 			}
 
 			// check static bindings
@@ -154,8 +146,7 @@ public class CoreInjector {
 
 				if (binding != null) {
 					Binding tmp = binding;
-					return ctx -> ctx.withBinding(tmp,
-							() -> tmp.createRecipe(ctx));
+					return ctx.withBinding(tmp, () -> tmp.createRecipe(ctx));
 				}
 			}
 
@@ -192,7 +183,7 @@ public class CoreInjector {
 
 				// use binding if available
 				if (jitBinding != nullJitBinding) {
-					return ctx -> ctx.withBinding(jitBinding,
+					return ctx.withBinding(jitBinding,
 							() -> jitBinding.createRecipe(ctx));
 				}
 			}

@@ -2,7 +2,7 @@ package com.github.ruediste.salta.standard;
 
 import java.util.Set;
 
-import com.github.ruediste.salta.core.BindingContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.StaticBinding;
@@ -28,7 +28,7 @@ public class StandardStaticBinding extends StaticBinding {
 	}
 
 	@Override
-	public CreationRecipe createRecipe(BindingContext ctx) {
+	public CreationRecipe createRecipe(RecipeCreationContext ctx) {
 		return recipeFactory.createRecipe(ctx);
 	}
 

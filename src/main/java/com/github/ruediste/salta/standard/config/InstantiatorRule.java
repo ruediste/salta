@@ -1,6 +1,6 @@
 package com.github.ruediste.salta.standard.config;
 
-import com.github.ruediste.salta.core.BindingContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
@@ -14,5 +14,5 @@ public interface InstantiatorRule {
 	 * Create the instantiator or return null if the next rule should be tried.
 	 * @param ctx TODO
 	 */
-	RecipeInstantiator apply(BindingContext ctx, TypeToken<?> type);
+	RecipeInstantiator apply(RecipeCreationContext ctx, TypeToken<?> type);
 }

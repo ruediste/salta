@@ -10,11 +10,11 @@ import java.util.function.Supplier;
  * Contains the bindings which are currently beeing constructed and is used for
  * circular dependency detection.
  */
-public class BindingContextImpl implements BindingContext {
+public class RecipeCreationContextImpl implements RecipeCreationContext {
 
 	private CoreInjector coreInjector;
 
-	public BindingContextImpl(CoreInjector coreInjector) {
+	public RecipeCreationContextImpl(CoreInjector coreInjector) {
 		this.coreInjector = coreInjector;
 	}
 

@@ -1,5 +1,8 @@
 package com.github.ruediste.salta.standard.recipe;
 
+import org.objectweb.asm.commons.GeneratorAdapter;
+
+import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.standard.MembersInjector;
 
 /**
@@ -12,4 +15,7 @@ public interface RecipeInjectionListener {
 	 * or another instance.
 	 */
 	Object afterInjection(Object injectee);
+
+	void compile(GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext);
 }

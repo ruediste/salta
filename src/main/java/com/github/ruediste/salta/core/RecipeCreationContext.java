@@ -2,7 +2,7 @@ package com.github.ruediste.salta.core;
 
 import java.util.function.Supplier;
 
-public interface BindingContext {
+public interface RecipeCreationContext {
 
 	CreationRecipe getRecipe(CoreDependencyKey<?> dependency);
 

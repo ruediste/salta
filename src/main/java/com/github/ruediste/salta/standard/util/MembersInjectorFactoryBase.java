@@ -6,7 +6,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.ruediste.salta.core.BindingContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.standard.InjectionPoint;
@@ -20,7 +20,7 @@ public abstract class MembersInjectorFactoryBase implements
 		RecipeMembersInjectorFactory {
 
 	@Override
-	public List<RecipeMembersInjector> createInjectors(BindingContext ctx,
+	public List<RecipeMembersInjector> createInjectors(RecipeCreationContext ctx,
 			TypeToken<?> typeToken) {
 		ArrayList<RecipeMembersInjector> result = new ArrayList<>();
 

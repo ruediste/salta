@@ -1,36 +1,95 @@
 package com.github.ruediste.salta.standard;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
-import com.github.ruediste.salta.core.BindingContext;
-import com.github.ruediste.salta.core.BindingContextImpl;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjector implements Injector {
 
+	private final static class ClassDependencyKey<T> extends
+			CoreDependencyKey<T> {
+
+		private Class<T> type;
+
+		ClassDependencyKey(Class<T> type) {
+			this.type = type;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this)
+				return true;
+			if (obj instanceof ClassDependencyKey) {
+				return type.equals(((ClassDependencyKey<?>) obj).type);
+			}
+			return false;
+
+		}
+
+		@Override
+		public int hashCode() {
+			return type.hashCode();
+		}
+
+		@Override
+		public TypeToken<T> getType() {
+			return TypeToken.of(type);
+		}
+
+		@Override
+		public Class<T> getRawType() {
+			return type;
+		}
+
+		@Override
+		public AnnotatedElement getAnnotatedElement() {
+			return new AnnotatedElement() {
+
+				@Override
+				public Annotation[] getDeclaredAnnotations() {
+					return new Annotation[] {};
+				}
+
+				@Override
+				public Annotation[] getAnnotations() {
+					return getDeclaredAnnotations();
+				}
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public <A extends Annotation> A getAnnotation(
+						Class<A> annotationClass) {
+					return null;
+				}
+			};
+		}
+	}
+
 	private final class ProviderImpl<T> implements Provider<T> {
 
-		private Function<BindingContext, T> factoryFunction;
+		private Supplier<T> factoryFunction;
 
 		public ProviderImpl(CoreDependencyKey<T> key) {
-			config.staticInitializers.add(i -> factoryFunction = coreInjector
-					.getInstanceFactory(key));
+			factoryFunction = coreInjector.getInstanceSupplier(key);
 		}
 
 		@Override
 		public T get() {
 			checkInitialized();
-			return factoryFunction.apply(new BindingContextImpl(coreInjector));
+			return factoryFunction.get();
 		}
 	}
 
@@ -39,8 +98,8 @@ public class StandardInjector implements Injector {
 
 		public MembersInjectorImpl(TypeToken<T> type) {
 			config.staticInitializers.add(i -> injectors = config
-					.createRecipeMembersInjectors(new BindingContextImpl(
-							coreInjector), type));
+					.createRecipeMembersInjectors(
+							new RecipeCreationContextImpl(coreInjector), type));
 		}
 
 		@Override
@@ -85,7 +144,7 @@ public class StandardInjector implements Injector {
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
 		checkInitialized();
 		List<RecipeMembersInjector> injectors = config
-				.createRecipeMembersInjectors(new BindingContextImpl(
+				.createRecipeMembersInjectors(new RecipeCreationContextImpl(
 						coreInjector), type);
 		for (RecipeMembersInjector rmi : injectors) {
 			rmi.injectMembers(instance);
@@ -123,7 +182,6 @@ public class StandardInjector implements Injector {
 	@Override
 	public <T> T getInstance(Class<T> type) {
 		checkInitialized();
-		return coreInjector.getInstance(DependencyKey.of(type));
+		return coreInjector.getInstance(new ClassDependencyKey<T>(type));
 	}
-
 }

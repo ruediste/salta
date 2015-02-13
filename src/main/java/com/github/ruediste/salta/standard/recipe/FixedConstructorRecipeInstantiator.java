@@ -1,20 +1,25 @@
 package com.github.ruediste.salta.standard.recipe;
 
+import static org.objectweb.asm.Opcodes.AASTORE;
+import static org.objectweb.asm.Opcodes.ANEWARRAY;
+
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
+
 import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
 
 /**
  * Instantiate a fixed class using a fixed constructor. Use a subclass of
  * {@link ConstructorInstantiatorRuleBase} to create an instance
  */
-public class FixedConstructorRecipeInstantiator implements
-		RecipeInstantiator {
+public class FixedConstructorRecipeInstantiator implements RecipeInstantiator {
 
 	Constructor<?> constructor;
 	List<CreationRecipe> argumentDependencies;
@@ -27,24 +32,28 @@ public class FixedConstructorRecipeInstantiator implements
 	}
 
 	@Override
-	public Object instantiate() {
-		// resolve dependencies
-		Object[] args = new Object[argumentDependencies.size()];
+	public void compile(GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext) {
+		// push constructor
+		compilationContext.addAndLoad(Type.getDescriptor(Constructor.class),
+				constructor);
+
+		// push dependencies as an array
+		mv.push(argumentDependencies.size());
+		mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
+
 		for (int i = 0; i < argumentDependencies.size(); i++) {
+			mv.dup();
+			mv.push(i);
 			CreationRecipe dependency = argumentDependencies.get(i);
-			args[i] = dependency.createInstance();
+			dependency.compile(mv, compilationContext);
+			mv.visitInsn(AASTORE);
 		}
 
 		// call constructor
-		try {
-			return constructor.newInstance(args);
-		} catch (InvocationTargetException e) {
-			throw new ProvisionException("Error in constructor " + constructor,
-					e.getCause());
-		} catch (InstantiationException | IllegalAccessException
-				| IllegalArgumentException e) {
-			throw new ProvisionException("Error while calling constructor", e);
-		}
+		mv.invokeVirtual(Type.getType(Constructor.class), new Method(
+				"newInstance", "([Ljava/lang/Object;)Ljava/lang/Object;"));
+
 	}
 
 }

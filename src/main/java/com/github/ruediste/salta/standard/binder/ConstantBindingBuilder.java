@@ -1,8 +1,13 @@
 package com.github.ruediste.salta.standard.binder;
 
-import com.github.ruediste.salta.core.BindingContext;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
+
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.RecipeCompilationContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
@@ -20,25 +25,36 @@ public class ConstantBindingBuilder {
 	}
 
 	private void bind(Class<?> cls, Object value) {
+		StandardStaticBinding binding = createBinding(cls, value);
+		config.config.staticBindings.add(binding);
+	}
+
+	StandardStaticBinding createBinding(Class<?> cls, Object value) {
 		StandardStaticBinding binding = new StandardStaticBinding();
 		binding.dependencyMatcher = annotationMatcher.and(d -> d.getType()
 				.isAssignableFrom(cls));
 		binding.recipeFactory = new CreationRecipeFactory() {
 
 			@Override
-			public CreationRecipe createRecipe(BindingContext ctx) {
+			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
 				CreationRecipe recipe = new CreationRecipe() {
 
 					@Override
-					public Object createInstance() {
-						return value;
+					public void compile(GeneratorAdapter mv,
+							RecipeCompilationContext compilationContext) {
+						String field = compilationContext.addField(
+								Type.getDescriptor(cls), value);
+						mv.loadThis();
+						mv.visitFieldInsn(Opcodes.GETFIELD,
+								compilationContext.getGeneratedClassName(),
+								field, Type.getDescriptor(cls));
 					}
 
 				};
 				return recipe;
 			}
 		};
-		config.config.staticBindings.add(binding);
+		return binding;
 	}
 
 	/**
