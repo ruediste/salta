@@ -13,16 +13,16 @@ import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.recipe.FixedFieldRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
-import com.github.ruediste.salta.standard.recipe.TransitiveMembersInjector;
+import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.google.common.reflect.TypeToken;
 
 public abstract class MembersInjectorFactoryBase implements
 		RecipeMembersInjectorFactory {
 
 	@Override
-	public List<TransitiveMembersInjector> createInjectors(BindingContext ctx,
+	public List<RecipeMembersInjector> createInjectors(BindingContext ctx,
 			TypeToken<?> typeToken) {
-		ArrayList<TransitiveMembersInjector> result = new ArrayList<>();
+		ArrayList<RecipeMembersInjector> result = new ArrayList<>();
 
 		MethodOverrideIndex overrideIndex = new MethodOverrideIndex(typeToken);
 		// iterate over super types, always processing supertypes before

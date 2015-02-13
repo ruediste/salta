@@ -1,9 +1,5 @@
 package com.github.ruediste.salta.core;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-
 import javax.inject.Inject;
 
 import org.junit.Before;
@@ -63,20 +59,13 @@ public class DependencyCircleTest {
 		injector = Salta.createInjector(new JSR330Module());
 	}
 
-	@Test
+	@Test(expected = ProvisionException.class)
 	public void circularConstructorTest() {
-		ConstructorTestClassA a = injector
-				.getInstance(ConstructorTestClassA.class);
-		assertNotNull(a.b);
-		assertNotNull(a.b.a);
-		assertNotSame(a, a.b.a);
+		injector.getInstance(ConstructorTestClassA.class);
 	}
 
-	@Test
+	@Test(expected = ProvisionException.class)
 	public void circularFieldTest() {
-		FieldTestClassA a = injector.getInstance(FieldTestClassA.class);
-		assertNotNull(a.b);
-		assertNotNull(a.b.a);
-		assertSame(a, a.b.a);
+		injector.getInstance(FieldTestClassA.class);
 	}
 }

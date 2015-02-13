@@ -9,20 +9,20 @@ import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.TransitiveMembersInjector;
-import com.github.ruediste.salta.standard.recipe.TransitiveRecipeInjectionListener;
-import com.github.ruediste.salta.standard.recipe.TransitiveRecipeInstantiator;
+import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
+import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
+import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
 public class DefaultCreationRecipeBuilder {
 
-	public Function<BindingContext, TransitiveRecipeInstantiator> instantiatorSupplier;
+	public Function<BindingContext, RecipeInstantiator> instantiatorSupplier;
 	/**
 	 * {@link MembersInjector} get called after the instantiation to inject
 	 * fields and methods
 	 */
-	public Function<BindingContext, List<TransitiveMembersInjector>> membersInjectorsSupplier;
-	public Function<BindingContext, List<TransitiveRecipeInjectionListener>> injectionListenerSupplier;
+	public Function<BindingContext, List<RecipeMembersInjector>> membersInjectorsSupplier;
+	public Function<BindingContext, List<RecipeInjectionListener>> injectionListenerSupplier;
 
 	public Supplier<Scope> scopeSupplier;
 	private Binding binding;
@@ -30,6 +30,7 @@ public class DefaultCreationRecipeBuilder {
 	public DefaultCreationRecipeBuilder(StandardInjectorConfiguration config,
 			TypeToken<?> type, Binding binding) {
 
+		this.binding = binding;
 		instantiatorSupplier = ctx -> config
 				.createRecipeInstantiator(ctx, type);
 		membersInjectorsSupplier = ctx -> config.createRecipeMembersInjectors(
@@ -41,14 +42,15 @@ public class DefaultCreationRecipeBuilder {
 
 	public CreationRecipe build(BindingContext ctx) {
 
-		TransitiveRecipeInstantiator transitiveInstantiator = instantiatorSupplier
+		RecipeInstantiator transitiveInstantiator = instantiatorSupplier
 				.apply(ctx);
 
-		List<TransitiveMembersInjector> mem = membersInjectorsSupplier
-				.apply(ctx);
+		// arrays for performance
+		RecipeMembersInjector[] mem = membersInjectorsSupplier.apply(ctx)
+				.toArray(new RecipeMembersInjector[] {});
 
-		List<TransitiveRecipeInjectionListener> listen = injectionListenerSupplier
-				.apply(ctx);
+		RecipeInjectionListener[] listen = injectionListenerSupplier
+				.apply(ctx).toArray(new RecipeInjectionListener[] {});
 
 		Scope scope = scopeSupplier.get();
 		return new CreationRecipe() {
@@ -56,10 +58,10 @@ public class DefaultCreationRecipeBuilder {
 			public Object createInstanceInner() {
 
 				Object result = transitiveInstantiator.instantiate();
-				for (TransitiveMembersInjector membersInjector : mem) {
+				for (RecipeMembersInjector membersInjector : mem) {
 					membersInjector.injectMembers(result);
 				}
-				for (TransitiveRecipeInjectionListener listener : listen) {
+				for (RecipeInjectionListener listener : listen) {
 					result = listener.afterInjection(result);
 				}
 				return result;

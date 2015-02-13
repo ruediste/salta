@@ -16,7 +16,7 @@ import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
-import com.github.ruediste.salta.standard.recipe.TransitiveRecipeInstantiator;
+import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -27,7 +27,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		InstantiatorRule {
 
 	@Override
-	public TransitiveRecipeInstantiator apply(BindingContext ctx,
+	public RecipeInstantiator apply(BindingContext ctx,
 			TypeToken<?> typeToken) {
 
 		Type type = typeToken.getType();

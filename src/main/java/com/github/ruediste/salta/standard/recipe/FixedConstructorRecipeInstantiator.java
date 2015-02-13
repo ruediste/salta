@@ -14,7 +14,7 @@ import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
  * {@link ConstructorInstantiatorRuleBase} to create an instance
  */
 public class FixedConstructorRecipeInstantiator implements
-		TransitiveRecipeInstantiator {
+		RecipeInstantiator {
 
 	Constructor<?> constructor;
 	List<CreationRecipe> argumentDependencies;
@@ -23,20 +23,21 @@ public class FixedConstructorRecipeInstantiator implements
 			List<CreationRecipe> argumentDependencies) {
 		constructor.setAccessible(true);
 		this.constructor = constructor;
-		this.argumentDependencies = argumentDependencies;
+		this.argumentDependencies = new ArrayList<>(argumentDependencies);
 	}
 
 	@Override
 	public Object instantiate() {
 		// resolve dependencies
-		ArrayList<Object> args = new ArrayList<>();
-		for (CreationRecipe dependency : argumentDependencies) {
-			args.add(dependency.createInstance());
+		Object[] args = new Object[argumentDependencies.size()];
+		for (int i = 0; i < argumentDependencies.size(); i++) {
+			CreationRecipe dependency = argumentDependencies.get(i);
+			args[i] = dependency.createInstance();
 		}
 
 		// call constructor
 		try {
-			return constructor.newInstance(args.toArray());
+			return constructor.newInstance(args);
 		} catch (InvocationTargetException e) {
 			throw new ProvisionException("Error in constructor " + constructor,
 					e.getCause());

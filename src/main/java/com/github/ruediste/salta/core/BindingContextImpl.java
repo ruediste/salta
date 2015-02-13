@@ -40,8 +40,9 @@ public class BindingContextImpl implements BindingContext {
 				if (found)
 					msg.add(b.toString());
 			}
+			msg.add(binding.toString());
 			throw new ProvisionException("Detected Dependency Circle: "
-					+ msg.stream().collect(joining(",", "[", "]")));
+					+ msg.stream().collect(joining("\n", "\n", "\n")));
 		}
 	}
 

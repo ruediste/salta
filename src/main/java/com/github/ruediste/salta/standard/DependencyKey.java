@@ -37,7 +37,9 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 		this.type = type;
 		this.rawType = rawType;
 		this.annotations = annotations;
-		this.hashCode = Objects.hash(type, annotations);
+
+		// don't use Objects.hash() for performance reason
+		this.hashCode = type.hashCode() + 31 * annotations.hashCode();
 	}
 
 	@Override

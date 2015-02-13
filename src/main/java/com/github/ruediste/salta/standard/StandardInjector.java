@@ -13,7 +13,7 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.TransitiveMembersInjector;
+import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjector implements Injector {
@@ -35,7 +35,7 @@ public class StandardInjector implements Injector {
 	}
 
 	private final class MembersInjectorImpl<T> implements MembersInjector<T> {
-		List<TransitiveMembersInjector> injectors = new ArrayList<>();
+		List<RecipeMembersInjector> injectors = new ArrayList<>();
 
 		public MembersInjectorImpl(TypeToken<T> type) {
 			config.staticInitializers.add(i -> injectors = config
@@ -46,7 +46,7 @@ public class StandardInjector implements Injector {
 		@Override
 		public void injectMembers(T instance) {
 			checkInitialized();
-			for (TransitiveMembersInjector i : injectors) {
+			for (RecipeMembersInjector i : injectors) {
 				i.injectMembers(instance);
 			}
 		}
@@ -84,10 +84,10 @@ public class StandardInjector implements Injector {
 	@Override
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
 		checkInitialized();
-		List<TransitiveMembersInjector> injectors = config
+		List<RecipeMembersInjector> injectors = config
 				.createRecipeMembersInjectors(new BindingContextImpl(
 						coreInjector), type);
-		for (TransitiveMembersInjector rmi : injectors) {
+		for (RecipeMembersInjector rmi : injectors) {
 			rmi.injectMembers(instance);
 		}
 	}

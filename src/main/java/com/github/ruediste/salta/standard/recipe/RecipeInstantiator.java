@@ -7,7 +7,6 @@ import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
  * instantiator should contain a very detailed description of what to do. All
  * reflection and decision making should happen upon instantiation
  */
-public interface RecipeInstantiator<T> {
-	T instantiate();
-
+public interface RecipeInstantiator {
+	Object instantiate();
 }

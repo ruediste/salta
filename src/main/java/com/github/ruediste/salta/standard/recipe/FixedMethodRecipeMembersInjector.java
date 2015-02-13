@@ -9,7 +9,7 @@ import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
 
 public class FixedMethodRecipeMembersInjector implements
-		TransitiveMembersInjector {
+		RecipeMembersInjector {
 
 	private Method method;
 	private List<CreationRecipe> argumentRecipes;

@@ -6,7 +6,7 @@ import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
 
 public class FixedFieldRecipeMembersInjector implements
-		TransitiveMembersInjector {
+		RecipeMembersInjector {
 
 	private Field field;
 	private CreationRecipe recipe;

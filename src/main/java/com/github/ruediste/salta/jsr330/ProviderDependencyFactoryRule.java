@@ -10,9 +10,16 @@ import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.DependencyFactoryRule;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.InjectionPoint;
+import com.github.ruediste.salta.standard.Injector;
 import com.google.common.reflect.TypeToken;
 
 public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
+
+	private Injector injector;
+
+	ProviderDependencyFactoryRule(Injector injector) {
+		this.injector = injector;
+	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
@@ -34,7 +41,18 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 						dependency.getAnnotatedElement().getAnnotations());
 			}
 
-			return ctx -> ctx.getRecipe(dep);
+			return ctx -> new CreationRecipe() {
+
+				@Override
+				public Object createInstance() {
+					return new Provider() {
+						@Override
+						public Object get() {
+							return injector.getInstance(dep);
+						}
+					};
+				}
+			};
 
 		}
 
