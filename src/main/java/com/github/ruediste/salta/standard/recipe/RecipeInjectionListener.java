@@ -1,7 +1,5 @@
 package com.github.ruediste.salta.standard.recipe;
 
-import com.github.ruediste.salta.core.ContextualInjector;
-import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.standard.MembersInjector;
 
 /**
@@ -13,7 +11,6 @@ public interface RecipeInjectionListener<T> {
 	 * Invoked after the {@link MembersInjector}s. Can return the same instance
 	 * or another instance.
 	 */
-	T afterInjection(T injectee, ContextualInjector injector);
+	T afterInjection(T injectee);
 
-	TransitiveRecipeInjectionListener createTransitive(BindingContext ctx);
 }

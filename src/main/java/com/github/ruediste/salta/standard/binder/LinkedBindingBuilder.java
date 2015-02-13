@@ -3,7 +3,6 @@ package com.github.ruediste.salta.standard.binder;
 import java.lang.reflect.Constructor;
 
 import com.github.ruediste.salta.core.BindingContext;
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
@@ -34,9 +33,8 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			return new CreationRecipe() {
 
 				@Override
-				public Object createInstance(ContextualInjector injector) {
-					return injector.withBinding(data.binding,
-							() -> provider.get());
+				public Object createInstance() {
+					return provider.get();
 				}
 			};
 		}
@@ -74,9 +72,8 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 		data.binding.recipeFactory = (ctx) -> new CreationRecipe() {
 
 			@Override
-			public Object createInstance(ContextualInjector injector) {
-				return injector.withBinding(data.binding,
-						() -> token.getValue(injector));
+			public Object createInstance() {
+				return token.getValue();
 			}
 
 		};
@@ -94,9 +91,8 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 		data.binding.recipeFactory = (ctx) -> new CreationRecipe() {
 
 			@Override
-			public Object createInstance(ContextualInjector injector) {
-				return injector.withBinding(data.binding,
-						() -> token.getValue(injector).get());
+			public Object createInstance() {
+				return token.getValue().get();
 			}
 
 		};

@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
@@ -28,11 +27,11 @@ public class FixedConstructorRecipeInstantiator implements
 	}
 
 	@Override
-	public Object instantiate(ContextualInjector injector) {
+	public Object instantiate() {
 		// resolve dependencies
 		ArrayList<Object> args = new ArrayList<>();
 		for (CreationRecipe dependency : argumentDependencies) {
-			args.add(dependency.createInstance(injector));
+			args.add(dependency.createInstance());
 		}
 
 		// call constructor

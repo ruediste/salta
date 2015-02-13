@@ -1,7 +1,5 @@
 package com.github.ruediste.salta.standard.recipe;
 
-import com.github.ruediste.salta.core.BindingContext;
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 
 /**
@@ -10,7 +8,6 @@ import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
  * reflection and decision making should happen upon instantiation
  */
 public interface RecipeInstantiator<T> {
-	T instantiate(ContextualInjector injector);
+	T instantiate();
 
-	TransitiveRecipeInstantiator createTransitive(BindingContext ctx);
 }

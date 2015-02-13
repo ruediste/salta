@@ -23,10 +23,10 @@ public class MemberInjectionToken<T> {
 		this.type = type;
 	}
 
-	public T getValue(ContextualInjector ctxInjector) {
+	public T getValue() {
 		synchronized (this) {
 			if (!injected) {
-				injector.injectMembers(type, value, ctxInjector);
+				injector.injectMembers(type, value);
 				injected = true;
 			}
 		}

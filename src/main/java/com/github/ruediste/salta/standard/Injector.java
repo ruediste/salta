@@ -20,7 +20,6 @@ package com.github.ruediste.salta.standard;
 import javax.inject.Provider;
 import javax.naming.ConfigurationException;
 
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.google.common.reflect.TypeToken;
@@ -46,15 +45,6 @@ public interface Injector {
 	void injectMembers(Object instance);
 
 	<T> void injectMembers(TypeToken<T> type, T instance);
-
-	/**
-	 * Injects dependencies into the fields and methods of {@code instance}
-	 * within the current injection context
-	 * */
-	void injectMembers(Object instance, ContextualInjector contextualInjector);
-
-	<T> void injectMembers(TypeToken<T> type, T instance,
-			ContextualInjector contextualInjector);
 
 	/**
 	 * Returns the members injector used to inject dependencies into methods and

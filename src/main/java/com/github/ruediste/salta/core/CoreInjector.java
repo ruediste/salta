@@ -85,8 +85,7 @@ public class CoreInjector {
 					e.getCause());
 		}
 
-		return (T) creationRecipe.createInstance(new ContextualInjectorImpl(
-				this));
+		return (T) creationRecipe.createInstance();
 	}
 
 	public <T> T getInstance(CoreDependencyKey<T> key, BindingContext ctx) {
@@ -97,7 +96,7 @@ public class CoreInjector {
 	@SuppressWarnings("unchecked")
 	public <T> Function<BindingContext, T> getInstanceFactory(
 			CoreDependencyKey<T> key) {
-		return ctx -> (T) getRecipe(key, ctx).createInstance(null);
+		return ctx -> (T) getRecipe(key, ctx).createInstance();
 	}
 
 	public CreationRecipe getRecipe(CoreDependencyKey<?> key, BindingContext ctx) {

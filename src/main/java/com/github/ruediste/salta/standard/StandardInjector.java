@@ -9,7 +9,6 @@ import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.core.BindingContextImpl;
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.ProvisionException;
@@ -47,9 +46,8 @@ public class StandardInjector implements Injector {
 		@Override
 		public void injectMembers(T instance) {
 			checkInitialized();
-			ContextualInjector ctxInjector = null;
 			for (TransitiveMembersInjector i : injectors) {
-				i.injectMembers(instance, ctxInjector);
+				i.injectMembers(instance);
 			}
 		}
 	}
@@ -77,33 +75,20 @@ public class StandardInjector implements Injector {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void injectMembers(Object instance) {
-		injectMembers(instance, null);
+		injectMembers((TypeToken) TypeToken.of(instance.getClass()), instance);
 	}
 
 	@Override
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
-		injectMembers(type, instance, null);
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
-	public void injectMembers(Object instance,
-			ContextualInjector contextualInjector) {
-		injectMembers((TypeToken) TypeToken.of(instance.getClass()), instance,
-				contextualInjector);
-	}
-
-	@Override
-	public <T> void injectMembers(TypeToken<T> type, T instance,
-			ContextualInjector contextualInjector) {
 		checkInitialized();
 		List<TransitiveMembersInjector> injectors = config
 				.createRecipeMembersInjectors(new BindingContextImpl(
 						coreInjector), type);
 		for (TransitiveMembersInjector rmi : injectors) {
-			rmi.injectMembers(instance, contextualInjector);
+			rmi.injectMembers(instance);
 		}
 	}
 

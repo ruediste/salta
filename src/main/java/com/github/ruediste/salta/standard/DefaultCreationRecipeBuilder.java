@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.BindingContext;
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
@@ -54,22 +53,21 @@ public class DefaultCreationRecipeBuilder {
 		Scope scope = scopeSupplier.get();
 		return new CreationRecipe() {
 
-			public Object createInstanceInner(ContextualInjector injector) {
+			public Object createInstanceInner() {
 
-				Object result = transitiveInstantiator.instantiate(injector);
+				Object result = transitiveInstantiator.instantiate();
 				for (TransitiveMembersInjector membersInjector : mem) {
-					membersInjector.injectMembers(result, injector);
+					membersInjector.injectMembers(result);
 				}
 				for (TransitiveRecipeInjectionListener listener : listen) {
-					result = listener.afterInjection(result, injector);
+					result = listener.afterInjection(result);
 				}
 				return result;
 			}
 
 			@Override
-			public Object createInstance(ContextualInjector injector) {
-				return scope.scope(binding, () -> injector.withBinding(binding,
-						() -> createInstanceInner(injector)));
+			public Object createInstance() {
+				return scope.scope(binding, () -> createInstanceInner());
 			}
 
 		};

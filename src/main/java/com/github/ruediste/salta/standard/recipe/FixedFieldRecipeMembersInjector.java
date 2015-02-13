@@ -2,7 +2,6 @@ package com.github.ruediste.salta.standard.recipe;
 
 import java.lang.reflect.Field;
 
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
 
@@ -20,8 +19,8 @@ public class FixedFieldRecipeMembersInjector implements
 	}
 
 	@Override
-	public void injectMembers(Object instance, ContextualInjector injector) {
-		Object value = recipe.createInstance(injector);
+	public void injectMembers(Object instance) {
+		Object value = recipe.createInstance();
 		try {
 			field.set(instance, value);
 		} catch (IllegalArgumentException | IllegalAccessException e) {

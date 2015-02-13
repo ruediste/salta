@@ -1,7 +1,6 @@
 package com.github.ruediste.salta.standard.binder;
 
 import com.github.ruediste.salta.core.BindingContext;
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
@@ -31,7 +30,7 @@ public class ConstantBindingBuilder {
 				CreationRecipe recipe = new CreationRecipe() {
 
 					@Override
-					public Object createInstance(ContextualInjector injector) {
+					public Object createInstance() {
 						return value;
 					}
 

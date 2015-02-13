@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
 
@@ -23,12 +22,12 @@ public class FixedMethodRecipeMembersInjector implements
 	}
 
 	@Override
-	public void injectMembers(Object instance, ContextualInjector injector) {
+	public void injectMembers(Object instance) {
 
 		// resolve dependencies
 		ArrayList<Object> args = new ArrayList<>();
 		for (CreationRecipe dependency : argumentRecipes) {
-			args.add(dependency.createInstance(injector));
+			args.add(dependency.createInstance());
 		}
 
 		// call method

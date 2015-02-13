@@ -7,6 +7,6 @@ import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
  */
 public abstract class CreationRecipe extends AttachedPropertyBearerBase {
 
-	public abstract Object createInstance(ContextualInjector injector);
+	public abstract Object createInstance();
 
 }
