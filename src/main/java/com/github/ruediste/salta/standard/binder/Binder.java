@@ -20,7 +20,6 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -41,7 +40,7 @@ import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.matchers.Matcher;
-import com.github.ruediste.salta.standard.DefaultCreationRecipeFactory;
+import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.MembersInjector;
@@ -308,13 +307,23 @@ public class Binder {
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
 		StandardStaticBinding binding = new StandardStaticBinding();
+		DefaultCreationRecipeBuilder recipeBuilder = new DefaultCreationRecipeBuilder(
+				config, type, binding);
+
 		binding.dependencyMatcher = key -> Objects.equals(key.getType(), type);
 		binding.possibleTypes = Collections.singleton(type);
-		binding.recipeFactory = new DefaultCreationRecipeFactory(config, type);
+		binding.recipeFactory = ctx -> recipeBuilder.build(ctx);
+
 		config.config.staticBindings.add(binding);
 
-		return new AnnotatedBindingBuilder<>(injector, binding,
-				DependencyKey.of(type), config);
+		BindingBuilderData<T> data = new BindingBuilderData<>();
+		data.injector = injector;
+		data.binding = binding;
+		data.eagerInstantiationDependency = DependencyKey.of(type);
+		data.config = config;
+		data.recipeBuilder = recipeBuilder;
+
+		return new AnnotatedBindingBuilder<>(data);
 	}
 
 	/**
@@ -468,23 +477,6 @@ public class Binder {
 	 */
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
 		return getMembersInjector(TypeToken.of(type));
-	}
-
-	/**
-	 * Prevents Guice from constructing a {@link Proxy} when a circular
-	 * dependency is found. By default, circular proxies are not disabled.
-	 * <p>
-	 * If a parent injector disables circular proxies, then all child injectors
-	 * (and private modules within that injector) also disable circular proxies.
-	 * If a parent does not disable circular proxies, a child injector or
-	 * private module may optionally declare itself as disabling circular
-	 * proxies. If it does, the behavior is limited only to that child or any
-	 * grandchildren. No siblings of the child will disable circular proxies.
-	 * 
-	 * @since 3.0
-	 */
-	public void disableCircularProxies() {
-		config.disableCircularProxies = true;
 	}
 
 	/**

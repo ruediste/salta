@@ -15,8 +15,7 @@ public class JSR330Module extends AbstractModule {
 		config.defaultMembersInjectorFactories
 				.add(new JSR330MembersInjectorFactory());
 
-		config.config.creationRules.add(new ProviderDependencyFactoryRule(
-				binder().getInjector()));
+		config.config.creationRules.add(new ProviderDependencyFactoryRule());
 
 		// register initializer for requested static injections
 		config.dynamicInitializers.add(i -> new StaticMemberInjector()

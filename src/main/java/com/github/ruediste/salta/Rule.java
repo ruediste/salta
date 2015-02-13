@@ -18,5 +18,5 @@ public interface Rule {
 	 * @param key
 	 *            key beeing requested
 	 */
-	void apply(CreationRecipe<?> recipe, CoreDependencyKey<?> key);
+	void apply(CreationRecipe recipe, CoreDependencyKey<?> key);
 }

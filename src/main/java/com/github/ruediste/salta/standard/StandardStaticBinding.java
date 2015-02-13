@@ -2,9 +2,9 @@ package com.github.ruediste.salta.standard;
 
 import java.util.Set;
 
+import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.CreationRecipeFactory;
 import com.github.ruediste.salta.core.StaticBinding;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
@@ -28,8 +28,8 @@ public class StandardStaticBinding extends StaticBinding {
 	}
 
 	@Override
-	public CreationRecipe<?> createRecipe() {
-		return recipeFactory.createRecipe();
+	public CreationRecipe createRecipe(BindingContext ctx) {
+		return recipeFactory.createRecipe(ctx);
 	}
 
 	@Override
@@ -37,8 +37,4 @@ public class StandardStaticBinding extends StaticBinding {
 		return "StandardStaticBinding(" + dependencyMatcher + ")";
 	}
 
-	@Override
-	public CreationRecipeFactory getRecipeFactory() {
-		return recipeFactory;
-	}
 }

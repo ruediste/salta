@@ -7,53 +7,56 @@ import java.util.function.Function;
 
 import javax.inject.Provider;
 
+import com.github.ruediste.salta.core.BindingContext;
+import com.github.ruediste.salta.core.BindingContextImpl;
 import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
-import com.github.ruediste.salta.core.InstantiationContext;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
+import com.github.ruediste.salta.standard.recipe.TransitiveMembersInjector;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjector implements Injector {
 
 	private final class ProviderImpl<T> implements Provider<T> {
 
-		private Function<InstantiationContext, T> factoryFunction;
+		private Function<BindingContext, T> factoryFunction;
 
 		public ProviderImpl(CoreDependencyKey<T> key) {
-			config.staticInitializers.add(i -> factoryFunction = injector
+			config.staticInitializers.add(i -> factoryFunction = coreInjector
 					.getInstanceFactory(key));
 		}
 
 		@Override
 		public T get() {
 			checkInitialized();
-			return factoryFunction.apply(new InstantiationContext(injector));
+			return factoryFunction.apply(new BindingContextImpl(coreInjector));
 		}
 	}
 
 	private final class MembersInjectorImpl<T> implements MembersInjector<T> {
-		List<RecipeMembersInjector<T>> injectors = new ArrayList<>();
+		List<TransitiveMembersInjector> injectors = new ArrayList<>();
 
 		public MembersInjectorImpl(TypeToken<T> type) {
 			config.staticInitializers.add(i -> injectors = config
-					.createRecipeMembersInjectors(type));
+					.createRecipeMembersInjectors(new BindingContextImpl(
+							coreInjector), type));
 		}
 
 		@Override
 		public void injectMembers(T instance) {
 			checkInitialized();
-			for (RecipeMembersInjector<T> i : injectors) {
-				i.injectMembers(instance, null);
+			ContextualInjector ctxInjector = null;
+			for (TransitiveMembersInjector i : injectors) {
+				i.injectMembers(instance, ctxInjector);
 			}
 		}
 	}
 
 	private boolean initialized;
 	private StandardInjectorConfiguration config;
-	private CoreInjector injector;
+	private CoreInjector coreInjector;
 
 	private void checkInitialized() {
 		if (!initialized) {
@@ -64,7 +67,7 @@ public class StandardInjector implements Injector {
 
 	public void initialize(StandardInjectorConfiguration config) {
 		this.config = config;
-		injector = new CoreInjector(config.config);
+		coreInjector = new CoreInjector(config.config);
 		for (Consumer<Injector> initializer : config.staticInitializers) {
 			initializer.accept(this);
 		}
@@ -76,12 +79,12 @@ public class StandardInjector implements Injector {
 
 	@Override
 	public void injectMembers(Object instance) {
-		injectMembers(instance, injector.createContextualInjector());
+		injectMembers(instance, null);
 	}
 
 	@Override
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
-		injectMembers(type, instance, injector.createContextualInjector());
+		injectMembers(type, instance, null);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -92,14 +95,14 @@ public class StandardInjector implements Injector {
 				contextualInjector);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public <T> void injectMembers(TypeToken<T> type, T instance,
 			ContextualInjector contextualInjector) {
 		checkInitialized();
-		List<RecipeMembersInjector<Object>> injectors = (List) config
-				.createRecipeMembersInjectors(type);
-		for (RecipeMembersInjector<Object> rmi : injectors) {
+		List<TransitiveMembersInjector> injectors = config
+				.createRecipeMembersInjectors(new BindingContextImpl(
+						coreInjector), type);
+		for (TransitiveMembersInjector rmi : injectors) {
 			rmi.injectMembers(instance, contextualInjector);
 		}
 	}
@@ -129,13 +132,13 @@ public class StandardInjector implements Injector {
 	public <T> T getInstance(CoreDependencyKey<T> key) {
 
 		checkInitialized();
-		return injector.getInstance(key);
+		return coreInjector.getInstance(key);
 	}
 
 	@Override
 	public <T> T getInstance(Class<T> type) {
 		checkInitialized();
-		return injector.getInstance(DependencyKey.of(type));
+		return coreInjector.getInstance(DependencyKey.of(type));
 	}
 
 }

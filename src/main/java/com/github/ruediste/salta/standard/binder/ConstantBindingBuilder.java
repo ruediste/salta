@@ -1,10 +1,11 @@
 package com.github.ruediste.salta.standard.binder;
 
+import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.core.ContextualInjector;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.CreationRecipeFactory;
 import com.github.ruediste.salta.matchers.Matcher;
+import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 
@@ -26,21 +27,15 @@ public class ConstantBindingBuilder {
 		binding.recipeFactory = new CreationRecipeFactory() {
 
 			@Override
-			public CreationRecipe<?> createRecipe() {
-				CreationRecipe<Object> recipe = new CreationRecipe<Object>() {
+			public CreationRecipe createRecipe(BindingContext ctx) {
+				CreationRecipe recipe = new CreationRecipe() {
 
 					@Override
 					public Object createInstance(ContextualInjector injector) {
 						return value;
 					}
 
-					@Override
-					public void injectMembers(Object instance,
-							ContextualInjector injector) {
-						// NOP
-					}
 				};
-				recipe.scope = config.defaultScope;
 				return recipe;
 			}
 		};

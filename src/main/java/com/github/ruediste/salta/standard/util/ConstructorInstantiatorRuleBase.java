@@ -9,12 +9,14 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
+import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
-import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
+import com.github.ruediste.salta.standard.recipe.TransitiveRecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -25,7 +27,9 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		InstantiatorRule {
 
 	@Override
-	public <T> RecipeInstantiator<T> apply(TypeToken<T> typeToken) {
+	public TransitiveRecipeInstantiator apply(BindingContext ctx,
+			TypeToken<?> typeToken) {
+
 		Type type = typeToken.getType();
 		Class<?> clazz;
 		if (type instanceof Class) {
@@ -83,7 +87,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 
 		Constructor<?> constructor = highestPriorityConstructors.get(0);
 
-		ArrayList<CoreDependencyKey<?>> args = new ArrayList<>();
+		ArrayList<CreationRecipe> args = new ArrayList<>();
 
 		Parameter[] parameters = constructor.getParameters();
 		for (int i = 0; i < parameters.length; i++) {
@@ -92,10 +96,10 @@ public abstract class ConstructorInstantiatorRuleBase implements
 			CoreDependencyKey<Object> dependency = new InjectionPoint(
 					typeToken.resolveType(parameter.getParameterizedType()),
 					constructor, parameter, i);
-			args.add(dependency);
+			args.add(ctx.getRecipe(dependency));
 		}
 
-		return new FixedConstructorRecipeInstantiator<T>(constructor, args);
+		return new FixedConstructorRecipeInstantiator(constructor, args);
 	}
 
 	/**

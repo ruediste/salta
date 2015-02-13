@@ -4,10 +4,7 @@ import java.lang.annotation.Annotation;
 
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.Scope;
-import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
-import com.github.ruediste.salta.standard.StandardStaticBinding;
-import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 
 /**
  * See the EDSL examples at {@link Binder}.
@@ -16,23 +13,10 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
  */
 public class ScopedBindingBuilder<T> {
 
-	protected StandardStaticBinding binding;
-	protected StandardInjectorConfiguration config;
+	protected BindingBuilderData<T> data;
 
-	/**
-	 * Dependency to be used to trigger an eager instantiation
-	 */
-	protected DependencyKey<T> eagerInstantiationDependency;
-	protected Injector injector;
-
-	public ScopedBindingBuilder(Injector injector,
-			StandardStaticBinding binding,
-			DependencyKey<T> eagerInstantiationDependency,
-			StandardInjectorConfiguration config) {
-		this.injector = injector;
-		this.binding = binding;
-		this.eagerInstantiationDependency = eagerInstantiationDependency;
-		this.config = config;
+	public ScopedBindingBuilder(BindingBuilderData<T> data) {
+		this.data = data;
 
 	}
 
@@ -40,8 +24,8 @@ public class ScopedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public void in(Class<? extends Annotation> scopeAnnotation) {
-		binding.recipeFactory = () -> binding.recipeFactory.createRecipe()
-				.withScope(config.getScope(scopeAnnotation));
+		data.recipeBuilder.scopeSupplier = () -> data.config
+				.getScope(scopeAnnotation);
 
 	}
 
@@ -49,8 +33,7 @@ public class ScopedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public void in(Scope scope) {
-		binding.recipeFactory = () -> binding.recipeFactory.createRecipe()
-				.withScope(scope);
+		data.recipeBuilder.scopeSupplier = () -> scope;
 	}
 
 	/**
@@ -59,14 +42,13 @@ public class ScopedBindingBuilder<T> {
 	 * initialization logic. See the EDSL examples at {@link Binder}.
 	 */
 	public void asEagerSingleton() {
-		if (eagerInstantiationDependency == null) {
+		if (data.eagerInstantiationDependency == null) {
 			throw new ProvisionException(
 					"class to bind as eager singleton not known");
 		}
-		binding.recipeFactory = () -> binding.recipeFactory.createRecipe()
-				.withScope(config.singletonScope);
+		data.recipeBuilder.scopeSupplier = () -> data.config.singletonScope;
 
-		config.dynamicInitializers.add(x -> x
-				.getInstance(eagerInstantiationDependency));
+		data.config.dynamicInitializers.add(x -> x
+				.getInstance(data.eagerInstantiationDependency));
 	}
 }

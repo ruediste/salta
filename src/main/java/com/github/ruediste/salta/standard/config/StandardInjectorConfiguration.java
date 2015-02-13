@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.github.ruediste.attachedProperties4J.AttachedProperty;
 import com.github.ruediste.salta.core.Binding;
+import com.github.ruediste.salta.core.BindingContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.ProvisionException;
@@ -27,8 +27,9 @@ import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.ruediste.salta.standard.recipe.TransitiveMembersInjector;
+import com.github.ruediste.salta.standard.recipe.TransitiveRecipeInjectionListener;
+import com.github.ruediste.salta.standard.recipe.TransitiveRecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjectorConfiguration {
@@ -46,9 +47,10 @@ public class StandardInjectorConfiguration {
 	public final Map<Class<? extends Annotation>, Scope> scopeAnnotationMap = new HashMap<>();
 
 	/**
-	 * Strategy to create a {@link RecipeInstantiator} given a constructor.
+	 * Strategy to create a {@link TransitiveRecipeInstantiator} given a
+	 * constructor.
 	 */
-	public BiFunction<Constructor<?>, TypeToken<?>, RecipeInstantiator<?>> fixedConstructorInstantiatorFactory;
+	public BiFunction<Constructor<?>, TypeToken<?>, TransitiveRecipeInstantiator> fixedConstructorInstantiatorFactory;
 
 	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
 
@@ -60,8 +62,8 @@ public class StandardInjectorConfiguration {
 
 	/**
 	 * Default list of factories used to create {@link RecipeMembersInjector}s
-	 * for a given type. If no member of the {@link #membersInjectorRules}
-	 * matches for a type these factories are used.
+	 * for a given type. These factories are used if no member of the
+	 * {@link #membersInjectorRules} matches for a type.
 	 */
 	public final List<RecipeMembersInjectorFactory> defaultMembersInjectorFactories = new ArrayList<>();
 
@@ -70,20 +72,20 @@ public class StandardInjectorConfiguration {
 	 * {@link #membersInjectorRules} and as fallback the
 	 * {@link #defaultMembersInjectorFactories}
 	 */
-	public <T> List<RecipeMembersInjector<T>> createRecipeMembersInjectors(
-			TypeToken<T> type) {
+	public List<TransitiveMembersInjector> createRecipeMembersInjectors(
+			BindingContext ctx, TypeToken<?> type) {
 		// test rules
 		for (MembersInjectorRule rule : membersInjectorRules) {
-			List<RecipeMembersInjector<T>> membersInjectors = rule
+			List<TransitiveMembersInjector> membersInjectors = rule
 					.getMembersInjectors(type);
 			if (membersInjectors != null)
 				return membersInjectors;
 		}
 
 		// use default factories
-		ArrayList<RecipeMembersInjector<T>> result = new ArrayList<>();
+		ArrayList<TransitiveMembersInjector> result = new ArrayList<>();
 		for (RecipeMembersInjectorFactory factory : defaultMembersInjectorFactories) {
-			result.addAll(factory.createInjectors(type));
+			result.addAll(factory.createInjectors(ctx, type));
 		}
 		return result;
 	}
@@ -97,12 +99,14 @@ public class StandardInjectorConfiguration {
 
 	/**
 	 * Create an {@link RecipeInstantiator} using the {@link #instantiatorRules}
+	 * 
+	 * @param ctx
 	 */
-	public <T> RecipeInstantiator<T> createRecipeInstantiator(TypeToken<?> type) {
+	public <T> TransitiveRecipeInstantiator createRecipeInstantiator(
+			BindingContext ctx, TypeToken<?> type) {
 		for (InstantiatorRule rule : instantiatorRules) {
 			@SuppressWarnings("unchecked")
-			RecipeInstantiator<T> instantiator = (RecipeInstantiator<T>) rule
-					.apply(type);
+			TransitiveRecipeInstantiator instantiator = rule.apply(ctx, type);
 			if (instantiator != null) {
 				return instantiator;
 			}
@@ -161,23 +165,25 @@ public class StandardInjectorConfiguration {
 	}
 
 	private static final class SingletonScope implements Scope {
-		private Cache<Binding, Object> instances = CacheBuilder.newBuilder()
-				.build();
+
+		private final AttachedProperty<Binding, Object> instance = new AttachedProperty<>(
+				"instance");
+
+		Object lock = new Object();
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T> T scope(Binding key, Supplier<T> unscoped) {
-			try {
-				return (T) instances.get(key, new Callable<Object>() {
 
-					@Override
-					public Object call() throws Exception {
-						return unscoped.get();
-					}
+			if (instance.isSet(key))
+				return (T) instance.get(key);
 
-				});
-			} catch (ExecutionException e) {
-				throw new ProvisionException(e.getCause());
+			synchronized (lock) {
+				if (instance.isSet(key))
+					return (T) instance.get(key);
+				T value = unscoped.get();
+				instance.set(key, value);
+				return value;
 			}
 		}
 
@@ -212,7 +218,10 @@ public class StandardInjectorConfiguration {
 	 */
 	public final List<CoreDependencyKey<?>> requestedEagerInstantiations = new ArrayList<>();
 
-	public boolean disableCircularProxies;
-
 	public boolean requireAtInjectOnConstructors;
+
+	public List<TransitiveRecipeInjectionListener> createInjectionListeners(
+			BindingContext ctx, TypeToken<?> type) {
+		throw new UnsupportedOperationException("TODO");
+	}
 }

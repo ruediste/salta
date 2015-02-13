@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard.recipe;
 
 import java.util.List;
 
+import com.github.ruediste.salta.core.BindingContext;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -10,5 +11,6 @@ import com.google.common.reflect.TypeToken;
  * injectors are used
  */
 public interface RecipeMembersInjectorFactory {
-	<T> List<RecipeMembersInjector<T>> createInjectors(TypeToken<T> type);
+	List<TransitiveMembersInjector> createInjectors(BindingContext ctx,
+			TypeToken<?> type);
 }

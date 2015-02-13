@@ -22,19 +22,17 @@ public class CoreInjector {
 	private final JITBinding nullJitBinding = new JITBinding() {
 
 		@Override
-		public CreationRecipe<?> createRecipe() {
+		public CreationRecipe createRecipe(BindingContext ctx) {
 			throw new UnsupportedOperationException(
 					"Called createRecipe() of null binding");
 		}
 
-		@Override
-		public CreationRecipeFactory getRecipeFactory() {
-			throw new UnsupportedOperationException(
-					"Called getRecipeFactory() of null binding");
-		}
 	};
 
-	private Cache<CoreDependencyKey<?>, Function<InstantiationContext, ?>> keyBasedCache = CacheBuilder
+	private Cache<CoreDependencyKey<?>, CreationRecipe> rootRecipeCache = CacheBuilder
+			.newBuilder().build();
+
+	private Cache<CoreDependencyKey<?>, Function<BindingContext, CreationRecipe>> recipeFactoryCache = CacheBuilder
 			.newBuilder().build();
 
 	private Cache<JITBindingKey, JITBinding> jitBindings = CacheBuilder
@@ -67,21 +65,17 @@ public class CoreInjector {
 		}
 	}
 
-	public <T> T getInstance(CoreDependencyKey<T> key) {
-		return getInstance(key, new InstantiationContext(this));
-	}
-
 	@SuppressWarnings("unchecked")
-	public <T> T getInstance(CoreDependencyKey<T> key, InstantiationContext ctx) {
-		Function<InstantiationContext, ?> factory;
+	public <T> T getInstance(CoreDependencyKey<T> key) {
+		CreationRecipe creationRecipe;
 		try {
-			factory = keyBasedCache.get(key,
-					new Callable<Function<InstantiationContext, ?>>() {
+			creationRecipe = rootRecipeCache.get(key,
+					new Callable<CreationRecipe>() {
 
 						@Override
-						public Function<InstantiationContext, ?> call()
-								throws Exception {
-							return getInstanceFactory(key);
+						public CreationRecipe call() throws Exception {
+							return getRecipe(key, new BindingContextImpl(
+									CoreInjector.this));
 						}
 					});
 		} catch (UncheckedExecutionException | ExecutionException e) {
@@ -90,19 +84,54 @@ public class CoreInjector {
 			throw new ProvisionException("Error looking up dependency " + key,
 					e.getCause());
 		}
-		return (T) factory.apply(ctx);
+
+		return (T) creationRecipe.createInstance(new ContextualInjectorImpl(
+				this));
+	}
+
+	public <T> T getInstance(CoreDependencyKey<T> key, BindingContext ctx) {
+		return getInstanceFactory(key).apply(ctx);
 
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> Function<InstantiationContext, T> getInstanceFactory(
+	public <T> Function<BindingContext, T> getInstanceFactory(
 			CoreDependencyKey<T> key) {
+		return ctx -> (T) getRecipe(key, ctx).createInstance(null);
+	}
+
+	public CreationRecipe getRecipe(CoreDependencyKey<?> key, BindingContext ctx) {
+		return getRecipeFactory(key).apply(ctx);
+	}
+
+	private Function<BindingContext, CreationRecipe> getRecipeFactory(
+			CoreDependencyKey<?> key) {
+		try {
+			return recipeFactoryCache.get(key,
+					new Callable<Function<BindingContext, CreationRecipe>>() {
+
+						@Override
+						public Function<BindingContext, CreationRecipe> call()
+								throws Exception {
+							return getRecipeFactoryInner(key);
+						}
+					});
+		} catch (UncheckedExecutionException | ExecutionException e) {
+			if (e.getCause() instanceof ProvisionException)
+				throw (ProvisionException) e.getCause();
+			throw new ProvisionException("Error looking up dependency " + key,
+					e.getCause());
+		}
+	}
+
+	private Function<BindingContext, CreationRecipe> getRecipeFactoryInner(
+			CoreDependencyKey<?> key) {
 		try {
 			// check rules
 			for (DependencyFactoryRule rule : config.creationRules) {
-				DependencyFactory<?> factory = rule.apply(key);
-				if (factory != null)
-					return ctx -> (T) factory.createInstance(ctx.injector);
+				Function<BindingContext, CreationRecipe> f = rule.apply(key);
+				if (f != null)
+					return f;
 			}
 
 			// check static bindings
@@ -125,13 +154,9 @@ public class CoreInjector {
 				}
 
 				if (binding != null) {
-					CreationRecipe<?> recipe = binding.createRecipe();
-					StaticBinding tmp = binding;
-					return ctx -> {
-						return (T) ctx.getInstance(tmp, key.getRawType(),
-								recipe);
-
-					};
+					Binding tmp = binding;
+					return ctx -> ctx.withBinding(tmp,
+							() -> tmp.createRecipe(ctx));
 				}
 			}
 
@@ -168,24 +193,17 @@ public class CoreInjector {
 
 				// use binding if available
 				if (jitBinding != nullJitBinding) {
-					CreationRecipe<?> recipe = jitBinding.createRecipe();
-					return ctx -> (T) ctx.getInstance(jitBinding,
-							key.getRawType(), recipe);
+					return ctx -> ctx.withBinding(jitBinding,
+							() -> jitBinding.createRecipe(ctx));
 				}
 			}
 		} catch (ProvisionException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new ProvisionException("Error while creating instance for "
-					+ key, e);
+			throw new ProvisionException("Error looking up dependency " + key,
+					e.getCause());
 		}
-
 		throw new ProvisionException("Dependency cannot be resolved:\n" + key);
-
-	}
-
-	public ContextualInjector createContextualInjector() {
-		return new InstantiationContext(this).injector;
 	}
 
 }

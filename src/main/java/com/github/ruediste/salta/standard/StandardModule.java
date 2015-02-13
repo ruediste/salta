@@ -37,8 +37,8 @@ public class StandardModule extends AbstractModule {
 			public JITBinding apply(JITBindingKey key) {
 				TypeToken<?> type = jitBindingKeyType.get(key);
 				StandardJitBinding binding = new StandardJitBinding();
-				binding.recipeFactory = new DefaultCreationRecipeFactory(
-						config, type);
+				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
+						config, type, binding).build(ctx);
 				return binding;
 			}
 		});

@@ -1,28 +1,22 @@
 package com.github.ruediste.salta.core;
 
+import java.util.function.Supplier;
+
 public class ContextualInjectorImpl implements ContextualInjector {
 
 	private CoreInjector injector;
-	private InstantiationContext ctx;
 
-	public ContextualInjectorImpl(CoreInjector injector,
-			InstantiationContext ctx) {
+	public ContextualInjectorImpl(CoreInjector injector) {
 		this.injector = injector;
-		this.ctx = ctx;
+	}
+
+	@Override
+	public <T> T withBinding(Binding binding, Supplier<T> sup) {
+		return sup.get();
 	}
 
 	@Override
 	public <T> T getInstance(CoreDependencyKey<T> key) {
-		return injector.getInstance(key, ctx);
-	}
-
-	@Override
-	public CoreInjector getInjector() {
-		return injector;
-	}
-
-	@Override
-	public InstantiationContext getInstantiationContext() {
-		return ctx;
+		return null;
 	}
 }
