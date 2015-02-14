@@ -40,6 +40,10 @@ public class CreationRecipeCompiler {
 	CompilerClassLoader loader = new CompilerClassLoader();
 	AtomicInteger classNumber = new AtomicInteger();
 
+	/**
+	 * Compile a recipe. May be called from multiple threads. May not acquire
+	 * {@link CoreInjector#recipeLock} or {@link CoreInjector#instantiationLock}
+	 */
 	public Supplier<?> compile(CreationRecipe recipe) {
 		RecipeCompilationContext ctx = new RecipeCompilationContext();
 
@@ -77,6 +81,8 @@ public class CreationRecipeCompiler {
 		if (true) {
 			ClassReader cr = new ClassReader(cw.toByteArray());
 			CheckClassAdapter.verify(cr, false, new PrintWriter(System.err));
+			// cr.accept(new TraceClassVisitor(null, new ASMifier(),
+			// new PrintWriter(System.out)), 0);
 		}
 
 		// load and instantiate

@@ -11,9 +11,17 @@ Salta was created as a response to shortcomings of both (JavaEE CDI)[http://docs
 
 In CDI, the set of available beans (the counterpart of bindings in Guice) is determined when the container is initialized and cannot be changed afterwards. This implies that the available classes are scanned during startup, which results in slow startup speeds.
 
-In Guice, the bindings can be created while the container is running. However, the focus lies on robustness. There are some major shortcomings in the area of flexibility. The annotations are hardcoded and there is no way to add a standard dependency (annotated with @Inject) to an injection point specific instance. (As it would for example be necessary to nicely integrate slf4j loggers)
+In Guice, the bindings can be created while the container is running (JIT bindings). However, the focus lies on robustness. There are some major shortcomings in the area of flexibility. The annotations are hardcoded and there is no way to add a standard dependency (annotated with @Inject) to an injection point specific instance. (As it would for example be necessary to nicely integrate slf4j loggers)
 
-So the goal for SimpleDI is to provide an API close to Guice, while focusing on fexibility. No class scanning happens at startup. Bindings can be created just in time, with the possiblity to specify explicit bindings in Modules. Depedencies can be satisfied in an injection point specific way.
+So the goal for SimpleDI is to provide an API close to Guice, while focusing on fexibility. No class scanning happens at startup. Bindings can be created just in time, with the possibility to specify explicit bindings in Modules. Depedencies can be satisfied in an injection point specific way.
+
+## Locking
+Salta tries to do as much as possible without locking. If synchronization is required, there is one lock for the creation of recipes (recipe lock) and one for the creation of instances (instantiation lock). The recipe lock is acquired eagerly, whenever a new recipe needs to be created. The instantiation lock is mainly used if a scope needs to make sure only a single instance is created for a binding.
+
+To avoid deadlocks, a thread holding the instantiation lock may not acquire the recipe lock. Thus all code in the compiled creation recipe, all constructors, injected methods and post construct methods may not use Injector.getInstance(). 
+
+## Speed
+Salta uses bytecode generation to speed up instantiation. Expect a 5x to 10x speedup over Guice.
 
 ## Bindings
 Bindings are a central element of SimpleDI. 

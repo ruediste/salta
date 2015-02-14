@@ -5,8 +5,8 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.commons.GeneratorAdapter;
 
 public class CreationRecipeCompilerTest {
 
@@ -22,7 +22,7 @@ public class CreationRecipeCompilerTest {
 		CreationRecipe recipe = new CreationRecipe() {
 
 			@Override
-			public void compile(MethodVisitor mv,
+			public void compile(GeneratorAdapter mv,
 					RecipeCompilationContext compilationContext) {
 				mv.visitInsn(Opcodes.ICONST_3);
 				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer",

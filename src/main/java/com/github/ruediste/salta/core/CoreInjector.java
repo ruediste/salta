@@ -4,45 +4,35 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class CoreInjector {
+
+	/**
+	 * Lock object for recipe creation. May not be acquired while holding the
+	 * {@link #instantiationLock}
+	 */
+	public final Object recipeLock = new Object();
+
+	/**
+	 * Lock object used during instantiation.
+	 */
+	public final Object instantiationLock = new Object();
 
 	private CoreInjectorConfiguration config;
 
 	private CreationRecipeCompiler compiler = new CreationRecipeCompiler();
 
-	private final JITBinding nullJitBinding = new JITBinding() {
+	private ConcurrentHashMap<CoreDependencyKey<?>, Supplier<?>> compiledRecipeCache = new ConcurrentHashMap<>();
 
-		@Override
-		public CreationRecipe createRecipe(RecipeCreationContext ctx) {
-			throw new UnsupportedOperationException(
-					"Called createRecipe() of null binding");
-		}
+	private HashMap<CoreDependencyKey<?>, CreationRecipe> recipeCache = new HashMap<>();
 
-	};
-
-	// private Cache<CoreDependencyKey<?>, Supplier<?>> compiledRecipeCache =
-	// CacheBuilder
-	// .newBuilder().build();
-	private Map<CoreDependencyKey<?>, Supplier<?>> compiledRecipeCache = new ConcurrentHashMap<>();
-
-	private Cache<CoreDependencyKey<?>, CreationRecipe> recipeCache = CacheBuilder
-			.newBuilder().build();
-
-	private Cache<JITBindingKey, JITBinding> jitBindings = CacheBuilder
-			.newBuilder().build();
+	private HashMap<JITBindingKey, JITBinding> jitBindings = new HashMap<>();
 
 	private HashMap<TypeToken<?>, List<StaticBinding>> staticBindingMap = new HashMap<>();
 	private ArrayList<StaticBinding> nonTypeSpecificStaticBindings = new ArrayList<>();
@@ -83,14 +73,21 @@ public class CoreInjector {
 	}
 
 	public Supplier<?> getCompiledRecipe(CoreDependencyKey<?> key) {
-		Supplier<?> supplier = compiledRecipeCache.get(key);
-		if (supplier != null)
-			return supplier;
+		Supplier<?> compiledRecipe = compiledRecipeCache.get(key);
+		if (compiledRecipe != null)
+			return compiledRecipe;
 
-		// todo: locking
-		supplier = compiler.compile(getRecipe(key));
-		compiledRecipeCache.put(key, supplier);
-		return supplier;
+		// possibly slow
+		CreationRecipe recipe = getRecipe(key);
+
+		// compile the recipe with a lock on the key. Therefore
+		// compile must not do anything fancy
+		return compiledRecipeCache.computeIfAbsent(key,
+				x -> compileRecipe(recipe));
+	}
+
+	public Supplier<?> compileRecipe(CreationRecipe recipe) {
+		return compiler.compile(recipe);
 	}
 
 	public CreationRecipe getRecipe(CoreDependencyKey<?> key) {
@@ -99,23 +96,21 @@ public class CoreInjector {
 
 	public CreationRecipe getRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
-		try {
-			return recipeCache.get(key, new Callable<CreationRecipe>() {
-
-				@Override
-				public CreationRecipe call() throws Exception {
-					return getRecipeInner(key, ctx);
-				}
-			});
-		} catch (UncheckedExecutionException | ExecutionException e) {
-			if (e.getCause() instanceof ProvisionException)
-				throw (ProvisionException) e.getCause();
-			throw new ProvisionException("Error looking up dependency " + key,
-					e.getCause());
+		// acquire the recipe lock
+		synchronized (recipeLock) {
+			CreationRecipe result = recipeCache.get(key);
+			if (result == null) {
+				result = createRecipe(key, ctx);
+				recipeCache.put(key, result);
+			}
+			return result;
 		}
 	}
 
-	private CreationRecipe getRecipeInner(CoreDependencyKey<?> key,
+	/**
+	 * Create a recipe. Expects the {@link #recipeLock} to be acquired
+	 */
+	private CreationRecipe createRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
 		try {
 			// check rules
@@ -145,8 +140,7 @@ public class CoreInjector {
 				}
 
 				if (binding != null) {
-					Binding tmp = binding;
-					return ctx.withBinding(tmp, () -> tmp.createRecipe(ctx));
+					return ctx.getOrCreateRecipe(binding, ctx);
 				}
 			}
 
@@ -160,38 +154,24 @@ public class CoreInjector {
 
 				// check existing bindings and create new one if necessary
 				JITBinding jitBinding;
-				try {
-					jitBinding = jitBindings.get(jitKey,
-							new Callable<JITBinding>() {
-
-								@Override
-								public JITBinding call() throws Exception {
-									for (JITBindingRule rule : config.jitBindingRules) {
-										JITBinding binding = rule.apply(jitKey);
-										if (binding != null) {
-											return binding;
-										}
-									}
-									return nullJitBinding;
-								}
-							});
-				} catch (ExecutionException e) {
-					throw new ProvisionException(
-							"Error while evaluating JIT binding rules",
-							e.getCause());
+				jitBinding = jitBindings.get(jitKey);
+				if (jitBinding == null) {
+					for (JITBindingRule rule : config.jitBindingRules) {
+						jitBinding = rule.apply(jitKey);
+						if (jitBinding != null) {
+							jitBindings.put(jitKey, jitBinding);
+							break;
+						}
+					}
 				}
 
 				// use binding if available
-				if (jitBinding != nullJitBinding) {
-					return ctx.withBinding(jitBinding,
-							() -> jitBinding.createRecipe(ctx));
+				if (jitBinding != null) {
+					return ctx.getOrCreateRecipe(jitBinding, ctx);
 				}
 			}
-		} catch (ProvisionException e) {
-			throw e;
 		} catch (Exception e) {
-			throw new ProvisionException("Error looking up dependency " + key,
-					e.getCause());
+			throw new ProvisionException("Error creating recipe for " + key, e);
 		}
 		throw new ProvisionException("Dependency cannot be resolved:\n" + key);
 	}

@@ -38,7 +38,6 @@ import net.sf.cglib.proxy.ProxyRefDispatcher;
 
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -46,6 +45,7 @@ import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Module;
+import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;

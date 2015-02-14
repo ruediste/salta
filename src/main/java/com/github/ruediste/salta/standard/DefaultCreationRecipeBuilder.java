@@ -10,7 +10,6 @@ import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -29,10 +28,12 @@ public class DefaultCreationRecipeBuilder {
 
 	public Supplier<Scope> scopeSupplier;
 	private Binding binding;
+	private TypeToken<?> type;
 
 	public DefaultCreationRecipeBuilder(StandardInjectorConfiguration config,
 			TypeToken<?> type, Binding binding) {
 
+		this.type = type;
 		this.binding = binding;
 		instantiatorSupplier = ctx -> config
 				.createRecipeInstantiator(ctx, type);
@@ -55,23 +56,22 @@ public class DefaultCreationRecipeBuilder {
 		RecipeInjectionListener[] listen = injectionListenerSupplier.apply(ctx)
 				.toArray(new RecipeInjectionListener[] {});
 
-		Scope scope = scopeSupplier.get();
-		return new CreationRecipe() {
+		CreationRecipe innerRecipe = new CreationRecipe() {
 
 			@Override
 			public void compile(GeneratorAdapter mv,
 					RecipeCompilationContext compilationContext) {
-				scope.compile(mv, compilationContext, () -> {
-					transitiveInstantiator.compile(mv, compilationContext);
-					for (RecipeMembersInjector membersInjector : mem) {
-						membersInjector.compile(mv, compilationContext);
-					}
-					for (RecipeInjectionListener listener : listen) {
-						listener.compile(mv, compilationContext);
-					}
-				});
+				transitiveInstantiator.compile(mv, compilationContext);
+				for (RecipeMembersInjector membersInjector : mem) {
+					membersInjector.compile(mv, compilationContext);
+				}
+				for (RecipeInjectionListener listener : listen) {
+					listener.compile(mv, compilationContext);
+				}
 			}
 
 		};
+		return scopeSupplier.get()
+				.createRecipe(ctx, binding, type, innerRecipe);
 	}
 }

@@ -9,16 +9,15 @@ import org.junit.Test;
 
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.ProvisionException;
-import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.standard.Injector;
 
 public class JSR330ConstructorInstantiatorRuleTest {
 
 	private Injector injector;
 
-	static class NoParameter {
-		public NoParameter() {
-		}
+	private static class NoParameter {
+		// public NoParameter() {
+		// }
 	}
 
 	static class OneParameter {

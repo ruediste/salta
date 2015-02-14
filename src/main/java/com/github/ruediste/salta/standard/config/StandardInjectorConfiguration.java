@@ -13,20 +13,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-import org.objectweb.asm.commons.GeneratorAdapter;
-
-import com.github.ruediste.attachedProperties4J.AttachedProperty;
-import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.ProvisionException;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Message;
+import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.ScopeRule;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
@@ -160,62 +154,6 @@ public class StandardInjectorConfiguration {
 			throw new ProvisionException("Unknown scope annotation "
 					+ scopeAnnotation);
 		return scope;
-	}
-
-	private static final class DefaultScope implements Scope {
-		@Override
-		public <T> T scope(Binding key, Supplier<T> unscoped) {
-			return unscoped.get();
-		}
-
-		@Override
-		public String toString() {
-			return "Default";
-		}
-
-		@Override
-		public void compile(GeneratorAdapter mv,
-				RecipeCompilationContext compilationContext,
-				Runnable instantiationCompilation) {
-			instantiationCompilation.run();
-		}
-	}
-
-	private static final class SingletonScope implements Scope {
-
-		private final AttachedProperty<Binding, Object> instance = new AttachedProperty<>(
-				"instance");
-
-		Object lock = new Object();
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T> T scope(Binding key, Supplier<T> unscoped) {
-
-			if (instance.isSet(key))
-				return (T) instance.get(key);
-
-			synchronized (lock) {
-				if (instance.isSet(key))
-					return (T) instance.get(key);
-				T value = unscoped.get();
-				instance.set(key, value);
-				return value;
-			}
-		}
-
-		@Override
-		public String toString() {
-			return "Singleton";
-		}
-
-		@Override
-		public void compile(GeneratorAdapter mv,
-				RecipeCompilationContext compilationContext,
-				Runnable instantiationCompilation) {
-			// TODO Auto-generated method stub
-
-		}
 	}
 
 	/**

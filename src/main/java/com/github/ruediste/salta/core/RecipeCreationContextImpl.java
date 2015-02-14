@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.joining;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.function.Supplier;
 
 /**
  * Contains the bindings which are currently beeing constructed and is used for
@@ -47,12 +46,18 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	}
 
 	@Override
-	public <T> T withBinding(Binding binding, Supplier<T> sup) {
+	public <T> CreationRecipe getOrCreateRecipe(Binding binding,
+			RecipeCreationContext ctx) {
 		addBinding(binding);
 		try {
-			return sup.get();
+			return binding.getOrCreateRecipe(ctx);
 		} finally {
 			removeBinding(binding);
 		}
+	}
+
+	@Override
+	public Object getInstance(CreationRecipe recipe) {
+		return coreInjector.compileRecipe(recipe).get();
 	}
 }

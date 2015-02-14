@@ -1,6 +1,5 @@
 package com.github.ruediste.salta.standard;
 
-import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
