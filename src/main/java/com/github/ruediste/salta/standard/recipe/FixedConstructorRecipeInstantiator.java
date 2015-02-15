@@ -7,9 +7,9 @@ import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
@@ -39,6 +39,29 @@ public class FixedConstructorRecipeInstantiator implements RecipeInstantiator {
 	@Override
 	public void compile(GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
+		if (isConstructorAccessible())
+			compileDirect(mv, compilationContext);
+		else
+			compileReflection(mv, compilationContext);
+	}
+
+	boolean isConstructorAccessible() {
+		if (Modifier.isPublic(constructor.getModifiers())) {
+			Class<?> declaringClass = constructor.getDeclaringClass();
+			do {
+				if (!Modifier.isPublic(declaringClass.getModifiers()))
+					return false;
+				declaringClass = declaringClass.getEnclosingClass();
+			} while (declaringClass != null);
+
+			return true;
+		}
+		return false;
+	}
+
+	private void compileReflection(GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext) {
+
 		// push constructor
 		compilationContext.addAndLoad(Type.getDescriptor(Constructor.class),
 				constructor);
@@ -73,14 +96,22 @@ public class FixedConstructorRecipeInstantiator implements RecipeInstantiator {
 		mv.visitLabel(l2);
 	}
 
-	private int foo() throws Throwable {
-		try {
-			if (new Random().nextBoolean())
-				throw new InvocationTargetException(null);
-			System.out.println("past");
-		} catch (InvocationTargetException e) {
-			throw e.getCause();
+	private void compileDirect(GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext) {
+
+		mv.newInstance(Type.getType(constructor.getDeclaringClass()));
+		mv.dup();
+
+		// push dependencies
+
+		for (int i = 0; i < argumentDependencies.size(); i++) {
+			CreationRecipe dependency = argumentDependencies.get(i);
+			dependency.compile(mv, compilationContext);
 		}
-		return 5;
+
+		// call constructor
+		mv.invokeConstructor(Type.getType(constructor.getDeclaringClass()),
+				Method.getMethod(constructor));
 	}
+
 }

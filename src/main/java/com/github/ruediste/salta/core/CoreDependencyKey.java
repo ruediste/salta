@@ -26,4 +26,8 @@ public abstract class CoreDependencyKey<T> {
 	 */
 	public abstract AnnotatedElement getAnnotatedElement();
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "(" + getType() + ")";
+	}
 }

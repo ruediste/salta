@@ -25,7 +25,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 		ProviderAccessBeforeRecipeCreationFinishedException() {
 			super(
-					"Attempt to access injected Provider before the recipe creation finished. Known cause: accessing provider from constructor in singleton");
+					"Attempt to access injected Provider before the recipe creation finished. Possible cause: accessing provider from constructor in singleton");
 		}
 	}
 

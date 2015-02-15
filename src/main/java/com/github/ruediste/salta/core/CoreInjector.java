@@ -121,7 +121,12 @@ public class CoreInjector {
 		synchronized (recipeLock) {
 			CreationRecipe result = recipeCache.get(key);
 			if (result == null) {
-				result = createRecipe(key, ctx);
+				try {
+					result = createRecipe(key, ctx);
+				} catch (Exception e) {
+					throw new ProvisionException(
+							"Error while creating recipe for " + key, e);
+				}
 				recipeCache.put(key, result);
 			}
 			return result;

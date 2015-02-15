@@ -104,10 +104,11 @@ public class StandardInjector implements Injector {
 		public MembersInjectorImpl(TypeToken<T> type) {
 			this.type = type;
 			synchronized (coreInjector.recipeLock) {
+				RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
+						coreInjector);
 				List<RecipeMembersInjector> injectors = config
-						.createRecipeMembersInjectors(
-								new RecipeCreationContextImpl(coreInjector),
-								type);
+						.createRecipeMembersInjectors(ctx, type);
+				ctx.processQueuedActions();
 				CreationRecipe recipe = new CreationRecipe() {
 
 					@Override

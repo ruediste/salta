@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.jsr330;
 
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -10,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.Salta;
+import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.jsr330.ProviderDependencyFactoryRule.ProviderAccessBeforeInstanceCreationFinishedException;
 import com.github.ruediste.salta.jsr330.ProviderDependencyFactoryRule.ProviderAccessBeforeRecipeCreationFinishedException;
 import com.github.ruediste.salta.standard.Injector;
@@ -83,9 +85,13 @@ public class ProviderDependencyFactoryRuleTest {
 		injector.getInstance(TestClassC.class);
 	}
 
-	@Test(expected = ProviderAccessBeforeRecipeCreationFinishedException.class)
+	@Test
 	public void testForbiddenProviderAccessSingleton() {
-		injector.getInstance(TestClassE.class);
+		try {
+			injector.getInstance(TestClassE.class);
+		} catch (ProvisionException e) {
+			assertTrue(e.getCause() instanceof ProviderAccessBeforeRecipeCreationFinishedException);
+		}
 
 	}
 }

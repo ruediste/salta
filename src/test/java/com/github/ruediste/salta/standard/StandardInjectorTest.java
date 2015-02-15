@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +14,7 @@ import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.google.common.reflect.TypeToken;
 
-public class StandardModuleTest {
-
+public class StandardInjectorTest {
 	private Injector injector;
 
 	@Before
@@ -28,6 +28,11 @@ public class StandardModuleTest {
 	public static class TestClassB {
 		@Inject
 		TestClassA a;
+	}
+
+	public static class TestClassC {
+		@Inject
+		Provider<TestClassA> a;
 	}
 
 	public static class TestClassGeneric<T> {
@@ -58,5 +63,12 @@ public class StandardModuleTest {
 	public void testInjectMembersGenericFailWithoutTypeToken() {
 		TestClassGeneric<TestClassA> b = new TestClassGeneric<TestClassA>();
 		injector.injectMembers(b);
+	}
+
+	@Test
+	public void testInjectProvider() {
+		TestClassC c = new TestClassC();
+		injector.injectMembers(c);
+		assertNotNull(c.a.get());
 	}
 }

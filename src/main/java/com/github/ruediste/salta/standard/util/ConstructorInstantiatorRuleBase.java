@@ -9,10 +9,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
@@ -72,17 +72,11 @@ public abstract class ConstructorInstantiatorRuleBase implements
 			highestPriorityConstructors.add(c);
 		}
 		if (highestPriorityConstructors.size() > 1)
-			throw new ProvisionException(
-					"Ambigous eligible constructors found on type\n"
-							+ typeToken
-							+ "\nConstructors:\n"
-							+ highestPriorityConstructors.stream()
-									.map(Object::toString)
-									.collect(joining("\n->", "->", "")));
+			throw multipleConstructorsFound(typeToken, clazz,
+					highestPriorityConstructors);
 
 		if (highestPriorityConstructors.isEmpty()) {
-			throw new ProvisionException(
-					"No suitable constructor found for type " + typeToken);
+			throw noConstructorFound(typeToken, clazz);
 		}
 
 		Constructor<?> constructor = highestPriorityConstructors.get(0);
@@ -100,6 +94,24 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		}
 
 		return new FixedConstructorRecipeInstantiator(constructor, args);
+	}
+
+	protected ProvisionException multipleConstructorsFound(
+			TypeToken<?> typeToken, Class<?> clazz,
+			ArrayList<Constructor<?>> highestPriorityConstructors) {
+		return new ProvisionException(
+				"Ambigous eligible constructors found on type\n"
+						+ typeToken
+						+ "\nConstructors:\n"
+						+ highestPriorityConstructors.stream()
+								.map(Object::toString)
+								.collect(joining("\n->", "->", "")));
+	}
+
+	protected ProvisionException noConstructorFound(TypeToken<?> typeToken,
+			Class<?> clazz) {
+		return new ProvisionException("No suitable constructor found for type "
+				+ typeToken);
 	}
 
 	/**
