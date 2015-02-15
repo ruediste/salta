@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.joining;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.function.Consumer;
 
 /**
  * Contains the bindings which are currently beeing constructed and is used for
@@ -17,12 +18,9 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 		this.coreInjector = coreInjector;
 	}
 
-	@Override
-	public CreationRecipe getRecipe(CoreDependencyKey<?> dependency) {
-		return coreInjector.getRecipe(dependency, this);
-	}
-
 	private LinkedHashSet<Binding> currentBindings = new LinkedHashSet<>();
+
+	private ArrayList<Consumer<RecipeCreationContext>> queuedActions = new ArrayList<>();
 
 	private void removeBinding(Binding b) {
 		currentBindings.remove(b);
@@ -46,18 +44,37 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	}
 
 	@Override
-	public <T> CreationRecipe getOrCreateRecipe(Binding binding,
-			RecipeCreationContext ctx) {
+	public CreationRecipe getOrCreateRecipe(Binding binding) {
 		addBinding(binding);
 		try {
-			return binding.getOrCreateRecipe(ctx);
+			return binding.getOrCreateRecipe(this);
 		} finally {
 			removeBinding(binding);
 		}
 	}
 
 	@Override
-	public Object getInstance(CreationRecipe recipe) {
-		return coreInjector.compileRecipe(recipe).get();
+	public CompiledCreationRecipe compileRecipe(CreationRecipe recipe) {
+		return coreInjector.compileRecipe(recipe);
 	}
+
+	@Override
+	public CreationRecipe getRecipe(CoreDependencyKey<?> dependency) {
+		return coreInjector.getRecipe(dependency, this);
+	}
+
+	@Override
+	public CreationRecipe getRecipeInNewContext(CoreDependencyKey<?> dependency) {
+		return coreInjector.getRecipe(dependency);
+	}
+
+	public void processQueuedActions() {
+		queuedActions.forEach(x -> x.accept(this));
+	}
+
+	@Override
+	public void queueAction(Consumer<RecipeCreationContext> action) {
+		queuedActions.add(action);
+	}
+
 }

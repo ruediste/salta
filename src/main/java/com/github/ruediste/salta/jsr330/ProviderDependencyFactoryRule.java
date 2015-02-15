@@ -1,12 +1,11 @@
 package com.github.ruediste.salta.jsr330;
 
-import java.util.HashMap;
-
 import javax.inject.Provider;
 
 import org.mockito.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import com.github.ruediste.salta.core.CompiledCreationRecipe;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.DependencyFactoryRule;
@@ -20,7 +19,25 @@ import com.google.common.reflect.TypeToken;
 
 public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
-	private HashMap<CoreDependencyKey<?>, ProviderImpl> currentProviders = new HashMap<>();
+	static class ProviderAccessBeforeRecipeCreationFinishedException extends
+			ProvisionException {
+		private static final long serialVersionUID = 1L;
+
+		ProviderAccessBeforeRecipeCreationFinishedException() {
+			super(
+					"Attempt to access injected Provider before the recipe creation finished. Known cause: accessing provider from constructor in singleton");
+		}
+	}
+
+	static class ProviderAccessBeforeInstanceCreationFinishedException extends
+			ProvisionException {
+		private static final long serialVersionUID = 1L;
+
+		ProviderAccessBeforeInstanceCreationFinishedException() {
+			super(
+					"Attempt to access injected Provider before the instance construction finished (e.g. from construction, injected method or post construct method)");
+		}
+	}
 
 	private Injector injector;
 
@@ -29,16 +46,54 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 	}
 
 	private static class ProviderImpl implements Provider<Object> {
-		Object value;
-		boolean initialized;
+		public CompiledCreationRecipe compiledRecipe;
+
+		private ThreadLocal<Boolean> isGetting = new ThreadLocal<>();
+
+		private CoreDependencyKey<?> dependency;
+
+		public ProviderImpl(CoreDependencyKey<?> dependency) {
+			this.dependency = dependency;
+		}
 
 		@Override
 		public Object get() {
-			if (!initialized) {
-				throw new ProvisionException(
-						"Attempt to access injected Provider before the construction finished (e.g. from construction, injected method or post construct method)");
+			if (compiledRecipe == null) {
+				throw new ProviderAccessBeforeRecipeCreationFinishedException();
 			}
-			return value;
+
+			if (isGetting.get() != null)
+				throw new ProviderAccessBeforeInstanceCreationFinishedException();
+			isGetting.set(true);
+
+			try {
+				return compiledRecipe.get();
+			} catch (ProvisionException e) {
+				throw e;
+			} catch (Throwable e) {
+				throw new ProvisionException(
+						"Error while getting instance from provider for key "
+								+ dependency, e);
+			} finally {
+				isGetting.remove();
+			}
+		}
+	}
+
+	private static class CreationRecipeImpl extends CreationRecipe {
+
+		ProviderImpl provider;
+
+		public CreationRecipeImpl(CoreDependencyKey<?> dependency) {
+			provider = new ProviderImpl(dependency);
+		}
+
+		@Override
+		public void compile(GeneratorAdapter mv,
+				RecipeCompilationContext compilationContext) {
+
+			compilationContext.addAndLoad(Type.getDescriptor(Provider.class),
+					provider);
 		}
 
 	}
@@ -49,45 +104,33 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 			RecipeCreationContext ctx) {
 
 		if (Provider.class.equals(dependency.getRawType())) {
-			// break dependency circles
-			ProviderImpl provider = currentProviders.get(dependency);
-			if (provider == null) {
+			// determine dependency
+			TypeToken<?> providedType = dependency.getType().resolveType(
+					Provider.class.getTypeParameters()[0]);
 
-				TypeToken<?> providedType = dependency.getType().resolveType(
-						Provider.class.getTypeParameters()[0]);
+			CoreDependencyKey<?> dep;
+			if (dependency instanceof InjectionPoint) {
+				InjectionPoint p = (InjectionPoint) dependency;
+				dep = new InjectionPoint(providedType, p.getMember(),
+						p.getAnnotatedElement(), p.getParameterIndex());
 
-				CoreDependencyKey<?> dep;
-				if (dependency instanceof InjectionPoint) {
-					InjectionPoint p = (InjectionPoint) dependency;
-					dep = new InjectionPoint(providedType, p.getMember(),
-							p.getAnnotatedElement(), p.getParameterIndex());
-
-				} else {
-					dep = DependencyKey.of(providedType).withAnnotations(
-							dependency.getAnnotatedElement().getAnnotations());
-				}
-
-				// instantiate Provider
-				provider = new ProviderImpl();
-				currentProviders.put(dependency, provider);
-				try {
-					provider.value = injector.getInstance(dep);
-					provider.initialized = true;
-				} finally {
-					currentProviders.remove(dependency);
-				}
+			} else {
+				dep = DependencyKey.of(providedType).withAnnotations(
+						dependency.getAnnotatedElement().getAnnotations());
 			}
 
-			ProviderImpl tmp = provider;
-			return new CreationRecipe() {
+			// create creation recipe
+			CreationRecipeImpl creationRecipe = new CreationRecipeImpl(
+					dependency);
 
-				@Override
-				public void compile(GeneratorAdapter mv,
-						RecipeCompilationContext compilationContext) {
-					compilationContext.addAndLoad(
-							Type.getDescriptor(Provider.class), tmp);
-				}
-			};
+			// queue creation and compilation of inner recipe
+			ctx.queueAction(x -> {
+				CreationRecipe innerRecipe = x.getRecipeInNewContext(dep);
+				creationRecipe.provider.compiledRecipe = x
+						.compileRecipe(innerRecipe);
+			});
+
+			return creationRecipe;
 
 		}
 

@@ -2,16 +2,20 @@ package com.github.ruediste.salta.standard;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
+import org.objectweb.asm.commons.GeneratorAdapter;
+
+import com.github.ruediste.salta.core.CompiledParameterizedCreationRecipe;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
+import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
@@ -94,19 +98,44 @@ public class StandardInjector implements Injector {
 	}
 
 	private final class MembersInjectorImpl<T> implements MembersInjector<T> {
-		List<RecipeMembersInjector> injectors = new ArrayList<>();
+		private CompiledParameterizedCreationRecipe compiledRecipe;
+		private TypeToken<T> type;
 
 		public MembersInjectorImpl(TypeToken<T> type) {
-			config.staticInitializers.add(i -> injectors = config
-					.createRecipeMembersInjectors(
-							new RecipeCreationContextImpl(coreInjector), type));
+			this.type = type;
+			synchronized (coreInjector.recipeLock) {
+				List<RecipeMembersInjector> injectors = config
+						.createRecipeMembersInjectors(
+								new RecipeCreationContextImpl(coreInjector),
+								type);
+				CreationRecipe recipe = new CreationRecipe() {
+
+					@Override
+					public void compile(GeneratorAdapter mv,
+							RecipeCompilationContext compilationContext) {
+						mv.loadArg(0);
+
+						for (RecipeMembersInjector rmi : injectors) {
+							rmi.compile(mv, compilationContext);
+						}
+					}
+				};
+				compiledRecipe = coreInjector
+						.compileParameterizedRecipe(recipe);
+			}
 		}
 
 		@Override
 		public void injectMembers(T instance) {
 			checkInitialized();
-			for (RecipeMembersInjector i : injectors) {
-				i.injectMembers(instance);
+			try {
+				compiledRecipe.get(instance);
+			} catch (ProvisionException e) {
+				throw e;
+			} catch (Throwable e) {
+				throw new ProvisionException(
+						"Error while injecting members of instance of " + type,
+						e);
 			}
 		}
 	}
@@ -143,12 +172,7 @@ public class StandardInjector implements Injector {
 	@Override
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
 		checkInitialized();
-		List<RecipeMembersInjector> injectors = config
-				.createRecipeMembersInjectors(new RecipeCreationContextImpl(
-						coreInjector), type);
-		for (RecipeMembersInjector rmi : injectors) {
-			rmi.injectMembers(instance);
-		}
+		getMembersInjector(type).injectMembers(instance);
 	}
 
 	@Override

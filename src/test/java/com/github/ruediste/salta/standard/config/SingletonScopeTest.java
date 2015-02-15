@@ -1,8 +1,10 @@
 package com.github.ruediste.salta.standard.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.junit.Before;
@@ -43,6 +45,21 @@ public class SingletonScopeTest {
 		}
 	}
 
+	@Singleton
+	private static class CircularA {
+		@Inject
+		Provider<CircularB> b;
+
+		public CircularA() {
+
+		}
+	}
+
+	private static class CircularB {
+		@Inject
+		CircularA a;
+	}
+
 	@Before
 	public void setup() {
 		injector = Salta.createInjector(new JSR330Module());
@@ -60,5 +77,11 @@ public class SingletonScopeTest {
 		assertEquals(0, injector.getInstance(TestClassB.class).compare());
 		injector.getInstance(TestClass.class).setValue(5);
 		assertEquals(5, injector.getInstance(TestClassB.class).compare());
+	}
+
+	@Test
+	public void testCircularWithProvider() {
+		CircularA a = injector.getInstance(CircularA.class);
+		assertSame(a, a.b.get().a);
 	}
 }

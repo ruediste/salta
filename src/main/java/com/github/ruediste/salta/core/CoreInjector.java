@@ -14,8 +14,8 @@ import com.google.common.reflect.TypeToken;
 public class CoreInjector {
 
 	/**
-	 * Lock object for recipe creation. May not be acquired while holding the
-	 * {@link #instantiationLock}
+	 * Lock object for recipe creation and compilation. May not be acquired
+	 * while holding the {@link #instantiationLock}
 	 */
 	public final Object recipeLock = new Object();
 
@@ -28,7 +28,7 @@ public class CoreInjector {
 
 	private CreationRecipeCompiler compiler = new CreationRecipeCompiler();
 
-	private ConcurrentHashMap<CoreDependencyKey<?>, Supplier<?>> compiledRecipeCache = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<CoreDependencyKey<?>, CompiledCreationRecipe> compiledRecipeCache = new ConcurrentHashMap<>();
 
 	private HashMap<CoreDependencyKey<?>, CreationRecipe> recipeCache = new HashMap<>();
 
@@ -61,19 +61,27 @@ public class CoreInjector {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T getInstance(CoreDependencyKey<T> key) {
-		return (T) getCompiledRecipe(key).get();
+		return getInstanceSupplier(key).get();
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> Supplier<T> getInstanceSupplier(CoreDependencyKey<T> key) {
-		Supplier<?> compiledRecipe = getCompiledRecipe(key);
-		return (Supplier<T>) compiledRecipe;
+		CompiledCreationRecipe compiledRecipe = getCompiledRecipe(key);
+		return () -> {
+			try {
+				return (T) compiledRecipe.get();
+			} catch (ProvisionException e) {
+				throw e;
+			} catch (Throwable e) {
+				throw new ProvisionException(
+						"Error while creating instance for " + key, e);
+			}
+		};
 	}
 
-	public Supplier<?> getCompiledRecipe(CoreDependencyKey<?> key) {
-		Supplier<?> compiledRecipe = compiledRecipeCache.get(key);
+	public CompiledCreationRecipe getCompiledRecipe(CoreDependencyKey<?> key) {
+		CompiledCreationRecipe compiledRecipe = compiledRecipeCache.get(key);
 		if (compiledRecipe != null)
 			return compiledRecipe;
 
@@ -86,12 +94,25 @@ public class CoreInjector {
 				x -> compileRecipe(recipe));
 	}
 
-	public Supplier<?> compileRecipe(CreationRecipe recipe) {
-		return compiler.compile(recipe);
+	public CompiledCreationRecipe compileRecipe(CreationRecipe recipe) {
+		synchronized (recipeLock) {
+			return compiler.compile(recipe);
+		}
+	}
+
+	public CompiledParameterizedCreationRecipe compileParameterizedRecipe(
+			CreationRecipe recipe) {
+		synchronized (recipeLock) {
+			return compiler.compileParameterRecipe(recipe);
+		}
 	}
 
 	public CreationRecipe getRecipe(CoreDependencyKey<?> key) {
-		return getRecipe(key, new RecipeCreationContextImpl(CoreInjector.this));
+		RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
+				CoreInjector.this);
+		CreationRecipe result = getRecipe(key, ctx);
+		ctx.processQueuedActions();
+		return result;
 	}
 
 	public CreationRecipe getRecipe(CoreDependencyKey<?> key,
@@ -140,7 +161,7 @@ public class CoreInjector {
 				}
 
 				if (binding != null) {
-					return ctx.getOrCreateRecipe(binding, ctx);
+					return ctx.getOrCreateRecipe(binding);
 				}
 			}
 
@@ -167,9 +188,11 @@ public class CoreInjector {
 
 				// use binding if available
 				if (jitBinding != null) {
-					return ctx.getOrCreateRecipe(jitBinding, ctx);
+					return ctx.getOrCreateRecipe(jitBinding);
 				}
 			}
+		} catch (ProvisionException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new ProvisionException("Error creating recipe for " + key, e);
 		}

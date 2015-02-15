@@ -3,6 +3,7 @@ package com.github.ruediste.salta.core;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -18,7 +19,15 @@ public class RecipeCompilationContext {
 	}
 
 	ArrayList<FieldEntry> fields = new ArrayList<>();
+	ArrayList<Runnable> queuedActions = new ArrayList<>();
+
 	public GeneratorAdapter mv;
+	private CreationRecipeCompiler compiler;
+
+	public RecipeCompilationContext(CreationRecipeCompiler compiler) {
+		this.compiler = compiler;
+
+	}
 
 	/**
 	 * Add a field to the generated method and return it's name. The field will
@@ -47,4 +56,15 @@ public class RecipeCompilationContext {
 		return clazz.name;
 	}
 
+	public CompiledCreationRecipe compileRecipe(CreationRecipe recipe) {
+		return compiler.compile(recipe);
+	}
+
+	public void queueCompilation(CreationRecipe recipe,
+			Consumer<CompiledCreationRecipe> callback) {
+		queuedActions.add(() -> {
+			CompiledCreationRecipe compiledRecipe = compiler.compile(recipe);
+			callback.accept(compiledRecipe);
+		});
+	}
 }

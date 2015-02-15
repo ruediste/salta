@@ -13,7 +13,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -44,26 +43,15 @@ public class CreationRecipeCompiler {
 	 * Compile a recipe. May be called from multiple threads. May not acquire
 	 * {@link CoreInjector#recipeLock} or {@link CoreInjector#instantiationLock}
 	 */
-	public Supplier<?> compile(CreationRecipe recipe) {
-		RecipeCompilationContext ctx = new RecipeCompilationContext();
+	public CompiledCreationRecipe compile(CreationRecipe recipe) {
+		RecipeCompilationContext ctx = new RecipeCompilationContext(this);
 
-		// setup clazz
-		ClassNode clazz = new ClassNode();
-		ctx.clazz = clazz;
-		clazz.name = "SaltaCompiledCreationRecipe"
-				+ classNumber.incrementAndGet();
-		clazz.access = ACC_FINAL & ACC_PUBLIC & ACC_SYNTHETIC;
-		clazz.version = V1_7;
-		clazz.superName = Type.getInternalName(Object.class);
-		clazz.interfaces.add(Type.getInternalName(Supplier.class));
-
-		// generate constructor
-		generateConstructor(clazz);
+		setupClazz(ctx, CompiledCreationRecipe.class);
 
 		// compile method
 		MethodNode m = new MethodNode(ACC_PUBLIC, "get",
 				"()Ljava/lang/Object;", null, null);
-		clazz.methods.add(m);
+		ctx.clazz.methods.add(m);
 		GeneratorAdapter mv = new GeneratorAdapter(m.access, new Method(m.name,
 				m.desc), m);
 		ctx.mv = mv;
@@ -75,9 +63,42 @@ public class CreationRecipeCompiler {
 		mv.visitMaxs(0, 0);
 		mv.visitEnd();
 
+		return (CompiledCreationRecipe) loadAndInstantiate(ctx);
+	}
+
+	/**
+	 * Compile a recipe which takes a parameter. May be called from multiple
+	 * threads. May not acquire {@link CoreInjector#recipeLock} or
+	 * {@link CoreInjector#instantiationLock}
+	 */
+	public CompiledParameterizedCreationRecipe compileParameterRecipe(
+			CreationRecipe recipe) {
+		RecipeCompilationContext ctx = new RecipeCompilationContext(this);
+
+		setupClazz(ctx, CompiledParameterizedCreationRecipe.class);
+
+		// compile method
+		MethodNode m = new MethodNode(ACC_PUBLIC, "get",
+				"(Ljava/lang/Object;)Ljava/lang/Object;", null, null);
+		ctx.clazz.methods.add(m);
+		GeneratorAdapter mv = new GeneratorAdapter(m.access, new Method(m.name,
+				m.desc), m);
+		ctx.mv = mv;
+		mv.visitCode();
+
+		recipe.compile(mv, ctx);
+
+		mv.visitInsn(ARETURN);
+		mv.visitMaxs(0, 0);
+		mv.visitEnd();
+
+		return (CompiledParameterizedCreationRecipe) loadAndInstantiate(ctx);
+	}
+
+	private Object loadAndInstantiate(RecipeCompilationContext ctx) {
 		// generate bytecode
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-		clazz.accept(cw);
+		ctx.clazz.accept(cw);
 		if (true) {
 			ClassReader cr = new ClassReader(cw.toByteArray());
 			CheckClassAdapter.verify(cr, false, new PrintWriter(System.err));
@@ -89,7 +110,7 @@ public class CreationRecipeCompiler {
 		Object instance;
 		Class<?> cls;
 		try {
-			cls = loader.defineClass(clazz.name, cw.toByteArray());
+			cls = loader.defineClass(ctx.clazz.name, cw.toByteArray());
 			Constructor<?> constructor = cls.getConstructor();
 			constructor.setAccessible(true);
 			instance = constructor.newInstance();
@@ -109,7 +130,28 @@ public class CreationRecipeCompiler {
 						+ entry.name, e);
 			}
 		}
-		return (Supplier<?>) instance;
+
+		// process queued actions
+		ctx.queuedActions.forEach(Runnable::run);
+
+		// return result
+		return instance;
+	}
+
+	private void setupClazz(RecipeCompilationContext ctx,
+			Class<?> implementedInterface) {
+		// setup clazz
+		ClassNode clazz = new ClassNode();
+		ctx.clazz = clazz;
+		clazz.name = "SaltaCompiledCreationRecipe"
+				+ classNumber.incrementAndGet();
+		clazz.access = ACC_FINAL & ACC_PUBLIC & ACC_SYNTHETIC;
+		clazz.version = V1_7;
+		clazz.superName = Type.getInternalName(Object.class);
+		clazz.interfaces.add(Type.getInternalName(implementedInterface));
+
+		// generate constructor
+		generateConstructor(clazz);
 	}
 
 	public void generateConstructor(ClassVisitor cw) {

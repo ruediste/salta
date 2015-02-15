@@ -4,12 +4,14 @@ import static org.junit.Assert.assertNotSame;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.Salta;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.jsr330.ProviderDependencyFactoryRule.ProviderAccessBeforeInstanceCreationFinishedException;
+import com.github.ruediste.salta.jsr330.ProviderDependencyFactoryRule.ProviderAccessBeforeRecipeCreationFinishedException;
 import com.github.ruediste.salta.standard.Injector;
 
 public class ProviderDependencyFactoryRuleTest {
@@ -43,7 +45,16 @@ public class ProviderDependencyFactoryRuleTest {
 	private static class TestClassD {
 		@Inject
 		public TestClassD(Provider<TestClassC> cProvider) {
+			// access in constructor -> forbidden
 			cProvider.get();
+		}
+	}
+
+	@Singleton
+	private static class TestClassE {
+		@Inject
+		public TestClassE(Provider<TestClassE> p) {
+			p.get();
 		}
 	}
 
@@ -59,9 +70,22 @@ public class ProviderDependencyFactoryRuleTest {
 		assertNotSame(otherA, a);
 	}
 
-	@Test(expected = ProvisionException.class)
-	public void testForbiddenAccess() {
+	@Test
+	public void testDifferentValues() {
+		TestClassA a = injector.getInstance(TestClassA.class);
+		TestClassA otherA1 = a.b.aProvider.get();
+		TestClassA otherA2 = a.b.aProvider.get();
+		assertNotSame(otherA1, otherA2);
+	}
+
+	@Test(expected = ProviderAccessBeforeInstanceCreationFinishedException.class)
+	public void testForbiddenProviderAccess() {
 		injector.getInstance(TestClassC.class);
+	}
+
+	@Test(expected = ProviderAccessBeforeRecipeCreationFinishedException.class)
+	public void testForbiddenProviderAccessSingleton() {
+		injector.getInstance(TestClassE.class);
 
 	}
 }

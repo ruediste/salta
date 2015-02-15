@@ -18,7 +18,7 @@ public class CreationRecipeCompilerTest {
 	}
 
 	@Test
-	public void testSimple() {
+	public void testSimple() throws Throwable {
 		CreationRecipe recipe = new CreationRecipe() {
 
 			@Override

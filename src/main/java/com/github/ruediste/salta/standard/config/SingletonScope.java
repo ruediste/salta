@@ -20,7 +20,7 @@ final class SingletonScope implements Scope {
 	@Override
 	public CreationRecipe createRecipe(RecipeCreationContext ctx,
 			Binding binding, TypeToken<?> type, CreationRecipe innerRecipe) {
-		Object instance = ctx.getInstance(innerRecipe);
+		Object instance = ctx.compileRecipe(innerRecipe).getNoThrow();
 		return new CreationRecipe() {
 
 			@Override
