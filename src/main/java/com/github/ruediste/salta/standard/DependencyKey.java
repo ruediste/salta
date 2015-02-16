@@ -74,9 +74,12 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 		return Collections.unmodifiableMap(annotations);
 	}
 
-	public DependencyKey<T> withAnnotation(Class<? extends Annotation> cls) {
-		return withAnnotations(AnnotationProxy.newProxy(cls)
-				.getProxedAnnotation());
+	public DependencyKey<T> withAnnotations(Class<? extends Annotation>... cls) {
+		Annotation[] annotations = new Annotation[cls.length];
+		for (int i = 0; i < cls.length; i++) {
+			annotations[i] = AnnotationProxy.newProxy(cls[i]);
+		}
+		return withAnnotations(annotations);
 	}
 
 	public DependencyKey<T> withAnnotations(Annotation... additionalAnnotations) {

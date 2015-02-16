@@ -2,9 +2,16 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.reflect.Constructor;
 
-import com.github.ruediste.salta.core.RecipeCreationContext;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
+
+import com.github.ruediste.salta.core.CompiledCreationRecipe;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.RecipeCompilationContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -18,25 +25,68 @@ import com.google.common.reflect.TypeToken;
  */
 public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 
-	private final class ProviderRecipeFactory implements CreationRecipeFactory {
-		private InstanceProvider<? extends T> provider;
+	public static class RecursiveAccessOfInstanceOfProviderClassException
+			extends ProvisionException {
+		private static final long serialVersionUID = 1L;
 
-		public ProviderRecipeFactory(
-				CoreDependencyKey<? extends InstanceProvider<? extends T>> providerKey) {
-			data.config.dynamicInitializers.add(injector -> {
-				provider = injector.getInstance(providerKey);
-			});
+		public RecursiveAccessOfInstanceOfProviderClassException(
+				CoreDependencyKey<?> providerKey) {
+			super(
+					"Access of provider before creation finished. Circular dependency of provider class"
+							+ providerKey);
+		}
+	}
+
+	public static final class ProviderRecipeFactory implements
+			CreationRecipeFactory {
+		public final class ProviderImpl implements InstanceProvider<Object> {
+			InstanceProvider<?> delegate;
+
+			@Override
+			public Object get() {
+				if (delegate == null) {
+					throw new RecursiveAccessOfInstanceOfProviderClassException(
+							providerKey);
+				}
+				return delegate.get();
+			}
+		}
+
+		private final class ProviderCreationRecipeImpl extends CreationRecipe {
+
+			ProviderImpl provider = new ProviderImpl();
+
+			@Override
+			public void compile(GeneratorAdapter mv,
+					RecipeCompilationContext compilationContext) {
+				compilationContext.addAndLoad(
+						Type.getDescriptor(ProviderImpl.class), provider);
+				provider.get();
+				mv.invokeVirtual(Type.getType(ProviderImpl.class),
+						Method.getMethod("Object get()"));
+			}
+		}
+
+		private CoreDependencyKey<?> providerKey;
+
+		public ProviderRecipeFactory(CoreDependencyKey<?> providerKey) {
+			this.providerKey = providerKey;
 		}
 
 		@Override
 		public CreationRecipe createRecipe(RecipeCreationContext ctx) {
-			return new CreationRecipe() {
 
-				@Override
-				public Object createInstance() {
-					return provider.get();
-				}
-			};
+			ProviderCreationRecipeImpl recipe = new ProviderCreationRecipeImpl();
+
+			ctx.queueAction(x -> {
+				CreationRecipe innerRecipe = x
+						.getRecipeInNewContext(providerKey);
+				CompiledCreationRecipe compiledRecipe = x
+						.compileRecipe(innerRecipe);
+				recipe.provider.delegate = (InstanceProvider<?>) compiledRecipe
+						.getNoThrow();
+			});
+			return recipe;
 		}
 	}
 
@@ -69,13 +119,34 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	public void toInstance(T instance) {
 		MemberInjectionToken<T> token = MemberInjectionToken
 				.getMemberInjectionToken(data.injector, instance);
-		data.binding.recipeFactory = (ctx) -> new CreationRecipe() {
+		data.binding.recipeFactory = new CreationRecipeFactory() {
+
+			boolean recipeCreationInProgress;
 
 			@Override
-			public Object createInstance() {
-				return token.getValue();
-			}
+			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
+				if (recipeCreationInProgress) {
+					throw new ProvisionException("Recipe creation in progress");
+				}
+				recipeCreationInProgress = true;
+				T injected;
+				try {
+					injected = token.getValue();
+				} finally {
+					recipeCreationInProgress = false;
+				}
+				return new CreationRecipe() {
 
+					@Override
+					public void compile(GeneratorAdapter mv,
+							RecipeCompilationContext compilationContext) {
+						compilationContext.addAndLoad(
+								Type.getDescriptor(injected.getClass()),
+								injected);
+					}
+
+				};
+			}
 		};
 
 	}
@@ -88,13 +159,25 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			InstanceProvider<? extends T> provider) {
 		MemberInjectionToken<InstanceProvider<? extends T>> token = MemberInjectionToken
 				.getMemberInjectionToken(data.injector, provider);
-		data.binding.recipeFactory = (ctx) -> new CreationRecipe() {
-
+		data.binding.recipeFactory = new CreationRecipeFactory() {
 			@Override
-			public Object createInstance() {
-				return token.getValue().get();
-			}
+			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
+				InstanceProvider<? extends T> injected = token.getValue();
+				return new CreationRecipe() {
 
+					@Override
+					public void compile(GeneratorAdapter mv,
+							RecipeCompilationContext compilationContext) {
+						compilationContext.addAndLoad(
+								Type.getDescriptor(InstanceProvider.class),
+								injected);
+						mv.invokeInterface(
+								Type.getType(InstanceProvider.class),
+								Method.getMethod("Object get()"));
+					}
+
+				};
+			}
 		};
 
 		return new ScopedBindingBuilder<>(data);

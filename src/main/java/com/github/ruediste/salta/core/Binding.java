@@ -10,6 +10,13 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	private CreationRecipe recipe;
 	boolean creatingRecipe;
 
+	public static class RecursiveRecipeCreationDetectedException extends
+			ProvisionException {
+		RecursiveRecipeCreationDetectedException() {
+			super("Recursive recipe creation detected");
+		}
+	}
+
 	/**
 	 * Create the {@link CreationRecipe} for this binding if it does not exist
 	 * yet. If the binding is already present, the passed context will be
@@ -18,8 +25,7 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	public CreationRecipe getOrCreateRecipe(RecipeCreationContext ctx) {
 		if (recipe == null) {
 			if (creatingRecipe)
-				throw new ProvisionException(
-						"Recursive recipe creation detected");
+				throw new RecursiveRecipeCreationDetectedException();
 			creatingRecipe = true;
 			recipe = createRecipe(ctx);
 			creatingRecipe = false;

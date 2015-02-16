@@ -1,5 +1,8 @@
 package com.github.ruediste.salta.core;
 
+import java.util.ArrayList;
+import java.util.stream.Stream;
+
 public class ProvisionException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
@@ -27,4 +30,13 @@ public class ProvisionException extends RuntimeException {
 			return super.getMessage();
 	}
 
+	public Stream<Throwable> getRecursiveCauses() {
+		ArrayList<Throwable> result = new ArrayList<>();
+		Throwable t = getCause();
+		while (t != null) {
+			result.add(t);
+			t = t.getCause();
+		}
+		return result.stream();
+	}
 }

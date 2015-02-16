@@ -22,7 +22,7 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 				.and(Annotations.matcher(annotationType));
 
 		data.eagerInstantiationDependency = data.eagerInstantiationDependency
-				.withAnnotation(annotationType);
+				.withAnnotations(annotationType);
 
 		return new LinkedBindingBuilder<>(data);
 	}

@@ -111,7 +111,13 @@ public class CoreInjector {
 		RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
 				CoreInjector.this);
 		CreationRecipe result = getRecipe(key, ctx);
-		ctx.processQueuedActions();
+
+		try {
+			ctx.processQueuedActions();
+		} catch (ProvisionException e) {
+			throw new ProvisionException(
+					"Error while processing queued actions for " + key, e);
+		}
 		return result;
 	}
 
