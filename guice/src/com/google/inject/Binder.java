@@ -23,8 +23,6 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.ProvisionListener;
-import com.google.inject.spi.TypeListener;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
@@ -340,37 +338,6 @@ public interface Binder {
 	<T> MembersInjector<T> getMembersInjector(Class<T> type);
 
 	/**
-	 * Registers a listener for injectable types. Guice will notify the listener
-	 * when it encounters injectable types matched by the given type matcher.
-	 *
-	 * @param typeMatcher
-	 *            that matches injectable types the listener should be notified
-	 *            of
-	 * @param listener
-	 *            for injectable types matched by typeMatcher
-	 * @since 2.0
-	 */
-	void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-			TypeListener listener);
-
-	/**
-	 * Registers listeners for provisioned objects. Guice will notify the
-	 * listeners just before and after the object is provisioned. Provisioned
-	 * objects that are also injectable (everything except objects provided
-	 * through Providers) can also be notified through TypeListeners registered
-	 * in {@link #bindListener}.
-	 * 
-	 * @param bindingMatcher
-	 *            that matches bindings of provisioned objects the listener
-	 *            should be notified of
-	 * @param listeners
-	 *            for provisioned objects matched by bindingMatcher
-	 * @since 4.0
-	 */
-	void bindListener(Matcher<? super Binding<?>> bindingMatcher,
-			ProvisionListener... listeners);
-
-	/**
 	 * Returns a binder that uses {@code source} as the reference location for
 	 * configuration errors. This is typically a {@link StackTraceElement} for
 	 * {@code .java} source but it could any binding source, such as the path to
@@ -395,19 +362,7 @@ public interface Binder {
 	 * @return a binder that shares its configuration with this binder.
 	 * @since 2.0
 	 */
-	Binder skipSources(Class... classesToSkip);
-
-	/**
-	 * Creates a new private child environment for bindings and other
-	 * configuration. The returned binder can be used to add and configuration
-	 * information in this environment. See {@link PrivateModule} for details.
-	 *
-	 * @return a binder that inherits configuration from this binder. Only
-	 *         exposed configuration on the returned binder will be visible to
-	 *         this binder.
-	 * @since 2.0
-	 */
-	PrivateBinder newPrivateBinder();
+	Binder skipSources(Class<?>... classesToSkip);
 
 	/**
 	 * Instructs the Injector that bindings must be listed in a Module in order
@@ -442,8 +397,12 @@ public interface Binder {
 	void requireExplicitBindings();
 
 	/**
+	 * Salta has no support for circular proxies anyway!!
+	 * <p>
 	 * Prevents Guice from constructing a {@link Proxy} when a circular
 	 * dependency is found. By default, circular proxies are not disabled.
+	 * </p>
+	 * 
 	 * <p>
 	 * If a parent injector disables circular proxies, then all child injectors
 	 * (and private modules within that injector) also disable circular proxies.
@@ -451,6 +410,7 @@ public interface Binder {
 	 * private module may optionally declare itself as disabling circular
 	 * proxies. If it does, the behavior is limited only to that child or any
 	 * grandchildren. No siblings of the child will disable circular proxies.
+	 * </p>
 	 * 
 	 * @since 3.0
 	 */

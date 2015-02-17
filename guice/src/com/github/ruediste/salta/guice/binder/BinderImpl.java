@@ -1,32 +1,28 @@
 package com.github.ruediste.salta.guice.binder;
 
-import java.util.function.BiFunction;
-
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.guice.ModuleAdapter;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Binder;
-import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Module;
-import com.google.inject.PrivateBinder;
 import com.google.inject.Provider;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
-import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.ProvisionListener;
-import com.google.inject.spi.TypeListener;
 
 public class BinderImpl implements Binder {
 
 	private com.github.ruediste.salta.standard.binder.Binder delegate;
+	private GuiceInjectorConfiguration config;
 
-	public BinderImpl(com.github.ruediste.salta.standard.binder.Binder delegate) {
+	public BinderImpl(
+			com.github.ruediste.salta.standard.binder.Binder delegate,
+			GuiceInjectorConfiguration config) {
 		this.delegate = delegate;
+		this.config = config;
 	}
 
 	@Override
@@ -114,70 +110,34 @@ public class BinderImpl implements Binder {
 	}
 
 	@Override
-	public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-			TypeListener listener) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void bindListener(Matcher<? super Binding<?>> bindingMatcher,
-			ProvisionListener... listeners) {
-
-		@SuppressWarnings("unchecked")
-		BiFunction<TypeToken<?>, Object, Object>[] saltaListeners = new BiFunction[listeners.length];
-
-		for (int i = 0; i < listeners.length; i++) {
-			ProvisionListener listener = listeners[i];
-			saltaListeners[i] = (t, x) -> {
-
-			};
-		}
-		delegate.bindListener(
-				type -> bindingMatcher.matches(new BindingImpl<>(type)),
-				saltaListener);
-	}
-
-	@Override
 	public Binder withSource(Object source) {
-		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 	@Override
-	public Binder skipSources(Class... classesToSkip) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public PrivateBinder newPrivateBinder() {
-		// TODO Auto-generated method stub
-		return null;
+	public Binder skipSources(Class<?>... classesToSkip) {
+		return this;
 	}
 
 	@Override
 	public void requireExplicitBindings() {
-		// TODO Auto-generated method stub
+		config.requireExplicitBindings = true;
+	}
+
+	@Override
+	public void requireAtInjectOnConstructors() {
+		config.requireAtInjectOnConstructors = true;
+	}
+
+	@Override
+	public void requireExactBindingAnnotations() {
+		config.requireExactBindingAnnotations = true;
 
 	}
 
 	@Override
 	public void disableCircularProxies() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void requireAtInjectOnConstructors() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void requireExactBindingAnnotations() {
-		// TODO Auto-generated method stub
-
+		// Salta has no circular proxies
 	}
 
 }

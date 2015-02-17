@@ -1,4 +1,7 @@
-package com.github.ruediste.salta.jsr330;
+package com.github.ruediste.salta.standard.util;
+
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
@@ -12,15 +15,30 @@ import com.github.ruediste.salta.core.DependencyFactoryRule;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.InjectionPoint;
-import com.github.ruediste.salta.standard.Injector;
 import com.google.common.reflect.TypeToken;
 
+/**
+ * Base class for {@link DependencyFactoryRule}s which match some sort of
+ * Provider (as in javax.inject.Provider).
+ * 
+ * <p>
+ * The initialization of providers is quite delicate. This class makes
+ * implementing such factories simple. Just provide a matcher which matches the
+ * injection points you want to inject a provider into and a wrapper, which
+ * creates an instance of the correct class, delegating to a supplied
+ * {@link Supplier}.
+ * </p>
+ */
 public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
-	static class ProviderAccessBeforeRecipeCreationFinishedException extends
-			ProvisionException {
+	private Matcher<? super CoreDependencyKey<?>> matcher;
+	private BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper;
+
+	public static class ProviderAccessBeforeRecipeCreationFinishedException
+			extends ProvisionException {
 		private static final long serialVersionUID = 1L;
 
 		ProviderAccessBeforeRecipeCreationFinishedException() {
@@ -29,8 +47,8 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 		}
 	}
 
-	static class ProviderAccessBeforeInstanceCreationFinishedException extends
-			ProvisionException {
+	public static class ProviderAccessBeforeInstanceCreationFinishedException
+			extends ProvisionException {
 		private static final long serialVersionUID = 1L;
 
 		ProviderAccessBeforeInstanceCreationFinishedException() {
@@ -39,13 +57,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 		}
 	}
 
-	private Injector injector;
-
-	ProviderDependencyFactoryRule(Injector injector) {
-		this.injector = injector;
-	}
-
-	private static class ProviderImpl implements Provider<Object> {
+	protected static class ProviderImpl implements Supplier<Object> {
 		public CompiledCreationRecipe compiledRecipe;
 
 		private ThreadLocal<Boolean> isGetting = new ThreadLocal<>();
@@ -82,19 +94,38 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 	private static class CreationRecipeImpl extends CreationRecipe {
 
-		ProviderImpl provider;
+		private Object wrappedProvider;
 
-		public CreationRecipeImpl(CoreDependencyKey<?> dependency) {
-			provider = new ProviderImpl(dependency);
+		public CreationRecipeImpl(Object wrappedProvider) {
+			this.wrappedProvider = wrappedProvider;
 		}
 
 		@Override
 		public void compile(GeneratorAdapter mv,
 				RecipeCompilationContext compilationContext) {
 
-			compilationContext.addAndLoad(Type.getDescriptor(Provider.class),
-					provider);
+			compilationContext.addAndLoad(
+					Type.getDescriptor(wrappedProvider.getClass()),
+					wrappedProvider);
 		}
+
+	}
+
+	/**
+	 * Create a new instance
+	 * 
+	 * @param matcher
+	 *            matcher for the injection points which should be injected with
+	 *            the provider
+	 * @param wrapper
+	 *            wrapper of a supplier to the actual instance which gets
+	 *            injected
+	 */
+	public ProviderDependencyFactoryRule(
+			Matcher<? super CoreDependencyKey<?>> matcher,
+			BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper) {
+		this.matcher = matcher;
+		this.wrapper = wrapper;
 
 	}
 
@@ -103,31 +134,34 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 	public CreationRecipe apply(CoreDependencyKey<?> dependency,
 			RecipeCreationContext ctx) {
 
-		if (Provider.class.equals(dependency.getRawType())) {
+		if (matcher.matches(dependency)) {
 			// determine dependency
-			TypeToken<?> providedType = dependency.getType().resolveType(
+			TypeToken<?> requestedType = dependency.getType().resolveType(
 					Provider.class.getTypeParameters()[0]);
 
 			CoreDependencyKey<?> dep;
 			if (dependency instanceof InjectionPoint) {
 				InjectionPoint p = (InjectionPoint) dependency;
-				dep = new InjectionPoint(providedType, p.getMember(),
+				dep = new InjectionPoint(requestedType, p.getMember(),
 						p.getAnnotatedElement(), p.getParameterIndex());
 
 			} else {
-				dep = DependencyKey.of(providedType).withAnnotations(
+				dep = DependencyKey.of(requestedType).withAnnotations(
 						dependency.getAnnotatedElement().getAnnotations());
 			}
 
+			// create and wrap provider instance
+			ProviderImpl provider = new ProviderImpl(dependency);
+			Object wrappedProvider = wrapper.apply(dependency, provider);
+
 			// create creation recipe
 			CreationRecipeImpl creationRecipe = new CreationRecipeImpl(
-					dependency);
+					wrappedProvider);
 
 			// queue creation and compilation of inner recipe
 			ctx.queueAction(x -> {
 				CreationRecipe innerRecipe = x.getRecipeInNewContext(dep);
-				creationRecipe.provider.compiledRecipe = x
-						.compileRecipe(innerRecipe);
+				provider.compiledRecipe = x.compileRecipe(innerRecipe);
 			});
 
 			return creationRecipe;

@@ -16,6 +16,10 @@ public class KeyAdapter<T> extends CoreDependencyKey<T> {
 		this.key = key;
 	}
 
+	public static <T> KeyAdapter<T> of(Key<T> key) {
+		return new KeyAdapter<>(key);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public TypeToken<T> getType() {

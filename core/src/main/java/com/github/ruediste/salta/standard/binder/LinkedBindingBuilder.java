@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.standard.binder;
 
 import java.lang.reflect.Constructor;
+import java.util.function.Function;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -37,10 +38,10 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 		}
 	}
 
-	public static final class ProviderRecipeFactory implements
+	public static final class ProviderRecipeFactory<T, P> implements
 			CreationRecipeFactory {
 		public final class ProviderImpl implements InstanceProvider<Object> {
-			InstanceProvider<?> delegate;
+			InstanceProvider<? extends T> delegate;
 
 			@Override
 			public Object get() {
@@ -67,12 +68,17 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			}
 		}
 
-		private CoreDependencyKey<?> providerKey;
+		private CoreDependencyKey<P> providerKey;
+		private Function<? super P, InstanceProvider<? extends T>> providerWrapper;
 
-		public ProviderRecipeFactory(CoreDependencyKey<?> providerKey) {
+		public ProviderRecipeFactory(
+				CoreDependencyKey<P> providerKey,
+				Function<? super P, InstanceProvider<? extends T>> providerWrapper) {
 			this.providerKey = providerKey;
+			this.providerWrapper = providerWrapper;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public CreationRecipe createRecipe(RecipeCreationContext ctx) {
 
@@ -83,8 +89,8 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 						.getRecipeInNewContext(providerKey);
 				CompiledCreationRecipe compiledRecipe = x
 						.compileRecipe(innerRecipe);
-				recipe.provider.delegate = (InstanceProvider<?>) compiledRecipe
-						.getNoThrow();
+				recipe.provider.delegate = providerWrapper
+						.apply((P) compiledRecipe.getNoThrow());
 			});
 			return recipe;
 		}
@@ -107,6 +113,16 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	public ScopedBindingBuilder<T> to(TypeToken<? extends T> implementation) {
 		data.binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
 				data.config, implementation, data.binding).build(ctx);
+
+		return new ScopedBindingBuilder<>(data);
+	}
+
+	/**
+	 * See the EDSL examples at {@link Binder}.
+	 */
+	public ScopedBindingBuilder<T> to(
+			CoreDependencyKey<? extends T> implementation) {
+		data.binding.recipeFactory = ctx -> ctx.getRecipe(implementation);
 
 		return new ScopedBindingBuilder<>(data);
 	}
@@ -205,10 +221,25 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	public ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<? extends InstanceProvider<? extends T>> providerKey) {
 
-		data.binding.recipeFactory = new ProviderRecipeFactory(providerKey);
+		return toProvider(providerKey, x -> x);
+
+	}
+
+	/**
+	 * See the EDSL examples at {@link Binder}.
+	 * 
+	 * <p>
+	 * This variant allows any provider class to be used as instance provider.
+	 * However, a wrapper to {@link InstanceProvider} has to be provided
+	 * </p>
+	 */
+	public <P> ScopedBindingBuilder<T> toProvider(
+			CoreDependencyKey<P> providerKey,
+			Function<? super P, InstanceProvider<? extends T>> providerWrapper) {
+		data.binding.recipeFactory = new ProviderRecipeFactory<T, P>(
+				providerKey, providerWrapper);
 
 		return new ScopedBindingBuilder<>(data);
-
 	}
 
 	/**

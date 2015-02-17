@@ -84,16 +84,23 @@ public class StandardInjector implements Injector {
 
 	private final class ProviderImpl<T> implements Provider<T> {
 
-		private Supplier<T> factoryFunction;
+		volatile private Supplier<T> supplier;
+		private CoreDependencyKey<T> key;
 
 		public ProviderImpl(CoreDependencyKey<T> key) {
-			factoryFunction = coreInjector.getInstanceSupplier(key);
+			this.key = key;
 		}
 
 		@Override
 		public T get() {
 			checkInitialized();
-			return factoryFunction.get();
+			if (supplier == null) {
+				synchronized (coreInjector.recipeLock) {
+					if (supplier == null)
+						supplier = coreInjector.getInstanceSupplier(key);
+				}
+			}
+			return supplier.get();
 		}
 	}
 
