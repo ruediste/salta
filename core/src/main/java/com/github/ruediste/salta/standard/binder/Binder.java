@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -38,6 +39,7 @@ import net.sf.cglib.proxy.ProxyRefDispatcher;
 
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -48,7 +50,10 @@ import com.github.ruediste.salta.standard.Module;
 import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
+import com.github.ruediste.salta.standard.config.InjectionListenerRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
+import com.github.ruediste.salta.standard.recipe.RecipeInjectorListenerImpl;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -477,6 +482,41 @@ public class Binder {
 	 */
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
 		return getMembersInjector(TypeToken.of(type));
+	}
+
+	/**
+	 * Registers listeners for provisioned objects. Salta will notify the
+	 * listeners whenever it instantiates an object of a matching type. The
+	 * listeners receives the object and can replace it if desired.
+	 */
+	@SafeVarargs
+	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
+			BiFunction<TypeToken<?>, Object, Object>... listeners) {
+		if (listeners.length > 0)
+			config.injectionListenerRules.add(new InjectionListenerRule() {
+
+				@Override
+				public RecipeInjectionListener getListener(
+						RecipeCreationContext ctx, TypeToken<?> type) {
+
+					if (typeMatcher.matches(type)) {
+						if (listeners.length == 1) {
+							BiFunction<TypeToken<?>, Object, Object> listener = listeners[0];
+							return new RecipeInjectorListenerImpl(
+									instance -> listener.apply(type, instance));
+						} else
+							return new RecipeInjectorListenerImpl(
+									instance -> {
+										for (BiFunction<TypeToken<?>, Object, Object> listener : listeners) {
+											instance = listener.apply(type,
+													instance);
+										}
+										return instance;
+									});
+					}
+					return null;
+				}
+			});
 	}
 
 	/**
