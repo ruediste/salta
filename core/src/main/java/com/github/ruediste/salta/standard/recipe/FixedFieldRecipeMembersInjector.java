@@ -25,7 +25,7 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
 	public void compile(GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
 		mv.dup();
-		compilationContext.addAndLoad(Type.getDescriptor(Field.class), field);
+		compilationContext.addFieldAndLoad(Type.getDescriptor(Field.class), field);
 		mv.swap();
 		recipe.compile(mv, compilationContext);
 

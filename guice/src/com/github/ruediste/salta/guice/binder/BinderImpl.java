@@ -1,7 +1,12 @@
 package com.github.ruediste.salta.guice.binder;
 
+import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.guice.ModuleAdapter;
+import com.github.ruediste.salta.standard.config.InjectionListenerRule;
+import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
+import com.github.ruediste.salta.standard.recipe.RecipeInjectorListenerImpl;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
@@ -12,6 +17,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ProvisionListener.ProvisionInvocation;
 
 public class BinderImpl implements Binder {
 
@@ -107,6 +113,61 @@ public class BinderImpl implements Binder {
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
 		return delegate.getMembersInjector(type)::injectMembers;
+	}
+
+	@Override
+	public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
+			TypeListener listener) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void bindListener(Matcher<? super Binding<?>> bindingMatcher,
+			ProvisionListener... listeners) {
+
+		for (int i = 0; i < listeners.length; i++) {
+			ProvisionListener listener = listeners[i];
+			delegate.getConfiguration().injectionListenerRules
+					.add(new InjectionListenerRule() {
+
+						final class Ref {
+							Object value;
+							boolean isSet;
+						}
+
+						@Override
+						public RecipeInjectionListener getListener(
+								RecipeCreationContext ctx, TypeToken<?> type) {
+							return RecipeInjectorListenerImpl
+									.ofWrapper(supplier -> {
+										Ref ref = new Ref();
+										ProvisionListener.ProvisionInvocation<Object> invocation = new ProvisionInvocation<Object>() {
+
+											@Override
+											public Object provision() {
+												if (ref.isSet)
+													throw new ProvisionException(
+															"provision() already called");
+												Object result = supplier.get();
+												ref.value = result;
+												ref.isSet = true;
+												return result;
+											}
+
+											@Override
+											public Binding<Object> getBinding() {
+												return new BindingImpl<>(type);
+											}
+										};
+										listener.onProvision(invocation);
+										if (!ref.isSet)
+											ref.value = supplier.get();
+										return ref.value;
+									});
+						}
+					});
+		}
 	}
 
 	@Override

@@ -103,7 +103,7 @@ public class CoreInjector {
 	public CompiledParameterizedCreationRecipe compileParameterizedRecipe(
 			CreationRecipe recipe) {
 		synchronized (recipeLock) {
-			return compiler.compileParameterRecipe(recipe);
+			return compiler.compileParameterizedRecipe(recipe);
 		}
 	}
 

@@ -29,7 +29,7 @@ public class FixedMethodRecipeMembersInjector implements RecipeMembersInjector {
 			RecipeCompilationContext compilationContext) {
 
 		mv.dup();
-		compilationContext.addAndLoad(Type.getDescriptor(Method.class), method);
+		compilationContext.addFieldAndLoad(Type.getDescriptor(Method.class), method);
 		mv.swap();
 
 		// push dependencies as an array

@@ -63,7 +63,7 @@ public class FixedConstructorRecipeInstantiator implements RecipeInstantiator {
 			RecipeCompilationContext compilationContext) {
 
 		// push constructor
-		compilationContext.addAndLoad(Type.getDescriptor(Constructor.class),
+		compilationContext.addFieldAndLoad(Type.getDescriptor(Constructor.class),
 				constructor);
 
 		// push dependencies as an array

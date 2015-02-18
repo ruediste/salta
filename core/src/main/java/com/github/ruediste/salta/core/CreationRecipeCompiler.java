@@ -26,7 +26,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.util.CheckClassAdapter;
 
-import com.github.ruediste.salta.core.RecipeCompilationContext.FieldEntry;
+import com.github.ruediste.salta.core.RecipeCompilationContextBase.FieldEntry;
 
 public class CreationRecipeCompiler {
 
@@ -44,7 +44,8 @@ public class CreationRecipeCompiler {
 	 * {@link CoreInjector#recipeLock} or {@link CoreInjector#instantiationLock}
 	 */
 	public CompiledCreationRecipe compile(CreationRecipe recipe) {
-		RecipeCompilationContext ctx = new RecipeCompilationContext(this);
+		RecipeCompilationContextImpl ctx = new RecipeCompilationContextImpl(
+				this);
 
 		setupClazz(ctx, CompiledCreationRecipe.class);
 
@@ -71,9 +72,10 @@ public class CreationRecipeCompiler {
 	 * threads. May not acquire {@link CoreInjector#recipeLock} or
 	 * {@link CoreInjector#instantiationLock}
 	 */
-	public CompiledParameterizedCreationRecipe compileParameterRecipe(
+	public CompiledParameterizedCreationRecipe compileParameterizedRecipe(
 			CreationRecipe recipe) {
-		RecipeCompilationContext ctx = new RecipeCompilationContext(this);
+		RecipeCompilationContextImpl ctx = new RecipeCompilationContextImpl(
+				this);
 
 		setupClazz(ctx, CompiledParameterizedCreationRecipe.class);
 
@@ -95,7 +97,7 @@ public class CreationRecipeCompiler {
 		return (CompiledParameterizedCreationRecipe) loadAndInstantiate(ctx);
 	}
 
-	private Object loadAndInstantiate(RecipeCompilationContext ctx) {
+	private Object loadAndInstantiate(RecipeCompilationContextImpl ctx) {
 		// generate bytecode
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 		ctx.clazz.accept(cw);
@@ -138,7 +140,7 @@ public class CreationRecipeCompiler {
 		return instance;
 	}
 
-	private void setupClazz(RecipeCompilationContext ctx,
+	private void setupClazz(RecipeCompilationContextImpl ctx,
 			Class<?> implementedInterface) {
 		// setup clazz
 		ClassNode clazz = new ClassNode();

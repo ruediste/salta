@@ -104,7 +104,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 		public void compile(GeneratorAdapter mv,
 				RecipeCompilationContext compilationContext) {
 
-			compilationContext.addAndLoad(
+			compilationContext.addFieldAndLoad(
 					Type.getDescriptor(wrappedProvider.getClass()),
 					wrappedProvider);
 		}

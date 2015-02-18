@@ -26,7 +26,7 @@ final class SingletonScope implements Scope {
 			@Override
 			public void compile(GeneratorAdapter mv,
 					RecipeCompilationContext compilationContext) {
-				compilationContext.addAndLoad(
+				compilationContext.addFieldAndLoad(
 						Type.getDescriptor(type.getRawType()), instance);
 			}
 		};

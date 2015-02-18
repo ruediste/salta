@@ -86,6 +86,10 @@ public class StandardInjectorConfiguration {
 		return result;
 	}
 
+	/**
+	 * List of rules to listen for injections. The listeners of all rules are
+	 * combined.
+	 */
 	public final List<InjectionListenerRule> injectionListenerRules = new ArrayList<>();
 
 	public List<RecipeInjectionListener> createInjectionListeners(

@@ -502,11 +502,12 @@ public class Binder {
 					if (typeMatcher.matches(type)) {
 						if (listeners.length == 1) {
 							BiFunction<TypeToken<?>, Object, Object> listener = listeners[0];
-							return new RecipeInjectorListenerImpl(
-									instance -> listener.apply(type, instance));
+							return RecipeInjectorListenerImpl
+									.of(instance -> listener.apply(type,
+											instance));
 						} else
-							return new RecipeInjectorListenerImpl(
-									instance -> {
+							return RecipeInjectorListenerImpl
+									.of(instance -> {
 										for (BiFunction<TypeToken<?>, Object, Object> listener : listeners) {
 											instance = listener.apply(type,
 													instance);

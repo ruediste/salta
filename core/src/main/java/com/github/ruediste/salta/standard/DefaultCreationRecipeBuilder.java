@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.standard;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -53,10 +54,10 @@ public class DefaultCreationRecipeBuilder {
 		RecipeMembersInjector[] mem = membersInjectorsSupplier.apply(ctx)
 				.toArray(new RecipeMembersInjector[] {});
 
-		RecipeInjectionListener[] listen = injectionListenerSupplier.apply(ctx)
-				.toArray(new RecipeInjectionListener[] {});
+		List<RecipeInjectionListener> listen = injectionListenerSupplier
+				.apply(ctx);
 
-		CreationRecipe innerRecipe = new CreationRecipe() {
+		CreationRecipe seedRecipe = new CreationRecipe() {
 
 			@Override
 			public void compile(GeneratorAdapter mv,
@@ -65,13 +66,37 @@ public class DefaultCreationRecipeBuilder {
 				for (RecipeMembersInjector membersInjector : mem) {
 					membersInjector.compile(mv, compilationContext);
 				}
-				for (RecipeInjectionListener listener : listen) {
-					listener.compile(mv, compilationContext);
-				}
-			}
 
+			}
 		};
+
+		CreationRecipe innerRecipe = createInnerRecipe(listen.iterator(),
+				seedRecipe);
+
 		return scopeSupplier.get()
 				.createRecipe(ctx, binding, type, innerRecipe);
+	}
+
+	private CreationRecipe createInnerRecipe(
+			Iterator<RecipeInjectionListener> iterator,
+			CreationRecipe seedRecipe) {
+		if (!iterator.hasNext())
+			return seedRecipe;
+
+		// consume a listener
+		RecipeInjectionListener listener = iterator.next();
+
+		// create a recipe for the rest of the chain
+		CreationRecipe innerRecipe = createInnerRecipe(iterator, seedRecipe);
+
+		// return recipe
+		return new CreationRecipe() {
+
+			@Override
+			public void compile(GeneratorAdapter mv,
+					RecipeCompilationContext compilationContext) {
+				listener.compile(mv, compilationContext, innerRecipe);
+			}
+		};
 	}
 }

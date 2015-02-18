@@ -60,7 +60,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			@Override
 			public void compile(GeneratorAdapter mv,
 					RecipeCompilationContext compilationContext) {
-				compilationContext.addAndLoad(
+				compilationContext.addFieldAndLoad(
 						Type.getDescriptor(ProviderImpl.class), provider);
 				provider.get();
 				mv.invokeVirtual(Type.getType(ProviderImpl.class),
@@ -156,7 +156,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 					@Override
 					public void compile(GeneratorAdapter mv,
 							RecipeCompilationContext compilationContext) {
-						compilationContext.addAndLoad(
+						compilationContext.addFieldAndLoad(
 								Type.getDescriptor(injected.getClass()),
 								injected);
 					}
@@ -184,7 +184,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 					@Override
 					public void compile(GeneratorAdapter mv,
 							RecipeCompilationContext compilationContext) {
-						compilationContext.addAndLoad(
+						compilationContext.addFieldAndLoad(
 								Type.getDescriptor(InstanceProvider.class),
 								injected);
 						mv.invokeInterface(

@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard.recipe;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 
 /**
@@ -11,9 +12,10 @@ import com.github.ruediste.salta.core.RecipeCompilationContext;
 public interface RecipeInjectionListener {
 
 	/**
-	 * Compile this recipe. The top of the stack contains the injected instance.
-	 * Can be replaced if desired.
+	 * Compile this recipe. The inner recipe will create the injected instance
+	 * as the top of the stack
 	 */
 	void compile(GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext);
+			RecipeCompilationContext compilationContext,
+			CreationRecipe innerRecipe);
 }

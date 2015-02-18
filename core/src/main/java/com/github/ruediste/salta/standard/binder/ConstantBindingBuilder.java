@@ -1,6 +1,5 @@
 package com.github.ruediste.salta.standard.binder;
 
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -42,12 +41,9 @@ public class ConstantBindingBuilder {
 					@Override
 					public void compile(GeneratorAdapter mv,
 							RecipeCompilationContext compilationContext) {
-						String field = compilationContext.addField(
-								Type.getDescriptor(cls), value);
 						mv.loadThis();
-						mv.visitFieldInsn(Opcodes.GETFIELD,
-								compilationContext.getGeneratedClassName(),
-								field, Type.getDescriptor(cls));
+						compilationContext.addFieldAndLoad(
+								Type.getDescriptor(cls), value);
 					}
 
 				};

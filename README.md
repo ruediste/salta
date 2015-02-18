@@ -1,5 +1,9 @@
-# Salta
+# Salta Dependency Injection Framework
 
+ * Familiar: API very similar to Guice
+ * Fast: more than 10 times faster than Guice
+ * Flexible: customize API, Annotations, Behaviour ...
+ 
 A dependency injection framework inspired by [Guice](https://github.com/google/guice). The configuration EDSL is copied almost 1-1, but the inner workings are completely different.
 
 ** PASSES JSR330 (javax.inject) Technology Compatibility Kit (TCK) **
@@ -7,13 +11,15 @@ A dependency injection framework inspired by [Guice](https://github.com/google/g
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 ## Design Overview
-Salta was created as a response to shortcomings of both (JavaEE CDI)[http://docs.oracle.com/javaee/6/tutorial/doc/giwhl.html] and (Guice)[https://github.com/google/guice]. 
+Salta was created as a response to shortcomings of (JavaEE CDI)[http://docs.oracle.com/javaee/6/tutorial/doc/giwhl.html], (Guice)[https://github.com/google/guice] and Spring.
 
-In CDI, the set of available beans (the counterpart of bindings in Guice) is determined when the container is initialized and cannot be changed afterwards. This implies that the available classes are scanned during startup, which results in slow startup speeds.
+In CDI, the set of available beans (the counterpart of bindings in Guice) is determined when the container is initialized and cannot be changed afterwards. This implies that the available classes are scanned during startup, which results in slow startup for large applications.
 
 In Guice, the bindings can be created while the container is running (JIT bindings). However, the focus lies on robustness. There are some major shortcomings in the area of flexibility. The annotations are hardcoded and there is no way to add a standard dependency (annotated with @Inject) to an injection point specific instance. (As it would for example be necessary to nicely integrate slf4j loggers)
 
-So the goal for SimpleDI is to provide an API close to Guice, while focusing on fexibility. No class scanning happens at startup. Bindings can be created just in time, with the possibility to specify explicit bindings in Modules. Depedencies can be satisfied in an injection point specific way.
+Spring is very slow.
+
+So the goal for SimpleDI is to provide an API close to Guice, while focusing on fexibility. No class scanning happens at startup. Bindings can be created just in time, with the possibility to specify explicit bindings in Modules. Depedencies can be satisfied in an injection point specific way. In addition, creating and injecting instances is almost as fast as hand written code due to bytecode generation.
 
 ## Locking
 Salta tries to do as much as possible without locking. If synchronization is required, there is one lock for the creation of recipes (recipe lock) and one for the creation of instances (instantiation lock). The recipe lock is acquired eagerly, whenever a new recipe needs to be created. The instantiation lock is mainly used if a scope needs to make sure only a single instance is created for a binding.
