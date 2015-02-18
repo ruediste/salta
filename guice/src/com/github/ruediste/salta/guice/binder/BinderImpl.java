@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.guice.binder;
 
+import java.lang.annotation.Annotation;
+
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.guice.KeyAdapter;
@@ -7,17 +9,23 @@ import com.github.ruediste.salta.guice.ModuleAdapter;
 import com.github.ruediste.salta.standard.config.InjectionListenerRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectorListenerImpl;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Binder;
+import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.ProvisionListener.ProvisionInvocation;
+import com.google.inject.spi.TypeListener;
 
 public class BinderImpl implements Binder {
 
@@ -64,7 +72,7 @@ public class BinderImpl implements Binder {
 
 	@Override
 	public void install(Module module) {
-		delegate.install(new ModuleAdapter(module));
+		delegate.install(new ModuleAdapter(module, config));
 	}
 
 	@Override
@@ -118,8 +126,8 @@ public class BinderImpl implements Binder {
 	@Override
 	public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
 			TypeListener listener) {
-		// TODO Auto-generated method stub
-
+		// TODO: implement
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -199,6 +207,18 @@ public class BinderImpl implements Binder {
 	@Override
 	public void disableCircularProxies() {
 		// Salta has no circular proxies
+	}
+
+	@Override
+	public void bindScope(Class<? extends Annotation> annotationType,
+			Scope scope) {
+		delegate.bindScope(annotationType, scope);
+	}
+
+	@Override
+	public <T> AnnotatedBindingBuilder<T> bind(Key<T> key) {
+		return new AnnotatedBindingBuilderImpl<>(delegate.bind(key
+				.getTypeLiteral().getTypeToken()));
 	}
 
 }

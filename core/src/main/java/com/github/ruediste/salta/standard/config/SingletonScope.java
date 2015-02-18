@@ -10,7 +10,7 @@ import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.standard.Scope;
 import com.google.common.reflect.TypeToken;
 
-final class SingletonScope implements Scope {
+public class SingletonScope implements Scope {
 
 	@Override
 	public String toString() {

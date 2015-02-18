@@ -16,6 +16,7 @@
 
 package com.google.inject;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 
 import com.google.inject.binder.AnnotatedBindingBuilder;
@@ -23,6 +24,8 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
+import com.google.inject.spi.ProvisionListener;
+import com.google.inject.spi.TypeListener;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
@@ -212,6 +215,16 @@ import com.google.inject.spi.Message;
 public interface Binder {
 
 	/**
+	 * Binds a scope to an annotation.
+	 */
+	void bindScope(Class<? extends Annotation> annotationType, Scope scope);
+
+	/**
+	 * See the EDSL examples at {@link Binder}.
+	 */
+	<T> AnnotatedBindingBuilder<T> bind(Key<T> typeLiteral);
+
+	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	<T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral);
@@ -363,6 +376,37 @@ public interface Binder {
 	 * @since 2.0
 	 */
 	Binder skipSources(Class<?>... classesToSkip);
+
+	/**
+	 * Registers a listener for injectable types. Guice will notify the listener
+	 * when it encounters injectable types matched by the given type matcher.
+	 *
+	 * @param typeMatcher
+	 *            that matches injectable types the listener should be notified
+	 *            of
+	 * @param listener
+	 *            for injectable types matched by typeMatcher
+	 * @since 2.0
+	 */
+	void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
+			TypeListener listener);
+
+	/**
+	 * Registers listeners for provisioned objects. Guice will notify the
+	 * listeners just before and after the object is provisioned. Provisioned
+	 * objects that are also injectable (everything except objects provided
+	 * through Providers) can also be notified through TypeListeners registered
+	 * in {@link #bindListener}.
+	 * 
+	 * @param bindingMatcher
+	 *            that matches bindings of provisioned objects the listener
+	 *            should be notified of
+	 * @param listeners
+	 *            for provisioned objects matched by bindingMatcher
+	 * @since 4.0
+	 */
+	void bindListener(Matcher<? super Binding<?>> bindingMatcher,
+			ProvisionListener... listeners);
 
 	/**
 	 * Instructs the Injector that bindings must be listed in a Module in order

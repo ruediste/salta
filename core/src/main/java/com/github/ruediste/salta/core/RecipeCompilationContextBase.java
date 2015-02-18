@@ -62,13 +62,11 @@ public abstract class RecipeCompilationContextBase implements
 		return entry.name;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.github.ruediste.salta.core.RecipeCompilationContext#addFieldAndLoad
-	 * (java.lang.String, java.lang.Object)
-	 */
+	@Override
+	public <T> String addFieldAndLoad(Class<T> fieldType, T value) {
+		return addFieldAndLoad(Type.getDescriptor(fieldType), value);
+	}
+
 	@Override
 	public String addFieldAndLoad(String desc, Object value) {
 		String fieldName = addField(desc, value);

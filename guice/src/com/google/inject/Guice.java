@@ -25,6 +25,7 @@ import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.guice.GuiceInjectorImpl;
 import com.github.ruediste.salta.guice.GuiceModule;
 import com.github.ruediste.salta.guice.ModuleAdapter;
+import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
 
 /**
  * The entry point to the Guice framework. Creates {@link Injector}s from
@@ -102,8 +103,10 @@ public final class Guice {
 	 */
 	public static Injector createInjector(Stage stage,
 			Iterable<? extends Module> modules) {
+		GuiceInjectorConfiguration config = new GuiceInjectorConfiguration();
 		StreamSupport.stream(modules.spliterator(), false)
-				.map(m -> new ModuleAdapter(m)).collect(toList());
-		return new GuiceInjectorImpl(Salta.createInjector(new GuiceModule()));
+				.map(m -> new ModuleAdapter(m, config)).collect(toList());
+		return new GuiceInjectorImpl(Salta.createInjector(new GuiceModule(
+				config)));
 	}
 }

@@ -10,6 +10,8 @@ public interface RecipeCompilationContext {
 	 */
 	public abstract String addField(String desc, Object value);
 
+	public abstract <T> String addFieldAndLoad(Class<T> fieldType, T value);
+
 	/**
 	 * Add a field to the compiled recipe class and load it.
 	 * 

@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.google.common.base.Function;
+import com.github.ruediste.salta.standard.binder.InstanceProvider;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
@@ -58,17 +58,27 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 	@Override
 	public ScopedBindingBuilder toProvider(
 			Class<? extends javax.inject.Provider<? extends T>> providerType) {
-		return new ScopedBindingBuilderImpl(delegate.toProvider(
-				(DependencyKey) DependencyKey.of(providerType), new Function() {
-
-				}));
+		return toProvider(TypeLiteral.get(providerType));
 	}
 
 	@Override
 	public ScopedBindingBuilder toProvider(
 			TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType) {
-		return new ScopedBindingBuilderImpl(delegate.toProvider(
-				DependencyKey.of(providerType.getTypeToken()), null));
+		return toProviderImpl(providerType);
+	}
+
+	private <P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProviderImpl(
+			TypeLiteral<P> providerType) {
+		return new ScopedBindingBuilderImpl(
+				delegate.toProvider(
+						DependencyKey.of(providerType.getTypeToken()),
+						new java.util.function.Function<P, InstanceProvider<? extends T>>() {
+
+							@Override
+							public InstanceProvider<? extends T> apply(P t) {
+								return () -> t.get();
+							}
+						}));
 	}
 
 	@Override

@@ -16,13 +16,11 @@
 
 package com.google.inject;
 
-import com.google.inject.internal.CircularDependencyProxy;
-import com.google.inject.internal.LinkedBindingImpl;
-import com.google.inject.internal.SingletonScope;
-import com.google.inject.spi.BindingScopingVisitor;
-import com.google.inject.spi.ExposedBinding;
-
-import java.lang.annotation.Annotation;
+import com.github.ruediste.salta.core.Binding;
+import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.standard.config.SingletonScope;
+import com.google.common.reflect.TypeToken;
 
 /**
  * Built-in scope implementations.
@@ -31,154 +29,38 @@ import java.lang.annotation.Annotation;
  */
 public class Scopes {
 
-  private Scopes() {}
+	private Scopes() {
+	}
 
-  /**
-   * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
-   */
-  public static final Scope SINGLETON = new SingletonScope();
+	private static class GuiceSingletonScope extends SingletonScope implements
+			Scope {
 
-  /**
-   * No scope; the same as not applying any scope at all.  Each time the
-   * Injector obtains an instance of an object with "no scope", it injects this
-   * instance then immediately forgets it.  When the next request for the same
-   * binding arrives it will need to obtain the instance over again.
-   *
-   * <p>This exists only in case a class has been annotated with a scope
-   * annotation such as {@link Singleton @Singleton}, and you need to override
-   * this to "no scope" in your binding.
-   *
-   * @since 2.0
-   */
-  public static final Scope NO_SCOPE = new Scope() {
-    public <T> Provider<T> scope(Key<T> key, Provider<T> unscoped) {
-      return unscoped;
-    }
-    @Override public String toString() {
-      return "Scopes.NO_SCOPE";
-    }
-  };
+	}
 
-  private static final BindingScopingVisitor<Boolean> IS_SINGLETON_VISITOR
-      = new BindingScopingVisitor<Boolean>() {
-        public Boolean visitNoScoping() {
-          return false;
-        }
+	/**
+	 * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
+	 */
+	public static final Scope SINGLETON = new GuiceSingletonScope();
 
-        public Boolean visitScopeAnnotation(Class<? extends Annotation> scopeAnnotation) {
-          return scopeAnnotation == Singleton.class
-              || scopeAnnotation == javax.inject.Singleton.class;
-        }
+	/**
+	 * No scope; the same as not applying any scope at all. Each time the
+	 * Injector obtains an instance of an object with "no scope", it injects
+	 * this instance then immediately forgets it. When the next request for the
+	 * same binding arrives it will need to obtain the instance over again.
+	 *
+	 * <p>
+	 * This exists only in case a class has been annotated with a scope
+	 * annotation such as {@link Singleton @Singleton}, and you need to override
+	 * this to "no scope" in your binding.
+	 *
+	 * @since 2.0
+	 */
+	public static final Scope NO_SCOPE = new Scope() {
 
-        public Boolean visitScope(Scope scope) {
-          return scope == Scopes.SINGLETON;
-        }
-
-        public Boolean visitEagerSingleton() {
-          return true;
-        }
-      };
-
-  /**
-   * Returns true if {@code binding} is singleton-scoped. If the binding is a {@link
-   * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it
-   * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
-   * also true if the target binding is singleton-scoped.
-   *
-   * @since 3.0
-   */
-  public static boolean isSingleton(Binding<?> binding) {
-    do {
-      boolean singleton = binding.acceptScopingVisitor(IS_SINGLETON_VISITOR);
-      if (singleton) {
-        return true;
-      }
-
-      if (binding instanceof LinkedBindingImpl) {
-        LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl) binding;
-        Injector injector = linkedBinding.getInjector();
-        if (injector != null) {
-          binding = injector.getBinding(linkedBinding.getLinkedKey());
-          continue;
-        }
-      } else if(binding instanceof ExposedBinding) {
-        ExposedBinding<?> exposedBinding = (ExposedBinding)binding;
-        Injector injector = exposedBinding.getPrivateElements().getInjector();
-        if (injector != null) {
-          binding = injector.getBinding(exposedBinding.getKey());
-          continue;
-        }
-      }
-
-      return false;
-    } while (true);
-  }
-
-  /**
-
-   * Returns true if {@code binding} has the given scope. If the binding is a {@link
-   * com.google.inject.spi.LinkedKeyBinding linked key binding} and belongs to an injector (ie. it
-   * was retrieved via {@link Injector#getBinding Injector.getBinding()}), then this method will
-   * also true if the target binding has the given scope.
-   *
-   * @param binding binding to check
-   * @param scope scope implementation instance
-   * @param scopeAnnotation scope annotation class
-   */
-  public static boolean isScoped(Binding<?> binding, final Scope scope,
-      final Class<? extends Annotation> scopeAnnotation) {
-    do {
-      boolean matches = binding.acceptScopingVisitor(new BindingScopingVisitor<Boolean>() {
-        public Boolean visitNoScoping() {
-          return false;
-        }
-
-        public Boolean visitScopeAnnotation(Class<? extends Annotation> visitedAnnotation) {
-          return visitedAnnotation == scopeAnnotation;
-        }
-
-        public Boolean visitScope(Scope visitedScope) {
-          return visitedScope == scope;
-        }
-
-        public Boolean visitEagerSingleton() {
-          return false;
-        }
-      });
-
-      if (matches) {
-        return true;
-      }
-
-      if (binding instanceof LinkedBindingImpl) {
-        LinkedBindingImpl<?> linkedBinding = (LinkedBindingImpl) binding;
-        Injector injector = linkedBinding.getInjector();
-        if (injector != null) {
-          binding = injector.getBinding(linkedBinding.getLinkedKey());
-          continue;
-        }
-      } else if(binding instanceof ExposedBinding) {
-        ExposedBinding<?> exposedBinding = (ExposedBinding)binding;
-        Injector injector = exposedBinding.getPrivateElements().getInjector();
-        if (injector != null) {
-          binding = injector.getBinding(exposedBinding.getKey());
-          continue;
-        }
-      }
-
-      return false;
-    } while (true);
-  }
-
-  /**
-   * Returns true if the object is a proxy for a circular dependency,
-   * constructed by Guice because it encountered a circular dependency. Scope
-   * implementations should be careful to <b>not cache circular proxies</b>,
-   * because the proxies are not intended for general purpose use. (They are
-   * designed just to fulfill the immediate injection, not all injections.
-   * Caching them can lead to IllegalArgumentExceptions or ClassCastExceptions.)
-   */
-  public static boolean isCircularProxy(Object object) {
-    return object instanceof CircularDependencyProxy;
-  }
+		@Override
+		public CreationRecipe createRecipe(RecipeCreationContext ctx,
+				Binding binding, TypeToken<?> type, CreationRecipe innerRecipe) {
+			return innerRecipe;
+		}
+	};
 }
