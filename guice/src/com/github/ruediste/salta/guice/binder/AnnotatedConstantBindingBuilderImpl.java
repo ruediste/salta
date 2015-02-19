@@ -18,14 +18,14 @@ public class AnnotatedConstantBindingBuilderImpl implements
 	@Override
 	public ConstantBindingBuilder annotatedWith(
 			Class<? extends Annotation> annotationType) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ConstantBindingBuilderImpl(
+				delegate.annotatedWith(annotationType));
 	}
 
 	@Override
 	public ConstantBindingBuilder annotatedWith(Annotation annotation) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ConstantBindingBuilderImpl(
+				delegate.annotatedWith(annotation));
 	}
 
 }

@@ -104,6 +104,10 @@ public abstract class AbstractModule implements Module {
 	 * @see Binder#bind(Class)
 	 */
 	protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
+		if (TypeLiteral.class.equals(clazz)) {
+			throw new com.github.ruediste.salta.core.ProvisionException(
+					"Binding to core guice framework type is not allowed: TypeLiteral");
+		}
 		return binder().bind(clazz);
 	}
 

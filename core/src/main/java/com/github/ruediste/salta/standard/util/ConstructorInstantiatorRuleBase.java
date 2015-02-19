@@ -31,6 +31,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 			TypeToken<?> typeToken) {
 
 		Type type = typeToken.getType();
+
 		Class<?> clazz;
 		if (type instanceof Class) {
 			clazz = (Class<?>) type;

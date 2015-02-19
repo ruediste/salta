@@ -36,18 +36,16 @@ public class ConstantBindingBuilder {
 
 			@Override
 			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
-				CreationRecipe recipe = new CreationRecipe() {
+				return new CreationRecipe() {
 
 					@Override
 					public void compile(GeneratorAdapter mv,
 							RecipeCompilationContext compilationContext) {
-						mv.loadThis();
 						compilationContext.addFieldAndLoad(
 								Type.getDescriptor(cls), value);
 					}
 
 				};
-				return recipe;
 			}
 		};
 		return binding;

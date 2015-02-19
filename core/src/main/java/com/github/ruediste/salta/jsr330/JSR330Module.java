@@ -23,8 +23,9 @@ public class JSR330Module extends AbstractModule {
 				(type, supplier) -> (Provider<?>) supplier::get));
 
 		// register initializer for requested static injections
-		config.dynamicInitializers.add(i -> new StaticMemberInjector()
+		config.dynamicInitializers.add(i -> new JSR330StaticMemberInjector()
 				.injectStaticMembers(config, i));
+
 		bindScope(Singleton.class, config.singletonScope);
 
 		install(new StandardModule());

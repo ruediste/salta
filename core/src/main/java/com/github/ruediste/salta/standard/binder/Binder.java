@@ -315,13 +315,15 @@ public class Binder {
 		DefaultCreationRecipeBuilder recipeBuilder = new DefaultCreationRecipeBuilder(
 				config, type, binding);
 
-		binding.dependencyMatcher = key -> Objects.equals(key.getType(), type);
 		binding.possibleTypes = Collections.singleton(type);
 		binding.recipeFactory = ctx -> recipeBuilder.build(ctx);
 
 		config.config.staticBindings.add(binding);
 
 		BindingBuilderData<T> data = new BindingBuilderData<>();
+		data.typeMatcher = key -> Objects.equals(key.getType(), type);
+		data.annotationMatcher = key -> true;
+		data.updateDepenencyMatcher();
 		data.injector = injector;
 		data.binding = binding;
 		data.eagerInstantiationDependency = DependencyKey.of(type);

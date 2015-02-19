@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.jsr330;
+package com.github.ruediste.salta.standard.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.standard.InjectionPoint;
@@ -18,8 +16,25 @@ import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
-final class StaticMemberInjector {
+/**
+ * Base class for static members injectors.
+ */
+public abstract class StaticMembersInjectorBase {
 
+	/**
+	 * Determine if a field should be injected. Called for static fields only;
+	 */
+	protected abstract boolean shouldInject(Field field);
+
+	/**
+	 * Determine if a method should be injected. Called for static methods only;
+	 */
+	protected abstract boolean shouldInject(Method method);
+
+	/**
+	 * Injects all
+	 * {@link StandardInjectorConfiguration#requestedStaticInjections}
+	 */
 	public void injectStaticMembers(StandardInjectorConfiguration config,
 			Injector injector) {
 		Set<Class<?>> injectedClasses = new HashSet<>();
@@ -45,7 +60,7 @@ final class StaticMemberInjector {
 		for (Field f : cls.getDeclaredFields()) {
 			if (!Modifier.isStatic(f.getModifiers()))
 				continue;
-			if (!f.isAnnotationPresent(Inject.class))
+			if (!shouldInject(f))
 				continue;
 			InjectionPoint<?> d = new InjectionPoint<>(TypeToken.of(f
 					.getGenericType()), f, f, null);
@@ -61,7 +76,7 @@ final class StaticMemberInjector {
 		for (Method m : cls.getDeclaredMethods()) {
 			if (!Modifier.isStatic(m.getModifiers()))
 				continue;
-			if (!m.isAnnotationPresent(Inject.class))
+			if (!shouldInject(m))
 				continue;
 			ArrayList<Object> args = new ArrayList<>();
 			Parameter[] parameters = m.getParameters();
@@ -82,4 +97,5 @@ final class StaticMemberInjector {
 			}
 		}
 	}
+
 }

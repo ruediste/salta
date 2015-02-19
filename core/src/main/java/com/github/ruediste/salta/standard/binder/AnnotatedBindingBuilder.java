@@ -31,6 +31,8 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public LinkedBindingBuilder<T> annotatedWith(Annotation annotation) {
+		data.annotationMatcher = Annotations.matcher(annotation);
+		data.updateDepenencyMatcher();
 		data.binding.dependencyMatcher = data.binding.dependencyMatcher
 				.and(Annotations.matcher(annotation));
 

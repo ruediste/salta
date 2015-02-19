@@ -8,12 +8,7 @@ import com.google.inject.TypeLiteral;
 
 public class GuiceInjectorImpl implements Injector {
 
-	com.github.ruediste.salta.standard.Injector delegate;
-
-	public GuiceInjectorImpl(
-			com.github.ruediste.salta.standard.Injector delegate) {
-		this.delegate = delegate;
-	}
+	private com.github.ruediste.salta.standard.Injector delegate;
 
 	@Override
 	public void injectMembers(Object instance) {
@@ -48,6 +43,12 @@ public class GuiceInjectorImpl implements Injector {
 	@Override
 	public <T> T getInstance(Class<T> type) {
 		return delegate.getInstance(type);
+	}
+
+	public GuiceInjectorImpl setDelegate(
+			com.github.ruediste.salta.standard.Injector delegate) {
+		this.delegate = delegate;
+		return this;
 	}
 
 }

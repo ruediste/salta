@@ -16,8 +16,9 @@
 
 package com.google.inject;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toCollection;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.StreamSupport;
 
@@ -104,9 +105,16 @@ public final class Guice {
 	public static Injector createInjector(Stage stage,
 			Iterable<? extends Module> modules) {
 		GuiceInjectorConfiguration config = new GuiceInjectorConfiguration();
-		StreamSupport.stream(modules.spliterator(), false)
-				.map(m -> new ModuleAdapter(m, config)).collect(toList());
-		return new GuiceInjectorImpl(Salta.createInjector(new GuiceModule(
-				config)));
+		ArrayList<com.github.ruediste.salta.standard.Module> wrappedModules = StreamSupport
+				.stream(modules.spliterator(), false)
+				.map(m -> new ModuleAdapter(m, config))
+				.collect(toCollection(ArrayList::new));
+
+		GuiceInjectorImpl injector = new GuiceInjectorImpl();
+		wrappedModules.add(new GuiceModule(config, injector));
+		Salta.createInjector(wrappedModules);
+
+		// delegate of injector was initialized by the GuiceModule
+		return injector;
 	}
 }
