@@ -18,7 +18,7 @@ package com.google.inject.binder;
 
 import java.lang.annotation.Annotation;
 
-import com.github.ruediste.salta.standard.Scope;
+import com.google.inject.Scope;
 
 /**
  * See the EDSL examples at {@link com.google.inject.Binder}.

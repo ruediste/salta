@@ -16,11 +16,8 @@
 
 package com.google.inject;
 
-import com.github.ruediste.salta.core.Binding;
-import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.standard.config.SingletonScope;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.internal.SingletonScope;
 
 /**
  * Built-in scope implementations.
@@ -32,15 +29,10 @@ public class Scopes {
 	private Scopes() {
 	}
 
-	private static class GuiceSingletonScope extends SingletonScope implements
-			Scope {
-
-	}
-
 	/**
 	 * One instance per {@link Injector}. Also see {@code @}{@link Singleton}.
 	 */
-	public static final Scope SINGLETON = new GuiceSingletonScope();
+	public static final Scope SINGLETON = new SingletonScope();
 
 	/**
 	 * No scope; the same as not applying any scope at all. Each time the
@@ -58,9 +50,15 @@ public class Scopes {
 	public static final Scope NO_SCOPE = new Scope() {
 
 		@Override
-		public CreationRecipe createRecipe(RecipeCreationContext ctx,
-				Binding binding, TypeToken<?> type, CreationRecipe innerRecipe) {
-			return innerRecipe;
+		public String toString() {
+			return "Scopes.NO_SCOPE";
+		}
+
+		@Override
+		public <T> Provider<T> scope(
+				com.github.ruediste.salta.core.Binding binding,
+				TypeToken<T> type, Provider<T> unscoped) {
+			return unscoped;
 		}
 	};
 }

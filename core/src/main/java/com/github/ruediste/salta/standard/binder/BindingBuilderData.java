@@ -13,8 +13,8 @@ public class BindingBuilderData<T> {
 	public StandardStaticBinding binding;
 	public StandardInjectorConfiguration config;
 
-	public Matcher<CoreDependencyKey<?>> typeMatcher;
-	public Matcher<CoreDependencyKey<?>> annotationMatcher;
+	private Matcher<CoreDependencyKey<?>> typeMatcher = key -> true;
+	private Matcher<CoreDependencyKey<?>> annotationMatcher = key -> true;
 	/**
 	 * Dependency to be used to trigger an eager instantiation
 	 */
@@ -25,6 +25,26 @@ public class BindingBuilderData<T> {
 	}
 
 	public void updateDepenencyMatcher() {
-		binding.dependencyMatcher = typeMatcher.and(annotationMatcher);
+		binding.dependencyMatcher = getTypeMatcher()
+				.and(getAnnotationMatcher());
+	}
+
+	public Matcher<CoreDependencyKey<?>> getTypeMatcher() {
+		return typeMatcher;
+	}
+
+	public void setTypeMatcher(Matcher<CoreDependencyKey<?>> typeMatcher) {
+		this.typeMatcher = typeMatcher;
+		updateDepenencyMatcher();
+	}
+
+	public Matcher<CoreDependencyKey<?>> getAnnotationMatcher() {
+		return annotationMatcher;
+	}
+
+	public void setAnnotationMatcher(
+			Matcher<CoreDependencyKey<?>> annotationMatcher) {
+		this.annotationMatcher = annotationMatcher;
+		updateDepenencyMatcher();
 	}
 }

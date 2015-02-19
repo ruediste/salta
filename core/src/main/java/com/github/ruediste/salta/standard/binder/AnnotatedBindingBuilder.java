@@ -16,13 +16,20 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
+	@SuppressWarnings("unchecked")
 	public LinkedBindingBuilder<T> annotatedWith(
-			Class<? extends Annotation> annotationType) {
-		data.binding.dependencyMatcher = data.binding.dependencyMatcher
-				.and(Annotations.matcher(annotationType));
+			Class<? extends Annotation> availableAnnotationType) {
+
+		data.setAnnotationMatcher(key -> {
+			Annotation requiredQualifier = data.config
+					.getRequiredQualifier(key);
+			return requiredQualifier != null
+					&& requiredQualifier.annotationType().equals(
+							availableAnnotationType);
+		});
 
 		data.eagerInstantiationDependency = data.eagerInstantiationDependency
-				.withAnnotations(annotationType);
+				.withAnnotations(availableAnnotationType);
 
 		return new LinkedBindingBuilder<>(data);
 	}
@@ -30,16 +37,14 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	public LinkedBindingBuilder<T> annotatedWith(Annotation annotation) {
-		data.annotationMatcher = Annotations.matcher(annotation);
-		data.updateDepenencyMatcher();
-		data.binding.dependencyMatcher = data.binding.dependencyMatcher
-				.and(Annotations.matcher(annotation));
-
+	public LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
+		data.setAnnotationMatcher(key -> {
+			return availableAnnotation.equals(data.config
+					.getRequiredQualifier(key));
+		});
 		data.eagerInstantiationDependency = data.eagerInstantiationDependency
-				.withAnnotations(annotation);
+				.withAnnotations(availableAnnotation);
 
 		return new LinkedBindingBuilder<>(data);
 	}
-
 }

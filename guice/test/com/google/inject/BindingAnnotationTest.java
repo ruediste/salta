@@ -17,7 +17,6 @@
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertContains;
-import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Annotation;
@@ -54,14 +53,10 @@ public class BindingAnnotationTest extends TestCase {
 					bindConstant().annotatedWith(Blue.class).to("foo");
 					bind(BlueFoo.class);
 				}
-			});
+			}).getInstance(Blue.class);
 			fail();
-		} catch (CreationException expected) {
-			assertContains(expected.getMessage(),
-					"No implementation for java.lang.String annotated with",
-					"BindingAnnotationTest$Blue(value=5) was bound", "at "
-							+ BindingAnnotationTest.class.getName(),
-					getDeclaringSourcePart(getClass()));
+		} catch (com.github.ruediste.salta.core.ProvisionException expected) {
+			// expected
 		}
 	}
 
@@ -85,14 +80,10 @@ public class BindingAnnotationTest extends TestCase {
 					bindConstant().annotatedWith(Color.class).to("foo");
 					bind(ColorFoo.class);
 				}
-			});
+			}).getInstance(ColorFoo.class);
 			fail();
-		} catch (CreationException expected) {
-			assertContains(expected.getMessage(),
-					"No implementation for java.lang.String annotated with",
-					"BindingAnnotationTest$Color", "at "
-							+ BindingAnnotationTest.class.getName(),
-					getDeclaringSourcePart(getClass()));
+		} catch (ProvisionException expected) {
+			// expected
 		}
 	}
 
@@ -109,12 +100,9 @@ public class BindingAnnotationTest extends TestCase {
 			BlueFoo instance = injector.getInstance(BlueFoo.class);
 
 			fail();
-		} catch (CreationException expected) {
+		} catch (com.github.ruediste.salta.core.ProvisionException expected) {
 			assertContains(expected.getMessage(),
-					"No implementation for java.lang.String annotated with",
-					"BindingAnnotationTest$Blue(value=5) was bound", "at "
-							+ BindingAnnotationTest.class.getName(),
-					getDeclaringSourcePart(getClass()));
+					"Dependency cannot be resolved");
 		}
 	}
 

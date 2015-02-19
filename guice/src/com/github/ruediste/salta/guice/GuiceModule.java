@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.guice;
 
 import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
 
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.DependencyFactoryRuleImpl;
@@ -10,6 +11,7 @@ import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.BindingAnnotation;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -34,9 +36,21 @@ public class GuiceModule extends AbstractModule {
 		config.defaultMembersInjectorFactories
 				.add(new GuiceMembersInjectorFactory());
 
-		config.config.creationRules.add(new ProviderDependencyFactoryRule(
-				Provider.class::equals,
-				(type, supplier) -> (Provider<?>) supplier::get));
+		config.config.creationRules
+				.add(new ProviderDependencyFactoryRule(key -> key.getRawType()
+						.equals(Provider.class),
+						(type, supplier) -> (Provider<?>) supplier::get,
+						Provider.class));
+
+		config.requiredQualifierExtractors.add(key -> Arrays.stream(
+				key.getAnnotatedElement().getAnnotations()).filter(
+				a -> a.annotationType().isAnnotationPresent(
+						BindingAnnotation.class)));
+
+		config.availableQualifierExtractors.add(type -> Arrays.stream(
+				type.getAnnotations()).filter(
+				a -> a.annotationType().isAnnotationPresent(
+						BindingAnnotation.class)));
 
 		// Rule for type literals
 		config.config.creationRules

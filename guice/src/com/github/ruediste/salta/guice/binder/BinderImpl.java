@@ -6,6 +6,7 @@ import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.guice.ModuleAdapter;
+import com.github.ruediste.salta.standard.ScopeImpl;
 import com.github.ruediste.salta.standard.config.InjectionListenerRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectorListenerImpl;
@@ -212,7 +213,8 @@ public class BinderImpl implements Binder {
 	@Override
 	public void bindScope(Class<? extends Annotation> annotationType,
 			Scope scope) {
-		delegate.bindScope(annotationType, scope);
+		delegate.bindScope(annotationType, new ScopeImpl(new GuiceScopeAdapter(
+				scope)));
 	}
 
 	@Override

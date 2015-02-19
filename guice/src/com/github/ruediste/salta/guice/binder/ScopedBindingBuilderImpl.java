@@ -2,7 +2,8 @@ package com.github.ruediste.salta.guice.binder;
 
 import java.lang.annotation.Annotation;
 
-import com.github.ruediste.salta.standard.Scope;
+import com.github.ruediste.salta.standard.ScopeImpl;
+import com.google.inject.Scope;
 import com.google.inject.binder.ScopedBindingBuilder;
 
 public class ScopedBindingBuilderImpl implements ScopedBindingBuilder {
@@ -21,7 +22,7 @@ public class ScopedBindingBuilderImpl implements ScopedBindingBuilder {
 
 	@Override
 	public void in(Scope scope) {
-		delegate.in(scope);
+		delegate.in(new ScopeImpl(new GuiceScopeAdapter(scope)));
 	}
 
 	@Override

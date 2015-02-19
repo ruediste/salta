@@ -29,7 +29,8 @@ public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
 	public final List<JITBindingKeyRule> jitBindingKeyRules = new ArrayList<>();
 
 	/**
-	 * Rules to create JIT bindings
+	 * Rules to create JIT bindings. The rules are matched until the first
+	 * returns a non null result, which will be used as jit binding
 	 */
 	public final List<JITBindingRule> jitBindingRules = new ArrayList<>();
 

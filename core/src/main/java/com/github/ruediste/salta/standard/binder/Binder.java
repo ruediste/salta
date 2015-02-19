@@ -321,11 +321,10 @@ public class Binder {
 		config.config.staticBindings.add(binding);
 
 		BindingBuilderData<T> data = new BindingBuilderData<>();
-		data.typeMatcher = key -> Objects.equals(key.getType(), type);
-		data.annotationMatcher = key -> true;
-		data.updateDepenencyMatcher();
-		data.injector = injector;
 		data.binding = binding;
+		data.setTypeMatcher(key -> Objects.equals(key.getType(), type));
+		data.setAnnotationMatcher(key -> config.getRequiredQualifier(key) == null);
+		data.injector = injector;
 		data.eagerInstantiationDependency = DependencyKey.of(type);
 		data.config = config;
 		data.recipeBuilder = recipeBuilder;

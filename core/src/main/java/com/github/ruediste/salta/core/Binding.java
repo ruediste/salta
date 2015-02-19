@@ -12,6 +12,8 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 
 	public static class RecursiveRecipeCreationDetectedException extends
 			ProvisionException {
+		private static final long serialVersionUID = 1L;
+
 		RecursiveRecipeCreationDetectedException() {
 			super("Recursive recipe creation detected");
 		}

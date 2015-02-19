@@ -36,6 +36,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 	private Matcher<? super CoreDependencyKey<?>> matcher;
 	private BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper;
+	private Class<?> providerType;
 
 	public static class ProviderAccessBeforeRecipeCreationFinishedException
 			extends ProvisionException {
@@ -92,12 +93,14 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 		}
 	}
 
-	private static class CreationRecipeImpl extends CreationRecipe {
+	private static class CreationRecipeImpl<T> extends CreationRecipe {
 
-		private Object wrappedProvider;
+		private T wrappedProvider;
+		private Class<T> providerType;
 
-		public CreationRecipeImpl(Object wrappedProvider) {
+		public CreationRecipeImpl(T wrappedProvider, Class<T> providerType) {
 			this.wrappedProvider = wrappedProvider;
+			this.providerType = providerType;
 		}
 
 		@Override
@@ -105,8 +108,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 				RecipeCompilationContext compilationContext) {
 
 			compilationContext.addFieldAndLoad(
-					Type.getDescriptor(wrappedProvider.getClass()),
-					wrappedProvider);
+					Type.getDescriptor(providerType), wrappedProvider);
 		}
 
 	}
@@ -123,10 +125,11 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 	 */
 	public ProviderDependencyFactoryRule(
 			Matcher<? super CoreDependencyKey<?>> matcher,
-			BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper) {
+			BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper,
+			Class<?> providerType) {
 		this.matcher = matcher;
 		this.wrapper = wrapper;
-
+		this.providerType = providerType;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -156,7 +159,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 			// create creation recipe
 			CreationRecipeImpl creationRecipe = new CreationRecipeImpl(
-					wrappedProvider);
+					wrappedProvider, providerType);
 
 			// queue creation and compilation of inner recipe
 			ctx.queueAction(x -> {

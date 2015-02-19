@@ -13,6 +13,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
@@ -23,10 +25,12 @@ import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.ScopeRule;
 import com.github.ruediste.salta.standard.Stage;
+import com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
+import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjectorConfiguration {
@@ -186,4 +190,48 @@ public class StandardInjectorConfiguration {
 	public final List<CoreDependencyKey<?>> requestedEagerInstantiations = new ArrayList<>();
 
 	public boolean requireAtInjectOnConstructors;
+
+	/**
+	 * Extractors of the required qualifier. This qualifier will be matched
+	 * against the qualifier available on types (JIT bindings, see
+	 * {@link #availableQualifierExtractors}) or the available qualifier
+	 * specified on bindings (see {@link AnnotatedBindingBuilder}). All
+	 * extractors are invoked. If more than one qualifier is found, an error is
+	 * raised
+	 */
+	public final List<Function<CoreDependencyKey<?>, Stream<Annotation>>> requiredQualifierExtractors = new ArrayList<>();
+
+	/**
+	 * Use the {@link #requiredQualifierExtractors} to determine the required
+	 * qualifier of a key (or null)
+	 */
+	public Annotation getRequiredQualifier(CoreDependencyKey<?> key) {
+		List<Annotation> qualifiers = requiredQualifierExtractors.stream()
+				.flatMap(f -> f.apply(key)).collect(toList());
+		if (qualifiers.size() > 1)
+			throw new ProvisionException(
+					"Multiple required qualifiers found on " + key + ": "
+							+ qualifiers);
+		return Iterables.getOnlyElement(qualifiers, null);
+	}
+
+	/**
+	 * Extractors for qualifier available on a type. Used by JIT bindings.
+	 */
+	public final List<Function<Class<?>, Stream<Annotation>>> availableQualifierExtractors = new ArrayList<>();
+
+	/**
+	 * Use the {@link #availableQualifierExtractors} to get the available
+	 * qualifier of a type. All extractors are invoked. If more than one
+	 * qualifier is found, an error is raised
+	 */
+	public Annotation getAvailableQualifier(Class<?> clazz) {
+		List<Annotation> qualifiers = availableQualifierExtractors.stream()
+				.flatMap(f -> f.apply(clazz)).collect(toList());
+		if (qualifiers.size() > 1)
+			throw new ProvisionException(
+					"Multiple avalable qualifiers found on " + clazz.getName()
+							+ ": " + qualifiers);
+		return Iterables.getOnlyElement(qualifiers, null);
+	}
 }

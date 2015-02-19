@@ -11,6 +11,19 @@ import com.google.common.reflect.TypeToken;
  */
 public interface Scope {
 
+	/**
+	 * Create a recipe. No incoming parameter on the stack. The scoped instance
+	 * is expected afterwards
+	 * 
+	 * @param ctx
+	 * @param binding
+	 *            binding which is beeing scoped
+	 * @param type
+	 *            type the binding was created for
+	 * @param innerRecipe
+	 *            recipe resulting in the unscoped instance
+	 * @return
+	 */
 	CreationRecipe createRecipe(RecipeCreationContext ctx, Binding binding,
 			TypeToken<?> type, CreationRecipe innerRecipe);
 
