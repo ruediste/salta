@@ -21,7 +21,6 @@ package com.github.ruediste.salta.standard.binder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.function.BiFunction;
 
 import javax.inject.Inject;
@@ -322,8 +321,9 @@ public class Binder {
 
 		BindingBuilderData<T> data = new BindingBuilderData<>();
 		data.binding = binding;
-		data.setTypeMatcher(key -> Objects.equals(key.getType(), type));
-		data.setAnnotationMatcher(key -> config.getRequiredQualifier(key) == null);
+		data.setTypeMatcher(CoreDependencyKey.typeMatcher(type));
+		data.setAnnotationMatcher(config
+				.requredQualifierMatcher((Annotation) null));
 		data.injector = injector;
 		data.eagerInstantiationDependency = DependencyKey.of(type);
 		data.config = config;

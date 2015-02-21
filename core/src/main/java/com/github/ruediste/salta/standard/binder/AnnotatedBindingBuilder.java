@@ -20,13 +20,8 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 	public LinkedBindingBuilder<T> annotatedWith(
 			Class<? extends Annotation> availableAnnotationType) {
 
-		data.setAnnotationMatcher(key -> {
-			Annotation requiredQualifier = data.config
-					.getRequiredQualifier(key);
-			return requiredQualifier != null
-					&& requiredQualifier.annotationType().equals(
-							availableAnnotationType);
-		});
+		data.setAnnotationMatcher(data.config
+				.requredQualifierMatcher(availableAnnotationType));
 
 		data.eagerInstantiationDependency = data.eagerInstantiationDependency
 				.withAnnotations(availableAnnotationType);
@@ -38,10 +33,8 @@ public class AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
-		data.setAnnotationMatcher(key -> {
-			return availableAnnotation.equals(data.config
-					.getRequiredQualifier(key));
-		});
+		data.setAnnotationMatcher(data.config
+				.requredQualifierMatcher(availableAnnotation));
 		data.eagerInstantiationDependency = data.eagerInstantiationDependency
 				.withAnnotations(availableAnnotation);
 

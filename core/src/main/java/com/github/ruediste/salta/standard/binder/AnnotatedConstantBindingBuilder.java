@@ -23,7 +23,7 @@ public class AnnotatedConstantBindingBuilder {
 	public ConstantBindingBuilder annotatedWith(
 			Class<? extends Annotation> annotationType) {
 		return new ConstantBindingBuilder(config,
-				Annotations.matcher(annotationType));
+				config.requredQualifierMatcher(annotationType));
 	}
 
 	/**
@@ -31,6 +31,6 @@ public class AnnotatedConstantBindingBuilder {
 	 */
 	public ConstantBindingBuilder annotatedWith(Annotation annotation) {
 		return new ConstantBindingBuilder(config,
-				Annotations.matcher(annotation));
+				config.requredQualifierMatcher(annotation));
 	}
 }

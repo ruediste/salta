@@ -3,7 +3,9 @@ package com.github.ruediste.salta.core;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
+import java.util.Objects;
 
+import com.github.ruediste.salta.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -29,5 +31,78 @@ public abstract class CoreDependencyKey<T> {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "(" + getType() + ")";
+	}
+
+	public static Matcher<CoreDependencyKey<?>> typeMatcher(TypeToken<?> type) {
+		return new TypeTokenMatcher(type);
+	}
+
+	public static class TypeTokenMatcher implements
+			Matcher<CoreDependencyKey<?>> {
+
+		private TypeToken<?> type;
+
+		public TypeTokenMatcher(TypeToken<?> type) {
+			this.type = type;
+		}
+
+		@Override
+		public boolean matches(CoreDependencyKey<?> key) {
+			return key.getType().equals(type);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this)
+				return true;
+			if (obj == null)
+				return false;
+			if (obj.getClass() != getClass())
+				return false;
+			TypeTokenMatcher other = (TypeTokenMatcher) obj;
+			return Objects.equals(type, other.type);
+
+		}
+
+		@Override
+		public String toString() {
+			return "type=" + type;
+		}
+	}
+
+	public static Matcher<CoreDependencyKey<?>> rawTypeMatcher(Class<?> type) {
+		return new RawTypeTokenMatcher(type);
+	}
+
+	public static class RawTypeTokenMatcher implements
+			Matcher<CoreDependencyKey<?>> {
+
+		private Class<?> type;
+
+		public RawTypeTokenMatcher(Class<?> type) {
+			this.type = type;
+		}
+
+		@Override
+		public boolean matches(CoreDependencyKey<?> key) {
+			return key.getRawType().equals(key);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this)
+				return true;
+			if (obj == null)
+				return false;
+			if (obj.getClass() != getClass())
+				return false;
+			RawTypeTokenMatcher other = (RawTypeTokenMatcher) obj;
+			return Objects.equals(type, other.type);
+		}
+
+		@Override
+		public String toString() {
+			return "rawType=" + type;
+		}
 	}
 }

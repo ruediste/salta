@@ -119,4 +119,9 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 			rawType = (Class<T>) type.getRawType();
 		return rawType;
 	}
+
+	@Override
+	public String toString() {
+		return "DependencyKey(" + getType() + "," + annotations.values() + ")";
+	}
 }

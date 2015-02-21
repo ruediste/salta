@@ -14,11 +14,10 @@ public class JSR330ConstructorInstantiatorRule extends
 	protected Integer getConstructorPriority(Constructor<?> c) {
 		if (c.isAnnotationPresent(Inject.class))
 			return 2;
-		boolean isPrivateInnerClass = c.getDeclaringClass().getEnclosingClass() != null
-				&& Modifier.isPrivate(c.getDeclaringClass().getModifiers());
+		boolean isInnerClass = c.getDeclaringClass().getEnclosingClass() != null;
 
 		if (c.getParameterCount() == 0
-				&& (Modifier.isPublic(c.getModifiers()) || isPrivateInnerClass))
+				&& (Modifier.isPublic(c.getModifiers()) || isInnerClass))
 			return 1;
 		return null;
 	}

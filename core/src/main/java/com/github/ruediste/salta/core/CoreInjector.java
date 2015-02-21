@@ -166,7 +166,7 @@ public class CoreInjector {
 						if (binding != null)
 							throw new ProvisionException(
 									"multiple bindings match dependency " + key
-											+ ": " + binding + ", " + b);
+											+ "\n * " + binding + "\n * " + b);
 						binding = b;
 					}
 				}

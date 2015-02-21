@@ -9,7 +9,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.util.Objects;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -18,6 +17,7 @@ import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.StaticBinding;
+import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
@@ -41,6 +41,10 @@ public abstract class ProviderMethodBinder {
 			}
 
 			Type boundType = m.getGenericReturnType();
+			Matcher<CoreDependencyKey<?>> matcher = CoreDependencyKey
+					.typeMatcher(TypeToken.of(boundType)).and(
+							config.requredQualifierMatcher(config
+									.getAvailableQualifier(m)));
 
 			config.config.staticBindings.add(new StaticBinding() {
 
@@ -92,11 +96,12 @@ public abstract class ProviderMethodBinder {
 
 				@Override
 				public boolean matches(CoreDependencyKey<?> dependency) {
-					if (!dependency.getType().isAssignableFrom(boundType))
-						return false;
-					return Objects.equals(
-							config.getRequiredQualifier(dependency),
-							availableQualifier);
+					return matcher.matches(dependency);
+				}
+
+				@Override
+				public String toString() {
+					return "ProviderMethodBinding " + m;
 				}
 			});
 		}

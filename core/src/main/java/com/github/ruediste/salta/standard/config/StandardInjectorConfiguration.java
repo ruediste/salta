@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -21,6 +22,7 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Scope;
@@ -227,6 +229,102 @@ public class StandardInjectorConfiguration {
 					"Multiple required qualifiers found on " + key + ": "
 							+ qualifiers);
 		return Iterables.getOnlyElement(qualifiers, null);
+	}
+
+	public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(
+			Annotation qualifier) {
+		return new RequiredQualifierMatcher(this, qualifier);
+	}
+
+	private static final class RequiredQualifierMatcher implements
+			Matcher<CoreDependencyKey<?>> {
+		private Annotation qualifier;
+		private StandardInjectorConfiguration config;
+
+		public RequiredQualifierMatcher(StandardInjectorConfiguration config,
+				Annotation qualifier) {
+			this.config = config;
+			this.qualifier = qualifier;
+		}
+
+		@Override
+		public boolean matches(CoreDependencyKey<?> key) {
+			return Objects.equals(qualifier, config.getRequiredQualifier(key));
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(config, qualifier);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this)
+				return true;
+			if (obj == null)
+				return false;
+			if (obj.getClass() != getClass())
+				return false;
+			RequiredQualifierMatcher other = (RequiredQualifierMatcher) obj;
+			return Objects.equals(config, other.config)
+					&& Objects.equals(qualifier, other.qualifier);
+		}
+
+		@Override
+		public String toString() {
+			return "qualifier=" + qualifier;
+		}
+	}
+
+	public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(
+			Class<? extends Annotation> qualifierType) {
+		// TODO Auto-generated method stub
+		return new RequiredQualifierTypeMatcher(this, qualifierType);
+	}
+
+	private static final class RequiredQualifierTypeMatcher implements
+			Matcher<CoreDependencyKey<?>> {
+		private StandardInjectorConfiguration config;
+		private Class<? extends Annotation> qualifierType;
+
+		public RequiredQualifierTypeMatcher(
+				StandardInjectorConfiguration config,
+				Class<? extends Annotation> qualifierType) {
+			this.config = config;
+			this.qualifierType = qualifierType;
+		}
+
+		@Override
+		public boolean matches(CoreDependencyKey<?> key) {
+			Annotation requiredQualifier = config.getRequiredQualifier(key);
+			if (requiredQualifier == null)
+				return qualifierType == null;
+			else
+				return requiredQualifier.annotationType().equals(qualifierType);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(config, qualifierType);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this)
+				return true;
+			if (obj == null)
+				return false;
+			if (obj.getClass() != getClass())
+				return false;
+			RequiredQualifierTypeMatcher other = (RequiredQualifierTypeMatcher) obj;
+			return Objects.equals(config, other.config)
+					&& Objects.equals(qualifierType, other.qualifierType);
+		}
+
+		@Override
+		public String toString() {
+			return "qualifier is" + qualifierType;
+		}
 	}
 
 	/**
