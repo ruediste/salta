@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-import com.google.inject.spi.Element;
 
 /**
  * A mapping from a key (type and optional annotation) to the strategy for
@@ -65,7 +64,7 @@ import com.google.inject.spi.Element;
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */
-public interface Binding<T> extends Element {
+public interface Binding<T> {
 
 	/**
 	 * Returns the key for this binding.

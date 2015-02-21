@@ -53,10 +53,11 @@ public abstract class AbstractModule implements Module {
 	Binder binder;
 
 	@Override
-	public final synchronized void configure(Binder builder) {
+	public final synchronized void configure(Binder binder) {
 		checkState(this.binder == null, "Re-entry is not allowed.");
 
-		this.binder = checkNotNull(builder, "builder");
+		binder.getDelegate().getConfiguration().modules.add(this);
+		this.binder = checkNotNull(binder, "binder");
 		try {
 			configure();
 		} finally {

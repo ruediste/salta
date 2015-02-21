@@ -223,4 +223,14 @@ public class BinderImpl implements Binder {
 				.getTypeLiteral().getTypeToken()));
 	}
 
+	@Override
+	public GuiceInjectorConfiguration getGuiceConfiguration() {
+		return config;
+	}
+
+	@Override
+	public com.github.ruediste.salta.standard.binder.Binder getDelegate() {
+		return delegate;
+	}
+
 }

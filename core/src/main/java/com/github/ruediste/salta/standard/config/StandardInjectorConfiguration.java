@@ -3,6 +3,7 @@ package com.github.ruediste.salta.standard.config;
 import static java.util.stream.Collectors.toList;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +53,36 @@ public class StandardInjectorConfiguration {
 	 */
 	public BiFunction<Constructor<?>, TypeToken<?>, RecipeInstantiator> fixedConstructorInstantiatorFactory;
 
+	/**
+	 * List of rules to create an instantiator given a type
+	 */
 	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
+
+	/**
+	 * When no matching {@link #instantiatorRules} is found, the type is passed
+	 * to these producers. They should throw an appropriate exception.
+	 */
+	public final List<Consumer<TypeToken<?>>> noInstantiatorFoundErrorProducers = new ArrayList<>();
+
+	/**
+	 * Create an {@link RecipeInstantiator} using the {@link #instantiatorRules}
+	 * If no instantiator is found, an error is raised using
+	 * {@link #noInstantiatorFoundErrorProducers} or a fallback
+	 */
+	public <T> RecipeInstantiator createRecipeInstantiator(
+			RecipeCreationContext ctx, TypeToken<?> type) {
+		for (InstantiatorRule rule : instantiatorRules) {
+			RecipeInstantiator instantiator = rule.apply(ctx, type);
+			if (instantiator != null) {
+				return instantiator;
+			}
+		}
+		// throw error
+		for (Consumer<TypeToken<?>> producer : noInstantiatorFoundErrorProducers) {
+			producer.accept(type);
+		}
+		throw new ProvisionException("No instantiator found for " + type);
+	}
 
 	/**
 	 * Rules used to create {@link RecipeMembersInjector}s for a type. The
@@ -109,22 +139,6 @@ public class StandardInjectorConfiguration {
 	public final List<ScopeRule> scopeRules = new ArrayList<>();
 
 	public final Set<Class<?>> requestedStaticInjections = new HashSet<>();
-
-	/**
-	 * Create an {@link RecipeInstantiator} using the {@link #instantiatorRules}
-	 * 
-	 * @param ctx
-	 */
-	public <T> RecipeInstantiator createRecipeInstantiator(
-			RecipeCreationContext ctx, TypeToken<?> type) {
-		for (InstantiatorRule rule : instantiatorRules) {
-			RecipeInstantiator instantiator = rule.apply(ctx, type);
-			if (instantiator != null) {
-				return instantiator;
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Get the scope for a type based on the {@link #scopeRules} followed by the
@@ -216,22 +230,37 @@ public class StandardInjectorConfiguration {
 	}
 
 	/**
-	 * Extractors for qualifier available on a type. Used by JIT bindings.
+	 * Extractors for the available qualifier of an annotated elements. Used by
+	 * JIT bindings or to determine the qualifiers of provider methods.
 	 */
-	public final List<Function<Class<?>, Stream<Annotation>>> availableQualifierExtractors = new ArrayList<>();
+	public final List<Function<AnnotatedElement, Stream<Annotation>>> availableQualifierExtractors = new ArrayList<>();
 
 	/**
 	 * Use the {@link #availableQualifierExtractors} to get the available
 	 * qualifier of a type. All extractors are invoked. If more than one
 	 * qualifier is found, an error is raised
 	 */
-	public Annotation getAvailableQualifier(Class<?> clazz) {
+	public Annotation getAvailableQualifier(AnnotatedElement element) {
 		List<Annotation> qualifiers = availableQualifierExtractors.stream()
-				.flatMap(f -> f.apply(clazz)).collect(toList());
+				.flatMap(f -> f.apply(element)).collect(toList());
 		if (qualifiers.size() > 1)
 			throw new ProvisionException(
-					"Multiple avalable qualifiers found on " + clazz.getName()
-							+ ": " + qualifiers);
+					"Multiple avalable qualifiers found on " + element + ": "
+							+ qualifiers);
 		return Iterables.getOnlyElement(qualifiers, null);
+	}
+
+	/**
+	 * List of modules that were used to create this configuration. Used to post
+	 * process the modules after the first configuration
+	 */
+	public List<Object> modules = new ArrayList<>();
+
+	public List<Consumer<Object>> modulePostProcessors = new ArrayList<>();
+
+	public void postProcessModules() {
+		for (Object module : modules) {
+			modulePostProcessors.stream().forEach(x -> x.accept(module));
+		}
 	}
 }

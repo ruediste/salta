@@ -32,21 +32,4 @@ public class GuiceConstructorInstantiatorRule extends
 		return null;
 	}
 
-	@Override
-	protected ProvisionException noConstructorFound(TypeToken<?> typeToken,
-			Class<?> clazz) {
-		Class<?> enclosingClass = clazz.getEnclosingClass();
-		if (enclosingClass != null) {
-			for (Constructor<?> c : clazz.getDeclaredConstructors()) {
-				if (c.getParameterCount() == 1
-						&& enclosingClass.equals(c.getParameterTypes()[0])) {
-					return new ProvisionException(
-							"No suitable constructor found for inner non-static class "
-									+ typeToken
-									+ ".\nCannot instantiate non-static inner classes. Forgotten to make class static?");
-				}
-			}
-		}
-		return super.noConstructorFound(typeToken, clazz);
-	}
 }

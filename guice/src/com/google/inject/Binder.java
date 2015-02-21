@@ -19,6 +19,7 @@ package com.google.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 
+import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -483,4 +484,8 @@ public interface Binder {
 	 * @since 4.0
 	 */
 	void requireExactBindingAnnotations();
+
+	GuiceInjectorConfiguration getGuiceConfiguration();
+
+	com.github.ruediste.salta.standard.binder.Binder getDelegate();
 }

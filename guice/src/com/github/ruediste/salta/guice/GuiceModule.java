@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.guice;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 
@@ -8,12 +9,14 @@ import com.github.ruediste.salta.core.DependencyFactoryRuleImpl;
 import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
 import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 
@@ -47,8 +50,8 @@ public class GuiceModule extends AbstractModule {
 				a -> a.annotationType().isAnnotationPresent(
 						BindingAnnotation.class)));
 
-		config.availableQualifierExtractors.add(type -> Arrays.stream(
-				type.getAnnotations()).filter(
+		config.availableQualifierExtractors.add(annotated -> Arrays.stream(
+				annotated.getAnnotations()).filter(
 				a -> a.annotationType().isAnnotationPresent(
 						BindingAnnotation.class)));
 
@@ -80,6 +83,24 @@ public class GuiceModule extends AbstractModule {
 		// register initializer for requested static injections
 		config.dynamicInitializers.add(i -> new GuiceStaticMemberInjector()
 				.injectStaticMembers(config, i));
+
+		// scan modules for @Provides methods
+		{
+			ProviderMethodBinder b = new ProviderMethodBinder(config) {
+
+				@Override
+				protected boolean isProviderMethod(Method m) {
+					if (!m.isAnnotationPresent(Provides.class))
+						return false;
+					if (void.class.equals(m.getReturnType())) {
+						throw new ProvisionException(
+								"@Provides method may not return void");
+					}
+					return true;
+				}
+			};
+			config.modulePostProcessors.add(b::bindProviderMethodsOf);
+		}
 		bindScope(Singleton.class, config.singletonScope);
 
 		config.staticInitializers.add(injector::setDelegate);

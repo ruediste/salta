@@ -161,6 +161,9 @@ public class StandardInjector implements Injector {
 
 	public void initialize(StandardInjectorConfiguration config) {
 		this.config = config;
+
+		config.postProcessModules();
+
 		coreInjector = new CoreInjector(config.config);
 		for (Consumer<Injector> initializer : config.staticInitializers) {
 			initializer.accept(this);

@@ -47,7 +47,7 @@ public class DefaultCreationRecipeBuilder {
 
 	public CreationRecipe build(RecipeCreationContext ctx) {
 
-		RecipeInstantiator transitiveInstantiator = instantiatorSupplier
+		RecipeInstantiator instantiator = instantiatorSupplier
 				.apply(ctx);
 
 		// arrays for performance
@@ -62,7 +62,7 @@ public class DefaultCreationRecipeBuilder {
 			@Override
 			public void compile(GeneratorAdapter mv,
 					RecipeCompilationContext compilationContext) {
-				transitiveInstantiator.compile(mv, compilationContext);
+				instantiator.compile(mv, compilationContext);
 				for (RecipeMembersInjector membersInjector : mem) {
 					membersInjector.compile(mv, compilationContext);
 				}

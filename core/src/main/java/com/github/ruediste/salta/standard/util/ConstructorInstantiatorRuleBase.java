@@ -77,7 +77,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 					highestPriorityConstructors);
 
 		if (highestPriorityConstructors.isEmpty()) {
-			throw noConstructorFound(typeToken, clazz);
+			return null;
 		}
 
 		Constructor<?> constructor = highestPriorityConstructors.get(0);
@@ -107,12 +107,6 @@ public abstract class ConstructorInstantiatorRuleBase implements
 						+ highestPriorityConstructors.stream()
 								.map(Object::toString)
 								.collect(joining("\n->", "->", "")));
-	}
-
-	protected ProvisionException noConstructorFound(TypeToken<?> typeToken,
-			Class<?> clazz) {
-		return new ProvisionException("No suitable constructor found for type "
-				+ typeToken);
 	}
 
 	/**
