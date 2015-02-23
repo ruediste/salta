@@ -59,8 +59,7 @@ public class GuiceModule extends AbstractModule {
 			public SupplierRecipe apply(CoreDependencyKey<?> key,
 					RecipeCreationContext ctx) {
 				if (Stage.class.equals(key.getType().getType()))
-					return new SupplierRecipeImpl(Stage.class,
-							() -> guiceConfig.stage);
+					return new SupplierRecipeImpl(() -> guiceConfig.stage);
 				else
 					return null;
 			}

@@ -131,4 +131,15 @@ public abstract class RecipeCompilationContextBase implements
 		return compiler;
 	}
 
+	@Override
+	public void cast(Class<?> from, Class<?> to) {
+		cast(Type.getType(from), Type.getType(to));
+	}
+
+	@Override
+	public void cast(Type from, Type to) {
+		if (from.getSort() == Type.OBJECT && to.getSort() == Type.OBJECT)
+			getMv().checkCast(to);
+	}
+
 }

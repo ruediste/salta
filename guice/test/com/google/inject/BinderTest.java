@@ -29,12 +29,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
 import com.github.ruediste.salta.core.SaltaException;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
@@ -45,9 +43,6 @@ import com.google.inject.util.Providers;
  * @author crazybob@google.com (Bob Lee)
  */
 public class BinderTest extends TestCase {
-
-	private final Logger loggerToWatch = Logger
-			.getLogger(Guice.class.getName());
 
 	private final List<LogRecord> logRecords = Lists.newArrayList();
 	private final Handler fakeHandler = new Handler() {
@@ -66,18 +61,6 @@ public class BinderTest extends TestCase {
 	};
 
 	Provider<Foo> fooProvider;
-
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		loggerToWatch.addHandler(fakeHandler);
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		loggerToWatch.removeHandler(fakeHandler);
-		super.tearDown();
-	}
 
 	public void testProviderFromBinder() {
 		Guice.createInjector(new Module() {
@@ -304,30 +287,11 @@ public class BinderTest extends TestCase {
 				}
 			});
 			fail();
-		} catch (CreationException expected) {
-			assertContains(expected.getMessage(),
-					"1) A binding to java.lang.String[] was already configured at "
-							+ getClass().getName(), "at "
-							+ getClass().getName(),
-					getDeclaringSourcePart(getClass()));
-			assertContains(expected.getMessage(), "1 error");
+		} catch (SaltaException expected) {
+			if (!expected.getMessage().contains("Duplicat"))
+				throw expected;
 		}
 
-		// passes because duplicates are ignored
-		injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(String[].class).toInstance(strings);
-				bind(new TypeLiteral<String[]>() {
-				}).toInstance(strings);
-			}
-		});
-		assertSame(strings,
-				injector.getInstance(Key.get(new TypeLiteral<String[]>() {
-				})));
-		assertSame(strings, injector.getInstance(new Key<String[]>() {
-		}));
-		assertSame(strings, injector.getInstance(String[].class));
 	}
 
 	static class ParentModule extends AbstractModule {
@@ -372,7 +336,7 @@ public class BinderTest extends TestCase {
 		try {
 			Guice.createInjector(new ParentModule()).getInstance(String.class);
 			fail();
-		} catch (CreationException expected) {
+		} catch (SaltaException expected) {
 			assertContains(
 					expected.getMessage(),
 					"1) A binding to java.lang.String was already configured at "
@@ -494,29 +458,10 @@ public class BinderTest extends TestCase {
 				}
 			});
 			fail();
-		} catch (CreationException expected) {
-			assertSame(message,
-					Iterables.getOnlyElement(expected.getErrorMessages()));
+		} catch (SaltaException expected) {
+			if (!expected.getMessage().contains("Whoops"))
+				throw expected;
 		}
-	}
-
-	public void testUserReportedErrorsAreAlsoLogged() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					addError(new Message("Whoops!",
-							new IllegalArgumentException()));
-				}
-			});
-			fail();
-		} catch (CreationException expected) {
-		}
-
-		LogRecord logRecord = Iterables.getOnlyElement(this.logRecords);
-		assertContains(
-				logRecord.getMessage(),
-				"An exception was caught and reported. Message: java.lang.IllegalArgumentException");
 	}
 
 	public void testBindingToProvider() {

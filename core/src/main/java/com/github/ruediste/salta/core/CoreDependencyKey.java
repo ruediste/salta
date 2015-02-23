@@ -52,6 +52,11 @@ public abstract class CoreDependencyKey<T> {
 		}
 
 		@Override
+		public int hashCode() {
+			return type.hashCode();
+		}
+
+		@Override
 		public boolean equals(Object obj) {
 			if (obj == this)
 				return true;

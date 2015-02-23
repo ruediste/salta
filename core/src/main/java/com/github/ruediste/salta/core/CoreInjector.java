@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import com.github.ruediste.salta.matchers.Matcher;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
@@ -42,6 +43,18 @@ public class CoreInjector {
 	 */
 	public CoreInjector(CoreInjectorConfiguration config) {
 		this.config = config;
+
+		// check uniqueness of static bindings
+		{
+			HashMap<Matcher<?>, StaticBinding> map = new HashMap<>();
+			for (StaticBinding b : config.staticBindings) {
+				StaticBinding existing = map.put(b.getMatcher(), b);
+				if (existing != null) {
+					throw new SaltaException("Duplicate static binding found\n"
+							+ b + "\n" + existing);
+				}
+			}
+		}
 
 		// initialize static binding map
 		for (StaticBinding binding : config.staticBindings) {
@@ -176,7 +189,7 @@ public class CoreInjector {
 
 				for (StaticBinding b : Iterables.concat(
 						nonTypeSpecificStaticBindings, typeSpecificBindings)) {
-					if (b.matches(key)) {
+					if (b.getMatcher().matches(key)) {
 						if (binding != null)
 							throw new SaltaException(
 									"multiple bindings match dependency " + key

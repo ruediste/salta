@@ -20,7 +20,6 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.function.BiFunction;
 
 import javax.inject.Inject;
@@ -316,7 +315,7 @@ public class Binder {
 		DefaultCreationRecipeBuilder recipeBuilder = new DefaultCreationRecipeBuilder(
 				config, type, binding);
 
-		binding.possibleTypes = Collections.singleton(type);
+		binding.possibleTypes.add(type);
 		binding.recipeFactory = ctx -> recipeBuilder.build(ctx);
 
 		config.config.staticBindings.add(binding);

@@ -2,6 +2,7 @@ package com.github.ruediste.salta.core;
 
 import java.util.Set;
 
+import com.github.ruediste.salta.matchers.Matcher;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -23,5 +24,5 @@ public abstract class StaticBinding extends Binding {
 		return null;
 	}
 
-	public abstract boolean matches(CoreDependencyKey<?> dependency);
+	public abstract Matcher<CoreDependencyKey<?>> getMatcher();
 }

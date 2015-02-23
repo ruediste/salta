@@ -97,13 +97,13 @@ public abstract class ProviderMethodBinder {
 				}
 
 				@Override
-				public boolean matches(CoreDependencyKey<?> dependency) {
-					return matcher.matches(dependency);
+				public String toString() {
+					return "ProviderMethodBinding " + m;
 				}
 
 				@Override
-				public String toString() {
-					return "ProviderMethodBinding " + m;
+				public Matcher<CoreDependencyKey<?>> getMatcher() {
+					return matcher;
 				}
 			});
 		}

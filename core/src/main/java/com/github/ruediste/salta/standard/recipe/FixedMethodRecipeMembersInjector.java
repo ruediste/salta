@@ -15,6 +15,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 
@@ -32,6 +33,54 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 	public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
 
+		if (Accessibility.isMethodPublic(method))
+			return compileDirect(argType, mv, compilationContext);
+		return compileReflection(argType, mv, compilationContext);
+	}
+
+	private Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext) {
+		// check type
+		Class<?> declaringClass = method.getDeclaringClass();
+
+		if (!declaringClass.isAssignableFrom(argType)) {
+			compilationContext.cast(argType, declaringClass);
+
+			argType = declaringClass;
+		}
+		mv.dup();
+		// push dependencies as an array
+
+		for (int i = 0; i < argumentRecipes.size(); i++) {
+			SupplierRecipe dependency = argumentRecipes.get(i);
+			Class<?> t = dependency.compile(compilationContext);
+			Class<?> parameterType = method.getParameterTypes()[i];
+
+			if (!parameterType.isAssignableFrom(t)) {
+				if (!parameterType.isPrimitive() && t.isPrimitive()) {
+					// mv.box(Type.getType(t));
+				}
+			}
+			if (t.isPrimitive())
+				// mv.box(Type.getType(t));
+				;
+		}
+
+		if (declaringClass.isInterface())
+			mv.invokeInterface(Type.getType(declaringClass),
+					org.objectweb.asm.commons.Method.getMethod(method));
+		else
+			mv.invokeVirtual(Type.getType(declaringClass),
+					org.objectweb.asm.commons.Method.getMethod(method));
+
+		if (!void.class.equals(method.getReturnType())) {
+			mv.pop();
+		}
+		return argType;
+	}
+
+	private Class<?> compileReflection(Class<?> argType, GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext) {
 		mv.dup();
 		compilationContext.addFieldAndLoad(Type.getDescriptor(Method.class),
 				method);

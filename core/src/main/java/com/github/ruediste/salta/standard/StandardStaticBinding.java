@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.standard;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
@@ -14,17 +15,12 @@ import com.google.common.reflect.TypeToken;
  */
 public class StandardStaticBinding extends StaticBinding {
 	public Matcher<CoreDependencyKey<?>> dependencyMatcher;
-	public Set<TypeToken<?>> possibleTypes;
+	public final Set<TypeToken<?>> possibleTypes = new HashSet<>();
 	public CreationRecipeFactory recipeFactory;
 
 	@Override
 	public Set<TypeToken<?>> getPossibleTypes() {
 		return possibleTypes;
-	}
-
-	@Override
-	public boolean matches(CoreDependencyKey<?> dependency) {
-		return dependencyMatcher.matches(dependency);
 	}
 
 	@Override
@@ -35,6 +31,11 @@ public class StandardStaticBinding extends StaticBinding {
 	@Override
 	public String toString() {
 		return "StandardStaticBinding(" + dependencyMatcher + ")";
+	}
+
+	@Override
+	public Matcher<CoreDependencyKey<?>> getMatcher() {
+		return dependencyMatcher;
 	}
 
 }

@@ -3,6 +3,7 @@ package com.github.ruediste.salta.core;
 import java.util.function.Supplier;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 public interface RecipeCompilationContext {
@@ -45,4 +46,24 @@ public interface RecipeCompilationContext {
 	GeneratorAdapter getMv();
 
 	CreationRecipeCompiler getCompiler();
+
+	/**
+	 * Supports the following casts
+	 * <ul>
+	 * <li>primitive to boxed</li>
+	 * <li>any to boxed to primitive</li>
+	 * <li>any to any (cast)</li>
+	 * </ul>
+	 */
+	void cast(Class<?> from, Class<?> to);
+
+	/**
+	 * Supports the following casts
+	 * <ul>
+	 * <li>primitive to boxed</li>
+	 * <li>any to boxed to primitive</li>
+	 * <li>any to any (cast)</li>
+	 * </ul>
+	 */
+	void cast(Type from, Type to);
 }
