@@ -122,6 +122,9 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 
 	@Override
 	public String toString() {
-		return "DependencyKey(" + getType() + "," + annotations.values() + ")";
+		String result = getType().toString();
+		if (!annotations.values().isEmpty())
+			result += annotations.values();
+		return result;
 	}
 }

@@ -2,7 +2,7 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Scope;
 
@@ -43,12 +43,18 @@ public class ScopedBindingBuilder<T> {
 	 */
 	public void asEagerSingleton() {
 		if (data.eagerInstantiationDependency == null) {
-			throw new ProvisionException(
+			throw new SaltaException(
 					"class to bind as eager singleton not known");
 		}
 		data.recipeBuilder.scopeSupplier = () -> data.config.singletonScope;
 
 		data.config.dynamicInitializers.add(x -> x
 				.getInstance(data.eagerInstantiationDependency));
+	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "BindingBuilder<" + data.boundType + ">";
 	}
 }

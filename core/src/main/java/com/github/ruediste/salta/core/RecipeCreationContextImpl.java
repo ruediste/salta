@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.joining;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.function.Consumer;
 
 /**
  * Contains the bindings which are currently beeing constructed and is used for
@@ -20,7 +19,7 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 
 	private LinkedHashSet<Binding> currentBindings = new LinkedHashSet<>();
 
-	private ArrayList<Consumer<RecipeCreationContext>> queuedActions = new ArrayList<>();
+	private ArrayList<Runnable> queuedActions = new ArrayList<>();
 
 	private void removeBinding(Binding b) {
 		currentBindings.remove(b);
@@ -38,13 +37,13 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 					msg.add(b.toString());
 			}
 			msg.add(binding.toString());
-			throw new ProvisionException("Detected Dependency Circle: "
+			throw new SaltaException("Detected Dependency Circle: "
 					+ msg.stream().collect(joining("\n", "\n", "\n")));
 		}
 	}
 
 	@Override
-	public CreationRecipe getOrCreateRecipe(Binding binding) {
+	public SupplierRecipe getOrCreateRecipe(Binding binding) {
 		addBinding(binding);
 		try {
 			return binding.getOrCreateRecipe(this);
@@ -54,27 +53,27 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	}
 
 	@Override
-	public CompiledCreationRecipe compileRecipe(CreationRecipe recipe) {
-		return coreInjector.compileRecipe(recipe);
-	}
-
-	@Override
-	public CreationRecipe getRecipe(CoreDependencyKey<?> dependency) {
+	public SupplierRecipe getRecipe(CoreDependencyKey<?> dependency) {
 		return coreInjector.getRecipe(dependency, this);
 	}
 
 	@Override
-	public CreationRecipe getRecipeInNewContext(CoreDependencyKey<?> dependency) {
+	public SupplierRecipe getRecipeInNewContext(CoreDependencyKey<?> dependency) {
 		return coreInjector.getRecipe(dependency);
 	}
 
 	public void processQueuedActions() {
-		queuedActions.forEach(x -> x.accept(this));
+		queuedActions.forEach(x -> x.run());
 	}
 
 	@Override
-	public void queueAction(Consumer<RecipeCreationContext> action) {
+	public void queueAction(Runnable action) {
 		queuedActions.add(action);
+	}
+
+	@Override
+	public CreationRecipeCompiler getCompiler() {
+		return coreInjector.getCompiler();
 	}
 
 }

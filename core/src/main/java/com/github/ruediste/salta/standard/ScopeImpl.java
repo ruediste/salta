@@ -7,10 +7,10 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import com.github.ruediste.salta.core.Binding;
-import com.github.ruediste.salta.core.CompiledCreationRecipe;
-import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SupplierRecipe;
 import com.google.common.reflect.TypeToken;
 
 public class ScopeImpl implements Scope {
@@ -38,21 +38,22 @@ public class ScopeImpl implements Scope {
 	}
 
 	@Override
-	public CreationRecipe createRecipe(RecipeCreationContext ctx,
-			Binding binding, TypeToken<?> type, CreationRecipe innerRecipe) {
-		CompiledCreationRecipe compilerInnerRecipe = ctx
-				.compileRecipe(innerRecipe);
+	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
+			Binding binding, TypeToken<?> type, SupplierRecipe innerRecipe) {
+		CompiledSupplier compilerInnerRecipe = ctx.getCompiler()
+				.compileSupplier(innerRecipe);
 
 		Supplier<Object> scoped = handler.scope(
 				compilerInnerRecipe::getNoThrow, binding, type);
-		return new CreationRecipe() {
+		return new SupplierRecipe() {
 
 			@Override
-			public void compile(GeneratorAdapter mv,
-					RecipeCompilationContext compilationContext) {
-				compilationContext.addFieldAndLoad(Supplier.class, scoped);
+			protected Class<?> compileImpl(GeneratorAdapter mv,
+					RecipeCompilationContext ctx) {
+				ctx.addFieldAndLoad(Supplier.class, scoped);
 				mv.invokeInterface(Type.getType(Supplier.class),
 						Method.getMethod("Object get("));
+				return Object.class;
 			}
 		};
 	}

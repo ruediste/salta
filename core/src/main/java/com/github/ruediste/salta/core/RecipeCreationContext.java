@@ -1,16 +1,15 @@
 package com.github.ruediste.salta.core;
 
-import java.util.function.Consumer;
 
 public interface RecipeCreationContext {
 
-	CreationRecipe getRecipe(CoreDependencyKey<?> dependency);
+	SupplierRecipe getRecipe(CoreDependencyKey<?> dependency);
 
-	CreationRecipe getRecipeInNewContext(CoreDependencyKey<?> dependency);
+	SupplierRecipe getRecipeInNewContext(CoreDependencyKey<?> dependency);
 
-	CreationRecipe getOrCreateRecipe(Binding binding);
+	SupplierRecipe getOrCreateRecipe(Binding binding);
 
-	CompiledCreationRecipe compileRecipe(CreationRecipe recipe);
+	CreationRecipeCompiler getCompiler();
 
-	void queueAction(Consumer<RecipeCreationContext> action);
+	void queueAction(Runnable action);
 }

@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.Salta;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.google.common.reflect.TypeToken;
 
@@ -59,7 +59,7 @@ public class StandardInjectorTest {
 		assertNotNull(other);
 	}
 
-	@Test(expected = ProvisionException.class)
+	@Test(expected = SaltaException.class)
 	public void testInjectMembersGenericFailWithoutTypeToken() {
 		TestClassGeneric<TestClassA> b = new TestClassGeneric<TestClassA>();
 		injector.injectMembers(b);

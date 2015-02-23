@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
+import com.github.ruediste.salta.core.SaltaException;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.name.Named;
@@ -86,7 +87,7 @@ public class BinderTest extends TestCase {
 
 				try {
 					fooProvider.get();
-				} catch (IllegalStateException e) { /* expected */
+				} catch (SaltaException e) { /* expected */
 				}
 			}
 		});
@@ -212,33 +213,27 @@ public class BinderTest extends TestCase {
 	}
 
 	public void testToStringOnBinderApi() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				public void configure() {
-					assertEquals("Binder", binder().toString());
-					assertEquals("Provider<java.lang.Integer>",
-							getProvider(Integer.class).toString());
-					assertEquals(
-							"Provider<java.util.List<java.lang.String>>",
-							getProvider(
-									Key.get(new TypeLiteral<List<String>>() {
-									})).toString());
+		Guice.createInjector(new AbstractModule() {
+			@Override
+			public void configure() {
+				assertEquals("Binder", binder().toString());
+				assertEquals("Provider<java.lang.Integer>",
+						getProvider(Integer.class).toString());
+				assertEquals("Provider<java.util.List<java.lang.String>>",
+						getProvider(Key.get(new TypeLiteral<List<String>>() {
+						})).toString());
 
-					assertEquals("BindingBuilder<java.lang.Integer>",
-							bind(Integer.class).toString());
-					assertEquals("BindingBuilder<java.lang.Integer>",
-							bind(Integer.class).annotatedWith(Names.named("a"))
-									.toString());
-					assertEquals("ConstantBindingBuilder", bindConstant()
-							.toString());
-					assertEquals("ConstantBindingBuilder", bindConstant()
-							.annotatedWith(Names.named("b")).toString());
-				}
-			});
-			fail();
-		} catch (CreationException ignored) {
-		}
+				assertEquals("BindingBuilder<java.lang.Integer>",
+						bind(Integer.class).toString());
+				assertEquals("BindingBuilder<java.lang.Integer>",
+						bind(Integer.class).annotatedWith(Names.named("a"))
+								.toString());
+				assertEquals("ConstantBindingBuilder", bindConstant()
+						.toString());
+				assertEquals("ConstantBindingBuilder", bindConstant()
+						.annotatedWith(Names.named("b")).toString());
+			}
+		});
 	}
 
 	public void testNothingIsSerializableInBinderApi() {

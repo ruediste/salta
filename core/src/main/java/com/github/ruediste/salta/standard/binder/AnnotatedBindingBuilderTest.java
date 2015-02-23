@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.Salta;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
 
@@ -60,7 +60,7 @@ public class AnnotatedBindingBuilderTest {
 				}
 			}, new JSR330Module()).getInstance(TestA.class);
 			fail();
-		} catch (ProvisionException e) {
+		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(
 					x -> x.getMessage().contains(
 							"Dependency cannot be resolved")))
@@ -73,7 +73,7 @@ public class AnnotatedBindingBuilderTest {
 		try {
 			Salta.createInjector(new JSR330Module()).getInstance(TestA.class);
 			fail();
-		} catch (ProvisionException e) {
+		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(
 					x -> x.getMessage().contains(
 							"Dependency cannot be resolved")))

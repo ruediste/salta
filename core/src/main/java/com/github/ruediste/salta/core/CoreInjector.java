@@ -26,11 +26,11 @@ public class CoreInjector {
 
 	private CoreInjectorConfiguration config;
 
-	private CreationRecipeCompiler compiler = new CreationRecipeCompiler();
+	private final CreationRecipeCompiler compiler = new CreationRecipeCompiler();
 
-	private ConcurrentHashMap<CoreDependencyKey<?>, CompiledCreationRecipe> compiledRecipeCache = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<CoreDependencyKey<?>, CompiledSupplier> compiledRecipeCache = new ConcurrentHashMap<>();
 
-	private HashMap<CoreDependencyKey<?>, CreationRecipe> recipeCache = new HashMap<>();
+	private HashMap<CoreDependencyKey<?>, SupplierRecipe> recipeCache = new HashMap<>();
 
 	private HashMap<JITBindingKey, JITBinding> jitBindings = new HashMap<>();
 
@@ -61,77 +61,91 @@ public class CoreInjector {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T getInstance(CoreDependencyKey<T> key) {
-		return getInstanceSupplier(key).get();
+		try {
+			return (T) getCompiledRecipe(key).get();
+		} catch (SaltaException e) {
+			throw e;
+		} catch (Throwable e) {
+			throw new SaltaException(
+					"Error while creating instance for " + key, e);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> Supplier<T> getInstanceSupplier(CoreDependencyKey<T> key) {
-		CompiledCreationRecipe compiledRecipe = getCompiledRecipe(key);
+		CompiledSupplier compiledRecipe = getCompiledRecipe(key);
 		return () -> {
 			try {
 				return (T) compiledRecipe.get();
-			} catch (ProvisionException e) {
+			} catch (SaltaException e) {
 				throw e;
 			} catch (Throwable e) {
-				throw new ProvisionException(
-						"Error while creating instance for " + key, e);
+				throw new SaltaException("Error while creating instance for "
+						+ key, e);
 			}
 		};
 	}
 
-	public CompiledCreationRecipe getCompiledRecipe(CoreDependencyKey<?> key) {
-		CompiledCreationRecipe compiledRecipe = compiledRecipeCache.get(key);
+	public CompiledSupplier getCompiledRecipe(CoreDependencyKey<?> key) {
+		CompiledSupplier compiledRecipe = compiledRecipeCache.get(key);
 		if (compiledRecipe != null)
 			return compiledRecipe;
 
 		// possibly slow
-		CreationRecipe recipe = getRecipe(key);
+		SupplierRecipe recipe = getRecipe(key);
 
 		// compile the recipe with a lock on the key. Therefore
 		// compile must not do anything fancy
 		return compiledRecipeCache.computeIfAbsent(key,
-				x -> compileRecipe(recipe));
+				x -> compileSupplier(recipe));
 	}
 
-	public CompiledCreationRecipe compileRecipe(CreationRecipe recipe) {
+	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
 		synchronized (recipeLock) {
-			return compiler.compile(recipe);
+			return compiler.compileSupplier(recipe);
 		}
 	}
 
-	public CompiledParameterizedCreationRecipe compileParameterizedRecipe(
-			CreationRecipe recipe) {
+	public CompiledFunction compileFunction(FunctionRecipe recipe) {
 		synchronized (recipeLock) {
-			return compiler.compileParameterizedRecipe(recipe);
+			return compiler.compileFunction(recipe);
 		}
 	}
 
-	public CreationRecipe getRecipe(CoreDependencyKey<?> key) {
-		RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
-				CoreInjector.this);
-		CreationRecipe result = getRecipe(key, ctx);
+	public SupplierRecipe getRecipe(CoreDependencyKey<?> key) {
+		synchronized (recipeLock) {
+			RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
+					CoreInjector.this);
 
-		try {
-			ctx.processQueuedActions();
-		} catch (ProvisionException e) {
-			throw new ProvisionException(
-					"Error while processing queued actions for " + key, e);
+			SupplierRecipe result = getRecipe(key, ctx);
+
+			try {
+				ctx.processQueuedActions();
+			} catch (SaltaException e) {
+				throw new SaltaException(
+						"Error while processing queued actions for " + key, e);
+			}
+
+			return result;
 		}
-		return result;
 	}
 
-	public CreationRecipe getRecipe(CoreDependencyKey<?> key,
+	/**
+	 * Get the recipe for a key
+	 */
+	public SupplierRecipe getRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
 		// acquire the recipe lock
 		synchronized (recipeLock) {
-			CreationRecipe result = recipeCache.get(key);
+			SupplierRecipe result = recipeCache.get(key);
 			if (result == null) {
 				try {
 					result = createRecipe(key, ctx);
 				} catch (Exception e) {
-					throw new ProvisionException(
-							"Error while creating recipe for " + key, e);
+					throw new SaltaException("Error while creating recipe for "
+							+ key, e);
 				}
 				recipeCache.put(key, result);
 			}
@@ -142,12 +156,12 @@ public class CoreInjector {
 	/**
 	 * Create a recipe. Expects the {@link #recipeLock} to be acquired
 	 */
-	private CreationRecipe createRecipe(CoreDependencyKey<?> key,
+	private SupplierRecipe createRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
 		try {
 			// check rules
 			for (DependencyFactoryRule rule : config.creationRules) {
-				CreationRecipe recipe = rule.apply(key, ctx);
+				SupplierRecipe recipe = rule.apply(key, ctx);
 				if (recipe != null)
 					return recipe;
 			}
@@ -164,7 +178,7 @@ public class CoreInjector {
 						nonTypeSpecificStaticBindings, typeSpecificBindings)) {
 					if (b.matches(key)) {
 						if (binding != null)
-							throw new ProvisionException(
+							throw new SaltaException(
 									"multiple bindings match dependency " + key
 											+ "\n * " + binding + "\n * " + b);
 						binding = b;
@@ -202,12 +216,17 @@ public class CoreInjector {
 					return ctx.getOrCreateRecipe(jitBinding);
 				}
 			}
-		} catch (ProvisionException e) {
+		} catch (SaltaException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new ProvisionException("Error creating recipe for " + key, e);
+			throw new SaltaException("Error creating recipe for " + key + "\n"
+					+ e.getMessage(), e);
 		}
-		throw new ProvisionException("Dependency cannot be resolved:\n" + key);
+		throw new SaltaException("Dependency cannot be resolved:\n" + key);
+	}
+
+	public CreationRecipeCompiler getCompiler() {
+		return compiler;
 	}
 
 }

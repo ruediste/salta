@@ -14,7 +14,7 @@ import org.junit.Test;
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.Binding.RecursiveRecipeCreationDetectedException;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -68,6 +68,19 @@ public class LinkedBindingBuilderTest {
 	}
 
 	@Test
+	public void testToPrimitiveInstance() throws Exception {
+		injector = Salta.createInjector(new AbstractModule() {
+
+			@Override
+			protected void configure() {
+				bind(int.class).toInstance(4);
+			}
+		}, new JSR330Module());
+
+		assertEquals(Integer.valueOf(4), injector.getInstance(int.class));
+	}
+
+	@Test
 	public void testToInstanceUsedTwiceInjectedOnce() throws Exception {
 		TestA instance = new TestA();
 		injector = Salta.createInjector(new AbstractModule() {
@@ -117,7 +130,7 @@ public class LinkedBindingBuilderTest {
 		}, new JSR330Module());
 		try {
 			injector.getInstance(TestC1.class);
-		} catch (ProvisionException e) {
+		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(
 					x -> x instanceof RecursiveRecipeCreationDetectedException)) {
 				throw e;
@@ -249,12 +262,41 @@ public class LinkedBindingBuilderTest {
 
 		try {
 			injector.getInstance(TestIA.class);
-		} catch (ProvisionException e) {
+		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses()
 					.anyMatch(
 							x -> x instanceof RecursiveAccessOfInstanceOfProviderClassException)) {
 				throw e;
 			}
 		}
+	}
+
+	private static class TwoConstructors {
+		int value;
+
+		public TwoConstructors() {
+			value = 1;
+		}
+
+		public TwoConstructors(TestB b) {
+			value = 2;
+		}
+	}
+
+	@Test
+	public void testToConstructor() {
+		injector = Salta.createInjector(new AbstractModule() {
+
+			@Override
+			protected void configure() {
+				try {
+					bind(TwoConstructors.class).toConstructor(
+							TwoConstructors.class.getConstructor());
+				} catch (NoSuchMethodException | SecurityException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}, new JSR330Module());
+		assertEquals(1, injector.getInstance(TwoConstructors.class).value);
 	}
 }

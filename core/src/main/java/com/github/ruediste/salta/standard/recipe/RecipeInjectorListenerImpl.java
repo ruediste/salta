@@ -7,8 +7,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
+import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.SupplierRecipe;
 
 /**
  * {@link RecipeInjectorListener} implementation accepting various strategy
@@ -49,31 +50,39 @@ public class RecipeInjectorListenerImpl implements RecipeInjectionListener {
 	}
 
 	@Override
-	public void compile(GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext,
-			CreationRecipe innerRecipe) {
+	public Class<?> compile(RecipeCompilationContext compilationContext,
+			SupplierRecipe innerRecipe) {
+		GeneratorAdapter mv = compilationContext.getMv();
 		if (listener != null) {
 			compilationContext.addFieldAndLoad(
 					Type.getDescriptor(Function.class), listener);
-			innerRecipe.compile(mv, compilationContext);
+			Class<?> t = innerRecipe.compile(compilationContext);
+			if (t.isPrimitive())
+				mv.box(Type.getType(t));
 			mv.invokeInterface(Type.getType(Function.class),
 					Method.getMethod("Object apply(Object)"));
+			return Object.class;
 		} else if (aroundListener != null) {
 			compilationContext.addFieldAndLoad(
 					Type.getDescriptor(AroundListener.class), aroundListener);
 			mv.dup();
 			mv.invokeInterface(Type.getType(AroundListener.class),
 					Method.getMethod("void before()"));
-			innerRecipe.compile(mv, compilationContext);
+			Class<?> t = innerRecipe.compile(compilationContext);
+			if (t.isPrimitive())
+				mv.box(Type.getType(t));
 			mv.invokeInterface(Type.getType(Function.class),
 					Method.getMethod("Object apply(Object)"));
+			return Object.class;
 		} else if (wrapperListener != null) {
 			compilationContext.addFieldAndLoad(
 					Type.getDescriptor(Function.class), wrapperListener);
 			compilationContext.compileToSupplier(innerRecipe);
-			mv.invokeInterface(Type.getType(Function.class),
-					Method.getMethod("Object apply(Object)"));
-		}
+			mv.invokeInterface(Type.getType(Function.class), Method
+					.getMethod("Object apply(java.util.function.Supplier)"));
+			return Object.class;
+		} else
+			throw new SaltaException("should not happen");
 	}
 
 }

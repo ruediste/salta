@@ -24,7 +24,9 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.CheckClassAdapter;
+import org.objectweb.asm.util.TraceClassVisitor;
 
 import com.github.ruediste.salta.core.RecipeCompilationContextBase.FieldEntry;
 
@@ -36,18 +38,18 @@ public class CreationRecipeCompiler {
 		}
 	}
 
-	CompilerClassLoader loader = new CompilerClassLoader();
-	AtomicInteger classNumber = new AtomicInteger();
+	private CompilerClassLoader loader = new CompilerClassLoader();
+	private AtomicInteger classNumber = new AtomicInteger();
 
 	/**
 	 * Compile a recipe. May be called from multiple threads. May not acquire
 	 * {@link CoreInjector#recipeLock} or {@link CoreInjector#instantiationLock}
 	 */
-	public CompiledCreationRecipe compile(CreationRecipe recipe) {
+	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
 		RecipeCompilationContextImpl ctx = new RecipeCompilationContextImpl(
 				this);
 
-		setupClazz(ctx, CompiledCreationRecipe.class);
+		setupClazz(ctx, CompiledSupplier.class);
 
 		// compile method
 		MethodNode m = new MethodNode(ACC_PUBLIC, "get",
@@ -58,13 +60,16 @@ public class CreationRecipeCompiler {
 		ctx.mv = mv;
 		mv.visitCode();
 
-		recipe.compile(mv, ctx);
+		Class<?> producedType = recipe.compile(ctx);
+
+		if (producedType.isPrimitive())
+			mv.box(Type.getType(producedType));
 
 		mv.visitInsn(ARETURN);
 		mv.visitMaxs(0, 0);
 		mv.visitEnd();
 
-		return (CompiledCreationRecipe) loadAndInstantiate(ctx);
+		return (CompiledSupplier) loadAndInstantiate(ctx);
 	}
 
 	/**
@@ -72,12 +77,11 @@ public class CreationRecipeCompiler {
 	 * threads. May not acquire {@link CoreInjector#recipeLock} or
 	 * {@link CoreInjector#instantiationLock}
 	 */
-	public CompiledParameterizedCreationRecipe compileParameterizedRecipe(
-			CreationRecipe recipe) {
+	public CompiledFunction compileFunction(FunctionRecipe recipe) {
 		RecipeCompilationContextImpl ctx = new RecipeCompilationContextImpl(
 				this);
 
-		setupClazz(ctx, CompiledParameterizedCreationRecipe.class);
+		setupClazz(ctx, CompiledFunction.class);
 
 		// compile method
 		MethodNode m = new MethodNode(ACC_PUBLIC, "get",
@@ -87,26 +91,24 @@ public class CreationRecipeCompiler {
 				m.desc), m);
 		ctx.mv = mv;
 		mv.visitCode();
+		mv.loadArg(0);
 
-		recipe.compile(mv, ctx);
+		Class<?> producedType = recipe.compile(Object.class, ctx);
+
+		if (producedType.isPrimitive())
+			mv.box(Type.getType(producedType));
 
 		mv.visitInsn(ARETURN);
 		mv.visitMaxs(0, 0);
 		mv.visitEnd();
 
-		return (CompiledParameterizedCreationRecipe) loadAndInstantiate(ctx);
+		return (CompiledFunction) loadAndInstantiate(ctx);
 	}
 
 	private Object loadAndInstantiate(RecipeCompilationContextImpl ctx) {
 		// generate bytecode
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 		ctx.clazz.accept(cw);
-		if (true) {
-			ClassReader cr = new ClassReader(cw.toByteArray());
-			CheckClassAdapter.verify(cr, false, new PrintWriter(System.err));
-			// cr.accept(new TraceClassVisitor(null, new ASMifier(),
-			// new PrintWriter(System.out)), 0);
-		}
 
 		// load and instantiate
 		Object instance;
@@ -116,9 +118,14 @@ public class CreationRecipeCompiler {
 			Constructor<?> constructor = cls.getConstructor();
 			constructor.setAccessible(true);
 			instance = constructor.newInstance();
-		} catch (Exception e) {
-			throw new ProvisionException("Error while loading compiled recipe",
-					e);
+		} catch (Throwable e) {
+			System.out.println("Error while loading compiled recipe");
+			ClassReader cr = new ClassReader(cw.toByteArray());
+			cr.accept(new TraceClassVisitor(null, new ASMifier(),
+					new PrintWriter(System.out)), 0);
+			CheckClassAdapter.verify(cr, false, new PrintWriter(System.err));
+
+			throw new SaltaException("Error while loading compiled recipe", e);
 		}
 
 		// init fields
@@ -128,7 +135,7 @@ public class CreationRecipeCompiler {
 				field.setAccessible(true);
 				field.set(instance, entry.value);
 			} catch (Exception e) {
-				throw new ProvisionException("Error while setting parameter "
+				throw new SaltaException("Error while setting parameter "
 						+ entry.name, e);
 			}
 		}
@@ -156,7 +163,7 @@ public class CreationRecipeCompiler {
 		generateConstructor(clazz);
 	}
 
-	public void generateConstructor(ClassVisitor cw) {
+	private void generateConstructor(ClassVisitor cw) {
 		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null,
 				null);
 		mv.visitCode();

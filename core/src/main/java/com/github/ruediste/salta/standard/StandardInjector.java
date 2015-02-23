@@ -10,13 +10,13 @@ import javax.inject.Provider;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.salta.core.CompiledParameterizedCreationRecipe;
+import com.github.ruediste.salta.core.CompiledFunction;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
-import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.FunctionRecipe;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContextImpl;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.google.common.reflect.TypeToken;
@@ -102,10 +102,15 @@ public class StandardInjector implements Injector {
 			}
 			return supplier.get();
 		}
+
+		@Override
+		public String toString() {
+			return "Provider<" + key + ">";
+		}
 	}
 
 	private final class MembersInjectorImpl<T> implements MembersInjector<T> {
-		private CompiledParameterizedCreationRecipe compiledRecipe;
+		private CompiledFunction compiledRecipe;
 		private TypeToken<T> type;
 
 		public MembersInjectorImpl(TypeToken<T> type) {
@@ -116,20 +121,18 @@ public class StandardInjector implements Injector {
 				List<RecipeMembersInjector> injectors = config
 						.createRecipeMembersInjectors(ctx, type);
 				ctx.processQueuedActions();
-				CreationRecipe recipe = new CreationRecipe() {
+				FunctionRecipe recipe = new FunctionRecipe() {
 
 					@Override
-					public void compile(GeneratorAdapter mv,
-							RecipeCompilationContext compilationContext) {
-						mv.loadArg(0);
-
+					protected Class<?> compileImpl(Class<?> argumentType,
+							GeneratorAdapter mv, RecipeCompilationContext ctx) {
 						for (RecipeMembersInjector rmi : injectors) {
-							rmi.compile(mv, compilationContext);
+							argumentType = rmi.compile(argumentType, ctx);
 						}
+						return argumentType;
 					}
 				};
-				compiledRecipe = coreInjector
-						.compileParameterizedRecipe(recipe);
+				compiledRecipe = coreInjector.compileFunction(recipe);
 			}
 		}
 
@@ -138,12 +141,12 @@ public class StandardInjector implements Injector {
 			checkInitialized();
 			try {
 				compiledRecipe.get(instance);
-			} catch (ProvisionException e) {
+			} catch (SaltaException e) {
 				throw e;
 			} catch (Throwable e) {
-				throw new ProvisionException(
-						"Error while injecting members of instance of " + type,
-						e);
+				throw new SaltaException(
+						"Error while injecting members of instance of " + type
+								+ "\n" + e.getMessage(), e);
 			}
 		}
 	}
@@ -154,7 +157,7 @@ public class StandardInjector implements Injector {
 
 	private void checkInitialized() {
 		if (!initialized) {
-			throw new ProvisionException(
+			throw new SaltaException(
 					"Cannot use injector before it is initialized");
 		}
 	}

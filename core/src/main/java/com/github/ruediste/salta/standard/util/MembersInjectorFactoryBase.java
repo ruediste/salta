@@ -6,22 +6,22 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.recipe.FixedFieldRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeMembersInjector;
-import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
+import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.google.common.reflect.TypeToken;
 
 public abstract class MembersInjectorFactoryBase implements
 		RecipeMembersInjectorFactory {
 
 	@Override
-	public List<RecipeMembersInjector> createInjectors(RecipeCreationContext ctx,
-			TypeToken<?> typeToken) {
+	public List<RecipeMembersInjector> createInjectors(
+			RecipeCreationContext ctx, TypeToken<?> typeToken) {
 		ArrayList<RecipeMembersInjector> result = new ArrayList<>();
 
 		MethodOverrideIndex overrideIndex = new MethodOverrideIndex(typeToken);
@@ -48,7 +48,7 @@ public abstract class MembersInjectorFactoryBase implements
 					method.setAccessible(true);
 
 					// create dependencies
-					ArrayList<CreationRecipe> args = new ArrayList<>();
+					ArrayList<SupplierRecipe> args = new ArrayList<>();
 					Parameter[] parameters = method.getParameters();
 					for (int i = 0; i < parameters.length; i++) {
 						Parameter parameter = parameters[i];

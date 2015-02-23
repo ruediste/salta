@@ -3,28 +3,28 @@ package com.github.ruediste.salta.core;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
-public class ProvisionException extends RuntimeException {
+public class SaltaException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ProvisionException() {
+	public SaltaException() {
 	}
 
-	public ProvisionException(String message) {
+	public SaltaException(String message) {
 		super("\n" + message);
 	}
 
-	public ProvisionException(Throwable cause) {
+	public SaltaException(Throwable cause) {
 		super(cause);
 	}
 
-	public ProvisionException(String message, Throwable cause) {
+	public SaltaException(String message, Throwable cause) {
 		super("\n" + message, cause);
 	}
 
 	@Override
 	public String getMessage() {
-		if (getCause() instanceof ProvisionException)
+		if (getCause() instanceof SaltaException)
 			return super.getMessage() + getCause().getMessage();
 		else
 			return super.getMessage();

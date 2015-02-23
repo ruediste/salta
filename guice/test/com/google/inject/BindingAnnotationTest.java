@@ -55,7 +55,7 @@ public class BindingAnnotationTest extends TestCase {
 				}
 			}).getInstance(Blue.class);
 			fail();
-		} catch (com.github.ruediste.salta.core.ProvisionException expected) {
+		} catch (com.github.ruediste.salta.core.SaltaException expected) {
 			// expected
 		}
 	}
@@ -100,7 +100,7 @@ public class BindingAnnotationTest extends TestCase {
 			BlueFoo instance = injector.getInstance(BlueFoo.class);
 
 			fail();
-		} catch (com.github.ruediste.salta.core.ProvisionException expected) {
+		} catch (com.github.ruediste.salta.core.SaltaException expected) {
 			assertContains(expected.getMessage(),
 					"Dependency cannot be resolved");
 		}

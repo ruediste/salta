@@ -6,20 +6,26 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-public class CreationRecipeImpl extends CreationRecipe {
+/**
+ * Implementation of {@link SupplierRecipe} using a {@link Supplier} to generate
+ * the result
+ */
+public class SupplierRecipeImpl extends SupplierRecipe {
 
 	private Supplier<Object> supplier;
 
-	public CreationRecipeImpl(Supplier<Object> supplier) {
+	public SupplierRecipeImpl(Supplier<Object> supplier) {
 		this.supplier = supplier;
 	}
 
 	@Override
-	public void compile(GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext) {
-		compilationContext.addFieldAndLoad(Supplier.class, supplier);
+	protected Class<?> compileImpl(GeneratorAdapter mv,
+			RecipeCompilationContext ctx) {
+		ctx.addFieldAndLoad(Supplier.class, supplier);
 		mv.invokeInterface(Type.getType(Supplier.class),
 				Method.getMethod("Object get()"));
+
+		return Object.class;
 	}
 
 }

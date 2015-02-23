@@ -4,13 +4,14 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.google.common.primitives.Primitives;
 
 public class ConstantBindingBuilder {
 
@@ -24,25 +25,29 @@ public class ConstantBindingBuilder {
 	}
 
 	private void bind(Class<?> cls, Object value) {
-		StandardStaticBinding binding = createBinding(cls, value);
-		config.config.staticBindings.add(binding);
+		config.config.staticBindings.add(createBinding(cls, value));
+		if (Primitives.isWrapperType(cls)) {
+			config.config.staticBindings.add(createBinding(
+					Primitives.unwrap(cls), value));
+		}
 	}
 
 	StandardStaticBinding createBinding(Class<?> cls, Object value) {
 		StandardStaticBinding binding = new StandardStaticBinding();
-		binding.dependencyMatcher = annotationMatcher.and(d -> d.getType()
-				.isAssignableFrom(cls));
+		binding.dependencyMatcher = annotationMatcher.and(d -> d.getRawType()
+				.equals(cls));
 		binding.recipeFactory = new CreationRecipeFactory() {
 
 			@Override
-			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
-				return new CreationRecipe() {
+			public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
+				return new SupplierRecipe() {
 
 					@Override
-					public void compile(GeneratorAdapter mv,
+					public Class<?> compileImpl(GeneratorAdapter mv,
 							RecipeCompilationContext compilationContext) {
 						compilationContext.addFieldAndLoad(
 								Type.getDescriptor(cls), value);
+						return cls;
 					}
 
 				};
@@ -63,7 +68,6 @@ public class ConstantBindingBuilder {
 	 */
 	public void to(int value) {
 		bind(Integer.class, value);
-
 	}
 
 	/**
@@ -129,5 +133,10 @@ public class ConstantBindingBuilder {
 	 */
 	public <E extends Enum<E>> void to(E value) {
 		bind(Enum.class, value);
+	}
+
+	@Override
+	public String toString() {
+		return "ConstantBindingBuilder";
 	}
 }

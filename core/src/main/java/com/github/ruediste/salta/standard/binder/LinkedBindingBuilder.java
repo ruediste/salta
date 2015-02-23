@@ -7,12 +7,12 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import com.github.ruediste.salta.core.CompiledCreationRecipe;
+import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -27,7 +27,7 @@ import com.google.common.reflect.TypeToken;
 public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 
 	public static class RecursiveAccessOfInstanceOfProviderClassException
-			extends ProvisionException {
+			extends SaltaException {
 		private static final long serialVersionUID = 1L;
 
 		public RecursiveAccessOfInstanceOfProviderClassException(
@@ -53,42 +53,45 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			}
 		}
 
-		private final class ProviderCreationRecipeImpl extends CreationRecipe {
+		private final class ProviderCreationRecipeImpl extends SupplierRecipe {
 
 			ProviderImpl provider = new ProviderImpl();
 
 			@Override
-			public void compile(GeneratorAdapter mv,
+			public Class<?> compileImpl(GeneratorAdapter mv,
 					RecipeCompilationContext compilationContext) {
 				compilationContext.addFieldAndLoad(
 						Type.getDescriptor(ProviderImpl.class), provider);
 				provider.get();
 				mv.invokeVirtual(Type.getType(ProviderImpl.class),
 						Method.getMethod("Object get()"));
+				return Object.class;
 			}
 		}
 
 		private CoreDependencyKey<P> providerKey;
 		private Function<? super P, InstanceProvider<? extends T>> providerWrapper;
+		private Class<?> producedType;
 
 		public ProviderRecipeFactory(
+				Class<?> producedType,
 				CoreDependencyKey<P> providerKey,
 				Function<? super P, InstanceProvider<? extends T>> providerWrapper) {
+			this.producedType = producedType;
 			this.providerKey = providerKey;
 			this.providerWrapper = providerWrapper;
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public CreationRecipe createRecipe(RecipeCreationContext ctx) {
+		public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
 
 			ProviderCreationRecipeImpl recipe = new ProviderCreationRecipeImpl();
 
-			ctx.queueAction(x -> {
-				CreationRecipe innerRecipe = x
-						.getRecipeInNewContext(providerKey);
-				CompiledCreationRecipe compiledRecipe = x
-						.compileRecipe(innerRecipe);
+			ctx.queueAction(() -> {
+				CompiledSupplier compiledRecipe = ctx
+						.getCompiler()
+						.compileSupplier(ctx.getRecipeInNewContext(providerKey));
 				recipe.provider.delegate = providerWrapper
 						.apply((P) compiledRecipe.getNoThrow());
 			});
@@ -111,10 +114,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public ScopedBindingBuilder<T> to(TypeToken<? extends T> implementation) {
-		data.binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-				data.config, implementation, data.binding).build(ctx);
-
-		return new ScopedBindingBuilder<>(data);
+		return to(DependencyKey.of(implementation));
 	}
 
 	/**
@@ -140,9 +140,9 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			boolean recipeCreationInProgress;
 
 			@Override
-			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
+			public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
 				if (recipeCreationInProgress) {
-					throw new ProvisionException("Recipe creation in progress");
+					throw new SaltaException("Recipe creation in progress");
 				}
 				recipeCreationInProgress = true;
 				T injected;
@@ -151,14 +151,15 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 				} finally {
 					recipeCreationInProgress = false;
 				}
-				return new CreationRecipe() {
+				return new SupplierRecipe() {
 
 					@Override
-					public void compile(GeneratorAdapter mv,
+					public Class<?> compileImpl(GeneratorAdapter mv,
 							RecipeCompilationContext compilationContext) {
+						Class<? super T> cls = data.boundType.getRawType();
 						compilationContext.addFieldAndLoad(
-								Type.getDescriptor(injected.getClass()),
-								injected);
+								Type.getDescriptor(cls), injected);
+						return cls;
 					}
 
 				};
@@ -177,12 +178,12 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 				.getMemberInjectionToken(data.injector, provider);
 		data.binding.recipeFactory = new CreationRecipeFactory() {
 			@Override
-			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
+			public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
 				InstanceProvider<? extends T> injected = token.getValue();
-				return new CreationRecipe() {
+				return new SupplierRecipe() {
 
 					@Override
-					public void compile(GeneratorAdapter mv,
+					public Class<Object> compileImpl(GeneratorAdapter mv,
 							RecipeCompilationContext compilationContext) {
 						compilationContext.addFieldAndLoad(
 								Type.getDescriptor(InstanceProvider.class),
@@ -190,6 +191,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 						mv.invokeInterface(
 								Type.getType(InstanceProvider.class),
 								Method.getMethod("Object get()"));
+						return Object.class;
 					}
 
 				};
@@ -237,7 +239,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			CoreDependencyKey<P> providerKey,
 			Function<? super P, InstanceProvider<? extends T>> providerWrapper) {
 		data.binding.recipeFactory = new ProviderRecipeFactory<T, P>(
-				providerKey, providerWrapper);
+				data.boundType.getRawType(), providerKey, providerWrapper);
 
 		return new ScopedBindingBuilder<>(data);
 	}
@@ -263,15 +265,9 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 		DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
 				data.config, type, data.binding);
 		builder.instantiatorSupplier = ctx -> data.config.fixedConstructorInstantiatorFactory
-				.apply(constructor, type);
+				.create(type, ctx, constructor);
 
-		data.binding.recipeFactory = new CreationRecipeFactory() {
-
-			@Override
-			public CreationRecipe createRecipe(RecipeCreationContext ctx) {
-				return builder.build(ctx);
-			}
-		};
+		data.binding.recipeFactory = builder::build;
 
 		return new ScopedBindingBuilder<>(data);
 

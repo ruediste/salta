@@ -1,10 +1,12 @@
 package com.github.ruediste.salta.standard.recipe;
 
-import org.objectweb.asm.commons.GeneratorAdapter;
+import com.github.ruediste.salta.core.FunctionRecipe;
+import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 
-import com.github.ruediste.salta.core.RecipeCompilationContext;
+/**
+ * {@link FunctionRecipe} used by the {@link DefaultCreationRecipeBuilder} to
+ * inject members of an instance created with a {@link RecipeInstantiator}.
+ */
+public abstract class RecipeMembersInjector extends FunctionRecipe {
 
-public interface RecipeMembersInjector {
-	void compile(GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext);
 }

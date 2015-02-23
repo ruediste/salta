@@ -30,7 +30,7 @@ public abstract class CoreDependencyKey<T> {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "(" + getType() + ")";
+		return getType().toString();
 	}
 
 	public static Matcher<CoreDependencyKey<?>> typeMatcher(TypeToken<?> type) {

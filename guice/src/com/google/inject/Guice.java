@@ -104,7 +104,8 @@ public final class Guice {
 	 */
 	public static Injector createInjector(Stage stage,
 			Iterable<? extends Module> modules) {
-		GuiceInjectorConfiguration config = new GuiceInjectorConfiguration();
+		GuiceInjectorConfiguration config = new GuiceInjectorConfiguration(
+				stage);
 		ArrayList<com.github.ruediste.salta.standard.Module> wrappedModules = StreamSupport
 				.stream(modules.spliterator(), false)
 				.map(m -> new ModuleAdapter(m, config))
@@ -112,7 +113,7 @@ public final class Guice {
 
 		GuiceInjectorImpl injector = new GuiceInjectorImpl();
 		wrappedModules.add(new GuiceModule(config, injector));
-		Salta.createInjector(wrappedModules);
+		Salta.createInjector(stage.getSaltaStage(), wrappedModules);
 
 		// delegate of injector was initialized by the GuiceModule
 		return injector;

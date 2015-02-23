@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,15 +12,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
-import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Message;
@@ -53,10 +51,11 @@ public class StandardInjectorConfiguration {
 	/**
 	 * Strategy to create a {@link RecipeInstantiator} given a constructor.
 	 */
-	public BiFunction<Constructor<?>, TypeToken<?>, RecipeInstantiator> fixedConstructorInstantiatorFactory;
+	public FixedConstructorInstantiatorFactory fixedConstructorInstantiatorFactory;
 
 	/**
-	 * List of rules to create an instantiator given a type
+	 * List of rules to create an instantiator given a type. The first matching
+	 * rule is used
 	 */
 	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
 
@@ -83,7 +82,7 @@ public class StandardInjectorConfiguration {
 		for (Consumer<TypeToken<?>> producer : noInstantiatorFoundErrorProducers) {
 			producer.accept(type);
 		}
-		throw new ProvisionException("No instantiator found for " + type);
+		throw new SaltaException("No instantiator found for " + type);
 	}
 
 	/**
@@ -161,7 +160,7 @@ public class StandardInjectorConfiguration {
 				.entrySet()) {
 			if (type.getRawType().isAnnotationPresent(entry.getKey())) {
 				if (scope != null)
-					throw new ProvisionException(
+					throw new SaltaException(
 							"Multiple scope annotations present on " + type);
 				scope = entry.getValue();
 			}
@@ -175,7 +174,7 @@ public class StandardInjectorConfiguration {
 	public Scope getScope(Class<? extends Annotation> scopeAnnotation) {
 		Scope scope = scopeAnnotationMap.get(scopeAnnotation);
 		if (scope == null)
-			throw new ProvisionException("Unknown scope annotation "
+			throw new SaltaException("Unknown scope annotation "
 					+ scopeAnnotation);
 		return scope;
 	}
@@ -225,9 +224,8 @@ public class StandardInjectorConfiguration {
 		List<Annotation> qualifiers = requiredQualifierExtractors.stream()
 				.flatMap(f -> f.apply(key)).collect(toList());
 		if (qualifiers.size() > 1)
-			throw new ProvisionException(
-					"Multiple required qualifiers found on " + key + ": "
-							+ qualifiers);
+			throw new SaltaException("Multiple required qualifiers found on "
+					+ key + ": " + qualifiers);
 		return Iterables.getOnlyElement(qualifiers, null);
 	}
 
@@ -342,9 +340,8 @@ public class StandardInjectorConfiguration {
 		List<Annotation> qualifiers = availableQualifierExtractors.stream()
 				.flatMap(f -> f.apply(element)).collect(toList());
 		if (qualifiers.size() > 1)
-			throw new ProvisionException(
-					"Multiple avalable qualifiers found on " + element + ": "
-							+ qualifiers);
+			throw new SaltaException("Multiple avalable qualifiers found on "
+					+ element + ": " + qualifiers);
 		return Iterables.getOnlyElement(qualifiers, null);
 	}
 

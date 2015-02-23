@@ -39,6 +39,8 @@ import net.sf.cglib.proxy.ProxyRefDispatcher;
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.jsr330.ImplementedBy;
+import com.github.ruediste.salta.jsr330.ProvidedBy;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -328,6 +330,7 @@ public class Binder {
 		data.eagerInstantiationDependency = DependencyKey.of(type);
 		data.config = config;
 		data.recipeBuilder = recipeBuilder;
+		data.boundType = type;
 
 		return new AnnotatedBindingBuilder<>(data);
 	}

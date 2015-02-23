@@ -1,9 +1,10 @@
 package com.github.ruediste.salta.guice.binder;
 
 import java.lang.annotation.Annotation;
+import java.util.function.Supplier;
 
-import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.guice.ModuleAdapter;
 import com.github.ruediste.salta.standard.ScopeImpl;
@@ -106,12 +107,35 @@ public class BinderImpl implements Binder {
 
 	@Override
 	public <T> Provider<T> getProvider(Key<T> key) {
-		return delegate.getProvider(new KeyAdapter<>(key))::get;
+		javax.inject.Provider<T> provider = delegate
+				.getProvider(new KeyAdapter<>(key));
+		return new Provider<T>() {
+			@Override
+			public T get() {
+				return provider.get();
+			}
+
+			@Override
+			public String toString() {
+				return provider.toString();
+			}
+		};
 	}
 
 	@Override
 	public <T> Provider<T> getProvider(Class<T> type) {
-		return delegate.getProvider(type)::get;
+		javax.inject.Provider<T> provider = delegate.getProvider(type);
+		return new Provider<T>() {
+			@Override
+			public T get() {
+				return provider.get();
+			}
+
+			@Override
+			public String toString() {
+				return provider.toString();
+			}
+		};
 	}
 
 	@Override
@@ -140,9 +164,37 @@ public class BinderImpl implements Binder {
 			delegate.getConfiguration().injectionListenerRules
 					.add(new InjectionListenerRule() {
 
-						final class Ref {
+						final class ProvisionInvocationImpl extends
+								ProvisionInvocation<Object> {
+
 							Object value;
-							boolean isSet;
+							boolean isProvisioned;
+							private Supplier<Object> supplier;
+							private TypeToken<?> type;
+
+							ProvisionInvocationImpl(TypeToken<?> type,
+									Supplier<Object> supplier) {
+								this.type = type;
+								this.supplier = supplier;
+
+							}
+
+							@Override
+							public Object provision() {
+								if (isProvisioned)
+									throw new SaltaException(
+											"provision() already called");
+								Object result = supplier.get();
+								value = result;
+								isProvisioned = true;
+								return result;
+							}
+
+							@Override
+							public Binding<Object> getBinding() {
+								return new BindingImpl<>(
+										Key.get(type.getType()), supplier::get);
+							}
 						}
 
 						@Override
@@ -150,29 +202,13 @@ public class BinderImpl implements Binder {
 								RecipeCreationContext ctx, TypeToken<?> type) {
 							return RecipeInjectorListenerImpl
 									.ofWrapper(supplier -> {
-										Ref ref = new Ref();
-										ProvisionListener.ProvisionInvocation<Object> invocation = new ProvisionInvocation<Object>() {
-
-											@Override
-											public Object provision() {
-												if (ref.isSet)
-													throw new ProvisionException(
-															"provision() already called");
-												Object result = supplier.get();
-												ref.value = result;
-												ref.isSet = true;
-												return result;
-											}
-
-											@Override
-											public Binding<Object> getBinding() {
-												return new BindingImpl<>(type);
-											}
-										};
+										ProvisionInvocationImpl invocation = new ProvisionInvocationImpl(
+												type, supplier);
 										listener.onProvision(invocation);
-										if (!ref.isSet)
-											ref.value = supplier.get();
-										return ref.value;
+										if (!invocation.isProvisioned)
+											return supplier.get();
+										else
+											return invocation.value;
 									});
 						}
 					});
@@ -233,4 +269,8 @@ public class BinderImpl implements Binder {
 		return delegate;
 	}
 
+	@Override
+	public String toString() {
+		return "Binder";
+	}
 }

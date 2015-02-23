@@ -7,6 +7,7 @@ import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.google.common.reflect.TypeToken;
 
 public class BindingBuilderData<T> {
 	public DefaultCreationRecipeBuilder recipeBuilder;
@@ -20,6 +21,7 @@ public class BindingBuilderData<T> {
 	 */
 	public DependencyKey<T> eagerInstantiationDependency;
 	public Injector injector;
+	public TypeToken<T> boundType;
 
 	public BindingBuilderData() {
 	}

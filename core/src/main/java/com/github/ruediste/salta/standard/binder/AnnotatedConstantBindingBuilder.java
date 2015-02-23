@@ -33,4 +33,9 @@ public class AnnotatedConstantBindingBuilder {
 		return new ConstantBindingBuilder(config,
 				config.requredQualifierMatcher(annotation));
 	}
+
+	@Override
+	public String toString() {
+		return "ConstantBindingBuilder";
+	}
 }

@@ -30,6 +30,7 @@ public class ConstantBindingBuilderTest {
 			@Override
 			protected void configure() {
 				bindConstant().annotatedWith(Names.named("foo")).to("bar");
+				bindConstant().annotatedWith(Names.named("foo")).to(3);
 			}
 		}, new JSR330Module());
 	}
@@ -38,6 +39,10 @@ public class ConstantBindingBuilderTest {
 		@Inject
 		@Named("foo")
 		String c;
+
+		@Inject
+		@Named("foo")
+		int i;
 	}
 
 	@Test
@@ -48,7 +53,7 @@ public class ConstantBindingBuilderTest {
 		CreationRecipeCompiler compiler = new CreationRecipeCompiler();
 		assertEquals(
 				3,
-				compiler.compile(
+				compiler.compileSupplier(
 						binding.createRecipe(new RecipeCreationContextImpl(null)))
 						.get());
 	}
@@ -64,6 +69,7 @@ public class ConstantBindingBuilderTest {
 	public void testFieldInject() {
 		TestClass a = injector.getInstance(TestClass.class);
 		assertEquals("bar", a.c);
+		assertEquals(3, a.i);
 	}
 
 }

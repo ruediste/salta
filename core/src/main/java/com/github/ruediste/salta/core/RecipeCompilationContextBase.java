@@ -11,7 +11,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.objectweb.asm.Handle;
@@ -36,20 +35,13 @@ public abstract class RecipeCompilationContextBase implements
 	ArrayList<Runnable> queuedActions = new ArrayList<>();
 	private int methodNr;
 
-	private CreationRecipeCompiler compiler;
+	private final CreationRecipeCompiler compiler;
 
 	public RecipeCompilationContextBase(CreationRecipeCompiler compiler) {
 		this.compiler = compiler;
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.github.ruediste.salta.core.RecipeCompilationContext#addField(java
-	 * .lang.String, java.lang.Object)
-	 */
 	@Override
 	public String addField(String desc, Object value) {
 		FieldEntry entry = new FieldEntry();
@@ -76,44 +68,13 @@ public abstract class RecipeCompilationContextBase implements
 		return fieldName;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.github.ruediste.salta.core.RecipeCompilationContext#compileRecipe
-	 * (com.github.ruediste.salta.core.CreationRecipe)
-	 */
 	@Override
-	public CompiledCreationRecipe compileRecipe(CreationRecipe recipe) {
-		return compiler.compile(recipe);
+	public void queueAction(Runnable runnable) {
+		queuedActions.add(runnable);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.github.ruediste.salta.core.RecipeCompilationContext#queueCompilation
-	 * (com.github.ruediste.salta.core.CreationRecipe,
-	 * java.util.function.Consumer)
-	 */
 	@Override
-	public void queueCompilation(CreationRecipe recipe,
-			Consumer<CompiledCreationRecipe> callback) {
-		queuedActions.add(() -> {
-			CompiledCreationRecipe compiledRecipe = compiler.compile(recipe);
-			callback.accept(compiledRecipe);
-		});
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.github.ruediste.salta.core.RecipeCompilationContext#compileToSupplier
-	 * (com.github.ruediste.salta.core.CreationRecipe)
-	 */
-	@Override
-	public void compileToSupplier(CreationRecipe recipe) {
+	public void compileToSupplier(SupplierRecipe recipe) {
 		String lambdaName = "lambda$" + methodNr++;
 		getMv().visitVarInsn(ALOAD, 0);
 		getMv().visitInvokeDynamicInsn(
@@ -149,7 +110,7 @@ public abstract class RecipeCompilationContextBase implements
 				}
 
 			};
-			recipe.compile(mv, innerContext);
+			recipe.compile(innerContext);
 
 			mv.visitInsn(ARETURN);
 			mv.visitMaxs(1, 1);
@@ -165,6 +126,9 @@ public abstract class RecipeCompilationContextBase implements
 		return Type.getMethodDescriptor(Type.getType(returnType), params);
 	}
 
-	public abstract GeneratorAdapter getMv();
+	@Override
+	public CreationRecipeCompiler getCompiler() {
+		return compiler;
+	}
 
 }

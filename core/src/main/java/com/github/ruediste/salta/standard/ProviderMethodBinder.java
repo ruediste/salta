@@ -4,7 +4,6 @@ import static org.objectweb.asm.Opcodes.AASTORE;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ANEWARRAY;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -13,10 +12,10 @@ import java.lang.reflect.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.StaticBinding;
+import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
@@ -34,8 +33,7 @@ public abstract class ProviderMethodBinder {
 
 	public void bindProviderMethodsOf(Object instance) {
 		for (Method m : instance.getClass().getDeclaredMethods()) {
-			Annotation availableQualifier = config
-					.getAvailableQualifier(getClass());
+
 			if (!isProviderMethod(m)) {
 				continue;
 			}
@@ -49,8 +47,8 @@ public abstract class ProviderMethodBinder {
 			config.config.staticBindings.add(new StaticBinding() {
 
 				@Override
-				protected CreationRecipe createRecipe(RecipeCreationContext ctx) {
-					CreationRecipe[] args = new CreationRecipe[m
+				protected SupplierRecipe createRecipe(RecipeCreationContext ctx) {
+					SupplierRecipe[] args = new SupplierRecipe[m
 							.getParameterCount()];
 					Parameter[] parameters = m.getParameters();
 					for (int i = 0; i < parameters.length; i++) {
@@ -59,10 +57,10 @@ public abstract class ProviderMethodBinder {
 								.of(p.getType()), m, p, i));
 					}
 					m.setAccessible(true);
-					return new CreationRecipe() {
+					return new SupplierRecipe() {
 
 						@Override
-						public void compile(GeneratorAdapter mv,
+						public Class<?> compileImpl(GeneratorAdapter mv,
 								RecipeCompilationContext compilationContext) {
 
 							compilationContext.addFieldAndLoad(Method.class, m);
@@ -79,7 +77,11 @@ public abstract class ProviderMethodBinder {
 							for (int i = 0; i < args.length; i++) {
 								mv.dup();
 								mv.push(i);
-								args[i].compile(mv, compilationContext);
+								Class<?> argType = args[i]
+										.compile(compilationContext);
+								if (argType.isPrimitive())
+									mv.box(org.objectweb.asm.Type
+											.getType(argType));
 								mv.visitInsn(AASTORE);
 							}
 
@@ -89,7 +91,7 @@ public abstract class ProviderMethodBinder {
 									new org.objectweb.asm.commons.Method(
 											"invoke",
 											"(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"));
-
+							return Object.class;
 						}
 					};
 				}

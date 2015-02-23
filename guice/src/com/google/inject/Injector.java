@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-
 /**
  * Builds the graphs of objects that make up your application. The injector
  * tracks the dependencies for each type and uses bindings to inject them. This
@@ -99,6 +98,35 @@ public interface Injector {
 	 * @since 2.0
 	 */
 	<T> MembersInjector<T> getMembersInjector(Class<T> type);
+
+	/**
+	 * Returns the binding for the given injection key. This will be an explicit
+	 * bindings if the key was bound explicitly by a module, or an implicit
+	 * binding otherwise. The implicit binding will be created if necessary.
+	 *
+	 * <p>
+	 * This method is part of the Guice SPI and is intended for use by tools and
+	 * extensions.
+	 *
+	 * @throws ConfigurationException
+	 *             if this injector cannot find or create the binding.
+	 */
+	<T> Binding<T> getBinding(Key<T> key);
+
+	/**
+	 * Returns the binding for the given type. This will be an explicit bindings
+	 * if the injection key was bound explicitly by a module, or an implicit
+	 * binding otherwise. The implicit binding will be created if necessary.
+	 *
+	 * <p>
+	 * This method is part of the Guice SPI and is intended for use by tools and
+	 * extensions.
+	 *
+	 * @throws ConfigurationException
+	 *             if this injector cannot find or create the binding.
+	 * @since 2.0
+	 */
+	<T> Binding<T> getBinding(Class<T> type);
 
 	/**
 	 * Returns the provider used to obtain instances for the given injection

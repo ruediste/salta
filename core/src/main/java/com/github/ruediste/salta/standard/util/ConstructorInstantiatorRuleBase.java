@@ -4,16 +4,12 @@ import static java.util.stream.Collectors.joining;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CreationRecipe;
-import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.standard.InjectionPoint;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -38,13 +34,13 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		} else if (type instanceof ParameterizedType) {
 			clazz = (Class<?>) ((ParameterizedType) type).getRawType();
 		} else
-			throw new ProvisionException("Unknown type " + typeToken);
+			throw new SaltaException("Unknown type " + typeToken);
 
 		if (clazz.isInterface()) {
-			throw new ProvisionException("Cannot instantiate " + clazz);
+			return null;
 		}
 		if (Modifier.isAbstract(clazz.getModifiers())) {
-			throw new ProvisionException("Cannot instantiate abstract " + clazz);
+			return null;
 		}
 		ArrayList<Constructor<?>> highestPriorityConstructors = new ArrayList<>();
 		Integer highestPriority = null;
@@ -80,27 +76,15 @@ public abstract class ConstructorInstantiatorRuleBase implements
 			return null;
 		}
 
-		Constructor<?> constructor = highestPriorityConstructors.get(0);
+		return FixedConstructorRecipeInstantiator.of(typeToken, ctx,
+				highestPriorityConstructors.get(0));
 
-		ArrayList<CreationRecipe> args = new ArrayList<>();
-
-		Parameter[] parameters = constructor.getParameters();
-		for (int i = 0; i < parameters.length; i++) {
-			Parameter parameter = parameters[i];
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			CoreDependencyKey<Object> dependency = new InjectionPoint(
-					typeToken.resolveType(parameter.getParameterizedType()),
-					constructor, parameter, i);
-			args.add(ctx.getRecipe(dependency));
-		}
-
-		return new FixedConstructorRecipeInstantiator(constructor, args);
 	}
 
-	protected ProvisionException multipleConstructorsFound(
-			TypeToken<?> typeToken, Class<?> clazz,
+	protected SaltaException multipleConstructorsFound(TypeToken<?> typeToken,
+			Class<?> clazz,
 			ArrayList<Constructor<?>> highestPriorityConstructors) {
-		return new ProvisionException(
+		return new SaltaException(
 				"Ambigous eligible constructors found on type\n"
 						+ typeToken
 						+ "\nConstructors:\n"

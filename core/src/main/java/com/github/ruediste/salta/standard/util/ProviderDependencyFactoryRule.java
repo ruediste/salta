@@ -8,13 +8,13 @@ import javax.inject.Provider;
 import org.mockito.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.salta.core.CompiledCreationRecipe;
+import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.DependencyFactoryRule;
-import com.github.ruediste.salta.core.ProvisionException;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.InjectionPoint;
@@ -39,7 +39,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 	private Class<?> providerType;
 
 	public static class ProviderAccessBeforeRecipeCreationFinishedException
-			extends ProvisionException {
+			extends SaltaException {
 		private static final long serialVersionUID = 1L;
 
 		ProviderAccessBeforeRecipeCreationFinishedException() {
@@ -49,7 +49,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 	}
 
 	public static class ProviderAccessBeforeInstanceCreationFinishedException
-			extends ProvisionException {
+			extends SaltaException {
 		private static final long serialVersionUID = 1L;
 
 		ProviderAccessBeforeInstanceCreationFinishedException() {
@@ -59,7 +59,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 	}
 
 	protected static class ProviderImpl implements Supplier<Object> {
-		public CompiledCreationRecipe compiledRecipe;
+		public CompiledSupplier compiledRecipe;
 
 		private ThreadLocal<Boolean> isGetting = new ThreadLocal<>();
 
@@ -81,10 +81,10 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 			try {
 				return compiledRecipe.get();
-			} catch (ProvisionException e) {
+			} catch (SaltaException e) {
 				throw e;
 			} catch (Throwable e) {
-				throw new ProvisionException(
+				throw new SaltaException(
 						"Error while getting instance from provider for key "
 								+ dependency, e);
 			} finally {
@@ -93,24 +93,25 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 		}
 	}
 
-	private static class CreationRecipeImpl<T> extends CreationRecipe {
+	private static class CreationRecipeImpl<T> extends SupplierRecipe {
 
 		private T wrappedProvider;
 		private Class<T> providerType;
 
-		public CreationRecipeImpl(T wrappedProvider, Class<T> providerType) {
+		public CreationRecipeImpl(Class<?> providedType, T wrappedProvider,
+				Class<T> providerType) {
 			this.wrappedProvider = wrappedProvider;
 			this.providerType = providerType;
 		}
 
 		@Override
-		public void compile(GeneratorAdapter mv,
+		public Class<?> compileImpl(GeneratorAdapter mv,
 				RecipeCompilationContext compilationContext) {
 
 			compilationContext.addFieldAndLoad(
 					Type.getDescriptor(providerType), wrappedProvider);
+			return providerType;
 		}
-
 	}
 
 	/**
@@ -134,7 +135,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public CreationRecipe apply(CoreDependencyKey<?> dependency,
+	public SupplierRecipe apply(CoreDependencyKey<?> dependency,
 			RecipeCreationContext ctx) {
 
 		if (matcher.matches(dependency)) {
@@ -159,12 +160,13 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 			// create creation recipe
 			CreationRecipeImpl creationRecipe = new CreationRecipeImpl(
-					wrappedProvider, providerType);
+					providerType, wrappedProvider, providerType);
 
 			// queue creation and compilation of inner recipe
-			ctx.queueAction(x -> {
-				CreationRecipe innerRecipe = x.getRecipeInNewContext(dep);
-				provider.compiledRecipe = x.compileRecipe(innerRecipe);
+			ctx.queueAction(() -> {
+				SupplierRecipe innerRecipe = ctx.getRecipeInNewContext(dep);
+				provider.compiledRecipe = ctx.getCompiler().compileSupplier(
+						innerRecipe);
 			});
 
 			return creationRecipe;

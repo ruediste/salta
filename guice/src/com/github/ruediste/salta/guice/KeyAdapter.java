@@ -50,7 +50,7 @@ public class KeyAdapter<T> extends CoreDependencyKey<T> {
 				return getDeclaredAnnotations();
 			}
 
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "hiding" })
 			@Override
 			public <T extends Annotation> T getAnnotation(
 					Class<T> annotationClass) {

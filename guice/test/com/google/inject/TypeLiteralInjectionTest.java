@@ -40,7 +40,7 @@ public class TypeLiteralInjectionTest extends TestCase {
 				}
 			});
 			fail();
-		} catch (com.github.ruediste.salta.core.ProvisionException expected) {
+		} catch (com.github.ruediste.salta.core.SaltaException expected) {
 			assertContains(expected.getMessage(),
 					"Binding to core guice framework type is not allowed: TypeLiteral");
 		}
@@ -54,7 +54,7 @@ public class TypeLiteralInjectionTest extends TestCase {
 		try {
 			Guice.createInjector().getInstance(B.class);
 			fail();
-		} catch (com.github.ruediste.salta.core.ProvisionException expected) {
+		} catch (com.github.ruediste.salta.core.SaltaException expected) {
 			assertContains(expected.getMessage(),
 					"TypeLiteral<T> cannot be used as a key; It is not fully specified.");
 		}
@@ -77,7 +77,7 @@ public class TypeLiteralInjectionTest extends TestCase {
 		try {
 			Guice.createInjector().getInstance(TypeLiteral.class);
 			fail();
-		} catch (com.github.ruediste.salta.core.ProvisionException expected) {
+		} catch (com.github.ruediste.salta.core.SaltaException expected) {
 			assertContains(expected.getMessage(),
 					"Cannot inject a TypeLiteral that has no type parameter");
 		}

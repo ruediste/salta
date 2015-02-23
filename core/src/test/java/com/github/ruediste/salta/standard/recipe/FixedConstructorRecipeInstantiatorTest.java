@@ -13,9 +13,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.Salta;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.standard.Injector;
+import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class FixedConstructorRecipeInstantiatorTest {
 
@@ -62,7 +63,7 @@ public class FixedConstructorRecipeInstantiatorTest {
 	public void testCatch() {
 		try {
 			pThrow.get();
-		} catch (ProvisionException e) {
+		} catch (SaltaException e) {
 			if (!(e.getCause() instanceof TestException)) {
 				throw e;
 			}
@@ -99,8 +100,7 @@ public class FixedConstructorRecipeInstantiatorTest {
 			throws NoSuchMethodException {
 		assertEquals(
 				expected,
-				new FixedConstructorRecipeInstantiator(clazz
-						.getDeclaredConstructor(), Collections.emptyList())
-						.isConstructorAccessible());
+				Accessibility.isConstructorPublic(new FixedConstructorRecipeInstantiator(clazz
+				.getDeclaredConstructor(), Collections.emptyList()).constructor));
 	}
 }

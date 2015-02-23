@@ -74,4 +74,8 @@ public class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
 
 	}
 
+	@Override
+	public String toString() {
+		return delegate.toString();
+	}
 }

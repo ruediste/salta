@@ -21,7 +21,7 @@ import javax.inject.Provider;
 import javax.naming.ConfigurationException;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.google.common.reflect.TypeToken;
 
 public interface Injector {
@@ -103,7 +103,7 @@ public interface Injector {
 	 *
 	 * @throws ConfigurationException
 	 *             if this injector cannot find or create the provider.
-	 * @throws ProvisionException
+	 * @throws SaltaException
 	 *             if there was a runtime failure while providing an instance.
 	 */
 	<T> T getInstance(CoreDependencyKey<T> key);
@@ -115,7 +115,7 @@ public interface Injector {
 	 *
 	 * @throws ConfigurationException
 	 *             if this injector cannot find or create the provider.
-	 * @throws ProvisionException
+	 * @throws SaltaException
 	 *             if there was a runtime failure while providing an instance.
 	 */
 	<T> T getInstance(Class<T> type);

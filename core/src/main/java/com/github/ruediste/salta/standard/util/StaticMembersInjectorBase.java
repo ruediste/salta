@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
@@ -68,8 +68,7 @@ public abstract class StaticMembersInjectorBase {
 			try {
 				f.set(null, injector.getInstance(d));
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new ProvisionException("Error while setting static " + f,
-						e);
+				throw new SaltaException("Error while setting static " + f, e);
 			}
 		}
 		// inject methods
@@ -90,10 +89,12 @@ public abstract class StaticMembersInjectorBase {
 			m.setAccessible(true);
 			try {
 				m.invoke(null, args.toArray());
-			} catch (IllegalArgumentException | IllegalAccessException
-					| InvocationTargetException e) {
-				throw new ProvisionException("Error while setting static " + m,
-						e);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new SaltaException("Error while setting static " + m
+						+ "\n" + e.getMessage(), e);
+			} catch (InvocationTargetException e) {
+				throw new SaltaException("Error while setting static " + m
+						+ "\n" + e.getCause().getMessage(), e.getCause());
 			}
 		}
 	}

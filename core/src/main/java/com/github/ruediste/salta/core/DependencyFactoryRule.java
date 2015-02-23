@@ -6,5 +6,5 @@ package com.github.ruediste.salta.core;
  */
 public interface DependencyFactoryRule {
 
-	CreationRecipe apply(CoreDependencyKey<?> key, RecipeCreationContext ctx);
+	SupplierRecipe apply(CoreDependencyKey<?> key, RecipeCreationContext ctx);
 }

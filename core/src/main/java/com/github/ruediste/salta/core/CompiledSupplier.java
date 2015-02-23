@@ -1,15 +1,15 @@
 package com.github.ruediste.salta.core;
 
-public interface CompiledCreationRecipe {
+public interface CompiledSupplier {
 	Object get() throws Throwable;
 
 	default Object getNoThrow() {
 		try {
 			return get();
-		} catch (ProvisionException e) {
+		} catch (SaltaException e) {
 			throw e;
 		} catch (Throwable e) {
-			throw new ProvisionException(
+			throw new SaltaException(
 					"Error while getting instance from compiled recipe", e);
 		}
 	}

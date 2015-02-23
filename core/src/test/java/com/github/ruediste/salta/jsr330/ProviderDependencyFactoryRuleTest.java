@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.Salta;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule.ProviderAccessBeforeInstanceCreationFinishedException;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule.ProviderAccessBeforeRecipeCreationFinishedException;
@@ -89,7 +89,7 @@ public class ProviderDependencyFactoryRuleTest {
 	public void testForbiddenProviderAccessSingleton() {
 		try {
 			injector.getInstance(TestClassE.class);
-		} catch (ProvisionException e) {
+		} catch (SaltaException e) {
 			assertTrue(e.getCause() instanceof ProviderAccessBeforeRecipeCreationFinishedException);
 		}
 

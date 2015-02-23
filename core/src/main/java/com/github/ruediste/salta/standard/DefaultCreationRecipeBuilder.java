@@ -8,9 +8,9 @@ import java.util.function.Supplier;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.Binding;
-import com.github.ruediste.salta.core.CreationRecipe;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -45,10 +45,9 @@ public class DefaultCreationRecipeBuilder {
 		scopeSupplier = () -> config.getScope(type);
 	}
 
-	public CreationRecipe build(RecipeCreationContext ctx) {
+	public SupplierRecipe build(RecipeCreationContext ctx) {
 
-		RecipeInstantiator instantiator = instantiatorSupplier
-				.apply(ctx);
+		RecipeInstantiator instantiator = instantiatorSupplier.apply(ctx);
 
 		// arrays for performance
 		RecipeMembersInjector[] mem = membersInjectorsSupplier.apply(ctx)
@@ -57,29 +56,30 @@ public class DefaultCreationRecipeBuilder {
 		List<RecipeInjectionListener> listen = injectionListenerSupplier
 				.apply(ctx);
 
-		CreationRecipe seedRecipe = new CreationRecipe() {
+		SupplierRecipe seedRecipe = new SupplierRecipe() {
 
 			@Override
-			public void compile(GeneratorAdapter mv,
+			public Class<?> compileImpl(GeneratorAdapter mv,
 					RecipeCompilationContext compilationContext) {
-				instantiator.compile(mv, compilationContext);
+				Class<?> result = instantiator.compile(compilationContext);
 				for (RecipeMembersInjector membersInjector : mem) {
-					membersInjector.compile(mv, compilationContext);
+					result = membersInjector
+							.compile(result, compilationContext);
 				}
-
+				return result;
 			}
 		};
 
-		CreationRecipe innerRecipe = createInnerRecipe(listen.iterator(),
+		SupplierRecipe innerRecipe = createInnerRecipe(listen.iterator(),
 				seedRecipe);
 
 		return scopeSupplier.get()
 				.createRecipe(ctx, binding, type, innerRecipe);
 	}
 
-	private CreationRecipe createInnerRecipe(
+	private SupplierRecipe createInnerRecipe(
 			Iterator<RecipeInjectionListener> iterator,
-			CreationRecipe seedRecipe) {
+			SupplierRecipe seedRecipe) {
 		if (!iterator.hasNext())
 			return seedRecipe;
 
@@ -87,16 +87,17 @@ public class DefaultCreationRecipeBuilder {
 		RecipeInjectionListener listener = iterator.next();
 
 		// create a recipe for the rest of the chain
-		CreationRecipe innerRecipe = createInnerRecipe(iterator, seedRecipe);
+		SupplierRecipe innerRecipe = createInnerRecipe(iterator, seedRecipe);
 
 		// return recipe
-		return new CreationRecipe() {
+		return new SupplierRecipe() {
 
 			@Override
-			public void compile(GeneratorAdapter mv,
-					RecipeCompilationContext compilationContext) {
-				listener.compile(mv, compilationContext, innerRecipe);
+			protected Class<?> compileImpl(GeneratorAdapter mv,
+					RecipeCompilationContext ctx) {
+				return listener.compile(ctx, innerRecipe);
 			}
+
 		};
 	}
 }

@@ -59,12 +59,12 @@ public class DependencyCircleTest {
 		injector = Salta.createInjector(new JSR330Module());
 	}
 
-	@Test(expected = ProvisionException.class)
+	@Test(expected = SaltaException.class)
 	public void circularConstructorTest() {
 		injector.getInstance(ConstructorTestClassA.class);
 	}
 
-	@Test(expected = ProvisionException.class)
+	@Test(expected = SaltaException.class)
 	public void circularFieldTest() {
 		injector.getInstance(FieldTestClassA.class);
 	}

@@ -9,10 +9,11 @@ import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
 import com.github.ruediste.salta.AbstractModule;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.StandardModule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
 
 public class JSR330Module extends AbstractModule {
@@ -20,7 +21,15 @@ public class JSR330Module extends AbstractModule {
 	@Override
 	protected void configure() {
 		StandardInjectorConfiguration config = binder().getConfiguration();
+
+		// add rule for ProvidedBy and ImplementedBy
+		config.instantiatorRules.add(new JSR330ProvidedByInstantiatorRule());
+		config.instantiatorRules.add(new JSR330ImplementedByInstantiatorRule());
+
+		// default instantiator rule
 		config.instantiatorRules.add(new JSR330ConstructorInstantiatorRule());
+
+		config.fixedConstructorInstantiatorFactory = FixedConstructorRecipeInstantiator::of;
 		config.noInstantiatorFoundErrorProducers
 				.add(typeToken -> {
 					Class<?> clazz = typeToken.getRawType();
@@ -30,7 +39,7 @@ public class JSR330Module extends AbstractModule {
 							if (c.getParameterCount() == 1
 									&& enclosingClass.equals(c
 											.getParameterTypes()[0])) {
-								throw new ProvisionException(
+								throw new SaltaException(
 										"No suitable constructor found for inner non-static class "
 												+ typeToken
 												+ ".\nCannot instantiate non-static inner classes. Forgotten to make class static?");
@@ -69,7 +78,7 @@ public class JSR330Module extends AbstractModule {
 						return false;
 					}
 					if (void.class.equals(m.getReturnType())) {
-						throw new ProvisionException(
+						throw new SaltaException(
 								"@Provides method returns void: " + m);
 					}
 					return true;

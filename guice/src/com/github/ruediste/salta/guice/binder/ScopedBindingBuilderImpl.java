@@ -30,4 +30,9 @@ public class ScopedBindingBuilderImpl implements ScopedBindingBuilder {
 		delegate.asEagerSingleton();
 	}
 
+	@Override
+	public String toString() {
+		return delegate.toString();
+	}
+
 }

@@ -1,8 +1,6 @@
 package com.github.ruediste.salta.standard.recipe;
 
-import org.objectweb.asm.commons.GeneratorAdapter;
-
-import com.github.ruediste.salta.core.RecipeCompilationContext;
+import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 
 /**
@@ -10,8 +8,6 @@ import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
  * instantiator should contain a very detailed description of what to do. All
  * reflection and decision making should happen upon instantiation
  */
-public interface RecipeInstantiator {
+public abstract class RecipeInstantiator extends SupplierRecipe {
 
-	void compile(GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext);
 }

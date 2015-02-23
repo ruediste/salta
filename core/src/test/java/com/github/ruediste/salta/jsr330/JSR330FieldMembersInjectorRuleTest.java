@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.Salta;
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.standard.Injector;
 
@@ -58,7 +58,7 @@ public class JSR330FieldMembersInjectorRuleTest {
 		assertNull(a.c);
 	}
 
-	@Test(expected = ProvisionException.class)
+	@Test(expected = SaltaException.class)
 	public void testFinalNotInjected() {
 		injector.getInstance(TestClassC.class);
 		fail();

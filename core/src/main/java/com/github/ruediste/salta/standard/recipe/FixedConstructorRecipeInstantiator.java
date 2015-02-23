@@ -7,7 +7,7 @@ import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,55 +16,62 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import com.github.ruediste.salta.core.CreationRecipe;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
+import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.standard.InjectionPoint;
+import com.github.ruediste.salta.standard.util.Accessibility;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
+import com.google.common.reflect.TypeToken;
 
 /**
  * Instantiate a fixed class using a fixed constructor. Use a subclass of
  * {@link ConstructorInstantiatorRuleBase} to create an instance
  */
-public class FixedConstructorRecipeInstantiator implements RecipeInstantiator {
+public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 
 	Constructor<?> constructor;
-	List<CreationRecipe> argumentDependencies;
+	List<SupplierRecipe> argumentDependencies;
 
 	public FixedConstructorRecipeInstantiator(Constructor<?> constructor,
-			List<CreationRecipe> argumentDependencies) {
+			List<SupplierRecipe> argumentDependencies) {
 		constructor.setAccessible(true);
 		this.constructor = constructor;
 		this.argumentDependencies = new ArrayList<>(argumentDependencies);
 	}
 
-	@Override
-	public void compile(GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext) {
-		if (isConstructorAccessible())
-			compileDirect(mv, compilationContext);
-		else
-			compileReflection(mv, compilationContext);
-	}
+	public static FixedConstructorRecipeInstantiator of(TypeToken<?> typeToken,
+			RecipeCreationContext ctx, Constructor<?> constructor) {
+		ArrayList<SupplierRecipe> args = new ArrayList<>();
 
-	boolean isConstructorAccessible() {
-		if (Modifier.isPublic(constructor.getModifiers())) {
-			Class<?> declaringClass = constructor.getDeclaringClass();
-			do {
-				if (!Modifier.isPublic(declaringClass.getModifiers()))
-					return false;
-				declaringClass = declaringClass.getEnclosingClass();
-			} while (declaringClass != null);
-
-			return true;
+		Parameter[] parameters = constructor.getParameters();
+		for (int i = 0; i < parameters.length; i++) {
+			Parameter parameter = parameters[i];
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			CoreDependencyKey<Object> dependency = new InjectionPoint(
+					typeToken.resolveType(parameter.getParameterizedType()),
+					constructor, parameter, i);
+			args.add(ctx.getRecipe(dependency));
 		}
-		return false;
+		return new FixedConstructorRecipeInstantiator(constructor, args);
 	}
 
-	private void compileReflection(GeneratorAdapter mv,
+	@Override
+	public Class<?> compileImpl(GeneratorAdapter mv,
+			RecipeCompilationContext compilationContext) {
+		if (Accessibility.isConstructorPublic(constructor))
+			return compileDirect(mv, compilationContext);
+		else
+			return compileReflection(mv, compilationContext);
+	}
+
+	private Class<?> compileReflection(GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
 
 		// push constructor
-		compilationContext.addFieldAndLoad(Type.getDescriptor(Constructor.class),
-				constructor);
+		compilationContext.addFieldAndLoad(
+				Type.getDescriptor(Constructor.class), constructor);
 
 		// push dependencies as an array
 		mv.push(argumentDependencies.size());
@@ -73,8 +80,10 @@ public class FixedConstructorRecipeInstantiator implements RecipeInstantiator {
 		for (int i = 0; i < argumentDependencies.size(); i++) {
 			mv.dup();
 			mv.push(i);
-			CreationRecipe dependency = argumentDependencies.get(i);
-			dependency.compile(mv, compilationContext);
+			SupplierRecipe dependency = argumentDependencies.get(i);
+			Class<?> argType = dependency.compile(compilationContext);
+			if (argType.isPrimitive())
+				mv.box(Type.getType(argType));
 			mv.visitInsn(AASTORE);
 		}
 
@@ -94,9 +103,11 @@ public class FixedConstructorRecipeInstantiator implements RecipeInstantiator {
 				"getCause", "()Ljava/lang/Throwable;", false);
 		mv.visitInsn(ATHROW);
 		mv.visitLabel(l2);
+
+		return Object.class;
 	}
 
-	private void compileDirect(GeneratorAdapter mv,
+	private Class<?> compileDirect(GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
 
 		mv.newInstance(Type.getType(constructor.getDeclaringClass()));
@@ -105,13 +116,22 @@ public class FixedConstructorRecipeInstantiator implements RecipeInstantiator {
 		// push dependencies
 
 		for (int i = 0; i < argumentDependencies.size(); i++) {
-			CreationRecipe dependency = argumentDependencies.get(i);
-			dependency.compile(mv, compilationContext);
+			SupplierRecipe dependency = argumentDependencies.get(i);
+			Class<?> tosType = dependency.compile(compilationContext);
+			Class<?> argType = constructor.getParameterTypes()[i];
+			if (!argType.isAssignableFrom(tosType)) {
+				if (argType.isPrimitive())
+					mv.unbox(Type.getType(argType));
+				else
+					mv.checkCast(Type.getType(argType));
+			}
 		}
 
 		// call constructor
 		mv.invokeConstructor(Type.getType(constructor.getDeclaringClass()),
 				Method.getMethod(constructor));
+
+		return constructor.getDeclaringClass();
 	}
 
 }

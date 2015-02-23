@@ -1,6 +1,5 @@
 package com.github.ruediste.salta.guice.binder;
 
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Binding;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -10,26 +9,24 @@ import com.google.inject.Provider;
  */
 public class BindingImpl<T> implements Binding<T> {
 
-	private TypeToken<?> type;
+	private Key<?> key;
+	private Provider<?> provider;
 
-	public BindingImpl(TypeToken<?> type) {
-		this.type = type;
-	}
-
-	@Override
-	public Object getSource() {
-		return null;
+	public BindingImpl(Key<?> key, Provider<?> provider) {
+		this.key = key;
+		this.provider = provider;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public Key<T> getKey() {
-		return (Key<T>) Key.get(type.getType());
+		return (Key<T>) key;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Provider<T> getProvider() {
-		throw new UnsupportedOperationException();
+		return (Provider<T>) provider;
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.guice;
 
+import com.github.ruediste.salta.guice.binder.BindingImpl;
+import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
@@ -49,6 +51,17 @@ public class GuiceInjectorImpl implements Injector {
 			com.github.ruediste.salta.standard.Injector delegate) {
 		this.delegate = delegate;
 		return this;
+	}
+
+	@Override
+	public <T> Binding<T> getBinding(Key<T> key) {
+		return new BindingImpl<>(key, getProvider(key));
+	}
+
+	@Override
+	public <T> Binding<T> getBinding(Class<T> type) {
+
+		return new BindingImpl<>(Key.get(type), getProvider(type));
 	}
 
 }

@@ -28,4 +28,8 @@ public class AnnotatedConstantBindingBuilderImpl implements
 				delegate.annotatedWith(annotation));
 	}
 
+	@Override
+	public String toString() {
+		return delegate.toString();
+	}
 }

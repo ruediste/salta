@@ -16,19 +16,27 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
  */
 public class Salta {
 
-	/**
-	 * Creates an injector for the given set of modules.
-	 */
 	public static Injector createInjector(Module... modules) {
-		return createInjector(Arrays.asList(modules));
+		return createInjector(Stage.DEVELOPMENT, modules);
 	}
 
 	/**
 	 * Creates an injector for the given set of modules.
 	 */
+	public static Injector createInjector(Stage stage, Module... modules) {
+		return createInjector(stage, Arrays.asList(modules));
+	}
+
 	public static Injector createInjector(List<Module> modules) {
+		return createInjector(Stage.DEVELOPMENT, modules);
+	}
+
+	/**
+	 * Creates an injector for the given set of modules.
+	 */
+	public static Injector createInjector(Stage stage, List<Module> modules) {
 		StandardInjectorConfiguration config = new StandardInjectorConfiguration(
-				Stage.DEVELOPMENT, new CoreInjectorConfiguration());
+				stage, new CoreInjectorConfiguration());
 		StandardInjector injector = new StandardInjector();
 		Binder binder = new Binder(config, injector);
 		for (Module module : modules) {

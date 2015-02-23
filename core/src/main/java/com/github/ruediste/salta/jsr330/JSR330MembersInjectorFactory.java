@@ -6,7 +6,7 @@ import java.lang.reflect.Modifier;
 
 import javax.inject.Inject;
 
-import com.github.ruediste.salta.core.ProvisionException;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.util.MembersInjectorFactoryBase;
 import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
 import com.google.common.reflect.TypeToken;
@@ -22,7 +22,7 @@ public class JSR330MembersInjectorFactory extends MembersInjectorFactoryBase {
 				|| Modifier.isStatic(method.getModifiers()))
 			return false;
 		if (method.getTypeParameters().length > 0) {
-			throw new ProvisionException(
+			throw new SaltaException(
 					"Method is annotated with @Inject but declares type parameters. Method:\n"
 							+ method);
 		}
@@ -35,7 +35,7 @@ public class JSR330MembersInjectorFactory extends MembersInjectorFactoryBase {
 	protected boolean isInjectableField(TypeToken<?> declaringType, Field f) {
 		boolean annotationPresent = f.isAnnotationPresent(Inject.class);
 		if (annotationPresent && Modifier.isFinal(f.getModifiers())) {
-			throw new ProvisionException("Final field annotated with @Inject");
+			throw new SaltaException("Final field annotated with @Inject");
 		}
 		if (Modifier.isStatic(f.getModifiers()))
 			return false;

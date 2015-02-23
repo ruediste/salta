@@ -106,7 +106,7 @@ public abstract class AbstractModule implements Module {
 	 */
 	protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
 		if (TypeLiteral.class.equals(clazz)) {
-			throw new com.github.ruediste.salta.core.ProvisionException(
+			throw new com.github.ruediste.salta.core.SaltaException(
 					"Binding to core guice framework type is not allowed: TypeLiteral");
 		}
 		return binder().bind(clazz);

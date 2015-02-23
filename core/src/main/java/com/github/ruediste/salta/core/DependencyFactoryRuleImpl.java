@@ -5,6 +5,11 @@ import java.util.function.Supplier;
 
 import com.github.ruediste.salta.matchers.Matcher;
 
+/**
+ * Implementation of {@link DependencyFactoryRule} delegating to a
+ * {@link Function} and a {@link Matcher}
+ * 
+ */
 public class DependencyFactoryRuleImpl implements DependencyFactoryRule {
 
 	private Function<CoreDependencyKey<?>, Supplier<Object>> supplierFactory;
@@ -18,10 +23,10 @@ public class DependencyFactoryRuleImpl implements DependencyFactoryRule {
 	}
 
 	@Override
-	public CreationRecipe apply(CoreDependencyKey<?> key,
+	public SupplierRecipe apply(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
 		if (matcher.matches(key))
-			return new CreationRecipeImpl(supplierFactory.apply(key));
+			return new SupplierRecipeImpl(supplierFactory.apply(key));
 		else
 			return null;
 	}

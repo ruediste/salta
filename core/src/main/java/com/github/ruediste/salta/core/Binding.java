@@ -7,11 +7,11 @@ import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
  */
 public abstract class Binding extends AttachedPropertyBearerBase {
 
-	private CreationRecipe recipe;
+	private SupplierRecipe recipe;
 	boolean creatingRecipe;
 
 	public static class RecursiveRecipeCreationDetectedException extends
-			ProvisionException {
+			SaltaException {
 		private static final long serialVersionUID = 1L;
 
 		RecursiveRecipeCreationDetectedException() {
@@ -22,9 +22,11 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	/**
 	 * Create the {@link CreationRecipe} for this binding if it does not exist
 	 * yet. If the binding is already present, the passed context will be
-	 * ignored.
+	 * ignored. This method is always called with the
+	 * {@link CoreInjector#recipeLock} held, thus no thread synchronization is
+	 * needed
 	 */
-	public CreationRecipe getOrCreateRecipe(RecipeCreationContext ctx) {
+	public SupplierRecipe getOrCreateRecipe(RecipeCreationContext ctx) {
 		if (recipe == null) {
 			if (creatingRecipe)
 				throw new RecursiveRecipeCreationDetectedException();
@@ -40,6 +42,6 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	 * per binding. Any expensive operations to create the recipe should be done
 	 * in this method
 	 */
-	protected abstract CreationRecipe createRecipe(RecipeCreationContext ctx);
+	protected abstract SupplierRecipe createRecipe(RecipeCreationContext ctx);
 
 }
