@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.standard.InjectionPoint;
@@ -18,6 +19,13 @@ import com.google.common.reflect.TypeToken;
 
 public abstract class MembersInjectorFactoryBase implements
 		RecipeMembersInjectorFactory {
+
+	private CoreInjectorConfiguration config;
+
+	public MembersInjectorFactoryBase(CoreInjectorConfiguration config) {
+		this.config = config;
+
+	}
 
 	@Override
 	public List<RecipeMembersInjector> createInjectors(
@@ -62,7 +70,7 @@ public abstract class MembersInjectorFactoryBase implements
 
 					// add injector
 					result.add(new FixedMethodRecipeMembersInjector(method,
-							args));
+							args, config.injectionStrategy));
 				}
 			}
 		}

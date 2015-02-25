@@ -72,7 +72,7 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	}
 
 	@Override
-	public CreationRecipeCompiler getCompiler() {
+	public RecipeCompiler getCompiler() {
 		return coreInjector.getCompiler();
 	}
 

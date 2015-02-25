@@ -34,4 +34,5 @@ public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
 	 */
 	public final List<JITBindingRule> jitBindingRules = new ArrayList<>();
 
+	public InjectionStrategy injectionStrategy = InjectionStrategy.INVOKE_DYNAMIC;
 }

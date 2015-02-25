@@ -48,7 +48,7 @@ public class JSR330Module extends AbstractModule {
 					}
 				});
 		config.defaultMembersInjectorFactories
-				.add(new JSR330MembersInjectorFactory());
+				.add(new JSR330MembersInjectorFactory(config.config));
 
 		config.config.creationRules.add(new ProviderDependencyFactoryRule(
 				key -> {

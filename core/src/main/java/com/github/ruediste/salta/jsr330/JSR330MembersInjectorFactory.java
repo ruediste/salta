@@ -6,12 +6,17 @@ import java.lang.reflect.Modifier;
 
 import javax.inject.Inject;
 
+import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.util.MembersInjectorFactoryBase;
 import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
 import com.google.common.reflect.TypeToken;
 
 public class JSR330MembersInjectorFactory extends MembersInjectorFactoryBase {
+
+	public JSR330MembersInjectorFactory(CoreInjectorConfiguration config) {
+		super(config);
+	}
 
 	@Override
 	protected boolean isInjectableMethod(TypeToken<?> declaringType,

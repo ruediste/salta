@@ -45,25 +45,25 @@ public interface RecipeCompilationContext {
 	 */
 	GeneratorAdapter getMv();
 
-	CreationRecipeCompiler getCompiler();
+	RecipeCompiler getCompiler();
 
 	/**
 	 * Supports the following casts
 	 * <ul>
-	 * <li>primitive to boxed</li>
-	 * <li>any to boxed to primitive</li>
-	 * <li>any to any (cast)</li>
+	 * <li>from a primitive type to the boxed version</li>
+	 * <li>from any type to a primitive</li>
+	 * <li>downcast from any type to any other</li>
+	 * <li>from object to array</li>
+	 * <li>array to Object (trivial)</li>
 	 * </ul>
+	 * 
+	 * This method will generate the necessary instructions such that the TOS
+	 * value has the requested type.
 	 */
 	void cast(Class<?> from, Class<?> to);
 
 	/**
-	 * Supports the following casts
-	 * <ul>
-	 * <li>primitive to boxed</li>
-	 * <li>any to boxed to primitive</li>
-	 * <li>any to any (cast)</li>
-	 * </ul>
+	 * see {@link #cast(Class, Class)}
 	 */
 	void cast(Type from, Type to);
 }

@@ -15,19 +15,31 @@ import com.google.common.reflect.TypeToken;
 public class CoreInjector {
 
 	/**
-	 * Lock object for recipe creation and compilation. May not be acquired
-	 * while holding the {@link #instantiationLock}
-	 */
-	public final Object recipeLock = new Object();
-
-	/**
 	 * Lock object used during instantiation.
 	 */
 	public final Object instantiationLock = new Object();
 
+	/**
+	 * Lock object for recipe creation and compilation. May not be acquired
+	 * while holding the {@link #instantiationLock}. The lock should always be
+	 * accessed with the following pattern:
+	 * 
+	 * <pre>
+	 * {@code
+	 * synchronzied (recipeLockHolder.get()){
+	 *    ...
+	 * }
+	 * </pre>
+	 * 
+	 * This checks that you do not hold the instantiation lock to avoid
+	 * deadlocks
+	 */
+	public final RecipeLockHolder recipeLockHolder = new RecipeLockHolder(
+			new Object(), instantiationLock);
+
 	private CoreInjectorConfiguration config;
 
-	private final CreationRecipeCompiler compiler = new CreationRecipeCompiler();
+	private final RecipeCompiler compiler = new RecipeCompiler();
 
 	private ConcurrentHashMap<CoreDependencyKey<?>, CompiledSupplier> compiledRecipeCache = new ConcurrentHashMap<>();
 
@@ -59,7 +71,7 @@ public class CoreInjector {
 		// initialize static binding map
 		for (StaticBinding binding : config.staticBindings) {
 			Set<TypeToken<?>> possibleTypes = binding.getPossibleTypes();
-			if (possibleTypes == null)
+			if (possibleTypes == null || possibleTypes.isEmpty())
 				nonTypeSpecificStaticBindings.add(binding);
 			else {
 				for (TypeToken<?> t : possibleTypes) {
@@ -116,19 +128,19 @@ public class CoreInjector {
 	}
 
 	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
-		synchronized (recipeLock) {
+		synchronized (recipeLockHolder.get()) {
 			return compiler.compileSupplier(recipe);
 		}
 	}
 
 	public CompiledFunction compileFunction(FunctionRecipe recipe) {
-		synchronized (recipeLock) {
+		synchronized (recipeLockHolder.get()) {
 			return compiler.compileFunction(recipe);
 		}
 	}
 
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> key) {
-		synchronized (recipeLock) {
+		synchronized (recipeLockHolder.get()) {
 			RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
 					CoreInjector.this);
 
@@ -151,7 +163,7 @@ public class CoreInjector {
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
 		// acquire the recipe lock
-		synchronized (recipeLock) {
+		synchronized (recipeLockHolder.get()) {
 			SupplierRecipe result = recipeCache.get(key);
 			if (result == null) {
 				try {
@@ -238,7 +250,7 @@ public class CoreInjector {
 		throw new SaltaException("Dependency cannot be resolved:\n" + key);
 	}
 
-	public CreationRecipeCompiler getCompiler() {
+	public RecipeCompiler getCompiler() {
 		return compiler;
 	}
 

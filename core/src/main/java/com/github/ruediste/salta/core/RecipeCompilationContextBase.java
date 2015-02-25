@@ -1,7 +1,9 @@
 package com.github.ruediste.salta.core;
 
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
@@ -35,9 +37,9 @@ public abstract class RecipeCompilationContextBase implements
 	ArrayList<Runnable> queuedActions = new ArrayList<>();
 	private int methodNr;
 
-	private final CreationRecipeCompiler compiler;
+	private final RecipeCompiler compiler;
 
-	public RecipeCompilationContextBase(CreationRecipeCompiler compiler) {
+	public RecipeCompilationContextBase(RecipeCompiler compiler) {
 		this.compiler = compiler;
 
 	}
@@ -49,7 +51,8 @@ public abstract class RecipeCompilationContextBase implements
 		entry.value = value;
 		fields.add(entry);
 
-		clazz.visitField(ACC_PUBLIC, entry.name, desc, null, null);
+		clazz.visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, entry.name, desc,
+				null, null);
 
 		return entry.name;
 	}
@@ -62,8 +65,8 @@ public abstract class RecipeCompilationContextBase implements
 	@Override
 	public String addFieldAndLoad(String desc, Object value) {
 		String fieldName = addField(desc, value);
-		getMv().loadThis();
-		getMv().getField(Type.getObjectType(clazz.name), fieldName,
+		// getMv().loadThis();
+		getMv().getStatic(Type.getObjectType(clazz.name), fieldName,
 				Type.getType(desc));
 		return fieldName;
 	}
@@ -127,7 +130,7 @@ public abstract class RecipeCompilationContextBase implements
 	}
 
 	@Override
-	public CreationRecipeCompiler getCompiler() {
+	public RecipeCompiler getCompiler() {
 		return compiler;
 	}
 
@@ -138,8 +141,7 @@ public abstract class RecipeCompilationContextBase implements
 
 	@Override
 	public void cast(Type from, Type to) {
-		if (from.getSort() == Type.OBJECT && to.getSort() == Type.OBJECT)
-			getMv().checkCast(to);
+		compiler.cast(getMv(), from, to);
 	}
 
 }

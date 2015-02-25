@@ -12,6 +12,7 @@ import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.primitives.Primitives;
+import com.google.common.reflect.TypeToken;
 
 public class ConstantBindingBuilder {
 
@@ -36,6 +37,7 @@ public class ConstantBindingBuilder {
 		StandardStaticBinding binding = new StandardStaticBinding();
 		binding.dependencyMatcher = annotationMatcher.and(d -> d.getRawType()
 				.equals(cls));
+		binding.possibleTypes.add(TypeToken.of(cls));
 		binding.recipeFactory = new CreationRecipeFactory() {
 
 			@Override

@@ -38,6 +38,7 @@ import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
 import com.github.ruediste.salta.standard.binder.Binder;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -207,4 +208,7 @@ public abstract class AbstractModule implements Module {
 		return binder().getMembersInjector(type);
 	}
 
+	protected StandardInjectorConfiguration getConfiguration() {
+		return binder().getConfiguration();
+	}
 }

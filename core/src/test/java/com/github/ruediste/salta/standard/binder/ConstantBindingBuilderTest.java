@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CreationRecipeCompiler;
+import com.github.ruediste.salta.core.RecipeCompiler;
 import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
@@ -50,7 +50,7 @@ public class ConstantBindingBuilderTest {
 		ConstantBindingBuilder builder = new ConstantBindingBuilder(null,
 				d -> true);
 		StandardStaticBinding binding = builder.createBinding(Integer.class, 3);
-		CreationRecipeCompiler compiler = new CreationRecipeCompiler();
+		RecipeCompiler compiler = new RecipeCompiler();
 		assertEquals(
 				3,
 				compiler.compileSupplier(

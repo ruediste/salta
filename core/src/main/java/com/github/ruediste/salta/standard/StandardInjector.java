@@ -95,7 +95,7 @@ public class StandardInjector implements Injector {
 		public T get() {
 			checkInitialized();
 			if (supplier == null) {
-				synchronized (coreInjector.recipeLock) {
+				synchronized (coreInjector.recipeLockHolder.get()) {
 					if (supplier == null)
 						supplier = coreInjector.getInstanceSupplier(key);
 				}
@@ -115,7 +115,7 @@ public class StandardInjector implements Injector {
 
 		public MembersInjectorImpl(TypeToken<T> type) {
 			this.type = type;
-			synchronized (coreInjector.recipeLock) {
+			synchronized (coreInjector.recipeLockHolder.get()) {
 				RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
 						coreInjector);
 				List<RecipeMembersInjector> injectors = config

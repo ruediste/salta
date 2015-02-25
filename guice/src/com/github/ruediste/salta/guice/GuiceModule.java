@@ -66,7 +66,7 @@ public class GuiceModule extends AbstractModule {
 		});
 
 		config.defaultMembersInjectorFactories
-				.add(new GuiceMembersInjectorFactory());
+				.add(new GuiceMembersInjectorFactory(config.config));
 
 		config.config.creationRules
 				.add(new ProviderDependencyFactoryRule(key -> key.getRawType()

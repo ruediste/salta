@@ -33,7 +33,7 @@ public class Accessibility {
 		return true;
 	}
 
-	private static boolean isClassPublic(Class<?> clazz) {
+	public static boolean isClassPublic(Class<?> clazz) {
 		do {
 			if (!Modifier.isPublic(clazz.getModifiers()))
 				return false;

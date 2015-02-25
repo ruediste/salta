@@ -5,7 +5,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public class RecipeCompilationContextImpl extends RecipeCompilationContextBase {
 	GeneratorAdapter mv;
 
-	public RecipeCompilationContextImpl(CreationRecipeCompiler compiler) {
+	public RecipeCompilationContextImpl(RecipeCompiler compiler) {
 		super(compiler);
 	}
 

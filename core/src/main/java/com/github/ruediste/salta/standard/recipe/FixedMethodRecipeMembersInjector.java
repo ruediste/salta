@@ -22,6 +22,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.SupplierRecipe;
@@ -32,6 +33,7 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 	private Method method;
 	private List<SupplierRecipe> argumentRecipes;
 	private static Lookup lookup;
+	private InjectionStrategy injectionStrategy;
 
 	static {
 		try {
@@ -46,9 +48,11 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 	}
 
 	public FixedMethodRecipeMembersInjector(Method method,
-			List<SupplierRecipe> argumentRecipes) {
+			List<SupplierRecipe> argumentRecipes,
+			InjectionStrategy injectionStrategy) {
 		this.method = method;
 		this.argumentRecipes = argumentRecipes;
+		this.injectionStrategy = injectionStrategy;
 		method.setAccessible(true);
 
 	}
@@ -60,19 +64,25 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 		if (Accessibility.isMethodPublic(method))
 			return compileDirect(argType, mv, compilationContext);
 		else
-			// if (lookup != null)
-			return compileDynamic(argType, mv, compilationContext);
-		// else
-		// return compileReflection(argType, mv, compilationContext);
+			switch (injectionStrategy) {
+			case INVOKE_DYNAMIC:
+				return compileDynamic(argType, mv, compilationContext);
+			case METHOD_HANDLES:
+				return compileMethodHandles(argType, mv, compilationContext);
+			case REFLECTION:
+				return compileReflection(argType, mv, compilationContext);
+			default:
+				throw new UnsupportedOperationException();
+			}
 	}
 
 	private Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext) {
+			RecipeCompilationContext ctx) {
 		// check type
 		Class<?> declaringClass = method.getDeclaringClass();
 
 		if (!declaringClass.isAssignableFrom(argType)) {
-			compilationContext.cast(argType, declaringClass);
+			ctx.cast(argType, declaringClass);
 
 			argType = declaringClass;
 		}
@@ -81,17 +91,8 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 
 		for (int i = 0; i < argumentRecipes.size(); i++) {
 			SupplierRecipe dependency = argumentRecipes.get(i);
-			Class<?> t = dependency.compile(compilationContext);
-			Class<?> parameterType = method.getParameterTypes()[i];
-
-			if (!parameterType.isAssignableFrom(t)) {
-				if (!parameterType.isPrimitive() && t.isPrimitive()) {
-					// mv.box(Type.getType(t));
-				}
-			}
-			if (t.isPrimitive())
-				// mv.box(Type.getType(t));
-				;
+			Class<?> t = dependency.compile(ctx);
+			ctx.cast(t, method.getParameterTypes()[i]);
 		}
 
 		if (declaringClass.isInterface())
@@ -150,6 +151,53 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 		return argType;
 	}
 
+	private Class<?> compileMethodHandles(Class<?> argType,
+			GeneratorAdapter mv, RecipeCompilationContext compilationContext) {
+		mv.dup();
+		MethodHandle handle;
+		try {
+			handle = lookup.unreflect(method);
+		} catch (IllegalAccessException e) {
+			throw new SaltaException(e);
+		}
+		// compilationContext.addFieldAndLoad(Type.getDescriptor(Method.class),
+		// method);
+
+		compilationContext.addFieldAndLoad(
+				Type.getDescriptor(MethodHandle.class), handle);
+
+		mv.swap();
+
+		Type[] argTypes = new Type[argumentRecipes.size() + 1];
+		if (Accessibility.isClassPublic(method.getDeclaringClass())) {
+			argTypes[0] = Type.getType(method.getDeclaringClass());
+		} else
+			argTypes[0] = Type.getType(Object.class);
+
+		for (int i = 0; i < argumentRecipes.size(); i++) {
+			SupplierRecipe dependency = argumentRecipes.get(i);
+			Class<?> t = dependency.compile(compilationContext);
+			if (t.isPrimitive())
+				mv.box(Type.getType(t));
+			if (Accessibility.isClassPublic(t))
+				argTypes[i + 1] = Type.getType(t);
+			else
+				argTypes[i + 1] = Type.getType(Object.class);
+		}
+
+		mv.invokeVirtual(
+				Type.getType(MethodHandle.class),
+				new org.objectweb.asm.commons.Method(
+						"invoke",
+						Type.getMethodDescriptor(
+								void.class.equals(method.getReturnType()) ? Type.VOID_TYPE
+										: Type.getType(Object.class), argTypes)));
+
+		if (!void.class.equals(method.getReturnType()))
+			mv.pop();
+		return argType;
+	}
+
 	private Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
 		mv.dup();
@@ -157,12 +205,12 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 		Class<?> declaringClass = method.getDeclaringClass();
 
 		Type[] argTypes = new Type[argumentRecipes.size() + 1];
-		argTypes[0] = Type.getType(Object.class);
+		argTypes[0] = Type.getType(argType);
 
 		for (int i = 0; i < argumentRecipes.size(); i++) {
 			SupplierRecipe dependency = argumentRecipes.get(i);
-			argTypes[i + 1] = Type.getType(dependency
-					.compile(compilationContext));
+			Class<?> t = dependency.compile(compilationContext);
+			argTypes[i + 1] = Type.getType(t);
 		}
 		Handle bsm = new Handle(
 				H_INVOKESTATIC,
@@ -181,9 +229,10 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 	public static CallSite bootstrap(MethodHandles.Lookup dummy, String name,
 			MethodType stackType, String declaringClassName,
 			String origDescriptor) throws Exception {
-		Class<?> declaringClass = Class.forName(declaringClassName);
+		ClassLoader loader = dummy.lookupClass().getClassLoader();
+		Class<?> declaringClass = loader.loadClass(declaringClassName);
 		MethodHandle method = lookup.findVirtual(declaringClass, name,
-				MethodType.fromMethodDescriptorString(origDescriptor, null));
+				MethodType.fromMethodDescriptorString(origDescriptor, loader));
 
 		return new ConstantCallSite(method.asType(stackType));
 	}

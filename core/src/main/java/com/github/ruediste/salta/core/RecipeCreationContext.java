@@ -9,7 +9,7 @@ public interface RecipeCreationContext {
 
 	SupplierRecipe getOrCreateRecipe(Binding binding);
 
-	CreationRecipeCompiler getCompiler();
+	RecipeCompiler getCompiler();
 
 	void queueAction(Runnable action);
 }

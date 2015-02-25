@@ -12,6 +12,7 @@ import static org.objectweb.asm.Opcodes.V1_7;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.asm.ClassReader;
@@ -30,7 +31,7 @@ import org.objectweb.asm.util.TraceClassVisitor;
 
 import com.github.ruediste.salta.core.RecipeCompilationContextBase.FieldEntry;
 
-public class CreationRecipeCompiler {
+public class RecipeCompiler {
 
 	private static class CompilerClassLoader extends ClassLoader {
 		public Class<?> defineClass(String name, byte[] bb) {
@@ -128,12 +129,21 @@ public class CreationRecipeCompiler {
 			throw new SaltaException("Error while loading compiled recipe", e);
 		}
 
+		Field modifiersField;
+		try {
+			modifiersField = Field.class.getDeclaredField("modifiers");
+			modifiersField.setAccessible(true);
+		} catch (NoSuchFieldException | SecurityException e1) {
+			throw new SaltaException(e1);
+		}
 		// init fields
 		for (FieldEntry entry : ctx.fields) {
 			try {
 				Field field = cls.getField(entry.name);
 				field.setAccessible(true);
-				field.set(instance, entry.value);
+				modifiersField.setInt(field, field.getModifiers()
+						& ~Modifier.FINAL);
+				field.set(null, entry.value);
 			} catch (Exception e) {
 				throw new SaltaException("Error while setting parameter "
 						+ entry.name, e);
@@ -180,5 +190,38 @@ public class CreationRecipeCompiler {
 		// null, l0, l1, 0);
 		mv.visitMaxs(1, 1);
 		mv.visitEnd();
+	}
+
+	/**
+	 * see {@link RecipeCompilationContext#cast(Class, Class)}
+	 */
+	public void cast(GeneratorAdapter mv, Type from, Type to) {
+		if (from.equals(to))
+			return;
+
+		if (to.getSort() == Type.ARRAY) {
+			if (from.getSort() == Type.OBJECT) {
+				mv.checkCast(to);
+				return;
+			}
+		} else if (from.getSort() != Type.OBJECT && to.getSort() != Type.OBJECT) {
+			// two primitives
+			// fall throught to throw
+		} else if (from.getSort() != Type.OBJECT) {
+			if (to.getSort() == Type.OBJECT) {
+				// primitive to object
+				mv.box(from);
+				return;
+			}
+		} else if (to.getSort() != Type.OBJECT) {
+			// any to primitive
+			mv.unbox(to);
+			return;
+		} else if (from.getSort() == Type.OBJECT && to.getSort() == Type.OBJECT) {
+			// downcast
+			mv.checkCast(to);
+			return;
+		}
+		throw new SaltaException("Cannot cast from " + from + " to " + to);
 	}
 }

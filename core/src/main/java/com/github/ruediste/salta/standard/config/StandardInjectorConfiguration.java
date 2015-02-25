@@ -252,7 +252,7 @@ public class StandardInjectorConfiguration {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(config, qualifier);
+			return qualifier == null ? 0 : qualifier.hashCode();
 		}
 
 		@Override
@@ -264,8 +264,7 @@ public class StandardInjectorConfiguration {
 			if (obj.getClass() != getClass())
 				return false;
 			RequiredQualifierMatcher other = (RequiredQualifierMatcher) obj;
-			return Objects.equals(config, other.config)
-					&& Objects.equals(qualifier, other.qualifier);
+			return Objects.equals(qualifier, other.qualifier);
 		}
 
 		@Override
@@ -274,9 +273,12 @@ public class StandardInjectorConfiguration {
 		}
 	}
 
+	/**
+	 * Return a Matcher which matches if the key has a qualifier of the provided
+	 * type
+	 */
 	public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(
 			Class<? extends Annotation> qualifierType) {
-		// TODO Auto-generated method stub
 		return new RequiredQualifierTypeMatcher(this, qualifierType);
 	}
 
@@ -303,7 +305,7 @@ public class StandardInjectorConfiguration {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(config, qualifierType);
+			return qualifierType == null ? 0 : qualifierType.hashCode();
 		}
 
 		@Override
@@ -315,8 +317,7 @@ public class StandardInjectorConfiguration {
 			if (obj.getClass() != getClass())
 				return false;
 			RequiredQualifierTypeMatcher other = (RequiredQualifierTypeMatcher) obj;
-			return Objects.equals(config, other.config)
-					&& Objects.equals(qualifierType, other.qualifierType);
+			return Objects.equals(qualifierType, other.qualifierType);
 		}
 
 		@Override
