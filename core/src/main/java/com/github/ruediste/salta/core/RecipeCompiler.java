@@ -9,6 +9,8 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_7;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -30,13 +32,21 @@ import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
 import com.github.ruediste.salta.core.RecipeCompilationContextBase.FieldEntry;
+import com.google.common.io.Files;
 
 public class RecipeCompiler {
+	private static final AtomicInteger instanceCounter = new AtomicInteger();
 
 	private static class CompilerClassLoader extends ClassLoader {
 		public Class<?> defineClass(String name, byte[] bb) {
 			return defineClass(name, bb, 0, bb.length);
 		}
+	}
+
+	private final int instanceNr;
+
+	public RecipeCompiler() {
+		instanceNr = instanceCounter.incrementAndGet();
 	}
 
 	private CompilerClassLoader loader = new CompilerClassLoader();
@@ -114,14 +124,23 @@ public class RecipeCompiler {
 		// load and instantiate
 		Object instance;
 		Class<?> cls;
+		byte[] bb = cw.toByteArray();
+		String className = Type.getObjectType(ctx.clazz.name).getClassName();
+
 		try {
-			cls = loader.defineClass(ctx.clazz.name, cw.toByteArray());
+			Files.write(bb, new File("target/compiledRecipes/" + ctx.clazz.name
+					+ ".class"));
+		} catch (IOException e2) {
+			throw new SaltaException("Error while writing generated class", e2);
+		}
+		try {
+			cls = loader.defineClass(className, bb);
 			Constructor<?> constructor = cls.getConstructor();
 			constructor.setAccessible(true);
 			instance = constructor.newInstance();
 		} catch (Throwable e) {
 			System.out.println("Error while loading compiled recipe");
-			ClassReader cr = new ClassReader(cw.toByteArray());
+			ClassReader cr = new ClassReader(bb);
 			cr.accept(new TraceClassVisitor(null, new ASMifier(),
 					new PrintWriter(System.out)), 0);
 			CheckClassAdapter.verify(cr, false, new PrintWriter(System.err));
@@ -162,7 +181,7 @@ public class RecipeCompiler {
 		// setup clazz
 		ClassNode clazz = new ClassNode();
 		ctx.clazz = clazz;
-		clazz.name = "SaltaCompiledCreationRecipe"
+		clazz.name = "salta/CompiledCreationRecipe" + instanceNr + "_"
 				+ classNumber.incrementAndGet();
 		clazz.access = ACC_FINAL & ACC_PUBLIC & ACC_SYNTHETIC;
 		clazz.version = V1_7;
@@ -195,31 +214,29 @@ public class RecipeCompiler {
 	/**
 	 * see {@link RecipeCompilationContext#cast(Class, Class)}
 	 */
-	public void cast(GeneratorAdapter mv, Type from, Type to) {
+	public void cast(GeneratorAdapter mv, Class<?> from, Class<?> to) {
 		if (from.equals(to))
 			return;
 
-		if (to.getSort() == Type.ARRAY) {
-			if (from.getSort() == Type.OBJECT) {
-				mv.checkCast(to);
-				return;
-			}
-		} else if (from.getSort() != Type.OBJECT && to.getSort() != Type.OBJECT) {
+		if (from.isPrimitive() && to.isPrimitive()) {
 			// two primitives
 			// fall throught to throw
-		} else if (from.getSort() != Type.OBJECT) {
-			if (to.getSort() == Type.OBJECT) {
+		} else if (from.isPrimitive()) {
+			if (!to.isArray() && !to.isPrimitive()) {
 				// primitive to object
-				mv.box(from);
+				mv.box(Type.getType(from));
 				return;
 			}
-		} else if (to.getSort() != Type.OBJECT) {
-			// any to primitive
-			mv.unbox(to);
-			return;
-		} else if (from.getSort() == Type.OBJECT && to.getSort() == Type.OBJECT) {
-			// downcast
-			mv.checkCast(to);
+		} else if (to.isPrimitive()) {
+			if (!from.isArray()) {
+				// any to primitive
+				mv.unbox(Type.getType(to));
+				return;
+			}
+		} else {
+			if (!to.isAssignableFrom(from))
+				// downcast
+				mv.checkCast(Type.getType(to));
 			return;
 		}
 		throw new SaltaException("Cannot cast from " + from + " to " + to);

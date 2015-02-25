@@ -3,7 +3,6 @@ package com.github.ruediste.salta.core;
 import java.util.function.Supplier;
 
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 public interface RecipeCompilationContext {
@@ -62,8 +61,4 @@ public interface RecipeCompilationContext {
 	 */
 	void cast(Class<?> from, Class<?> to);
 
-	/**
-	 * see {@link #cast(Class, Class)}
-	 */
-	void cast(Type from, Type to);
 }

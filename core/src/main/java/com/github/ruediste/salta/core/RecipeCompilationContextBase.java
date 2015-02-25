@@ -136,12 +136,6 @@ public abstract class RecipeCompilationContextBase implements
 
 	@Override
 	public void cast(Class<?> from, Class<?> to) {
-		cast(Type.getType(from), Type.getType(to));
-	}
-
-	@Override
-	public void cast(Type from, Type to) {
 		compiler.cast(getMv(), from, to);
 	}
-
 }

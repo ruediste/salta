@@ -78,17 +78,15 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 
 	private Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
 			RecipeCompilationContext ctx) {
-		// check type
+		// cast receiver
 		Class<?> declaringClass = method.getDeclaringClass();
+		if (!declaringClass.isAssignableFrom(argType))
+			mv.checkCast(Type.getType(declaringClass));
+		argType = declaringClass;
 
-		if (!declaringClass.isAssignableFrom(argType)) {
-			ctx.cast(argType, declaringClass);
-
-			argType = declaringClass;
-		}
 		mv.dup();
-		// push dependencies as an array
 
+		// push dependencies as an array
 		for (int i = 0; i < argumentRecipes.size(); i++) {
 			SupplierRecipe dependency = argumentRecipes.get(i);
 			Class<?> t = dependency.compile(ctx);
@@ -152,7 +150,7 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 	}
 
 	private Class<?> compileMethodHandles(Class<?> argType,
-			GeneratorAdapter mv, RecipeCompilationContext compilationContext) {
+			GeneratorAdapter mv, RecipeCompilationContext ctx) {
 		mv.dup();
 		MethodHandle handle;
 		try {
@@ -160,28 +158,30 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 		} catch (IllegalAccessException e) {
 			throw new SaltaException(e);
 		}
-		// compilationContext.addFieldAndLoad(Type.getDescriptor(Method.class),
-		// method);
-
-		compilationContext.addFieldAndLoad(
-				Type.getDescriptor(MethodHandle.class), handle);
+		ctx.addFieldAndLoad(Type.getDescriptor(MethodHandle.class), handle);
 
 		mv.swap();
 
 		Type[] argTypes = new Type[argumentRecipes.size() + 1];
-		if (Accessibility.isClassPublic(method.getDeclaringClass())) {
-			argTypes[0] = Type.getType(method.getDeclaringClass());
+		Class<?> declaringClass = method.getDeclaringClass();
+
+		if (Accessibility.isClassPublic(declaringClass)) {
+			if (!declaringClass.isAssignableFrom(argType)) {
+				mv.checkCast(Type.getType(declaringClass));
+				argType = declaringClass;
+			}
+			argTypes[0] = Type.getType(declaringClass);
 		} else
 			argTypes[0] = Type.getType(Object.class);
 
 		for (int i = 0; i < argumentRecipes.size(); i++) {
 			SupplierRecipe dependency = argumentRecipes.get(i);
-			Class<?> t = dependency.compile(compilationContext);
-			if (t.isPrimitive())
-				mv.box(Type.getType(t));
-			if (Accessibility.isClassPublic(t))
-				argTypes[i + 1] = Type.getType(t);
-			else
+			Class<?> paramType = method.getParameterTypes()[i];
+			Class<?> t = dependency.compile(ctx);
+			if (Accessibility.isClassPublic(paramType)) {
+				ctx.cast(t, paramType);
+				argTypes[i + 1] = Type.getType(paramType);
+			} else
 				argTypes[i + 1] = Type.getType(Object.class);
 		}
 
@@ -199,18 +199,30 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 	}
 
 	private Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext) {
+			RecipeCompilationContext ctx) {
 		mv.dup();
 		// push dependencies as an array
 		Class<?> declaringClass = method.getDeclaringClass();
 
 		Type[] argTypes = new Type[argumentRecipes.size() + 1];
-		argTypes[0] = Type.getType(argType);
+		if (Accessibility.isClassPublic(declaringClass)) {
+			if (!declaringClass.isAssignableFrom(argType)) {
+				mv.checkCast(Type.getType(declaringClass));
+				argType = declaringClass;
+			}
+			argTypes[0] = Type.getType(argType);
+		} else
+			argTypes[0] = Type.getType(Object.class);
 
 		for (int i = 0; i < argumentRecipes.size(); i++) {
 			SupplierRecipe dependency = argumentRecipes.get(i);
-			Class<?> t = dependency.compile(compilationContext);
-			argTypes[i + 1] = Type.getType(t);
+			Class<?> t = dependency.compile(ctx);
+			Class<?> paramType = method.getParameterTypes()[i];
+			if (Accessibility.isClassPublic(paramType)) {
+				ctx.cast(t, paramType);
+				argTypes[i + 1] = Type.getType(paramType);
+			} else
+				argTypes[i + 1] = Type.getType(Object.class);
 		}
 		Handle bsm = new Handle(
 				H_INVOKESTATIC,
