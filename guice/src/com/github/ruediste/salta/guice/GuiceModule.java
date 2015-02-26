@@ -173,6 +173,6 @@ public class GuiceModule extends AbstractModule {
 		});
 
 		config.instantiatorRules.add(new GuiceConstructorInstantiatorRule(
-				guiceConfig.requireAtInjectOnConstructors));
+				config.config, guiceConfig.requireAtInjectOnConstructors));
 	}
 }

@@ -135,7 +135,23 @@ public abstract class RecipeCompilationContextBase implements
 	}
 
 	@Override
-	public void cast(Class<?> from, Class<?> to) {
-		compiler.cast(getMv(), from, to);
+	public Class<?> castToPublic(Class<?> from, Class<?> to) {
+		return compiler.castToPublic(getMv(), from, to);
+	}
+
+	@Override
+	public void pop(Class<?> type) {
+		switch (Type.getType(type).getSize()) {
+		case 0:
+			break;
+		case 1:
+			getMv().pop();
+			break;
+		case 2:
+			getMv().pop2();
+			break;
+		default:
+			throw new UnsupportedOperationException();
+		}
 	}
 }

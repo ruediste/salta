@@ -9,8 +9,6 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_7;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -32,7 +30,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
 import com.github.ruediste.salta.core.RecipeCompilationContextBase.FieldEntry;
-import com.google.common.io.Files;
+import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class RecipeCompiler {
 	private static final AtomicInteger instanceCounter = new AtomicInteger();
@@ -127,12 +125,13 @@ public class RecipeCompiler {
 		byte[] bb = cw.toByteArray();
 		String className = Type.getObjectType(ctx.clazz.name).getClassName();
 
-		try {
-			Files.write(bb, new File("target/compiledRecipes/" + ctx.clazz.name
-					+ ".class"));
-		} catch (IOException e2) {
-			throw new SaltaException("Error while writing generated class", e2);
-		}
+		// try {
+		// Files.write(bb, new File("target/compiledRecipes/" + ctx.clazz.name
+		// + ".class"));
+		// } catch (IOException e2) {
+		// throw new SaltaException("Error while writing generated class", e2);
+		// }
+
 		try {
 			cls = loader.defineClass(className, bb);
 			Constructor<?> constructor = cls.getConstructor();
@@ -212,32 +211,36 @@ public class RecipeCompiler {
 	}
 
 	/**
-	 * see {@link RecipeCompilationContext#cast(Class, Class)}
+	 * see {@link RecipeCompilationContext#castToPublic(Class, Class)}
 	 */
-	public void cast(GeneratorAdapter mv, Class<?> from, Class<?> to) {
+	public Class<?> castToPublic(GeneratorAdapter mv, Class<?> from, Class<?> to) {
+		if (!Accessibility.isClassPublic(to))
+			to = Object.class;
+
 		if (from.equals(to))
-			return;
+			return to;
 
 		if (from.isPrimitive() && to.isPrimitive()) {
-			// two primitives
+			// two primitives which are not equal
 			// fall throught to throw
 		} else if (from.isPrimitive()) {
 			if (!to.isArray() && !to.isPrimitive()) {
 				// primitive to object
 				mv.box(Type.getType(from));
-				return;
+				return to;
 			}
 		} else if (to.isPrimitive()) {
 			if (!from.isArray()) {
 				// any to primitive
 				mv.unbox(Type.getType(to));
-				return;
+				return to;
 			}
 		} else {
-			if (!to.isAssignableFrom(from))
+			if (!to.isAssignableFrom(from)) {
 				// downcast
 				mv.checkCast(Type.getType(to));
-			return;
+			}
+			return to;
 		}
 		throw new SaltaException("Cannot cast from " + from + " to " + to);
 	}

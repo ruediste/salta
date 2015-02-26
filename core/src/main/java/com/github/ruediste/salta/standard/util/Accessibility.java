@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -41,5 +42,11 @@ public class Accessibility {
 		} while (clazz != null);
 
 		return true;
+	}
+
+	public static boolean isFieldPublic(Field field) {
+		if (!Modifier.isPublic(field.getModifiers()))
+			return false;
+		return isClassPublic(field.getType());
 	}
 }

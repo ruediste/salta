@@ -1,6 +1,8 @@
 package com.github.ruediste.salta.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 import org.junit.Before;
@@ -8,6 +10,8 @@ import org.junit.Test;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+
+import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class RecipeCompilerTest {
 
@@ -114,7 +118,7 @@ public class RecipeCompilerTest {
 	}
 
 	@Test
-	public void testCast() throws Throwable {
+	public void testCastToPublic() throws Throwable {
 		FunctionRecipe recipe = new FunctionRecipe() {
 
 			@Override
@@ -122,41 +126,41 @@ public class RecipeCompilerTest {
 					GeneratorAdapter mv, RecipeCompilationContext ctx) {
 				// primitive to boxed
 				mv.push(4);
-				ctx.cast(int.class, Integer.class);
+				ctx.castToPublic(int.class, Integer.class);
 				acceptInteger(mv);
 
 				// primitive to Object
 				mv.push(4);
-				ctx.cast(int.class, Object.class);
+				ctx.castToPublic(int.class, Object.class);
 				acceptInteger(mv);
 
 				// Object to primitive
 				mv.push(4);
-				ctx.cast(int.class, Integer.class);
+				ctx.castToPublic(int.class, Integer.class);
 				toObject(mv);
-				ctx.cast(Object.class, int.class);
+				ctx.castToPublic(Object.class, int.class);
 				acceptInt(mv);
 
 				// boxed to primitive
 				mv.push(4);
-				ctx.cast(int.class, Integer.class);
+				ctx.castToPublic(int.class, Integer.class);
 				toInteger(mv);
-				ctx.cast(Integer.class, int.class);
+				ctx.castToPublic(Integer.class, int.class);
 				acceptInt(mv);
 
 				// down cast
 				mv.push(4);
-				ctx.cast(int.class, Integer.class);
+				ctx.castToPublic(int.class, Integer.class);
 				toObject(mv);
-				ctx.cast(Object.class, Integer.class);
+				ctx.castToPublic(Object.class, Integer.class);
 				acceptInteger(mv);
 
 				// object to array
 				mv.push(0);
 				mv.newArray(Type.getType(Object.class));
-				ctx.cast(Object[].class, Object.class);
+				ctx.castToPublic(Object[].class, Object.class);
 				toObject(mv);
-				ctx.cast(Object.class, Object[].class);
+				ctx.castToPublic(Object.class, Object[].class);
 				acceptArray(mv);
 
 				mv.push(4);
@@ -203,5 +207,11 @@ public class RecipeCompilerTest {
 		};
 
 		assertEquals(4, compiler.compileFunction(recipe).get(5));
+	}
+
+	@Test
+	public void assumptions() {
+		assertTrue(Accessibility.isClassPublic(int.class));
+		assertFalse(Object.class.isAssignableFrom(int.class));
 	}
 }

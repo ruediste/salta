@@ -5,10 +5,15 @@ import java.lang.reflect.Modifier;
 
 import javax.inject.Inject;
 
+import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
 
 public class JSR330ConstructorInstantiatorRule extends
 		ConstructorInstantiatorRuleBase {
+
+	public JSR330ConstructorInstantiatorRule(CoreInjectorConfiguration config) {
+		super(config);
+	}
 
 	@Override
 	protected Integer getConstructorPriority(Constructor<?> c) {

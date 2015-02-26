@@ -8,6 +8,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
+import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
@@ -21,6 +22,13 @@ import com.google.common.reflect.TypeToken;
  */
 public abstract class ConstructorInstantiatorRuleBase implements
 		InstantiatorRule {
+
+	private CoreInjectorConfiguration config;
+
+	public ConstructorInstantiatorRuleBase(CoreInjectorConfiguration config) {
+		this.config = config;
+
+	}
 
 	@Override
 	public RecipeInstantiator apply(RecipeCreationContext ctx,
@@ -77,7 +85,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		}
 
 		return FixedConstructorRecipeInstantiator.of(typeToken, ctx,
-				highestPriorityConstructors.get(0));
+				highestPriorityConstructors.get(0), config.injectionStrategy);
 
 	}
 

@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import com.github.ruediste.salta.standard.util.Accessibility;
+
 public interface RecipeCompilationContext {
 
 	/**
@@ -57,8 +59,17 @@ public interface RecipeCompilationContext {
 	 * </ul>
 	 * 
 	 * This method will generate the necessary instructions such that the TOS
-	 * value has the requested type.
+	 * value has the requested type. The type which is beeing cast to will
+	 * always be public ({@link Accessibility#isClassPublic(Class)})
+	 * 
+	 * @return the type to which the TOS was casted
 	 */
-	void cast(Class<?> from, Class<?> to);
+	Class<?> castToPublic(Class<?> from, Class<?> to);
+
+	/**
+	 * Pop a value of the given type from the stack. if {@code void.class} is
+	 * passed, nothing is popped
+	 */
+	void pop(Class<?> type);
 
 }

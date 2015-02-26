@@ -3,131 +3,23 @@ package com.github.ruediste.salta.standard.recipe;
 import static org.junit.Assert.assertNotNull;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
-import java.util.Arrays;
-
-import javax.inject.Inject;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCompiler;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.SupplierRecipe;
-import com.github.ruediste.salta.jsr330.JSR330Module;
-import com.github.ruediste.salta.standard.Injector;
-import com.github.ruediste.salta.standard.Stage;
 
-public class FixedMethodRecipeMembersInjectorTest {
-	private Injector injector;
-
-	private static class TestClass {
-		@Inject
-		public Object m1() {
-			return null;
-		}
-
-		@Inject
-		public Object m2(Stage stage) {
-			return null;
-		}
-
-		@Inject
-		private Object mPrivate(Stage stage) {
-			return null;
-		}
-
-		@Inject
-		Object mPackage(Stage stage) {
-			return null;
-		}
-
-		@Inject
-		protected Object mProtected(Stage stage) {
-			return null;
-		}
-
-	}
-
-	public static class TestA {
-		@Inject
-		public void publicNonVisible(TestB b) {
-		}
-
-		@Inject
-		public Object publicNonVisible1(TestB b) {
-			return null;
-		}
-
-		@Inject
-		public TestB publicNonVisible2() {
-			return null;
-		}
-
-	}
-
-	private static class TestB {
-	}
-
-	private static class TestTwoDouble {
-		@Inject
-		double m1() {
-			return 0;
-		}
-
-		@Inject
-		double m2() {
-			return 0;
-		}
-	}
-
+public class FixedFieldRecipeMembersInjectorTest {
 	private RecipeCompiler compiler;
 
 	@Before
 	public void setup() {
-		injector = Salta.createInjector(new JSR330Module());
 		compiler = new RecipeCompiler();
-	}
-
-	@Test
-	public void testInjectionWorks() {
-		injector.getInstance(TestClass.class);
-	}
-
-	/**
-	 * Check if double return values are correctly popped from the stack
-	 */
-	@Test
-	public void testTwoDouble() {
-		injector.getInstance(TestTwoDouble.class);
-	}
-
-	@Test
-	public void testPublicNonVisible() {
-		injector.getInstance(TestA.class);
-	}
-
-	public static class TestPublic {
-		@Inject
-		public void foo() {
-		}
-
-		@Inject
-		public Object withResult() {
-			return null;
-		}
-	}
-
-	@Test
-	public void testPublic() {
-		injector.getInstance(TestPublic.class);
-
-		TestPublic p = new TestPublic();
-		injector.injectMembers(p);
 	}
 
 	public static class TestPub {
@@ -136,42 +28,19 @@ public class FixedMethodRecipeMembersInjectorTest {
 	private static class TestPriv {
 	}
 
-	public static class TestC {
-		public void m() {
-		}
-
-		public void m(int i) {
-		}
-
-		public void m(double i) {
-		}
-
-		public void m(Object o) {
-		}
-
-		public void m(TestPub t) {
-		}
-
-		public void m(TestPriv t) {
-		}
-
-		void m1() {
-		}
-
-		void m1(int i) {
-		}
-
-		void m1(double i) {
-		}
-
-		void m1(Object o) {
-		}
-
-		void m1(TestPub t) {
-		}
-
-		void m1(TestPriv t) {
-		}
+	public static class TestMain {
+		public int f_int;
+		int f1_int;
+		public Integer f_Integer;
+		Integer f1_Integer;
+		public double f_double;
+		double f1_double;
+		public Object f_Object;
+		Object f1_Object;
+		public TestPub f_TestPub;
+		TestPub f1_TestPub;
+		public TestPriv f_TestPriv;
+		TestPriv f1_TestPriv;
 	}
 
 	public static class Helper {
@@ -203,16 +72,11 @@ public class FixedMethodRecipeMembersInjectorTest {
 			this.strategy = strategy;
 		}
 
-		void m() throws NoSuchMethodException, SecurityException {
-			new FixedMethodRecipeMembersInjector(
-					TestC.class.getDeclaredMethod(m), Arrays.asList(), strategy);
-		}
-
-		void m(Class<?> param, SupplierRecipe recipe)
-				throws NoSuchMethodException, SecurityException {
-			new FixedMethodRecipeMembersInjector(TestC.class.getDeclaredMethod(
-					m, param), Arrays.asList(recipe), strategy).compile(
-					TestC.class, ctx);
+		void f(Class<?> param, SupplierRecipe recipe) throws Exception {
+			new FixedFieldRecipeMembersInjector(
+					TestMain.class.getDeclaredField(m + "_"
+							+ param.getSimpleName()), recipe, strategy)
+					.compile(TestMain.class, ctx);
 		}
 
 		SupplierRecipe toObject(SupplierRecipe arg) {
@@ -224,7 +88,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 					arg.compile(ctx);
 					mv.visitMethodInsn(
 							INVOKESTATIC,
-							"com/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$Helper",
+							"com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
 							"toObject",
 							"(Ljava/lang/Object;)Ljava/lang/Object;", false);
 					return Object.class;
@@ -241,9 +105,9 @@ public class FixedMethodRecipeMembersInjectorTest {
 						RecipeCompilationContext ctx) {
 					mv.visitMethodInsn(
 							INVOKESTATIC,
-							"com/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$Helper",
+							"com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
 							"getPub",
-							"()Lcom/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$TestPub;",
+							"()Lcom/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$TestPub;",
 							false);
 
 					return TestPub.class;
@@ -259,7 +123,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 						RecipeCompilationContext ctx) {
 					mv.visitMethodInsn(
 							INVOKESTATIC,
-							"com/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$Helper",
+							"com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
 							"getPriv", "()Ljava/lang/Object;", false);
 
 					return TestPriv.class;
@@ -323,12 +187,12 @@ public class FixedMethodRecipeMembersInjectorTest {
 	public void testDetail() throws Throwable {
 		for (InjectionStrategy strategy : InjectionStrategy.values()) {
 			try {
-				doTestDetail("m", strategy);
+				doTestDetail("f", strategy);
 			} catch (Throwable t) {
 				throw new RuntimeException("Error in public/" + strategy, t);
 			}
 			try {
-				doTestDetail("m1", strategy);
+				doTestDetail("f1", strategy);
 			} catch (Throwable t) {
 				throw new RuntimeException("Error in package/" + strategy, t);
 			}
@@ -345,38 +209,40 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 				Builder b = new Builder(mv, ctx, m, strategy);
 
-				ctx.addFieldAndLoad(TestC.class, new TestC());
+				ctx.addFieldAndLoad(TestMain.class, new TestMain());
 				try {
-					// void
-					b.m();
-
 					// int
-					b.m(int.class, b.getInteger());
-					b.m(int.class, b.getIntP());
-					b.m(int.class, b.toObject(b.getInteger()));
+					b.f(int.class, b.getInteger());
+					b.f(int.class, b.getIntP());
+					b.f(int.class, b.toObject(b.getInteger()));
+
+					// Integer
+					b.f(Integer.class, b.getInteger());
+					b.f(Integer.class, b.getIntP());
+					b.f(Integer.class, b.toObject(b.getInteger()));
 
 					// double
-					b.m(double.class, b.getDouble());
-					b.m(double.class, b.getDoubleP());
-					b.m(double.class, b.toObject(b.getDouble()));
+					b.f(double.class, b.getDouble());
+					b.f(double.class, b.getDoubleP());
+					b.f(double.class, b.toObject(b.getDouble()));
 
 					// Object
-					b.m(Object.class, b.toObject(b.getInteger()));
-					b.m(Object.class, b.getIntP());
-					b.m(Object.class, b.getDoubleP());
+					b.f(Object.class, b.toObject(b.getInteger()));
+					b.f(Object.class, b.getIntP());
+					b.f(Object.class, b.getDoubleP());
 
 					// Pub
-					b.m(TestPub.class, b.getPub());
-					b.m(TestPub.class, b.toObject(b.getPub()));
+					b.f(TestPub.class, b.getPub());
+					b.f(TestPub.class, b.toObject(b.getPub()));
 
 					// Priv
-					b.m(TestPriv.class, b.getPriv());
-				} catch (NoSuchMethodException | SecurityException e) {
-					throw new SaltaException();
+					b.f(TestPriv.class, b.getPriv());
+				} catch (Exception e) {
+					throw new SaltaException(e);
 				}
 
 				// mv.pop();
-				return TestC.class;
+				return TestMain.class;
 			}
 
 		};

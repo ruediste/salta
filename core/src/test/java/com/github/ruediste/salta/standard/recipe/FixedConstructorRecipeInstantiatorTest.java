@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -98,9 +97,7 @@ public class FixedConstructorRecipeInstantiatorTest {
 
 	private void checkIsConstructorAccessible(boolean expected, Class<?> clazz)
 			throws NoSuchMethodException {
-		assertEquals(
-				expected,
-				Accessibility.isConstructorPublic(new FixedConstructorRecipeInstantiator(clazz
-				.getDeclaredConstructor(), Collections.emptyList()).constructor));
+		assertEquals(expected, Accessibility.isConstructorPublic(clazz
+				.getDeclaredConstructor()));
 	}
 }

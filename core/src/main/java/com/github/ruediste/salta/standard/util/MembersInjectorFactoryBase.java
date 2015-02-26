@@ -46,7 +46,7 @@ public abstract class MembersInjectorFactoryBase implements
 
 					// add injector
 					result.add(new FixedFieldRecipeMembersInjector(f, ctx
-							.getRecipe(dependency)));
+							.getRecipe(dependency), config.injectionStrategy));
 				}
 			}
 

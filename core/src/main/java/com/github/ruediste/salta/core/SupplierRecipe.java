@@ -14,7 +14,7 @@ public abstract class SupplierRecipe {
 	 * expected type, since this is often not possible due to types which are
 	 * not visible from the compiled recipe. The caller of compile has to allow
 	 * for all typecasts which are performed by
-	 * {@link RecipeCompilationContext#cast(Class, Class)}.
+	 * {@link RecipeCompilationContext#castToPublic(Class, Class)}.
 	 * 
 	 * @return type of the supplied instance
 	 * 

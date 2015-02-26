@@ -27,9 +27,12 @@ public class JSR330Module extends AbstractModule {
 		config.instantiatorRules.add(new JSR330ImplementedByInstantiatorRule());
 
 		// default instantiator rule
-		config.instantiatorRules.add(new JSR330ConstructorInstantiatorRule());
+		config.instantiatorRules.add(new JSR330ConstructorInstantiatorRule(
+				config.config));
 
-		config.fixedConstructorInstantiatorFactory = FixedConstructorRecipeInstantiator::of;
+		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
+				.of(type, ctx, cstr, config.config.injectionStrategy);
+
 		config.noInstantiatorFoundErrorProducers
 				.add(typeToken -> {
 					Class<?> clazz = typeToken.getRawType();
