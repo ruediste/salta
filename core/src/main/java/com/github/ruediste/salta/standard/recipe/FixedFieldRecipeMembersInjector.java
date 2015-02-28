@@ -38,17 +38,31 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 	public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
 		if (Accessibility.isFieldPublic(field)) {
-			return compileReflection(argType, mv, compilationContext);
+			return compileDirect(argType, mv, compilationContext);
 		}
 		switch (strategy) {
 		case INVOKE_DYNAMIC:
-		case METHOD_HANDLES:
 			return compileDynamic(argType, mv, compilationContext);
 		case REFLECTION:
 			return compileReflection(argType, mv, compilationContext);
 		default:
 			throw new UnsupportedOperationException();
 		}
+	}
+
+	protected Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
+			RecipeCompilationContext ctx) {
+		argType = ctx.castToPublic(argType, field.getDeclaringClass());
+		mv.dup();
+		{
+			Class<?> t = recipe.compile(ctx);
+			ctx.castToPublic(t, field.getType());
+		}
+
+		mv.putField(Type.getType(field.getDeclaringClass()), field.getName(),
+				Type.getType(field.getType()));
+
+		return argType;
 	}
 
 	protected Class<?> compileReflection(Class<?> argType, GeneratorAdapter mv,
@@ -84,22 +98,23 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 				H_INVOKESTATIC,
 				Type.getInternalName(getClass()),
 				"bootstrap",
-				"(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;");
+				"(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/invoke/CallSite;");
 
-		mv.invokeDynamic(field.getName(), Type.getMethodDescriptor(
+		mv.invokeDynamic("field", Type.getMethodDescriptor(
 				Type.getType(void.class), Type.getType(argType), valueType),
-				bsm, field.getDeclaringClass().getName());
+				bsm, field.getDeclaringClass().getName(), field.getName());
 		return argType;
 	}
 
 	public static CallSite bootstrap(MethodHandles.Lookup dummy, String name,
-			MethodType stackType, String declaringClassName) throws Exception {
+			MethodType stackType, String declaringClassName, String fieldName)
+			throws Exception {
 		ClassLoader loader = dummy.lookupClass().getClassLoader();
 
 		Class<?> declaringClass = loader.loadClass(declaringClassName);
 
 		MethodHandle method = UnrestrictedLookupHolder.lookup
-				.unreflectSetter(declaringClass.getDeclaredField(name));
+				.unreflectSetter(declaringClass.getDeclaredField(fieldName));
 
 		return new ConstantCallSite(method.asType(stackType));
 	}

@@ -78,7 +78,6 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 		else
 			switch (strategy) {
 			case INVOKE_DYNAMIC:
-			case METHOD_HANDLES:
 				return compileDynamic(mv, compilationContext);
 			case REFLECTION:
 				return compileReflection(mv, compilationContext);

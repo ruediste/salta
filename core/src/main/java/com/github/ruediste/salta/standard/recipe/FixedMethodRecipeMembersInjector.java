@@ -22,7 +22,6 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.RecipeCompilationContext;
-import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.SupplierRecipe;
 import com.github.ruediste.salta.standard.util.Accessibility;
 
@@ -52,8 +51,6 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 			switch (injectionStrategy) {
 			case INVOKE_DYNAMIC:
 				return compileDynamic(argType, mv, compilationContext);
-			case METHOD_HANDLES:
-				return compileMethodHandles(argType, mv, compilationContext);
 			case REFLECTION:
 				return compileReflection(argType, mv, compilationContext);
 			default:
@@ -126,46 +123,6 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 		mv.visitLabel(l2);
 
 		mv.pop();
-		return argType;
-	}
-
-	private Class<?> compileMethodHandles(Class<?> argType,
-			GeneratorAdapter mv, RecipeCompilationContext ctx) {
-
-		Type[] argTypes = new Type[argumentRecipes.size() + 1];
-
-		// cast receiver
-		argType = ctx.castToPublic(argType, method.getDeclaringClass());
-		argTypes[0] = Type.getType(argType);
-		mv.dup();
-
-		// lookup method handle
-		MethodHandle handle;
-		try {
-			handle = UnrestrictedLookupHolder.lookup.unreflect(method);
-		} catch (IllegalAccessException e) {
-			throw new SaltaException(e);
-		}
-		ctx.addFieldAndLoad(Type.getDescriptor(MethodHandle.class), handle);
-		mv.swap();
-
-		// push arguments
-		for (int i = 0; i < argumentRecipes.size(); i++) {
-			Class<?> t = argumentRecipes.get(i).compile(ctx);
-			argTypes[i + 1] = Type.getType(ctx.castToPublic(t,
-					method.getParameterTypes()[i]));
-		}
-
-		mv.invokeVirtual(
-				Type.getType(MethodHandle.class),
-				new org.objectweb.asm.commons.Method(
-						"invoke",
-						Type.getMethodDescriptor(
-								void.class.equals(method.getReturnType()) ? Type.VOID_TYPE
-										: Type.getType(Object.class), argTypes)));
-
-		if (!void.class.equals(method.getReturnType()))
-			mv.pop();
 		return argType;
 	}
 
