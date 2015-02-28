@@ -1,6 +1,5 @@
 package com.github.ruediste.salta.standard.config;
 
-import org.mockito.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.Binding;
@@ -24,11 +23,12 @@ public class SingletonScope implements Scope {
 				.getNoThrow();
 		return new SupplierRecipe() {
 
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public Class<?> compileImpl(GeneratorAdapter mv,
 					RecipeCompilationContext compilationContext) {
-				compilationContext.addFieldAndLoad(
-						Type.getDescriptor(type.getRawType()), instance);
+				compilationContext.addFieldAndLoad((Class) type.getRawType(),
+						instance);
 				return type.getRawType();
 			}
 		};

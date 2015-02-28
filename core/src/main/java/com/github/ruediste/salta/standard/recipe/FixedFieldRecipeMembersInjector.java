@@ -68,8 +68,7 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 	protected Class<?> compileReflection(Class<?> argType, GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
 		mv.dup();
-		compilationContext.addFieldAndLoad(Type.getDescriptor(Field.class),
-				field);
+		compilationContext.addFieldAndLoad(Field.class, field);
 		mv.swap();
 		Class<?> t = recipe.compile(compilationContext);
 		if (t.isPrimitive())

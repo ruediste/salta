@@ -54,8 +54,7 @@ public class RecipeInjectorListenerImpl implements RecipeInjectionListener {
 			SupplierRecipe innerRecipe) {
 		GeneratorAdapter mv = compilationContext.getMv();
 		if (listener != null) {
-			compilationContext.addFieldAndLoad(
-					Type.getDescriptor(Function.class), listener);
+			compilationContext.addFieldAndLoad(Function.class, listener);
 			Class<?> t = innerRecipe.compile(compilationContext);
 			if (t.isPrimitive())
 				mv.box(Type.getType(t));
@@ -63,8 +62,8 @@ public class RecipeInjectorListenerImpl implements RecipeInjectionListener {
 					Method.getMethod("Object apply(Object)"));
 			return Object.class;
 		} else if (aroundListener != null) {
-			compilationContext.addFieldAndLoad(
-					Type.getDescriptor(AroundListener.class), aroundListener);
+			compilationContext.addFieldAndLoad(AroundListener.class,
+					aroundListener);
 			mv.dup();
 			mv.invokeInterface(Type.getType(AroundListener.class),
 					Method.getMethod("void before()"));
@@ -75,8 +74,7 @@ public class RecipeInjectorListenerImpl implements RecipeInjectionListener {
 					Method.getMethod("Object apply(Object)"));
 			return Object.class;
 		} else if (wrapperListener != null) {
-			compilationContext.addFieldAndLoad(
-					Type.getDescriptor(Function.class), wrapperListener);
+			compilationContext.addFieldAndLoad(Function.class, wrapperListener);
 			compilationContext.compileToSupplier(innerRecipe);
 			mv.invokeInterface(Type.getType(Function.class), Method
 					.getMethod("Object apply(java.util.function.Supplier)"));

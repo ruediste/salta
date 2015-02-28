@@ -45,30 +45,30 @@ public abstract class RecipeCompilationContextBase implements
 	}
 
 	@Override
-	public String addField(String desc, Object value) {
+	public <T> FieldHandle addField(Class<T> fieldType, T value) {
 		FieldEntry entry = new FieldEntry();
 		entry.name = "field" + fields.size();
 		entry.value = value;
 		fields.add(entry);
 
-		clazz.visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, entry.name, desc,
-				null, null);
+		clazz.visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, entry.name,
+				Type.getDescriptor(fieldType), null, null);
 
-		return entry.name;
+		return new FieldHandle(fieldType, entry.name);
 	}
 
 	@Override
-	public <T> String addFieldAndLoad(Class<T> fieldType, T value) {
-		return addFieldAndLoad(Type.getDescriptor(fieldType), value);
+	public <T> FieldHandle addFieldAndLoad(Class<T> fieldType, T value) {
+		FieldHandle handle = addField(fieldType, value);
+		loadField(handle);
+		return handle;
 	}
 
 	@Override
-	public String addFieldAndLoad(String desc, Object value) {
-		String fieldName = addField(desc, value);
+	public void loadField(FieldHandle handle) {
 		// getMv().loadThis();
-		getMv().getStatic(Type.getObjectType(clazz.name), fieldName,
-				Type.getType(desc));
-		return fieldName;
+		getMv().getStatic(Type.getObjectType(clazz.name), handle.name,
+				Type.getType(handle.type));
 	}
 
 	@Override

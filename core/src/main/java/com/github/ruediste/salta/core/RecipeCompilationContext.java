@@ -13,20 +13,19 @@ public interface RecipeCompilationContext {
 	 * Add a field to the generated method and return it's name. The field will
 	 * be initialized to the given value
 	 */
-	String addField(String desc, Object value);
-
-	<T> String addFieldAndLoad(Class<T> fieldType, T value);
+	<T> FieldHandle addField(Class<T> fieldType, T value);
 
 	/**
 	 * Add a field to the compiled recipe class and load it.
 	 * 
-	 * @param desc
-	 *            descriptor of the field
+	 * @param fieldType
+	 *            type of the field to be added and loaded
 	 * @param value
 	 *            value the field is initialized to
-	 * @return name of the added field
 	 */
-	String addFieldAndLoad(String desc, Object value);
+	<T> FieldHandle addFieldAndLoad(Class<T> fieldType, T value);
+
+	void loadField(FieldHandle handle);
 
 	/**
 	 * Queue the compilation of a recipe

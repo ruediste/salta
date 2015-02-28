@@ -1,6 +1,5 @@
 package com.github.ruediste.salta.standard.binder;
 
-import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
@@ -44,11 +43,11 @@ public class ConstantBindingBuilder {
 			public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
 				return new SupplierRecipe() {
 
+					@SuppressWarnings({ "unchecked", "rawtypes" })
 					@Override
 					public Class<?> compileImpl(GeneratorAdapter mv,
 							RecipeCompilationContext compilationContext) {
-						compilationContext.addFieldAndLoad(
-								Type.getDescriptor(cls), value);
+						compilationContext.addFieldAndLoad((Class) cls, value);
 						return cls;
 					}
 

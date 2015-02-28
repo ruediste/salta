@@ -90,8 +90,7 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 			RecipeCompilationContext compilationContext) {
 
 		// push constructor
-		compilationContext.addFieldAndLoad(
-				Type.getDescriptor(Constructor.class), constructor);
+		compilationContext.addFieldAndLoad(Constructor.class, constructor);
 
 		// push dependencies as an array
 		mv.push(argumentDependencies.size());

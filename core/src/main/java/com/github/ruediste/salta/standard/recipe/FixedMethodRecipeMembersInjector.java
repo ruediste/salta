@@ -86,8 +86,7 @@ public class FixedMethodRecipeMembersInjector extends RecipeMembersInjector {
 	private Class<?> compileReflection(Class<?> argType, GeneratorAdapter mv,
 			RecipeCompilationContext compilationContext) {
 		mv.dup();
-		compilationContext.addFieldAndLoad(Type.getDescriptor(Method.class),
-				method);
+		compilationContext.addFieldAndLoad(Method.class, method);
 		mv.swap();
 
 		// push dependencies as an array

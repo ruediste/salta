@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
-import org.mockito.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CompiledSupplier;
@@ -108,8 +107,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 		public Class<?> compileImpl(GeneratorAdapter mv,
 				RecipeCompilationContext compilationContext) {
 
-			compilationContext.addFieldAndLoad(
-					Type.getDescriptor(providerType), wrappedProvider);
+			compilationContext.addFieldAndLoad(providerType, wrappedProvider);
 			return providerType;
 		}
 	}
