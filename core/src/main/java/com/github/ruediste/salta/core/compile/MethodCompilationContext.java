@@ -9,12 +9,15 @@ import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.CodeSizeEvaluator;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.tree.ClassNode;
 
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.util.Accessibility;
@@ -27,11 +30,15 @@ public class MethodCompilationContext {
 
 	private final ClassCompilationContext classCtx;
 	private final GeneratorAdapter mv;
+	private int access;
+	private String desc;
 
 	public MethodCompilationContext(ClassCompilationContext classCtx,
-			GeneratorAdapter mv) {
+			GeneratorAdapter mv, int access, String desc) {
 		this.classCtx = classCtx;
 		this.mv = mv;
+		this.access = access;
+		this.desc = desc;
 	}
 
 	public GeneratorAdapter getMv() {
@@ -46,7 +53,8 @@ public class MethodCompilationContext {
 
 	public void loadField(FieldHandle handle) {
 		// getMv().loadThis();
-		getMv().getStatic(Type.getObjectType(getClassCtx().getClazz().name),
+		getMv().getStatic(
+				Type.getObjectType(getClassCtx().getInternalClassName()),
 				handle.name, Type.getType(handle.type));
 	}
 
@@ -147,6 +155,52 @@ public class MethodCompilationContext {
 			return to;
 		}
 		throw new SaltaException("Cannot cast from " + from + " to " + to);
+	}
+
+	private int codeSizeOffset;
+
+	public void addCodeSizeOffset(int offset) {
+		codeSizeOffset += offset;
+	}
+
+	public static class CodeSizeHelper {
+		public MethodCompilationContext ctx;
+		private CodeSizeEvaluator cse;
+
+		public int getSize() {
+			return cse.getMaxSize() + ctx.codeSizeOffset;
+		}
+	}
+
+	public CodeSizeHelper getCodeSizeHelper() {
+		ClassNode node = new ClassNode();
+		node.name = getClassCtx().getClazz().name;
+		ClassCompilationContext ccc = new ClassCompilationContext(node, true,
+				classCtx.getCompiler());
+		CodeSizeEvaluator cse = new CodeSizeEvaluator(null);
+		MethodCompilationContext mcc = new MethodCompilationContext(ccc,
+				new GeneratorAdapter(cse, access, "method", desc), access, desc);
+		CodeSizeHelper helper = new CodeSizeHelper();
+		helper.ctx = mcc;
+		helper.cse = cse;
+		return helper;
+	}
+
+	private boolean separateSubRecipes;
+
+	public <T> T withSeparateSubRecipes(final boolean separateSubRecipes,
+			Function<GeneratorAdapter, T> compileFunc) {
+		boolean old = this.isSeparateSubRecipes();
+		this.separateSubRecipes = separateSubRecipes;
+		try {
+			return compileFunc.apply(mv);
+		} finally {
+			this.separateSubRecipes = old;
+		}
+	}
+
+	public boolean isSeparateSubRecipes() {
+		return separateSubRecipes;
 	}
 
 }

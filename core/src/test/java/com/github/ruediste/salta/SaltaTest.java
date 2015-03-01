@@ -99,10 +99,6 @@ public class SaltaTest {
 
 	public static CallSite bootstrap(MethodHandles.Lookup dummy, String name,
 			MethodType type, Class<?> clazz, String fieldName) throws Exception {
-		System.out.println(name);
-		System.out.println(type.parameterType(0));
-		System.out.println(clazz);
-		System.out.println(fieldName);
 		Field f = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
 		f.setAccessible(true);
 		Lookup lookup = (Lookup) f.get(null);

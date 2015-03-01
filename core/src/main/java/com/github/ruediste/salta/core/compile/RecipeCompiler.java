@@ -11,8 +11,6 @@ import static org.objectweb.asm.Opcodes.V1_7;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.asm.ClassReader;
@@ -31,7 +29,6 @@ import com.github.ruediste.salta.core.CompiledFunction;
 import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.compile.ClassCompilationContext.FieldEntry;
 
 public class RecipeCompiler {
 	private static final AtomicInteger instanceCounter = new AtomicInteger();
@@ -56,7 +53,7 @@ public class RecipeCompiler {
 	 * {@link CoreInjector#recipeLock} or {@link CoreInjector#instantiationLock}
 	 */
 	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
-		ClassCompilationContext ccc = setupClazz(CompiledSupplier.class);
+		ClassCompilationContext ccc = createClass(CompiledSupplier.class);
 		ccc.addMethod(ACC_PUBLIC, "get", "()Ljava/lang/Object;", null,
 				new MethodRecipe() {
 
@@ -73,7 +70,9 @@ public class RecipeCompiler {
 					}
 				});
 
-		return (CompiledSupplier) loadAndInstantiate(ccc);
+		Class<?> cls = loadClass(ccc);
+
+		return (CompiledSupplier) instantiate(cls);
 	}
 
 	/**
@@ -82,8 +81,7 @@ public class RecipeCompiler {
 	 * {@link CoreInjector#instantiationLock}
 	 */
 	public CompiledFunction compileFunction(FunctionRecipe recipe) {
-
-		ClassCompilationContext ccc = setupClazz(CompiledFunction.class);
+		ClassCompilationContext ccc = createClass(CompiledFunction.class);
 		ccc.addMethod(ACC_PUBLIC, "get",
 				"(Ljava/lang/Object;)Ljava/lang/Object;", null,
 				new MethodRecipe() {
@@ -103,17 +101,16 @@ public class RecipeCompiler {
 						mv.visitInsn(ARETURN);
 					}
 				});
-
-		return (CompiledFunction) loadAndInstantiate(ccc);
+		Class<?> cls = loadClass(ccc);
+		return (CompiledFunction) instantiate(cls);
 	}
 
-	private Object loadAndInstantiate(ClassCompilationContext ctx) {
+	public Class<?> loadClass(ClassCompilationContext ctx) {
 		// generate bytecode
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 		ctx.getClazz().accept(cw);
 
-		// load and instantiate
-		Object instance;
+		// load class
 		Class<?> cls;
 		byte[] bb = cw.toByteArray();
 		String className = Type.getObjectType(ctx.getClazz().name)
@@ -128,11 +125,8 @@ public class RecipeCompiler {
 
 		try {
 			cls = loader.defineClass(className, bb);
-			Constructor<?> constructor = cls.getConstructor();
-			constructor.setAccessible(true);
-			instance = constructor.newInstance();
 		} catch (Throwable e) {
-			System.out.println("Error while loading compiled recipe");
+			System.out.println("Error while loading compiled recipe class");
 			ClassReader cr = new ClassReader(bb);
 			cr.accept(new TraceClassVisitor(null, new ASMifier(),
 					new PrintWriter(System.out)), 0);
@@ -141,35 +135,28 @@ public class RecipeCompiler {
 			throw new SaltaException("Error while loading compiled recipe", e);
 		}
 
-		Field modifiersField;
-		try {
-			modifiersField = Field.class.getDeclaredField("modifiers");
-			modifiersField.setAccessible(true);
-		} catch (NoSuchFieldException | SecurityException e1) {
-			throw new SaltaException(e1);
-		}
-		// init fields
-		for (FieldEntry entry : ctx.fields) {
-			try {
-				Field field = cls.getField(entry.name);
-				field.setAccessible(true);
-				modifiersField.setInt(field, field.getModifiers()
-						& ~Modifier.FINAL);
-				field.set(null, entry.value);
-			} catch (Exception e) {
-				throw new SaltaException("Error while setting parameter "
-						+ entry.name, e);
-			}
-		}
-
-		// process queued actions
-		ctx.queuedActions.forEach(Runnable::run);
+		ctx.initFields(cls);
 
 		// return result
+		return cls;
+	}
+
+	private Object instantiate(Class<?> cls) {
+
+		Object instance;
+		try {
+			Constructor<?> constructor = cls.getConstructor();
+			constructor.setAccessible(true);
+			instance = constructor.newInstance();
+		} catch (Throwable e) {
+			throw new SaltaException(
+					"Error while instantiating compiled recipe", e);
+		}
+
 		return instance;
 	}
 
-	private ClassCompilationContext setupClazz(Class<?> implementedInterface) {
+	public ClassCompilationContext createClass(Class<?> implementedInterface) {
 		// setup clazz
 		ClassNode clazz = new ClassNode();
 		clazz.name = "salta/CompiledCreationRecipe" + instanceNr + "_"
@@ -177,12 +164,13 @@ public class RecipeCompiler {
 		clazz.access = ACC_FINAL & ACC_PUBLIC & ACC_SYNTHETIC;
 		clazz.version = V1_7;
 		clazz.superName = Type.getInternalName(Object.class);
-		clazz.interfaces.add(Type.getInternalName(implementedInterface));
+		if (implementedInterface != null)
+			clazz.interfaces.add(Type.getInternalName(implementedInterface));
 
 		// generate constructor
 		generateConstructor(clazz);
 
-		return new ClassCompilationContext(clazz);
+		return new ClassCompilationContext(clazz, false, this);
 	}
 
 	private void generateConstructor(ClassVisitor cw) {

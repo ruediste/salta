@@ -3,6 +3,8 @@ package com.github.ruediste.salta.core.compile;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 import org.objectweb.asm.Opcodes;
@@ -11,6 +13,8 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
+
+import com.github.ruediste.salta.core.SaltaException;
 
 /**
  * Context for the compilation of a recipe class. Manages unique names of fields
@@ -26,12 +30,17 @@ public class ClassCompilationContext {
 	}
 
 	ArrayList<FieldEntry> fields = new ArrayList<>();
-	ArrayList<Runnable> queuedActions = new ArrayList<>();
 
 	private int methodNr;
+	private final boolean codeSizeEvaluation;
 
-	public ClassCompilationContext(ClassNode clazz) {
+	private final RecipeCompiler compiler;
+
+	public ClassCompilationContext(ClassNode clazz, boolean codeSizeEvaluation,
+			RecipeCompiler compiler) {
 		this.clazz = clazz;
+		this.codeSizeEvaluation = codeSizeEvaluation;
+		this.compiler = compiler;
 	}
 
 	public <T> FieldHandle addField(Class<T> fieldType, T value) {
@@ -44,10 +53,6 @@ public class ClassCompilationContext {
 				Type.getDescriptor(fieldType), null, null);
 
 		return new FieldHandle(fieldType, entry.name);
-	}
-
-	public void queueAction(Runnable runnable) {
-		queuedActions.add(runnable);
 	}
 
 	/**
@@ -99,12 +104,14 @@ public class ClassCompilationContext {
 	 */
 	public String addMethod(final int access, String name, final String desc,
 			final String[] exceptions, MethodRecipe recipe) {
+		if (codeSizeEvaluation)
+			return name;
 		MethodNode m = new MethodNode(access, name, desc, null, exceptions);
 		getClazz().methods.add(m);
 		GeneratorAdapter mv = new GeneratorAdapter(m.access, new Method(m.name,
 				m.desc), m);
 		mv.visitCode();
-		recipe.compile(new MethodCompilationContext(this, mv));
+		recipe.compile(new MethodCompilationContext(this, mv, access, desc));
 		mv.visitMaxs(0, 0);
 		mv.visitEnd();
 		return m.name;
@@ -117,4 +124,36 @@ public class ClassCompilationContext {
 	public ClassNode getClazz() {
 		return clazz;
 	}
+
+	public boolean isCodeSizeEvaluation() {
+		return codeSizeEvaluation;
+	}
+
+	public void initFields(Class<?> recipeClass) {
+		Field modifiersField;
+		try {
+			modifiersField = Field.class.getDeclaredField("modifiers");
+			modifiersField.setAccessible(true);
+		} catch (NoSuchFieldException | SecurityException e1) {
+			throw new SaltaException(e1);
+		}
+		// init fields
+		for (FieldEntry entry : fields) {
+			try {
+				Field field = recipeClass.getField(entry.name);
+				field.setAccessible(true);
+				modifiersField.setInt(field, field.getModifiers()
+						& ~Modifier.FINAL);
+				field.set(null, entry.value);
+			} catch (Exception e) {
+				throw new SaltaException("Error while setting parameter "
+						+ entry.name, e);
+			}
+		}
+	}
+
+	public RecipeCompiler getCompiler() {
+		return compiler;
+	}
+
 }

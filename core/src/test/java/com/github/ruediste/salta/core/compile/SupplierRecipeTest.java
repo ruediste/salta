@@ -2,7 +2,6 @@ package com.github.ruediste.salta.core.compile;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -23,16 +22,13 @@ public class SupplierRecipeTest {
 	}
 
 	@Test
-	@Ignore
 	public void testMethodSplit() throws Throwable {
 		SupplierRecipe innerNameRecipe = new SupplierRecipe() {
 
 			@Override
 			protected Class<?> compileImpl(GeneratorAdapter mv,
 					MethodCompilationContext ctx) {
-				ctx.addFieldAndLoad(int.class, 56);
-				ctx.castToPublic(int.class, Object.class);
-				mv.pop();
+
 				ctx.addFieldAndLoad(String.class, ctx.getClassCtx()
 						.getInternalClassName());
 				return String.class;
@@ -45,12 +41,13 @@ public class SupplierRecipeTest {
 					MethodCompilationContext ctx) {
 				mv.newInstance(Type.getType(TestClass.class));
 				mv.dup();
-				innerNameRecipe.compile(ctx);
-				mv.checkCast(Type.getType(String.class));
+				Class<?> t = innerNameRecipe.compile(ctx);
+				ctx.castToPublic(t, String.class);
 				ctx.addFieldAndLoad(String.class, ctx.getClassCtx()
 						.getInternalClassName());
 				mv.invokeConstructor(Type.getType(TestClass.class),
 						Method.getMethod("void <init>(String, String)"));
+				// mv.pop();
 				return TestClass.class;
 			}
 		};

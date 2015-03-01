@@ -43,6 +43,7 @@ In the TREE workload, each class depends on 10 other classes, except for the lea
 
 The dependencies are injected using constructors, methods or fields. Also, the visibility of the constructors, members or field is varied  between public, package, protected and private.
 
+Results for depth 4:
 	
 	Benchmark                (injection)  (visibility)   Mode  Cnt     Score      Error   Units
 	GuiceThroughput.measure       METHOD        PUBLIC  thrpt   10     0.066 ±    0.009  ops/ms
