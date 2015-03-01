@@ -29,6 +29,48 @@ To avoid deadlocks, a thread holding the instantiation lock may not acquire the 
 ## Speed
 Salta uses bytecode generation to speed up instantiation. Expect a 5x to 10x speedup over Guice.
 
+### Bechmark Results
+We use different workloads to test the performance of Salta and compare it to Guice. Code generation is used to create large class graphs. All benchmarks are executed on a 
+**Intel(R) Core(TM) i7-3820 CPU @ 3.60GHz** with 16GB RAM, running Ubuntu Linux.
+
+In the TREE workload, each class depends on 10 other classes, except for the leaf classes. The depth of the tree is varied. The number of classes in the tree is
+
+ * 1 for depth 0 
+ * 11 for depth 1 
+ * 111 for depth 2
+ * 1111 for depth 3 
+ * 11111 for depth 4 
+
+The dependencies are injected using constructors, methods or fields. Also, the visibility of the constructors, members or field is varied  between public, package, protected and private.
+
+	
+	Benchmark                (injection)  (visibility)   Mode  Cnt     Score      Error   Units
+	GuiceThroughput.measure       METHOD        PUBLIC  thrpt   10     0.066 ±    0.009  ops/ms
+	GuiceThroughput.measure       METHOD       PACKAGE  thrpt   10     0.061 ±    0.012  ops/ms
+	GuiceThroughput.measure       METHOD     PROTECTED  thrpt   10     0.050 ±    0.001  ops/ms
+	GuiceThroughput.measure       METHOD       PRIVATE  thrpt   10     0.050 ±    0.001  ops/ms
+	GuiceThroughput.measure  CONSTRUCTOR        PUBLIC  thrpt   10     0.098 ±    0.004  ops/ms
+	GuiceThroughput.measure  CONSTRUCTOR       PACKAGE  thrpt   10     0.089 ±    0.003  ops/ms
+	GuiceThroughput.measure  CONSTRUCTOR     PROTECTED  thrpt   10     0.083 ±    0.017  ops/ms
+	GuiceThroughput.measure  CONSTRUCTOR       PRIVATE  thrpt   10     0.092 ±    0.002  ops/ms
+	GuiceThroughput.measure        FIELD        PUBLIC  thrpt   10     0.082 ±    0.002  ops/ms
+	GuiceThroughput.measure        FIELD       PACKAGE  thrpt   10     0.083 ±    0.002  ops/ms
+	GuiceThroughput.measure        FIELD     PROTECTED  thrpt   10     0.084 ±    0.006  ops/ms
+	GuiceThroughput.measure        FIELD       PRIVATE  thrpt   10     0.084 ±    0.003  ops/ms
+	GuiceStartup.measure          METHOD        PUBLIC     ss   10  8442.462 ±  439.050   ms/op
+	GuiceStartup.measure          METHOD       PACKAGE     ss   10  8079.176 ±  499.078   ms/op
+	GuiceStartup.measure          METHOD     PROTECTED     ss   10  7821.022 ±  258.310   ms/op
+	GuiceStartup.measure          METHOD       PRIVATE     ss   10  7914.901 ±  513.936   ms/op
+	GuiceStartup.measure     CONSTRUCTOR        PUBLIC     ss   10  7641.369 ±  538.386   ms/op
+	GuiceStartup.measure     CONSTRUCTOR       PACKAGE     ss   10  7060.088 ±  533.836   ms/op
+	GuiceStartup.measure     CONSTRUCTOR     PROTECTED     ss   10  7327.997 ±  817.067   ms/op
+	GuiceStartup.measure     CONSTRUCTOR       PRIVATE     ss   10  6729.250 ±  306.703   ms/op
+	GuiceStartup.measure           FIELD        PUBLIC     ss   10  7710.462 ± 1505.247   ms/op
+	GuiceStartup.measure           FIELD       PACKAGE     ss   10  8589.887 ± 1938.777   ms/op
+	GuiceStartup.measure           FIELD     PROTECTED     ss   10  7470.670 ±  251.739   ms/op
+	GuiceStartup.measure           FIELD       PRIVATE     ss   10  7216.927 ±  315.699   ms/op
+
+
 ## Bindings
 Bindings are a central element of SimpleDI. 
 

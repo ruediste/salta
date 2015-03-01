@@ -8,9 +8,9 @@ import java.util.function.Supplier;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.Binding;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -60,7 +60,7 @@ public class DefaultCreationRecipeBuilder {
 
 			@Override
 			public Class<?> compileImpl(GeneratorAdapter mv,
-					RecipeCompilationContext compilationContext) {
+					MethodCompilationContext compilationContext) {
 				Class<?> result = instantiator.compile(compilationContext);
 				for (RecipeMembersInjector membersInjector : mem) {
 					result = membersInjector
@@ -94,7 +94,7 @@ public class DefaultCreationRecipeBuilder {
 
 			@Override
 			protected Class<?> compileImpl(GeneratorAdapter mv,
-					RecipeCompilationContext ctx) {
+					MethodCompilationContext ctx) {
 				return listener.compile(ctx, innerRecipe);
 			}
 

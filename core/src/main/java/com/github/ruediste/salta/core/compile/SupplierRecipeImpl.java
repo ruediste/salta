@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.core.compile;
 
 import java.util.function.Supplier;
 
@@ -20,7 +20,7 @@ public class SupplierRecipeImpl extends SupplierRecipe {
 
 	@Override
 	protected Class<?> compileImpl(GeneratorAdapter mv,
-			RecipeCompilationContext ctx) {
+			MethodCompilationContext ctx) {
 		ctx.addFieldAndLoad(Supplier.class, supplier);
 		mv.invokeInterface(Type.getType(Supplier.class),
 				Method.getMethod("Object get()"));

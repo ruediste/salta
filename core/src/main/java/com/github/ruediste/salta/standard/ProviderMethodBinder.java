@@ -12,10 +12,10 @@ import java.lang.reflect.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.StaticBinding;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
@@ -61,7 +61,7 @@ public abstract class ProviderMethodBinder {
 
 						@Override
 						public Class<?> compileImpl(GeneratorAdapter mv,
-								RecipeCompilationContext compilationContext) {
+								MethodCompilationContext compilationContext) {
 
 							compilationContext.addFieldAndLoad(Method.class, m);
 							// push module instance to the stack

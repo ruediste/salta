@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.core.compile;
 
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -22,15 +22,16 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.util.ASMifier;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
-import com.github.ruediste.salta.core.RecipeCompilationContextBase.FieldEntry;
-import com.github.ruediste.salta.standard.util.Accessibility;
+import com.github.ruediste.salta.core.CompiledFunction;
+import com.github.ruediste.salta.core.CompiledSupplier;
+import com.github.ruediste.salta.core.CoreInjector;
+import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.compile.ClassCompilationContext.FieldEntry;
 
 public class RecipeCompiler {
 	private static final AtomicInteger instanceCounter = new AtomicInteger();
@@ -55,30 +56,24 @@ public class RecipeCompiler {
 	 * {@link CoreInjector#recipeLock} or {@link CoreInjector#instantiationLock}
 	 */
 	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
-		RecipeCompilationContextImpl ctx = new RecipeCompilationContextImpl(
-				this);
+		ClassCompilationContext ccc = setupClazz(CompiledSupplier.class);
+		ccc.addMethod(ACC_PUBLIC, "get", "()Ljava/lang/Object;", null,
+				new MethodRecipe() {
 
-		setupClazz(ctx, CompiledSupplier.class);
+					@Override
+					protected void compileImpl(GeneratorAdapter mv,
+							MethodCompilationContext ctx) {
 
-		// compile method
-		MethodNode m = new MethodNode(ACC_PUBLIC, "get",
-				"()Ljava/lang/Object;", null, null);
-		ctx.clazz.methods.add(m);
-		GeneratorAdapter mv = new GeneratorAdapter(m.access, new Method(m.name,
-				m.desc), m);
-		ctx.mv = mv;
-		mv.visitCode();
+						Class<?> producedType = recipe.compile(ctx);
 
-		Class<?> producedType = recipe.compile(ctx);
+						if (producedType.isPrimitive())
+							mv.box(Type.getType(producedType));
 
-		if (producedType.isPrimitive())
-			mv.box(Type.getType(producedType));
+						mv.visitInsn(ARETURN);
+					}
+				});
 
-		mv.visitInsn(ARETURN);
-		mv.visitMaxs(0, 0);
-		mv.visitEnd();
-
-		return (CompiledSupplier) loadAndInstantiate(ctx);
+		return (CompiledSupplier) loadAndInstantiate(ccc);
 	}
 
 	/**
@@ -87,43 +82,42 @@ public class RecipeCompiler {
 	 * {@link CoreInjector#instantiationLock}
 	 */
 	public CompiledFunction compileFunction(FunctionRecipe recipe) {
-		RecipeCompilationContextImpl ctx = new RecipeCompilationContextImpl(
-				this);
 
-		setupClazz(ctx, CompiledFunction.class);
+		ClassCompilationContext ccc = setupClazz(CompiledFunction.class);
+		ccc.addMethod(ACC_PUBLIC, "get",
+				"(Ljava/lang/Object;)Ljava/lang/Object;", null,
+				new MethodRecipe() {
 
-		// compile method
-		MethodNode m = new MethodNode(ACC_PUBLIC, "get",
-				"(Ljava/lang/Object;)Ljava/lang/Object;", null, null);
-		ctx.clazz.methods.add(m);
-		GeneratorAdapter mv = new GeneratorAdapter(m.access, new Method(m.name,
-				m.desc), m);
-		ctx.mv = mv;
-		mv.visitCode();
-		mv.loadArg(0);
+					@Override
+					protected void compileImpl(GeneratorAdapter mv,
+							MethodCompilationContext ctx) {
 
-		Class<?> producedType = recipe.compile(Object.class, ctx);
+						mv.loadArg(0);
 
-		if (producedType.isPrimitive())
-			mv.box(Type.getType(producedType));
+						Class<?> producedType = recipe.compile(Object.class,
+								ctx);
 
-		mv.visitInsn(ARETURN);
-		mv.visitMaxs(0, 0);
-		mv.visitEnd();
+						if (producedType.isPrimitive())
+							mv.box(Type.getType(producedType));
 
-		return (CompiledFunction) loadAndInstantiate(ctx);
+						mv.visitInsn(ARETURN);
+					}
+				});
+
+		return (CompiledFunction) loadAndInstantiate(ccc);
 	}
 
-	private Object loadAndInstantiate(RecipeCompilationContextImpl ctx) {
+	private Object loadAndInstantiate(ClassCompilationContext ctx) {
 		// generate bytecode
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-		ctx.clazz.accept(cw);
+		ctx.getClazz().accept(cw);
 
 		// load and instantiate
 		Object instance;
 		Class<?> cls;
 		byte[] bb = cw.toByteArray();
-		String className = Type.getObjectType(ctx.clazz.name).getClassName();
+		String className = Type.getObjectType(ctx.getClazz().name)
+				.getClassName();
 
 		// try {
 		// Files.write(bb, new File("target/compiledRecipes/" + ctx.clazz.name
@@ -175,11 +169,9 @@ public class RecipeCompiler {
 		return instance;
 	}
 
-	private void setupClazz(RecipeCompilationContextImpl ctx,
-			Class<?> implementedInterface) {
+	private ClassCompilationContext setupClazz(Class<?> implementedInterface) {
 		// setup clazz
 		ClassNode clazz = new ClassNode();
-		ctx.clazz = clazz;
 		clazz.name = "salta/CompiledCreationRecipe" + instanceNr + "_"
 				+ classNumber.incrementAndGet();
 		clazz.access = ACC_FINAL & ACC_PUBLIC & ACC_SYNTHETIC;
@@ -189,6 +181,8 @@ public class RecipeCompiler {
 
 		// generate constructor
 		generateConstructor(clazz);
+
+		return new ClassCompilationContext(clazz, this);
 	}
 
 	private void generateConstructor(ClassVisitor cw) {
@@ -210,38 +204,4 @@ public class RecipeCompiler {
 		mv.visitEnd();
 	}
 
-	/**
-	 * see {@link RecipeCompilationContext#castToPublic(Class, Class)}
-	 */
-	public Class<?> castToPublic(GeneratorAdapter mv, Class<?> from, Class<?> to) {
-		if (!Accessibility.isClassPublic(to))
-			to = Object.class;
-
-		if (from.equals(to))
-			return to;
-
-		if (from.isPrimitive() && to.isPrimitive()) {
-			// two primitives which are not equal
-			// fall throught to throw
-		} else if (from.isPrimitive()) {
-			if (!to.isArray() && !to.isPrimitive()) {
-				// primitive to object
-				mv.box(Type.getType(from));
-				return to;
-			}
-		} else if (to.isPrimitive()) {
-			if (!from.isArray()) {
-				// any to primitive
-				mv.unbox(Type.getType(to));
-				return to;
-			}
-		} else {
-			if (!to.isAssignableFrom(from)) {
-				// downcast
-				mv.checkCast(Type.getType(to));
-			}
-			return to;
-		}
-		throw new SaltaException("Cannot cast from " + from + " to " + to);
-	}
 }

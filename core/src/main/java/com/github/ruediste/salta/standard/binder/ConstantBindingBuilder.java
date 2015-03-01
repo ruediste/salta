@@ -3,9 +3,9 @@ package com.github.ruediste.salta.standard.binder;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
@@ -46,7 +46,7 @@ public class ConstantBindingBuilder {
 					@SuppressWarnings({ "unchecked", "rawtypes" })
 					@Override
 					public Class<?> compileImpl(GeneratorAdapter mv,
-							RecipeCompilationContext compilationContext) {
+							MethodCompilationContext compilationContext) {
 						compilationContext.addFieldAndLoad((Class) cls, value);
 						return cls;
 					}

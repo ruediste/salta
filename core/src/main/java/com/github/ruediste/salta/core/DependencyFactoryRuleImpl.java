@@ -3,6 +3,8 @@ package com.github.ruediste.salta.core;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.matchers.Matcher;
 
 /**

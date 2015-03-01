@@ -7,9 +7,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 /**
  * {@link RecipeInjectorListener} implementation accepting various strategy
@@ -50,7 +50,7 @@ public class RecipeInjectorListenerImpl implements RecipeInjectionListener {
 	}
 
 	@Override
-	public Class<?> compile(RecipeCompilationContext compilationContext,
+	public Class<?> compile(MethodCompilationContext compilationContext,
 			SupplierRecipe innerRecipe) {
 		GeneratorAdapter mv = compilationContext.getMv();
 		if (listener != null) {

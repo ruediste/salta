@@ -4,10 +4,10 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -48,7 +48,7 @@ public abstract class ProvidedByInstantiatorRuleBase implements
 
 				@Override
 				public Class<?> compileImpl(GeneratorAdapter mv,
-						RecipeCompilationContext compilationContext) {
+						MethodCompilationContext compilationContext) {
 					recipe.compile(compilationContext);
 					Method method;
 					try {

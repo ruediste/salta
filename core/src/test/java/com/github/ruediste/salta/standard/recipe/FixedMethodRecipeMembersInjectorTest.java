@@ -14,10 +14,10 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.InjectionStrategy;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
-import com.github.ruediste.salta.core.RecipeCompiler;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.RecipeCompiler;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Stage;
@@ -193,9 +193,9 @@ public class FixedMethodRecipeMembersInjectorTest {
 		private GeneratorAdapter mv;
 		private InjectionStrategy strategy;
 		String m;
-		private RecipeCompilationContext ctx;
+		private MethodCompilationContext ctx;
 
-		public Builder(GeneratorAdapter mv, RecipeCompilationContext ctx,
+		public Builder(GeneratorAdapter mv, MethodCompilationContext ctx,
 				String m, InjectionStrategy strategy) {
 			this.mv = mv;
 			this.ctx = ctx;
@@ -220,7 +220,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 				@Override
 				protected Class<?> compileImpl(GeneratorAdapter mv,
-						RecipeCompilationContext ctx) {
+						MethodCompilationContext ctx) {
 					arg.compile(ctx);
 					mv.visitMethodInsn(
 							INVOKESTATIC,
@@ -238,7 +238,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 				@Override
 				protected Class<?> compileImpl(GeneratorAdapter mv,
-						RecipeCompilationContext ctx) {
+						MethodCompilationContext ctx) {
 					mv.visitMethodInsn(
 							INVOKESTATIC,
 							"com/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$Helper",
@@ -256,7 +256,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 				@Override
 				protected Class<?> compileImpl(GeneratorAdapter mv,
-						RecipeCompilationContext ctx) {
+						MethodCompilationContext ctx) {
 					mv.visitMethodInsn(
 							INVOKESTATIC,
 							"com/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$Helper",
@@ -272,7 +272,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 				@Override
 				protected Class<?> compileImpl(GeneratorAdapter mv,
-						RecipeCompilationContext ctx) {
+						MethodCompilationContext ctx) {
 					mv.push(1);
 					return int.class;
 				}
@@ -284,7 +284,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 				@Override
 				protected Class<?> compileImpl(GeneratorAdapter mv,
-						RecipeCompilationContext ctx) {
+						MethodCompilationContext ctx) {
 					mv.push(1);
 					mv.box(Type.getType(int.class));
 					return Integer.class;
@@ -297,7 +297,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 				@Override
 				protected Class<?> compileImpl(GeneratorAdapter mv,
-						RecipeCompilationContext ctx) {
+						MethodCompilationContext ctx) {
 					mv.push(1.2);
 					return double.class;
 				}
@@ -309,7 +309,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 				@Override
 				protected Class<?> compileImpl(GeneratorAdapter mv,
-						RecipeCompilationContext ctx) {
+						MethodCompilationContext ctx) {
 					mv.push(1.2);
 					mv.box(Type.getType(double.class));
 					return Double.class;
@@ -341,7 +341,7 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 			@Override
 			protected Class<?> compileImpl(GeneratorAdapter mv,
-					RecipeCompilationContext ctx) {
+					MethodCompilationContext ctx) {
 
 				Builder b = new Builder(mv, ctx, m, strategy);
 

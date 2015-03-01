@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.core.compile;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -19,7 +19,7 @@ public abstract class FunctionRecipe {
 	 * 
 	 */
 	public final Class<?> compile(Class<?> argumentType,
-			RecipeCompilationContext ctx) {
+			MethodCompilationContext ctx) {
 		return compileImpl(argumentType, ctx.getMv(), ctx);
 	}
 
@@ -34,5 +34,5 @@ public abstract class FunctionRecipe {
 	 * 
 	 */
 	protected abstract Class<?> compileImpl(Class<?> argumentType,
-			GeneratorAdapter mv, RecipeCompilationContext ctx);
+			GeneratorAdapter mv, MethodCompilationContext ctx);
 }

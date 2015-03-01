@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.core.compile;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -7,6 +7,16 @@ import org.objectweb.asm.commons.GeneratorAdapter;
  */
 public abstract class SupplierRecipe {
 
+	private final int sizeThreshold;
+
+	public SupplierRecipe() {
+		this(64000); // leave some extra space
+	}
+
+	public SupplierRecipe(int sizeThreshold) {
+		this.sizeThreshold = sizeThreshold;
+	}
+
 	/**
 	 * Emit the code to produce the supplied instance, which needs to be placed
 	 * on the top of the stack. Generally, there is an implicit expected type
@@ -14,12 +24,12 @@ public abstract class SupplierRecipe {
 	 * expected type, since this is often not possible due to types which are
 	 * not visible from the compiled recipe. The caller of compile has to allow
 	 * for all typecasts which are performed by
-	 * {@link RecipeCompilationContext#castToPublic(Class, Class)}.
+	 * {@link MethodCompilationContext#castToPublic(Class, Class)}.
 	 * 
 	 * @return type of the supplied instance
 	 * 
 	 */
-	public final Class<?> compile(RecipeCompilationContext ctx) {
+	public final Class<?> compile(MethodCompilationContext ctx) {
 		return compileImpl(ctx.getMv(), ctx);
 	}
 
@@ -31,5 +41,5 @@ public abstract class SupplierRecipe {
 	 * 
 	 */
 	protected abstract Class<?> compileImpl(GeneratorAdapter mv,
-			RecipeCompilationContext ctx);
+			MethodCompilationContext ctx);
 }

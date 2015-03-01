@@ -1,5 +1,8 @@
 package com.github.ruediste.salta.core;
 
+import com.github.ruediste.salta.core.compile.RecipeCompiler;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
+
 
 public interface RecipeCreationContext {
 

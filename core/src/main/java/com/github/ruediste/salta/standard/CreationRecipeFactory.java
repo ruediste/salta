@@ -1,7 +1,7 @@
 package com.github.ruediste.salta.standard;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 /**
  * Factory to create {@link SupplierRecipe}s. Used by

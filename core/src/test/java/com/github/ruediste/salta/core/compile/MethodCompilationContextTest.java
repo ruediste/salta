@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.core.compile;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,89 +7,18 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.standard.util.Accessibility;
 
-public class RecipeCompilerTest {
+public class MethodCompilationContextTest {
 
 	private RecipeCompiler compiler;
 
 	@Before
 	public void setup() {
 		compiler = new RecipeCompiler();
-	}
-
-	@Test
-	public void testObjectSupplier() throws Throwable {
-		SupplierRecipe recipe = new SupplierRecipe() {
-
-			@Override
-			protected Class<?> compileImpl(GeneratorAdapter mv,
-					RecipeCompilationContext ctx) {
-				mv.visitInsn(Opcodes.ICONST_3);
-				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer",
-						"valueOf", "(I)Ljava/lang/Integer;", false);
-				return Integer.class;
-			}
-
-		};
-
-		assertEquals(3, compiler.compileSupplier(recipe).get());
-	}
-
-	@Test
-	public void testPrimitiveSupplier() throws Throwable {
-		SupplierRecipe recipe = new SupplierRecipe() {
-
-			@Override
-			protected Class<?> compileImpl(GeneratorAdapter mv,
-					RecipeCompilationContext ctx) {
-				mv.visitInsn(Opcodes.ICONST_3);
-				return int.class;
-			}
-
-		};
-
-		assertEquals(3, compiler.compileSupplier(recipe).get());
-	}
-
-	@Test
-	public void testObjectFunction() throws Throwable {
-		FunctionRecipe recipe = new FunctionRecipe() {
-
-			@Override
-			protected Class<?> compileImpl(Class<?> argType,
-					GeneratorAdapter mv, RecipeCompilationContext ctx) {
-				mv.pop();
-				mv.visitInsn(Opcodes.ICONST_3);
-				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer",
-						"valueOf", "(I)Ljava/lang/Integer;", false);
-				return Integer.class;
-			}
-
-		};
-
-		assertEquals(3, compiler.compileFunction(recipe).get(5));
-	}
-
-	@Test
-	public void testPrimitiveFunction() throws Throwable {
-		FunctionRecipe recipe = new FunctionRecipe() {
-
-			@Override
-			protected Class<?> compileImpl(Class<?> argType,
-					GeneratorAdapter mv, RecipeCompilationContext ctx) {
-				mv.pop();
-				mv.visitInsn(Opcodes.ICONST_3);
-				return int.class;
-			}
-
-		};
-
-		assertEquals(3, compiler.compileFunction(recipe).get(5));
 	}
 
 	public static class CastTestHelper {
@@ -123,7 +52,7 @@ public class RecipeCompilerTest {
 
 			@Override
 			protected Class<?> compileImpl(Class<?> argType,
-					GeneratorAdapter mv, RecipeCompilationContext ctx) {
+					GeneratorAdapter mv, MethodCompilationContext ctx) {
 				// primitive to boxed
 				mv.push(4);
 				ctx.castToPublic(int.class, Integer.class);
@@ -168,40 +97,35 @@ public class RecipeCompilerTest {
 			}
 
 			protected void acceptArray(GeneratorAdapter mv) {
-				mv.visitMethodInsn(
-						INVOKESTATIC,
-						"com/github/ruediste/salta/core/RecipeCompilerTest$CastTestHelper",
+				mv.visitMethodInsn(INVOKESTATIC,
+						Type.getInternalName(CastTestHelper.class),
 						"acceptArray", "([Ljava/lang/Object;)V", false);
 			}
 
 			protected void toInteger(GeneratorAdapter mv) {
-				mv.visitMethodInsn(
-						INVOKESTATIC,
-						"com/github/ruediste/salta/core/RecipeCompilerTest$CastTestHelper",
+				mv.visitMethodInsn(INVOKESTATIC,
+						Type.getInternalName(CastTestHelper.class),
 						"toInteger",
 						"(Ljava/lang/Integer;)Ljava/lang/Integer;", false);
 			}
 
 			protected void acceptInt(GeneratorAdapter mv) {
-				mv.visitMethodInsn(
-						INVOKESTATIC,
-						"com/github/ruediste/salta/core/RecipeCompilerTest$CastTestHelper",
+				mv.visitMethodInsn(INVOKESTATIC,
+						Type.getInternalName(CastTestHelper.class),
 						"acceptInt", "(I)V", false);
 			}
 
 			protected void toObject(GeneratorAdapter mv) {
-				mv.visitMethodInsn(
-						INVOKESTATIC,
-						"com/github/ruediste/salta/core/RecipeCompilerTest$CastTestHelper",
-						"toObject", "(Ljava/lang/Object;)Ljava/lang/Object;",
-						false);
+				mv.visitMethodInsn(INVOKESTATIC,
+						Type.getInternalName(CastTestHelper.class), "toObject",
+						"(Ljava/lang/Object;)Ljava/lang/Object;", false);
 			}
 
 			protected void acceptInteger(GeneratorAdapter mv) {
-				mv.visitMethodInsn(
-						INVOKESTATIC,
-						"com/github/ruediste/salta/core/RecipeCompilerTest$CastTestHelper",
-						"acceptInteger", "(Ljava/lang/Integer;)V", false);
+				mv.visitMethodInsn(INVOKESTATIC,
+
+				Type.getInternalName(CastTestHelper.class), "acceptInteger",
+						"(Ljava/lang/Integer;)V", false);
 			}
 
 		};

@@ -1,12 +1,13 @@
 package com.github.ruediste.salta.standard.recipe;
 
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
-import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantCallSite;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 
 import org.objectweb.asm.Handle;
@@ -15,8 +16,9 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import com.github.ruediste.salta.core.InjectionStrategy;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.MethodRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
@@ -36,7 +38,7 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 
 	@Override
 	public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext) {
+			MethodCompilationContext compilationContext) {
 		if (Accessibility.isFieldPublic(field)) {
 			return compileDirect(argType, mv, compilationContext);
 		}
@@ -51,7 +53,7 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 	}
 
 	protected Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
-			RecipeCompilationContext ctx) {
+			MethodCompilationContext ctx) {
 		argType = ctx.castToPublic(argType, field.getDeclaringClass());
 		mv.dup();
 		{
@@ -66,7 +68,7 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 	}
 
 	protected Class<?> compileReflection(Class<?> argType, GeneratorAdapter mv,
-			RecipeCompilationContext compilationContext) {
+			MethodCompilationContext compilationContext) {
 		mv.dup();
 		compilationContext.addFieldAndLoad(Field.class, field);
 		mv.swap();
@@ -79,7 +81,7 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 	}
 
 	protected Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
-			RecipeCompilationContext ctx) {
+			MethodCompilationContext ctx) {
 
 		// cast receiver
 		argType = ctx.castToPublic(argType, field.getDeclaringClass());
@@ -92,29 +94,49 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 			valueType = Type.getType(ctx.castToPublic(t, field.getType()));
 		}
 
-		// set field
-		Handle bsm = new Handle(
-				H_INVOKESTATIC,
-				Type.getInternalName(getClass()),
-				"bootstrap",
-				"(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/invoke/CallSite;");
+		String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;";
+		String bootstrapName = ctx.getClassCtx().addMethod(
+				ACC_PRIVATE + ACC_STATIC, bootstrapDesc, null,
+				new MethodRecipe() {
 
-		mv.invokeDynamic("field", Type.getMethodDescriptor(
-				Type.getType(void.class), Type.getType(argType), valueType),
-				bsm, field.getDeclaringClass().getName(), field.getName());
+					@Override
+					protected void compileImpl(GeneratorAdapter mv,
+							MethodCompilationContext ctx) {
+						mv.newInstance(Type.getType(ConstantCallSite.class));
+						mv.dup();
+
+						mv.loadArg(0);
+						ctx.addFieldAndLoad(Field.class, field);
+
+						mv.visitMethodInsn(
+								INVOKEVIRTUAL,
+								"java/lang/invoke/MethodHandles$Lookup",
+								"unreflectSetter",
+								"(Ljava/lang/reflect/Field;)Ljava/lang/invoke/MethodHandle;",
+								false);
+						mv.loadArg(2);
+						mv.visitMethodInsn(
+								INVOKEVIRTUAL,
+								"java/lang/invoke/MethodHandle",
+								"asType",
+								"(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+								false);
+						mv.visitMethodInsn(INVOKESPECIAL,
+								"java/lang/invoke/ConstantCallSite", "<init>",
+								"(Ljava/lang/invoke/MethodHandle;)V", false);
+						mv.visitInsn(ARETURN);
+					}
+				});
+
+		// set field
+		Handle bsm = new Handle(H_INVOKESTATIC, ctx.getClassCtx()
+				.getInternalClassName(), bootstrapName, bootstrapDesc);
+
+		mv.invokeDynamic(
+				"field",
+				Type.getMethodDescriptor(Type.getType(void.class),
+						Type.getType(argType), valueType), bsm);
 		return argType;
 	}
 
-	public static CallSite bootstrap(MethodHandles.Lookup dummy, String name,
-			MethodType stackType, String declaringClassName, String fieldName)
-			throws Exception {
-		ClassLoader loader = dummy.lookupClass().getClassLoader();
-
-		Class<?> declaringClass = loader.loadClass(declaringClassName);
-
-		MethodHandle method = UnrestrictedLookupHolder.lookup
-				.unreflectSetter(declaringClass.getDeclaredField(fieldName));
-
-		return new ConstantCallSite(method.asType(stackType));
-	}
 }

@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.core.compile;
 
 public class FieldHandle {
 	FieldHandle(Class<?> type, String name) {

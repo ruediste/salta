@@ -9,10 +9,10 @@ import org.objectweb.asm.commons.Method;
 
 import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -59,7 +59,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 
 			@Override
 			public Class<?> compileImpl(GeneratorAdapter mv,
-					RecipeCompilationContext compilationContext) {
+					MethodCompilationContext compilationContext) {
 				compilationContext
 						.addFieldAndLoad(ProviderImpl.class, provider);
 				mv.invokeVirtual(Type.getType(ProviderImpl.class),
@@ -154,7 +154,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 
 					@Override
 					public Class<?> compileImpl(GeneratorAdapter mv,
-							RecipeCompilationContext compilationContext) {
+							MethodCompilationContext compilationContext) {
 						Class<? super T> cls = data.boundType.getRawType();
 						compilationContext.addFieldAndLoad(cls, injected);
 						return cls;
@@ -182,7 +182,7 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 
 					@Override
 					public Class<Object> compileImpl(GeneratorAdapter mv,
-							RecipeCompilationContext compilationContext) {
+							MethodCompilationContext compilationContext) {
 						compilationContext.addFieldAndLoad(
 								InstanceProvider.class, injected);
 						mv.invokeInterface(

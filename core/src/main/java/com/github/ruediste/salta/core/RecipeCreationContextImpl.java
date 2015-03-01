@@ -5,6 +5,9 @@ import static java.util.stream.Collectors.joining;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+import com.github.ruediste.salta.core.compile.RecipeCompiler;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
+
 /**
  * Contains the bindings which are currently beeing constructed and is used for
  * circular dependency detection.

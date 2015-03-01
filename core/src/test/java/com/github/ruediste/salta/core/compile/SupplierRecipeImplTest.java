@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.core;
+package com.github.ruediste.salta.core.compile;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,6 +9,9 @@ import org.junit.Test;
 
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.Salta;
+import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.DependencyFactoryRule;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.standard.Injector;
 

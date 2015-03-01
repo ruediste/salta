@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import com.github.ruediste.salta.core.compile.FunctionRecipe;
+import com.github.ruediste.salta.core.compile.RecipeCompiler;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;

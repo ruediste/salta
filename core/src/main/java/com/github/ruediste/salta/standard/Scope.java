@@ -2,7 +2,7 @@ package com.github.ruediste.salta.standard;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.google.common.reflect.TypeToken;
 
 /**

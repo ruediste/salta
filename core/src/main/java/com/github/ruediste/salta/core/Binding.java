@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.core;
 
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 /**
  * Base class for bindings

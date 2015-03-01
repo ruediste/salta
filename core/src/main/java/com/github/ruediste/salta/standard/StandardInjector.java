@@ -13,10 +13,10 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import com.github.ruediste.salta.core.CompiledFunction;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
-import com.github.ruediste.salta.core.FunctionRecipe;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.compile.FunctionRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.google.common.reflect.TypeToken;
@@ -125,7 +125,7 @@ public class StandardInjector implements Injector {
 
 					@Override
 					protected Class<?> compileImpl(Class<?> argumentType,
-							GeneratorAdapter mv, RecipeCompilationContext ctx) {
+							GeneratorAdapter mv, MethodCompilationContext ctx) {
 						for (RecipeMembersInjector rmi : injectors) {
 							argumentType = rmi.compile(argumentType, ctx);
 						}

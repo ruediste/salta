@@ -10,10 +10,10 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.DependencyFactoryRule;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.InjectionPoint;
@@ -105,7 +105,7 @@ public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
 
 		@Override
 		public Class<?> compileImpl(GeneratorAdapter mv,
-				RecipeCompilationContext compilationContext) {
+				MethodCompilationContext compilationContext) {
 
 			compilationContext.addFieldAndLoad(providerType, wrappedProvider);
 			return providerType;

@@ -9,7 +9,7 @@ import java.util.List;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.recipe.FixedFieldRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeMembersInjector;

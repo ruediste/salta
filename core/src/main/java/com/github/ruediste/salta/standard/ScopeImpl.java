@@ -8,9 +8,9 @@ import org.objectweb.asm.commons.Method;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CompiledSupplier;
-import com.github.ruediste.salta.core.RecipeCompilationContext;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.google.common.reflect.TypeToken;
 
 public class ScopeImpl implements Scope {
@@ -49,7 +49,7 @@ public class ScopeImpl implements Scope {
 
 			@Override
 			protected Class<?> compileImpl(GeneratorAdapter mv,
-					RecipeCompilationContext ctx) {
+					MethodCompilationContext ctx) {
 				ctx.addFieldAndLoad(Supplier.class, scoped);
 				mv.invokeInterface(Type.getType(Supplier.class),
 						Method.getMethod("Object get("));
