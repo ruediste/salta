@@ -110,10 +110,6 @@ public class MethodCompilationContext {
 		}
 	}
 
-	public RecipeCompiler getCompiler() {
-		return getClassCtx().getCompiler();
-	}
-
 	public ClassCompilationContext getClassCtx() {
 		return classCtx;
 	}

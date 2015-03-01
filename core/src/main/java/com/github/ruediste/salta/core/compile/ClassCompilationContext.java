@@ -30,11 +30,8 @@ public class ClassCompilationContext {
 
 	private int methodNr;
 
-	private final RecipeCompiler compiler;
-
-	public ClassCompilationContext(ClassNode clazz, RecipeCompiler compiler) {
+	public ClassCompilationContext(ClassNode clazz) {
 		this.clazz = clazz;
-		this.compiler = compiler;
 	}
 
 	public <T> FieldHandle addField(Class<T> fieldType, T value) {
@@ -51,10 +48,6 @@ public class ClassCompilationContext {
 
 	public void queueAction(Runnable runnable) {
 		queuedActions.add(runnable);
-	}
-
-	public RecipeCompiler getCompiler() {
-		return compiler;
 	}
 
 	/**

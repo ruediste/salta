@@ -2,6 +2,7 @@ package com.github.ruediste.salta.core.compile;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -22,6 +23,7 @@ public class SupplierRecipeTest {
 	}
 
 	@Test
+	@Ignore
 	public void testMethodSplit() throws Throwable {
 		SupplierRecipe innerNameRecipe = new SupplierRecipe() {
 

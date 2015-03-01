@@ -102,28 +102,42 @@ public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
 					@Override
 					protected void compileImpl(GeneratorAdapter mv,
 							MethodCompilationContext ctx) {
+						// start constructing the constant CallSite to be
+						// returned
 						mv.newInstance(Type.getType(ConstantCallSite.class));
 						mv.dup();
 
+						// load the lookup
 						mv.loadArg(0);
+
+						// load the field
 						ctx.addFieldAndLoad(Field.class, field);
 
+						// unreflect
 						mv.visitMethodInsn(
 								INVOKEVIRTUAL,
 								"java/lang/invoke/MethodHandles$Lookup",
 								"unreflectSetter",
 								"(Ljava/lang/reflect/Field;)Ljava/lang/invoke/MethodHandle;",
 								false);
+
+						// load the target method type
 						mv.loadArg(2);
+
+						// asType
 						mv.visitMethodInsn(
 								INVOKEVIRTUAL,
 								"java/lang/invoke/MethodHandle",
 								"asType",
 								"(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
 								false);
+
+						// invoke the constructor of the callsite
 						mv.visitMethodInsn(INVOKESPECIAL,
 								"java/lang/invoke/ConstantCallSite", "<init>",
 								"(Ljava/lang/invoke/MethodHandle;)V", false);
+
+						// return
 						mv.visitInsn(ARETURN);
 					}
 				});

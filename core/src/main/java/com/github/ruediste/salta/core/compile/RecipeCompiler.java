@@ -182,7 +182,7 @@ public class RecipeCompiler {
 		// generate constructor
 		generateConstructor(clazz);
 
-		return new ClassCompilationContext(clazz, this);
+		return new ClassCompilationContext(clazz);
 	}
 
 	private void generateConstructor(ClassVisitor cw) {
