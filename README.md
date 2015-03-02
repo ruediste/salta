@@ -1,14 +1,25 @@
 # Salta Dependency Injection Framework
 
- * Familiar: API very similar to Guice
- * Fast: more than 10 times faster than Guice
- * Flexible: customize API, Annotations, Behaviour ...
+ * Familiar: same configuration API as Guice, similar concepts
+ * Fast: fast startup, fast object instantiation
+ * Flexible: customize API, annotations, behaviour ...
  
-A dependency injection framework inspired by [Guice](https://github.com/google/guice). The configuration EDSL is copied almost 1-1, but the inner workings are completely different.
 
 ** PASSES JSR330 (javax.inject) Technology Compatibility Kit (TCK) **
 
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+## Familiar
+To make things easy for developers, the configuration API of Salta was copied from Guice (without the SPI). The concepts of modules, bindings, JIT bindings and scopes was taken over as well. Thus, if you know Guice, the learning curve is very gentle.
+
+The only truly new concept added is the DependencyFactoryRule, used to construct injection point specific instances.
+
+## Fast
+To start big applications fast, Salta was designed to allow most bindings to be constructed just in time (JIT). This is enabled by allowing applications to customize the JIT binding process. Care has been taken to make sure the order in which the JIT bindings are constructed can not affect the outcome.
+
+To instantiate objects fast, Salta relies heavily on bytecode generation. The results are impressive: benchmarks show speedups of up to 10,000x over Guice. 
+
+Bytecode generation does not lead to slow startup speed. We found speedups around 2x over Guice.
 
 ## Design Overview
 Salta was created as a response to shortcomings of (JavaEE CDI)[http://docs.oracle.com/javaee/6/tutorial/doc/giwhl.html], (Guice)[https://github.com/google/guice] and Spring.
