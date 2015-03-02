@@ -15,13 +15,28 @@ To make things easy for developers, the configuration API of Salta was copied fr
 The only truly new concept added is the DependencyFactoryRule, used to construct injection point specific instances.
 
 ## Fast
-To start big applications fast, Salta was designed to allow most bindings to be constructed just in time (JIT). This is enabled by allowing applications to customize the JIT binding process. Care has been taken to make sure the order in which the JIT bindings are constructed can not affect the outcome.
+To start big applications fast, Salta avoids processing all available classes during startup. Instead, bindings are constructed just in time (JIT) as they are needed. The creation of JIT bindings is fully customizable.
 
-To instantiate objects fast, Salta relies heavily on bytecode generation. The results are impressive: benchmarks show speedups of up to 10,000x over Guice. 
+Care has been taken to make sure the order in which the JIT bindings are constructed can not affect the outcome. Otherwise, different runs of your program would lead to different objects beeing injected.
 
-Bytecode generation does not lead to slow startup speed. We found speedups around 2x over Guice.
+To instantiate objects fast, Salta relies heavily on bytecode generation, resulting in a speedup between 10x and 30x over Guice. 
 
-## Design Overview
+Bytecode generation does not lead to slow startup speed. Salta is consistently slightly faster than Guice.
+
+## Flexible
+Salta has been designed from ground up to be flexible:
+
+ * customize JIT bindings
+ * customize injection points
+ * no fixed annotations
+ * injection point specific instances
+ * custom scopes
+
+Read the design overview for details
+
+## Motivation
+
+
 Salta was created as a response to shortcomings of (JavaEE CDI)[http://docs.oracle.com/javaee/6/tutorial/doc/giwhl.html], (Guice)[https://github.com/google/guice] and Spring.
 
 In CDI, the set of available beans (the counterpart of bindings in Guice) is determined when the container is initialized and cannot be changed afterwards. This implies that the available classes are scanned during startup, which results in slow startup for large applications.
@@ -54,37 +69,212 @@ In the TREE workload, each class depends on 10 other classes, except for the lea
 
 The dependencies are injected using constructors, methods or fields. Also, the visibility of the constructors, members or field is varied  between public, package, protected and private.
 
+Results for depth 2:
+
+	Benchmark             (injection)  (injectionStrategy)  (visibility)   Mode  Cnt     Score     Error   Units
+	GuiceThroughput.bind       METHOD                  N/A        PUBLIC  thrpt   10    53.184 ±   6.731  ops/ms
+	GuiceThroughput.bind       METHOD                  N/A       PACKAGE  thrpt   10    57.722 ±  11.749  ops/ms
+	GuiceThroughput.bind       METHOD                  N/A     PROTECTED  thrpt   10    42.947 ±   7.769  ops/ms
+	GuiceThroughput.bind       METHOD                  N/A       PRIVATE  thrpt   10    42.335 ±   1.574  ops/ms
+	GuiceThroughput.bind  CONSTRUCTOR                  N/A        PUBLIC  thrpt   10    92.924 ±   5.277  ops/ms
+	GuiceThroughput.bind  CONSTRUCTOR                  N/A       PACKAGE  thrpt   10    90.212 ±   5.215  ops/ms
+	GuiceThroughput.bind  CONSTRUCTOR                  N/A     PROTECTED  thrpt   10    88.682 ±   7.160  ops/ms
+	GuiceThroughput.bind  CONSTRUCTOR                  N/A       PRIVATE  thrpt   10    88.897 ±   7.693  ops/ms
+	GuiceThroughput.bind        FIELD                  N/A        PUBLIC  thrpt   10    77.193 ±   3.523  ops/ms
+	GuiceThroughput.bind        FIELD                  N/A       PACKAGE  thrpt   10    78.591 ±   4.018  ops/ms
+	GuiceThroughput.bind        FIELD                  N/A     PROTECTED  thrpt   10    75.793 ±   4.034  ops/ms
+	GuiceThroughput.bind        FIELD                  N/A       PRIVATE  thrpt   10    73.640 ±   4.110  ops/ms
+	GuiceThroughput.jit        METHOD                  N/A        PUBLIC  thrpt   10    54.414 ±   2.358  ops/ms
+	GuiceThroughput.jit        METHOD                  N/A       PACKAGE  thrpt   10    57.505 ±   3.006  ops/ms
+	GuiceThroughput.jit        METHOD                  N/A     PROTECTED  thrpt   10    49.273 ±   1.467  ops/ms
+	GuiceThroughput.jit        METHOD                  N/A       PRIVATE  thrpt   10    47.958 ±   1.929  ops/ms
+	GuiceThroughput.jit   CONSTRUCTOR                  N/A        PUBLIC  thrpt   10    93.431 ±   4.727  ops/ms
+	GuiceThroughput.jit   CONSTRUCTOR                  N/A       PACKAGE  thrpt   10    89.629 ±   4.934  ops/ms
+	GuiceThroughput.jit   CONSTRUCTOR                  N/A     PROTECTED  thrpt   10    91.943 ±   4.721  ops/ms
+	GuiceThroughput.jit   CONSTRUCTOR                  N/A       PRIVATE  thrpt   10    93.124 ±   5.506  ops/ms
+	GuiceThroughput.jit         FIELD                  N/A        PUBLIC  thrpt   10    70.436 ±   4.835  ops/ms
+	GuiceThroughput.jit         FIELD                  N/A       PACKAGE  thrpt   10    70.497 ±   4.924  ops/ms
+	GuiceThroughput.jit         FIELD                  N/A     PROTECTED  thrpt   10    76.393 ±   4.242  ops/ms
+	GuiceThroughput.jit         FIELD                  N/A       PRIVATE  thrpt   10    78.330 ±   3.377  ops/ms
+	SaltaThroughput.bind       METHOD       INVOKE_DYNAMIC        PUBLIC  thrpt   10  3048.985 ± 100.539  ops/ms
+	SaltaThroughput.bind       METHOD       INVOKE_DYNAMIC       PACKAGE  thrpt   10   903.226 ±  64.969  ops/ms
+	SaltaThroughput.bind       METHOD       INVOKE_DYNAMIC     PROTECTED  thrpt   10  1042.216 ±  94.632  ops/ms
+	SaltaThroughput.bind       METHOD       INVOKE_DYNAMIC       PRIVATE  thrpt   10  3012.583 ±  87.397  ops/ms
+	SaltaThroughput.bind  CONSTRUCTOR       INVOKE_DYNAMIC        PUBLIC  thrpt   10  2848.874 ± 117.853  ops/ms
+	SaltaThroughput.bind  CONSTRUCTOR       INVOKE_DYNAMIC       PACKAGE  thrpt   10  3029.303 ±  18.151  ops/ms
+	SaltaThroughput.bind  CONSTRUCTOR       INVOKE_DYNAMIC     PROTECTED  thrpt   10  3028.243 ±  57.548  ops/ms
+	SaltaThroughput.bind  CONSTRUCTOR       INVOKE_DYNAMIC       PRIVATE  thrpt   10  3025.744 ±  98.660  ops/ms
+	SaltaThroughput.bind        FIELD       INVOKE_DYNAMIC        PUBLIC  thrpt   10  3035.663 ±  64.943  ops/ms
+	SaltaThroughput.bind        FIELD       INVOKE_DYNAMIC       PACKAGE  thrpt   10  3054.545 ±  53.454  ops/ms
+	SaltaThroughput.bind        FIELD       INVOKE_DYNAMIC     PROTECTED  thrpt   10  2981.779 ± 130.167  ops/ms
+	SaltaThroughput.bind        FIELD       INVOKE_DYNAMIC       PRIVATE  thrpt   10  3059.706 ±  55.114  ops/ms
+	SaltaThroughput.jit        METHOD       INVOKE_DYNAMIC        PUBLIC  thrpt   10  3049.825 ±  81.149  ops/ms
+	SaltaThroughput.jit        METHOD       INVOKE_DYNAMIC       PACKAGE  thrpt   10  1128.279 ±  33.087  ops/ms
+	SaltaThroughput.jit        METHOD       INVOKE_DYNAMIC     PROTECTED  thrpt   10  1184.837 ±  34.339  ops/ms
+	SaltaThroughput.jit        METHOD       INVOKE_DYNAMIC       PRIVATE  thrpt   10  3075.690 ±  59.745  ops/ms
+	SaltaThroughput.jit   CONSTRUCTOR       INVOKE_DYNAMIC        PUBLIC  thrpt   10  2839.472 ±  80.464  ops/ms
+	SaltaThroughput.jit   CONSTRUCTOR       INVOKE_DYNAMIC       PACKAGE  thrpt   10  2998.377 ± 163.368  ops/ms
+	SaltaThroughput.jit   CONSTRUCTOR       INVOKE_DYNAMIC     PROTECTED  thrpt   10  3042.142 ±  69.207  ops/ms
+	SaltaThroughput.jit   CONSTRUCTOR       INVOKE_DYNAMIC       PRIVATE  thrpt   10  3002.486 ± 110.543  ops/ms
+	SaltaThroughput.jit         FIELD       INVOKE_DYNAMIC        PUBLIC  thrpt   10  3080.668 ±  63.787  ops/ms
+	SaltaThroughput.jit         FIELD       INVOKE_DYNAMIC       PACKAGE  thrpt   10  3015.873 ±  71.816  ops/ms
+	SaltaThroughput.jit         FIELD       INVOKE_DYNAMIC     PROTECTED  thrpt   10  3037.711 ± 106.141  ops/ms
+	SaltaThroughput.jit         FIELD       INVOKE_DYNAMIC       PRIVATE  thrpt   10  3003.920 ±  93.435  ops/ms
+	GuiceStartup.bind          METHOD                  N/A        PUBLIC     ss   10   358.216 ±  23.827   ms/op
+	GuiceStartup.bind          METHOD                  N/A       PACKAGE     ss   10   359.387 ±  40.800   ms/op
+	GuiceStartup.bind          METHOD                  N/A     PROTECTED     ss   10   348.555 ±  40.878   ms/op
+	GuiceStartup.bind          METHOD                  N/A       PRIVATE     ss   10   367.173 ±  50.680   ms/op
+	GuiceStartup.bind     CONSTRUCTOR                  N/A        PUBLIC     ss   10   351.889 ±  62.540   ms/op
+	GuiceStartup.bind     CONSTRUCTOR                  N/A       PACKAGE     ss   10   352.236 ±  48.189   ms/op
+	GuiceStartup.bind     CONSTRUCTOR                  N/A     PROTECTED     ss   10   343.481 ±  40.639   ms/op
+	GuiceStartup.bind     CONSTRUCTOR                  N/A       PRIVATE     ss   10   335.248 ±  36.823   ms/op
+	GuiceStartup.bind           FIELD                  N/A        PUBLIC     ss   10   338.567 ±  20.255   ms/op
+	GuiceStartup.bind           FIELD                  N/A       PACKAGE     ss   10   336.423 ±  16.747   ms/op
+	GuiceStartup.bind           FIELD                  N/A     PROTECTED     ss   10   339.697 ±  20.447   ms/op
+	GuiceStartup.bind           FIELD                  N/A       PRIVATE     ss   10   337.982 ±  19.924   ms/op
+	GuiceStartup.jit           METHOD                  N/A        PUBLIC     ss   10   334.513 ±  46.532   ms/op
+	GuiceStartup.jit           METHOD                  N/A       PACKAGE     ss   10   317.212 ±  15.614   ms/op
+	GuiceStartup.jit           METHOD                  N/A     PROTECTED     ss   10   309.336 ±   5.360   ms/op
+	GuiceStartup.jit           METHOD                  N/A       PRIVATE     ss   10   341.251 ±  51.933   ms/op
+	GuiceStartup.jit      CONSTRUCTOR                  N/A        PUBLIC     ss   10   305.092 ±  19.580   ms/op
+	GuiceStartup.jit      CONSTRUCTOR                  N/A       PACKAGE     ss   10   301.760 ±  23.552   ms/op
+	GuiceStartup.jit      CONSTRUCTOR                  N/A     PROTECTED     ss   10   307.548 ±  39.367   ms/op
+	GuiceStartup.jit      CONSTRUCTOR                  N/A       PRIVATE     ss   10   302.733 ±  33.245   ms/op
+	GuiceStartup.jit            FIELD                  N/A        PUBLIC     ss   10   316.570 ±  35.833   ms/op
+	GuiceStartup.jit            FIELD                  N/A       PACKAGE     ss   10   316.428 ±  36.766   ms/op
+	GuiceStartup.jit            FIELD                  N/A     PROTECTED     ss   10   315.988 ±  22.807   ms/op
+	GuiceStartup.jit            FIELD                  N/A       PRIVATE     ss   10   312.055 ±  16.903   ms/op
+	SaltaStartup.bind          METHOD       INVOKE_DYNAMIC        PUBLIC     ss   10   244.098 ±   4.140   ms/op
+	SaltaStartup.bind          METHOD       INVOKE_DYNAMIC       PACKAGE     ss   10   267.972 ±   4.982   ms/op
+	SaltaStartup.bind          METHOD       INVOKE_DYNAMIC     PROTECTED     ss   10   282.769 ±  47.659   ms/op
+	SaltaStartup.bind          METHOD       INVOKE_DYNAMIC       PRIVATE     ss   10   274.330 ±  28.069   ms/op
+	SaltaStartup.bind     CONSTRUCTOR       INVOKE_DYNAMIC        PUBLIC     ss   10   253.096 ±  42.339   ms/op
+	SaltaStartup.bind     CONSTRUCTOR       INVOKE_DYNAMIC       PACKAGE     ss   10   253.762 ±  27.383   ms/op
+	SaltaStartup.bind     CONSTRUCTOR       INVOKE_DYNAMIC     PROTECTED     ss   10   249.430 ±  29.511   ms/op
+	SaltaStartup.bind     CONSTRUCTOR       INVOKE_DYNAMIC       PRIVATE     ss   10   244.278 ±  14.867   ms/op
+	SaltaStartup.bind           FIELD       INVOKE_DYNAMIC        PUBLIC     ss   10   250.114 ±  31.275   ms/op
+	SaltaStartup.bind           FIELD       INVOKE_DYNAMIC       PACKAGE     ss   10   280.167 ±  24.375   ms/op
+	SaltaStartup.bind           FIELD       INVOKE_DYNAMIC     PROTECTED     ss   10   272.376 ±  11.333   ms/op
+	SaltaStartup.bind           FIELD       INVOKE_DYNAMIC       PRIVATE     ss   10   282.349 ±  33.898   ms/op
+	SaltaStartup.jit           METHOD       INVOKE_DYNAMIC        PUBLIC     ss   10   222.079 ±  34.384   ms/op
+	SaltaStartup.jit           METHOD       INVOKE_DYNAMIC       PACKAGE     ss   10   243.439 ±  15.716   ms/op
+	SaltaStartup.jit           METHOD       INVOKE_DYNAMIC     PROTECTED     ss   10   249.619 ±  39.985   ms/op
+	SaltaStartup.jit           METHOD       INVOKE_DYNAMIC       PRIVATE     ss   10   237.482 ±   3.935   ms/op
+	SaltaStartup.jit      CONSTRUCTOR       INVOKE_DYNAMIC        PUBLIC     ss   10   206.111 ±  10.626   ms/op
+	SaltaStartup.jit      CONSTRUCTOR       INVOKE_DYNAMIC       PACKAGE     ss   10   217.669 ±  34.528   ms/op
+	SaltaStartup.jit      CONSTRUCTOR       INVOKE_DYNAMIC     PROTECTED     ss   10   223.562 ±  29.698   ms/op
+	SaltaStartup.jit      CONSTRUCTOR       INVOKE_DYNAMIC       PRIVATE     ss   10   212.704 ±   9.092   ms/op
+	SaltaStartup.jit            FIELD       INVOKE_DYNAMIC        PUBLIC     ss   10   212.101 ±   3.093   ms/op
+	SaltaStartup.jit            FIELD       INVOKE_DYNAMIC       PACKAGE     ss   10   240.993 ±  10.611   ms/op
+	SaltaStartup.jit            FIELD       INVOKE_DYNAMIC     PROTECTED     ss   10   241.824 ±  14.351   ms/op
+	SaltaStartup.jit            FIELD       INVOKE_DYNAMIC       PRIVATE     ss   10   237.888 ±   2.738   ms/op
+
+
+Results for depth 3:
+
+	Benchmark             (injection)  (injectionStrategy)  (visibility)   Mode  Cnt     Score     Error   Units
+	GuiceThroughput.bind       METHOD                  N/A        PUBLIC  thrpt   10     1.441 ±   0.830  ops/ms
+	GuiceThroughput.bind       METHOD                  N/A       PACKAGE  thrpt   10     1.079 ±   0.553  ops/ms
+	GuiceThroughput.bind       METHOD                  N/A     PROTECTED  thrpt   10     0.761 ±   0.308  ops/ms
+	GuiceThroughput.bind       METHOD                  N/A       PRIVATE  thrpt   10     0.584 ±   0.169  ops/ms
+	GuiceThroughput.bind  CONSTRUCTOR                  N/A        PUBLIC  thrpt   10     2.027 ±   1.685  ops/ms
+	GuiceThroughput.bind  CONSTRUCTOR                  N/A       PACKAGE  thrpt   10     3.441 ±   0.851  ops/ms
+	GuiceThroughput.bind  CONSTRUCTOR                  N/A     PROTECTED  thrpt   10     3.290 ±   0.953  ops/ms
+	GuiceThroughput.bind  CONSTRUCTOR                  N/A       PRIVATE  thrpt   10     3.745 ±   0.802  ops/ms
+	GuiceThroughput.bind        FIELD                  N/A        PUBLIC  thrpt   10     4.323 ±   0.323  ops/ms
+	GuiceThroughput.bind        FIELD                  N/A       PACKAGE  thrpt   10     3.313 ±   1.805  ops/ms
+	GuiceThroughput.bind        FIELD                  N/A     PROTECTED  thrpt   10     2.067 ±   2.185  ops/ms
+	GuiceThroughput.bind        FIELD                  N/A       PRIVATE  thrpt   10     3.440 ±   1.514  ops/ms
+	GuiceThroughput.jit        METHOD                  N/A        PUBLIC  thrpt   10     2.632 ±   1.268  ops/ms
+	GuiceThroughput.jit        METHOD                  N/A       PACKAGE  thrpt   10     1.924 ±   1.143  ops/ms
+	GuiceThroughput.jit        METHOD                  N/A     PROTECTED  thrpt   10     0.656 ±   0.058  ops/ms
+	GuiceThroughput.jit        METHOD                  N/A       PRIVATE  thrpt   10     0.601 ±   0.042  ops/ms
+	GuiceThroughput.jit   CONSTRUCTOR                  N/A        PUBLIC  thrpt   10     4.134 ±   0.252  ops/ms
+	GuiceThroughput.jit   CONSTRUCTOR                  N/A       PACKAGE  thrpt   10     3.933 ±   0.606  ops/ms
+	GuiceThroughput.jit   CONSTRUCTOR                  N/A     PROTECTED  thrpt   10     4.870 ±   0.520  ops/ms
+	GuiceThroughput.jit   CONSTRUCTOR                  N/A       PRIVATE  thrpt   10     4.429 ±   0.359  ops/ms
+	GuiceThroughput.jit         FIELD                  N/A        PUBLIC  thrpt   10     4.470 ±   0.145  ops/ms
+	GuiceThroughput.jit         FIELD                  N/A       PACKAGE  thrpt   10     4.539 ±   0.265  ops/ms
+	GuiceThroughput.jit         FIELD                  N/A     PROTECTED  thrpt   10     4.536 ±   0.213  ops/ms
+	GuiceThroughput.jit         FIELD                  N/A       PRIVATE  thrpt   10     4.620 ±   0.137  ops/ms
+	SaltaThroughput.bind       METHOD       INVOKE_DYNAMIC        PUBLIC  thrpt   10   112.334 ±   6.029  ops/ms
+	SaltaThroughput.bind       METHOD       INVOKE_DYNAMIC       PACKAGE  thrpt   10    25.024 ±   1.506  ops/ms
+	SaltaThroughput.bind       METHOD       INVOKE_DYNAMIC     PROTECTED  thrpt   10    24.583 ±   1.572  ops/ms
+	SaltaThroughput.bind       METHOD       INVOKE_DYNAMIC       PRIVATE  thrpt   10   112.376 ±  16.587  ops/ms
+	SaltaThroughput.bind  CONSTRUCTOR       INVOKE_DYNAMIC        PUBLIC  thrpt   10   109.658 ±  10.594  ops/ms
+	SaltaThroughput.bind  CONSTRUCTOR       INVOKE_DYNAMIC       PACKAGE  thrpt   10    16.563 ±   0.801  ops/ms
+	SaltaThroughput.bind  CONSTRUCTOR       INVOKE_DYNAMIC     PROTECTED  thrpt   10    16.761 ±   0.989  ops/ms
+	SaltaThroughput.bind  CONSTRUCTOR       INVOKE_DYNAMIC       PRIVATE  thrpt   10    16.653 ±   1.187  ops/ms
+	SaltaThroughput.bind        FIELD       INVOKE_DYNAMIC        PUBLIC  thrpt   10   115.231 ±   8.711  ops/ms
+	SaltaThroughput.bind        FIELD       INVOKE_DYNAMIC       PACKAGE  thrpt   10   104.815 ±   8.318  ops/ms
+	SaltaThroughput.bind        FIELD       INVOKE_DYNAMIC     PROTECTED  thrpt   10    98.038 ±  15.843  ops/ms
+	SaltaThroughput.bind        FIELD       INVOKE_DYNAMIC       PRIVATE  thrpt   10   105.113 ±  12.261  ops/ms
+	SaltaThroughput.jit        METHOD       INVOKE_DYNAMIC        PUBLIC  thrpt   10   116.963 ±   6.660  ops/ms
+	SaltaThroughput.jit        METHOD       INVOKE_DYNAMIC       PACKAGE  thrpt   10    24.803 ±   1.447  ops/ms
+	SaltaThroughput.jit        METHOD       INVOKE_DYNAMIC     PROTECTED  thrpt   10    24.589 ±   1.893  ops/ms
+	SaltaThroughput.jit        METHOD       INVOKE_DYNAMIC       PRIVATE  thrpt   10   113.449 ±  11.013  ops/ms
+	SaltaThroughput.jit   CONSTRUCTOR       INVOKE_DYNAMIC        PUBLIC  thrpt   10   114.136 ±  17.200  ops/ms
+	SaltaThroughput.jit   CONSTRUCTOR       INVOKE_DYNAMIC       PACKAGE  thrpt   10    16.312 ±   1.363  ops/ms
+	SaltaThroughput.jit   CONSTRUCTOR       INVOKE_DYNAMIC     PROTECTED  thrpt   10    16.584 ±   0.909  ops/ms
+	SaltaThroughput.jit   CONSTRUCTOR       INVOKE_DYNAMIC       PRIVATE  thrpt   10    16.474 ±   1.909  ops/ms
+	SaltaThroughput.jit         FIELD       INVOKE_DYNAMIC        PUBLIC  thrpt   10   116.995 ±   9.138  ops/ms
+	SaltaThroughput.jit         FIELD       INVOKE_DYNAMIC       PACKAGE  thrpt   10   103.238 ±  12.611  ops/ms
+	SaltaThroughput.jit         FIELD       INVOKE_DYNAMIC     PROTECTED  thrpt   10   101.769 ±  11.408  ops/ms
+	SaltaThroughput.jit         FIELD       INVOKE_DYNAMIC       PRIVATE  thrpt   10   101.720 ±  11.210  ops/ms
+	GuiceStartup.bind          METHOD                  N/A        PUBLIC     ss   10  1424.984 ± 199.287   ms/op
+	GuiceStartup.bind          METHOD                  N/A       PACKAGE     ss   10  1408.609 ± 156.808   ms/op
+	GuiceStartup.bind          METHOD                  N/A     PROTECTED     ss   10  1348.665 ± 156.429   ms/op
+	GuiceStartup.bind          METHOD                  N/A       PRIVATE     ss   10  1378.556 ± 222.143   ms/op
+	GuiceStartup.bind     CONSTRUCTOR                  N/A        PUBLIC     ss   10  1293.249 ± 118.633   ms/op
+	GuiceStartup.bind     CONSTRUCTOR                  N/A       PACKAGE     ss   10  1229.740 ± 129.589   ms/op
+	GuiceStartup.bind     CONSTRUCTOR                  N/A     PROTECTED     ss   10  1226.714 ± 149.464   ms/op
+	GuiceStartup.bind     CONSTRUCTOR                  N/A       PRIVATE     ss   10  1245.763 ± 148.923   ms/op
+	GuiceStartup.bind           FIELD                  N/A        PUBLIC     ss   10  1323.059 ± 181.396   ms/op
+	GuiceStartup.bind           FIELD                  N/A       PACKAGE     ss   10  1324.281 ± 152.359   ms/op
+	GuiceStartup.bind           FIELD                  N/A     PROTECTED     ss   10  1313.831 ± 181.921   ms/op
+	GuiceStartup.bind           FIELD                  N/A       PRIVATE     ss   10  1306.492 ± 136.248   ms/op
+	GuiceStartup.jit           METHOD                  N/A        PUBLIC     ss   10  1195.295 ± 149.547   ms/op
+	GuiceStartup.jit           METHOD                  N/A       PACKAGE     ss   10  1181.128 ± 150.931   ms/op
+	GuiceStartup.jit           METHOD                  N/A     PROTECTED     ss   10  1150.795 ± 138.435   ms/op
+	GuiceStartup.jit           METHOD                  N/A       PRIVATE     ss   10  1123.502 ± 147.460   ms/op
+	GuiceStartup.jit      CONSTRUCTOR                  N/A        PUBLIC     ss   10  1156.548 ± 189.550   ms/op
+	GuiceStartup.jit      CONSTRUCTOR                  N/A       PACKAGE     ss   10  1036.281 ± 129.667   ms/op
+	GuiceStartup.jit      CONSTRUCTOR                  N/A     PROTECTED     ss   10  1051.352 ± 207.313   ms/op
+	GuiceStartup.jit      CONSTRUCTOR                  N/A       PRIVATE     ss   10  1019.603 ± 122.556   ms/op
+	GuiceStartup.jit            FIELD                  N/A        PUBLIC     ss   10  1138.938 ± 144.106   ms/op
+	GuiceStartup.jit            FIELD                  N/A       PACKAGE     ss   10  1207.385 ± 170.160   ms/op
+	GuiceStartup.jit            FIELD                  N/A     PROTECTED     ss   10  1170.451 ± 185.066   ms/op
+	GuiceStartup.jit            FIELD                  N/A       PRIVATE     ss   10  1079.846 ±  96.166   ms/op
+	SaltaStartup.bind          METHOD       INVOKE_DYNAMIC        PUBLIC     ss   10   818.334 ±  83.920   ms/op
+	SaltaStartup.bind          METHOD       INVOKE_DYNAMIC       PACKAGE     ss   10  1025.007 ± 128.748   ms/op
+	SaltaStartup.bind          METHOD       INVOKE_DYNAMIC     PROTECTED     ss   10   936.887 ±  62.735   ms/op
+	SaltaStartup.bind          METHOD       INVOKE_DYNAMIC       PRIVATE     ss   10  1002.986 ± 125.853   ms/op
+	SaltaStartup.bind     CONSTRUCTOR       INVOKE_DYNAMIC        PUBLIC     ss   10   728.705 ±  81.118   ms/op
+	SaltaStartup.bind     CONSTRUCTOR       INVOKE_DYNAMIC       PACKAGE     ss   10   765.831 ±  63.270   ms/op
+	SaltaStartup.bind     CONSTRUCTOR       INVOKE_DYNAMIC     PROTECTED     ss   10   764.783 ±  64.112   ms/op
+	SaltaStartup.bind     CONSTRUCTOR       INVOKE_DYNAMIC       PRIVATE     ss   10   795.655 ±  74.401   ms/op
+	SaltaStartup.bind           FIELD       INVOKE_DYNAMIC        PUBLIC     ss   10   788.857 ±  88.863   ms/op
+	SaltaStartup.bind           FIELD       INVOKE_DYNAMIC       PACKAGE     ss   10   939.460 ±  77.122   ms/op
+	SaltaStartup.bind           FIELD       INVOKE_DYNAMIC     PROTECTED     ss   10   959.246 ±  43.071   ms/op
+	SaltaStartup.bind           FIELD       INVOKE_DYNAMIC       PRIVATE     ss   10   946.486 ± 120.487   ms/op
+	SaltaStartup.jit           METHOD       INVOKE_DYNAMIC        PUBLIC     ss   10   626.760 ±  56.768   ms/op
+	SaltaStartup.jit           METHOD       INVOKE_DYNAMIC       PACKAGE     ss   10   811.133 ±  76.751   ms/op
+	SaltaStartup.jit           METHOD       INVOKE_DYNAMIC     PROTECTED     ss   10   834.650 ±  97.316   ms/op
+	SaltaStartup.jit           METHOD       INVOKE_DYNAMIC       PRIVATE     ss   10   796.690 ±  92.045   ms/op
+	SaltaStartup.jit      CONSTRUCTOR       INVOKE_DYNAMIC        PUBLIC     ss   10   561.121 ±  61.557   ms/op
+	SaltaStartup.jit      CONSTRUCTOR       INVOKE_DYNAMIC       PACKAGE     ss   10   588.689 ±  67.639   ms/op
+	SaltaStartup.jit      CONSTRUCTOR       INVOKE_DYNAMIC     PROTECTED     ss   10   593.523 ±  44.894   ms/op
+	SaltaStartup.jit      CONSTRUCTOR       INVOKE_DYNAMIC       PRIVATE     ss   10   597.534 ±  76.979   ms/op
+	SaltaStartup.jit            FIELD       INVOKE_DYNAMIC        PUBLIC     ss   10   610.428 ±  98.353   ms/op
+	SaltaStartup.jit            FIELD       INVOKE_DYNAMIC       PACKAGE     ss   10   824.820 ±  72.068   ms/op
+	SaltaStartup.jit            FIELD       INVOKE_DYNAMIC     PROTECTED     ss   10   754.061 ±  43.541   ms/op
+	SaltaStartup.jit            FIELD       INVOKE_DYNAMIC       PRIVATE     ss   10   785.188 ± 102.295   ms/op
+
 Results for depth 4:
 	
-	Benchmark                (injection)  (visibility)   Mode  Cnt     Score      Error   Units
-	GuiceThroughput.measure       METHOD        PUBLIC  thrpt   10     0.066 ±    0.009  ops/ms
-	GuiceThroughput.measure       METHOD       PACKAGE  thrpt   10     0.061 ±    0.012  ops/ms
-	GuiceThroughput.measure       METHOD     PROTECTED  thrpt   10     0.050 ±    0.001  ops/ms
-	GuiceThroughput.measure       METHOD       PRIVATE  thrpt   10     0.050 ±    0.001  ops/ms
-	GuiceThroughput.measure  CONSTRUCTOR        PUBLIC  thrpt   10     0.098 ±    0.004  ops/ms
-	GuiceThroughput.measure  CONSTRUCTOR       PACKAGE  thrpt   10     0.089 ±    0.003  ops/ms
-	GuiceThroughput.measure  CONSTRUCTOR     PROTECTED  thrpt   10     0.083 ±    0.017  ops/ms
-	GuiceThroughput.measure  CONSTRUCTOR       PRIVATE  thrpt   10     0.092 ±    0.002  ops/ms
-	GuiceThroughput.measure        FIELD        PUBLIC  thrpt   10     0.082 ±    0.002  ops/ms
-	GuiceThroughput.measure        FIELD       PACKAGE  thrpt   10     0.083 ±    0.002  ops/ms
-	GuiceThroughput.measure        FIELD     PROTECTED  thrpt   10     0.084 ±    0.006  ops/ms
-	GuiceThroughput.measure        FIELD       PRIVATE  thrpt   10     0.084 ±    0.003  ops/ms
-	GuiceStartup.measure          METHOD        PUBLIC     ss   10  8442.462 ±  439.050   ms/op
-	GuiceStartup.measure          METHOD       PACKAGE     ss   10  8079.176 ±  499.078   ms/op
-	GuiceStartup.measure          METHOD     PROTECTED     ss   10  7821.022 ±  258.310   ms/op
-	GuiceStartup.measure          METHOD       PRIVATE     ss   10  7914.901 ±  513.936   ms/op
-	GuiceStartup.measure     CONSTRUCTOR        PUBLIC     ss   10  7641.369 ±  538.386   ms/op
-	GuiceStartup.measure     CONSTRUCTOR       PACKAGE     ss   10  7060.088 ±  533.836   ms/op
-	GuiceStartup.measure     CONSTRUCTOR     PROTECTED     ss   10  7327.997 ±  817.067   ms/op
-	GuiceStartup.measure     CONSTRUCTOR       PRIVATE     ss   10  6729.250 ±  306.703   ms/op
-	GuiceStartup.measure           FIELD        PUBLIC     ss   10  7710.462 ± 1505.247   ms/op
-	GuiceStartup.measure           FIELD       PACKAGE     ss   10  8589.887 ± 1938.777   ms/op
-	GuiceStartup.measure           FIELD     PROTECTED     ss   10  7470.670 ±  251.739   ms/op
-	GuiceStartup.measure           FIELD       PRIVATE     ss   10  7216.927 ±  315.699   ms/op
-
 
 ## Bindings
-Bindings are a central element of SimpleDI. 
+Bindings are a central element of Salta. 
 
 First, if a binding itself is requested again by a dependency while resolving the binding, we call it a circular dependency. We do not allow circular dependencies due to predictability issues. See further down. 
 
