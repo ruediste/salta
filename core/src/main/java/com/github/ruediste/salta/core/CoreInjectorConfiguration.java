@@ -16,7 +16,7 @@ public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
 	/**
 	 * Rules to instantiate dependencies without bindings
 	 */
-	public final List<DependencyFactoryRule> creationRules = new ArrayList<>();
+	public final List<CreationRule> creationRules = new ArrayList<>();
 
 	/**
 	 * Statically defined bindings

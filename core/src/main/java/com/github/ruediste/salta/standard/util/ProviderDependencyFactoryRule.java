@@ -9,7 +9,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.DependencyFactoryRule;
+import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
@@ -20,7 +20,7 @@ import com.github.ruediste.salta.standard.InjectionPoint;
 import com.google.common.reflect.TypeToken;
 
 /**
- * Base class for {@link DependencyFactoryRule}s which match some sort of
+ * Base class for {@link CreationRule}s which match some sort of
  * Provider (as in javax.inject.Provider).
  * 
  * <p>
@@ -31,7 +31,7 @@ import com.google.common.reflect.TypeToken;
  * {@link Supplier}.
  * </p>
  */
-public class ProviderDependencyFactoryRule implements DependencyFactoryRule {
+public class ProviderDependencyFactoryRule implements CreationRule {
 
 	private Matcher<? super CoreDependencyKey<?>> matcher;
 	private BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper;

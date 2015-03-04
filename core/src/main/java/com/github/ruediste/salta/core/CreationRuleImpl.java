@@ -8,16 +8,16 @@ import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.matchers.Matcher;
 
 /**
- * Implementation of {@link DependencyFactoryRule} delegating to a
+ * Implementation of {@link CreationRule} delegating to a
  * {@link Function} and a {@link Matcher}
  * 
  */
-public class DependencyFactoryRuleImpl implements DependencyFactoryRule {
+public class CreationRuleImpl implements CreationRule {
 
 	private Function<CoreDependencyKey<?>, Supplier<Object>> supplierFactory;
 	private Matcher<? super CoreDependencyKey<?>> matcher;
 
-	public DependencyFactoryRuleImpl(
+	public CreationRuleImpl(
 			Matcher<? super CoreDependencyKey<?>> matcher,
 			Function<CoreDependencyKey<?>, Supplier<Object>> supplierFactory) {
 		this.matcher = matcher;

@@ -4,7 +4,7 @@ import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 /**
- * Base class for bindings
+ * Base class for {@link StaticBinding}s and {@link JITBinding}s.
  */
 public abstract class Binding extends AttachedPropertyBearerBase {
 
@@ -22,7 +22,7 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 
 	/**
 	 * Create the {@link CreationRecipe} for this binding if it does not exist
-	 * yet. If the binding is already present, the passed context will be
+	 * yet. If the binding is already created, the passed context will be
 	 * ignored. This method is always called with the
 	 * {@link CoreInjector#recipeLock} held, thus no thread synchronization is
 	 * needed

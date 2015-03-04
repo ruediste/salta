@@ -188,7 +188,7 @@ public class CoreInjector {
 			RecipeCreationContext ctx) {
 		try {
 			// check rules
-			for (DependencyFactoryRule rule : config.creationRules) {
+			for (CreationRule rule : config.creationRules) {
 				SupplierRecipe recipe = rule.apply(key, ctx);
 				if (recipe != null)
 					return recipe;

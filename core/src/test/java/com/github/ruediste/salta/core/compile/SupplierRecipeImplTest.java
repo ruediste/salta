@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.DependencyFactoryRule;
+import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.standard.Injector;
@@ -26,7 +26,7 @@ public class SupplierRecipeImplTest {
 			@Override
 			protected void configure() {
 				binder().getConfiguration().config.creationRules
-						.add(new DependencyFactoryRule() {
+						.add(new CreationRule() {
 
 							@Override
 							public SupplierRecipe apply(

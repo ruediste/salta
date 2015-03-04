@@ -10,8 +10,8 @@ import java.util.List;
 
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.DependencyFactoryRule;
-import com.github.ruediste.salta.core.DependencyFactoryRuleImpl;
+import com.github.ruediste.salta.core.CreationRule;
+import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -53,7 +53,7 @@ public class GuiceModule extends AbstractModule {
 
 		StandardInjectorConfiguration config = binder().getConfiguration();
 
-		config.config.creationRules.add(new DependencyFactoryRule() {
+		config.config.creationRules.add(new CreationRule() {
 
 			@Override
 			public SupplierRecipe apply(CoreDependencyKey<?> key,
@@ -86,7 +86,7 @@ public class GuiceModule extends AbstractModule {
 
 		// Rule for type literals
 		config.config.creationRules
-				.add(new DependencyFactoryRuleImpl(
+				.add(new CreationRuleImpl(
 						k -> TypeLiteral.class.equals(k.getRawType()),
 						key -> {
 							TypeToken<?> type = key.getType();

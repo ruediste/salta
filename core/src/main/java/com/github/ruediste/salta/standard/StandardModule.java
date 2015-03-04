@@ -5,7 +5,7 @@ import java.lang.annotation.Annotation;
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.DependencyFactoryRuleImpl;
+import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.JITBinding;
 import com.github.ruediste.salta.core.JITBindingKey;
 import com.github.ruediste.salta.core.JITBindingKeyRule;
@@ -30,7 +30,7 @@ public class StandardModule extends AbstractModule {
 		StandardInjectorConfiguration config = binder().getConfiguration();
 
 		// stage creation rule
-		config.config.creationRules.add(new DependencyFactoryRuleImpl(
+		config.config.creationRules.add(new CreationRuleImpl(
 				key -> Stage.class.equals(key.getRawType()),
 				key -> () -> config.stage));
 

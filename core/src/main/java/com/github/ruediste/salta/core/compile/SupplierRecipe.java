@@ -20,7 +20,7 @@ public abstract class SupplierRecipe {
 	private Class<?> returnType;
 
 	public SupplierRecipe() {
-		this(4000); // leave some extra space
+		this(7000); // leave some extra space
 	}
 
 	public SupplierRecipe(int sizeThreshold) {
