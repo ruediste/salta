@@ -29,12 +29,35 @@ public class GuiceInjectorImpl implements Injector {
 
 	@Override
 	public <T> Provider<T> getProvider(Key<T> key) {
-		return delegate.getProvider(new KeyAdapter<>(key))::get;
+		javax.inject.Provider<T> provider = delegate
+				.getProvider(new KeyAdapter<>(key));
+		return new Provider<T>() {
+			@Override
+			public T get() {
+				return provider.get();
+			}
+
+			@Override
+			public String toString() {
+				return provider.toString();
+			}
+		};
 	}
 
 	@Override
 	public <T> Provider<T> getProvider(Class<T> type) {
-		return delegate.getProvider(type)::get;
+		javax.inject.Provider<T> provider = delegate.getProvider(type);
+		return new Provider<T>() {
+			@Override
+			public T get() {
+				return provider.get();
+			}
+
+			@Override
+			public String toString() {
+				return provider.toString();
+			}
+		};
 	}
 
 	@Override
@@ -62,6 +85,11 @@ public class GuiceInjectorImpl implements Injector {
 	public <T> Binding<T> getBinding(Class<T> type) {
 
 		return new BindingImpl<>(Key.get(type), getProvider(type));
+	}
+
+	@Override
+	public com.github.ruediste.salta.standard.Injector getSaltaInjector() {
+		return delegate;
 	}
 
 }

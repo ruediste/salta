@@ -3,7 +3,6 @@ package com.github.ruediste.salta.core;
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
-
 public interface RecipeCreationContext {
 
 	SupplierRecipe getRecipe(CoreDependencyKey<?> dependency);
@@ -15,4 +14,9 @@ public interface RecipeCreationContext {
 	RecipeCompiler getCompiler();
 
 	void queueAction(Runnable action);
+
+	/**
+	 * get {@link CoreInjector#recipeLock}
+	 */
+	Object getRecipeLock();
 }

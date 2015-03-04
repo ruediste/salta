@@ -72,7 +72,6 @@ public class StandardInjector implements Injector {
 					return getDeclaredAnnotations();
 				}
 
-				@SuppressWarnings("unchecked")
 				@Override
 				public <A extends Annotation> A getAnnotation(
 						Class<A> annotationClass) {
@@ -95,7 +94,7 @@ public class StandardInjector implements Injector {
 		public T get() {
 			checkInitialized();
 			if (supplier == null) {
-				synchronized (coreInjector.recipeLockHolder.get()) {
+				synchronized (coreInjector.recipeLock) {
 					if (supplier == null)
 						supplier = coreInjector.getInstanceSupplier(key);
 				}
@@ -115,7 +114,7 @@ public class StandardInjector implements Injector {
 
 		public MembersInjectorImpl(TypeToken<T> type) {
 			this.type = type;
-			synchronized (coreInjector.recipeLockHolder.get()) {
+			synchronized (coreInjector.recipeLock) {
 				RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
 						coreInjector);
 				List<RecipeMembersInjector> injectors = config

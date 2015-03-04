@@ -23,71 +23,66 @@ import junit.framework.TestCase;
  */
 public class EagerSingletonTest extends TestCase {
 
-  @Override public void setUp() {
-    A.instanceCount = 0;
-    B.instanceCount = 0;
-    C.instanceCount = 0;
-  }
+	@Override
+	public void setUp() {
+		A.instanceCount = 0;
+		B.instanceCount = 0;
+		C.instanceCount = 0;
+	}
 
-  public void testJustInTimeEagerSingletons() {
-    Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
-      protected void configure() {
-        // create a just-in-time binding for A
-        getProvider(A.class);
+	public void testJustInTimeEagerSingletons() {
+		Guice.createInjector(Stage.PRODUCTION, new AbstractModule() {
+			@Override
+			protected void configure() {
+				// create a just-in-time binding for A
+				getProvider(A.class);
 
-        // create a just-in-time binding for C
-        requestInjection(new Object() {
-          @Inject void inject(Injector injector) {
-            injector.getInstance(C.class);
-          }
-        });
-      }
-    });
+				// create a just-in-time binding for C
+				requestInjection(new Object() {
+					@Inject
+					void inject(Injector injector) {
+						injector.getInstance(C.class);
+					}
+				});
+			}
+		});
 
-    assertEquals(1, A.instanceCount);
-    assertEquals("Singletons discovered when creating singletons should not be built eagerly",
-        0, B.instanceCount);
-    assertEquals(1, C.instanceCount);
-  }
+		assertEquals(1, A.instanceCount);
+		assertEquals(
+				"Singletons discovered when creating singletons should not be built eagerly",
+				0, B.instanceCount);
+		assertEquals(1, C.instanceCount);
+	}
 
-  public void testJustInTimeSingletonsAreNotEager() {
-    Injector injector = Guice.createInjector(Stage.PRODUCTION);
-    injector.getProvider(B.class);
-    assertEquals(0, B.instanceCount);
-  }
+	public void testJustInTimeSingletonsAreNotEager() {
+		Injector injector = Guice.createInjector(Stage.PRODUCTION);
+		injector.getProvider(B.class);
+		assertEquals(0, B.instanceCount);
+	}
 
-  public void testChildEagerSingletons() {
-    Injector parent = Guice.createInjector(Stage.PRODUCTION);
-    parent.createChildInjector(new AbstractModule() {
-      @Override protected void configure() {
-        bind(D.class).to(C.class);
-      }
-    });
+	@Singleton
+	static class A {
+		static int instanceCount = 0;
+		int instanceId = instanceCount++;
 
-    assertEquals(1, C.instanceCount);
-  }
+		@Inject
+		A(Injector injector) {
+			injector.getProvider(B.class);
+		}
+	}
 
-  @Singleton
-  static class A {
-    static int instanceCount = 0;
-    int instanceId = instanceCount++;
+	@Singleton
+	static class B {
+		static int instanceCount = 0;
+		int instanceId = instanceCount++;
+	}
 
-    @Inject A(Injector injector) {
-      injector.getProvider(B.class);
-    }
-  }
+	@Singleton
+	static class C implements D {
+		static int instanceCount = 0;
+		int instanceId = instanceCount++;
+	}
 
-  @Singleton
-  static class B {
-    static int instanceCount = 0;
-    int instanceId = instanceCount++;
-  }
-
-  @Singleton
-  static class C implements D {
-    static int instanceCount = 0;
-    int instanceId = instanceCount++;
-  }
-
-  private static interface D {}
+	private static interface D {
+	}
 }

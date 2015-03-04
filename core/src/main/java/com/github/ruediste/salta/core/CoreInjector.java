@@ -18,27 +18,9 @@ import com.google.common.reflect.TypeToken;
 public class CoreInjector {
 
 	/**
-	 * Lock object used during instantiation.
+	 * Lock object for recipe creation and compilation.
 	 */
-	public final Object instantiationLock = new Object();
-
-	/**
-	 * Lock object for recipe creation and compilation. May not be acquired
-	 * while holding the {@link #instantiationLock}. The lock should always be
-	 * accessed with the following pattern:
-	 * 
-	 * <pre>
-	 * {@code
-	 * synchronzied (recipeLockHolder.get()){
-	 *    ...
-	 * }
-	 * </pre>
-	 * 
-	 * This checks that you do not hold the instantiation lock to avoid
-	 * deadlocks
-	 */
-	public final RecipeLockHolder recipeLockHolder = new RecipeLockHolder(
-			new Object(), instantiationLock);
+	public final Object recipeLock = new Object();
 
 	private CoreInjectorConfiguration config;
 
@@ -131,19 +113,19 @@ public class CoreInjector {
 	}
 
 	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
-		synchronized (recipeLockHolder.get()) {
+		synchronized (recipeLock) {
 			return compiler.compileSupplier(recipe);
 		}
 	}
 
 	public CompiledFunction compileFunction(FunctionRecipe recipe) {
-		synchronized (recipeLockHolder.get()) {
+		synchronized (recipeLock) {
 			return compiler.compileFunction(recipe);
 		}
 	}
 
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> key) {
-		synchronized (recipeLockHolder.get()) {
+		synchronized (recipeLock) {
 			RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
 					CoreInjector.this);
 
@@ -166,7 +148,7 @@ public class CoreInjector {
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
 		// acquire the recipe lock
-		synchronized (recipeLockHolder.get()) {
+		synchronized (recipeLock) {
 			SupplierRecipe result = recipeCache.get(key);
 			if (result == null) {
 				try {

@@ -79,4 +79,8 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 		return coreInjector.getCompiler();
 	}
 
+	@Override
+	public Object getRecipeLock() {
+		return coreInjector.recipeLock;
+	}
 }

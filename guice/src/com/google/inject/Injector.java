@@ -176,4 +176,5 @@ public interface Injector {
 	 */
 	<T> T getInstance(Class<T> type);
 
+	com.github.ruediste.salta.standard.Injector getSaltaInjector();
 }

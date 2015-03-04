@@ -29,4 +29,8 @@ public class BindingImpl<T> implements Binding<T> {
 		return (Provider<T>) provider;
 	}
 
+	@Override
+	public String toString() {
+		return "Binding<" + key + ">";
+	}
 }

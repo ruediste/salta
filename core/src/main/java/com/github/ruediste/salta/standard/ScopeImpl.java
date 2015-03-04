@@ -52,7 +52,7 @@ public class ScopeImpl implements Scope {
 					MethodCompilationContext ctx) {
 				ctx.addFieldAndLoad(Supplier.class, scoped);
 				mv.invokeInterface(Type.getType(Supplier.class),
-						Method.getMethod("Object get("));
+						Method.getMethod("Object get()"));
 				return Object.class;
 			}
 		};

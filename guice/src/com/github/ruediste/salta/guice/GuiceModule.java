@@ -74,10 +74,11 @@ public class GuiceModule extends AbstractModule {
 						(type, supplier) -> (Provider<?>) supplier::get,
 						Provider.class));
 
-		config.requiredQualifierExtractors.add(key -> Arrays.stream(
-				key.getAnnotatedElement().getAnnotations()).filter(
-				a -> a.annotationType().isAnnotationPresent(
-						BindingAnnotation.class)));
+		config.requiredQualifierExtractors.add(key -> {
+			return Arrays.stream(key.getAnnotatedElement().getAnnotations())
+					.filter(a -> a.annotationType().isAnnotationPresent(
+							BindingAnnotation.class));
+		});
 
 		config.availableQualifierExtractors.add(annotated -> Arrays.stream(
 				annotated.getAnnotations()).filter(

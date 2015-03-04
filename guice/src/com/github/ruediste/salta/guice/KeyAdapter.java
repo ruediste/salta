@@ -5,6 +5,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Objects;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.standard.binder.AnnotationProxy;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Key;
 
@@ -14,6 +15,11 @@ public class KeyAdapter<T> extends CoreDependencyKey<T> {
 
 	public KeyAdapter(Key<T> key) {
 		this.key = key;
+	}
+
+	@Override
+	public String toString() {
+		return key.toString();
 	}
 
 	public static <T> KeyAdapter<T> of(Key<T> key) {
@@ -39,10 +45,18 @@ public class KeyAdapter<T> extends CoreDependencyKey<T> {
 			@Override
 			public Annotation[] getDeclaredAnnotations() {
 				Annotation a = key.getAnnotation();
-				if (a == null)
-					return new Annotation[] {};
-				else
+				if (a != null)
 					return new Annotation[] { a };
+				else {
+					Class<? extends Annotation> annotationType = key
+							.getAnnotationType();
+					if (annotationType != null)
+						return new Annotation[] { AnnotationProxy
+								.newProxy(annotationType) };
+					else
+						return new Annotation[] {};
+
+				}
 			}
 
 			@Override

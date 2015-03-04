@@ -193,7 +193,18 @@ public class BinderImpl implements Binder {
 							@Override
 							public Binding<Object> getBinding() {
 								return new BindingImpl<>(
-										Key.get(type.getType()), supplier::get);
+										Key.get(type.getType()),
+										new Provider<Object>() {
+											@Override
+											public Object get() {
+												return supplier.get();
+											}
+
+											@Override
+											public String toString() {
+												return supplier.toString();
+											}
+										});
 							}
 						}
 
