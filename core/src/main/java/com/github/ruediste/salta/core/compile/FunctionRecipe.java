@@ -6,7 +6,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
  * Recipe for compiling a function that accepts one argument and produces a
  * result
  */
-public abstract class FunctionRecipe {
+public interface FunctionRecipe {
 
 	/**
 	 * Emit the code to apply the function to an argument. The argument is
@@ -18,8 +18,7 @@ public abstract class FunctionRecipe {
 	 * @return type of the result
 	 * 
 	 */
-	public final Class<?> compile(Class<?> argumentType,
-			MethodCompilationContext ctx) {
+	default Class<?> compile(Class<?> argumentType, MethodCompilationContext ctx) {
 		return compileImpl(argumentType, ctx.getMv(), ctx);
 	}
 
@@ -33,6 +32,6 @@ public abstract class FunctionRecipe {
 	 * @return type of the supplied instance
 	 * 
 	 */
-	protected abstract Class<?> compileImpl(Class<?> argumentType,
-			GeneratorAdapter mv, MethodCompilationContext ctx);
+	Class<?> compileImpl(Class<?> argumentType, GeneratorAdapter mv,
+			MethodCompilationContext ctx);
 }

@@ -5,10 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
+import java.util.function.Supplier;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 
 import com.github.ruediste.salta.standard.util.Accessibility;
 
@@ -51,8 +54,8 @@ public class MethodCompilationContextTest {
 		FunctionRecipe recipe = new FunctionRecipe() {
 
 			@Override
-			protected Class<?> compileImpl(Class<?> argType,
-					GeneratorAdapter mv, MethodCompilationContext ctx) {
+			public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
+					MethodCompilationContext ctx) {
 				// primitive to boxed
 				mv.push(4);
 				ctx.castToPublic(int.class, Integer.class);
@@ -137,5 +140,29 @@ public class MethodCompilationContextTest {
 	public void assumptions() {
 		assertTrue(Accessibility.isClassPublic(int.class));
 		assertFalse(Object.class.isAssignableFrom(int.class));
+	}
+
+	@Test
+	public void testCompileToSupplier() throws Throwable {
+		Object result = compiler.compileSupplier(new SupplierRecipe() {
+
+			@Override
+			protected Class<?> compileImpl(GeneratorAdapter mv,
+					MethodCompilationContext ctx) {
+				ctx.compileToSupplier(new SupplierRecipe() {
+
+					@Override
+					protected Class<?> compileImpl(GeneratorAdapter mv,
+							MethodCompilationContext ctx) {
+						mv.push(1);
+						return int.class;
+					}
+				});
+				mv.invokeInterface(Type.getType(Supplier.class),
+						Method.getMethod("Object get()"));
+				return Object.class;
+			}
+		}).get();
+		assertEquals(1, result);
 	}
 }

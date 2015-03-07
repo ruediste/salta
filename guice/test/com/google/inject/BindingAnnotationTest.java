@@ -71,22 +71,6 @@ public class BindingAnnotationTest extends TestCase {
 		}).getInstance(RedFoo.class);
 	}
 
-	public void testRequireExactAnnotationsRequireAllOptionals() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					binder().requireExactBindingAnnotations();
-					bindConstant().annotatedWith(Color.class).to("foo");
-					bind(ColorFoo.class);
-				}
-			}).getInstance(ColorFoo.class);
-			fail();
-		} catch (ProvisionException expected) {
-			// expected
-		}
-	}
-
 	public void testAnnotationWithValueThatDoesntMatch() {
 		try {
 			Injector injector = Guice.createInjector(new AbstractModule() {

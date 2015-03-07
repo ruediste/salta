@@ -3,8 +3,6 @@ package com.github.ruediste.salta.standard.util;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import javax.inject.Provider;
-
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CompiledSupplier;
@@ -20,8 +18,8 @@ import com.github.ruediste.salta.standard.InjectionPoint;
 import com.google.common.reflect.TypeToken;
 
 /**
- * Base class for {@link CreationRule}s which match some sort of
- * Provider (as in javax.inject.Provider).
+ * Base class for {@link CreationRule}s which match some sort of Provider (as in
+ * javax.inject.Provider).
  * 
  * <p>
  * The initialization of providers is quite delicate. This class makes
@@ -137,9 +135,13 @@ public class ProviderDependencyFactoryRule implements CreationRule {
 			RecipeCreationContext ctx) {
 
 		if (matcher.matches(dependency)) {
+			if (dependency.getType().getType() instanceof Class) {
+				throw new SaltaException(
+						"Cannot inject a Provider that has no type parameter");
+			}
 			// determine dependency
 			TypeToken<?> requestedType = dependency.getType().resolveType(
-					Provider.class.getTypeParameters()[0]);
+					providerType.getTypeParameters()[0]);
 
 			CoreDependencyKey<?> dep;
 			if (dependency instanceof InjectionPoint) {

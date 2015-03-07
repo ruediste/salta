@@ -20,7 +20,6 @@ import javax.annotation.PostConstruct;
 
 import com.github.ruediste.salta.standard.config.MemberInjectionToken;
 import com.google.common.base.Objects;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 
@@ -55,7 +54,6 @@ public final class Providers {
 		private MemberInjectionToken<javax.inject.Provider<T>> token;
 
 		public GuicifiedProvider(javax.inject.Provider<T> delegate) {
-
 			this.delegate = delegate;
 		}
 
@@ -66,7 +64,7 @@ public final class Providers {
 
 		@Override
 		public int hashCode() {
-			return Objects.hashCode(token.getValue().get());
+			return Objects.hashCode(delegate);
 		}
 
 		@Override
@@ -78,8 +76,7 @@ public final class Providers {
 			if (getClass() != obj.getClass())
 				return false;
 			GuicifiedProvider<?> other = (GuicifiedProvider<?>) obj;
-			return Objects.equal(token.getValue().get(), other.token.getValue()
-					.get());
+			return Objects.equal(delegate, other.delegate);
 		}
 
 		@Override
@@ -88,7 +85,6 @@ public final class Providers {
 		}
 
 		@PostConstruct
-		@Inject
 		public void initialize(Injector injector) {
 			token = MemberInjectionToken.getMemberInjectionToken(
 					injector.getSaltaInjector(), delegate);

@@ -132,6 +132,10 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 * @see com.github.ruediste.salta.standard.core.inject.Injector#injectMembers
 	 */
 	public void toInstance(T instance) {
+		if (instance == null)
+			throw new SaltaException(
+					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
+
 		MemberInjectionToken<T> token = MemberInjectionToken
 				.getMemberInjectionToken(data.injector, instance);
 		data.binding.recipeFactory = new CreationRecipeFactory() {

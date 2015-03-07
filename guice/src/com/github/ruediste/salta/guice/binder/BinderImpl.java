@@ -8,9 +8,9 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.guice.ModuleAdapter;
 import com.github.ruediste.salta.standard.ScopeImpl;
-import com.github.ruediste.salta.standard.config.InjectionListenerRule;
-import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
-import com.github.ruediste.salta.standard.recipe.RecipeInjectorListenerImpl;
+import com.github.ruediste.salta.standard.config.EnhancementRule;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
@@ -43,6 +43,8 @@ public class BinderImpl implements Binder {
 
 	@Override
 	public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+		if (Provider.class.equals(typeLiteral.getRawType()))
+			throw new SaltaException("Binding to Provider is not allowed.");
 		return new AnnotatedBindingBuilderImpl<T>(delegate.bind(typeLiteral
 				.getTypeToken()));
 	}
@@ -161,8 +163,8 @@ public class BinderImpl implements Binder {
 
 		for (int i = 0; i < listeners.length; i++) {
 			ProvisionListener listener = listeners[i];
-			delegate.getConfiguration().injectionListenerRules
-					.add(new InjectionListenerRule() {
+			delegate.getConfiguration().enhancerRules
+					.add(new EnhancementRule() {
 
 						final class ProvisionInvocationImpl extends
 								ProvisionInvocation<Object> {
@@ -209,10 +211,10 @@ public class BinderImpl implements Binder {
 						}
 
 						@Override
-						public RecipeInjectionListener getListener(
+						public RecipeEnhancer getEnhancer(
 								RecipeCreationContext ctx, TypeToken<?> type) {
-							return RecipeInjectorListenerImpl
-									.ofWrapper(supplier -> {
+							return new RecipeEnhancerWrapperImpl(
+									supplier -> {
 										ProvisionInvocationImpl invocation = new ProvisionInvocationImpl(
 												type, supplier);
 										listener.onProvision(invocation);

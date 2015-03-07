@@ -4,6 +4,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
@@ -25,6 +26,9 @@ public class ConstantBindingBuilder {
 	}
 
 	private void bind(Class<?> cls, Object value) {
+		if (value == null)
+			throw new SaltaException(
+					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
 		config.config.staticBindings.add(createBinding(cls, value));
 		if (Primitives.isWrapperType(cls)) {
 			config.config.staticBindings.add(createBinding(

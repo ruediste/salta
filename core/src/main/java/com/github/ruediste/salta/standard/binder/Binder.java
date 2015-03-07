@@ -21,6 +21,7 @@ package com.github.ruediste.salta.standard.binder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -48,10 +49,10 @@ import com.github.ruediste.salta.standard.Module;
 import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
-import com.github.ruediste.salta.standard.config.InjectionListenerRule;
+import com.github.ruediste.salta.standard.config.EnhancementRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
-import com.github.ruediste.salta.standard.recipe.RecipeInjectorListenerImpl;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -369,7 +370,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public void requestInjection(Object instance) {
-		config.dynamicInitializers.add(x -> x.injectMembers(instance));
+		config.dynamicInitializers.add(injector -> injector.injectMembers(instance));
 	}
 
 	/**
@@ -486,39 +487,25 @@ public class Binder {
 	}
 
 	/**
-	 * Registers listeners for provisioned objects. Salta will notify the
-	 * listeners whenever it instantiates an object of a matching type. The
-	 * listeners receives the object and can replace it if desired.
+	 * Registers an enhancer for provisioned objects. Salta will notify the
+	 * listener whenever it instantiates an object of a matching type. The
+	 * listener receives the object and can replace it if desired.
 	 */
-	@SafeVarargs
 	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
-			BiFunction<TypeToken<?>, Object, Object>... listeners) {
-		if (listeners.length > 0)
-			config.injectionListenerRules.add(new InjectionListenerRule() {
+			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
+		config.enhancerRules.add(new EnhancementRule() {
 
-				@Override
-				public RecipeInjectionListener getListener(
-						RecipeCreationContext ctx, TypeToken<?> type) {
+			@Override
+			public RecipeEnhancer getEnhancer(RecipeCreationContext ctx,
+					TypeToken<?> type) {
 
-					if (typeMatcher.matches(type)) {
-						if (listeners.length == 1) {
-							BiFunction<TypeToken<?>, Object, Object> listener = listeners[0];
-							return RecipeInjectorListenerImpl
-									.of(instance -> listener.apply(type,
-											instance));
-						} else
-							return RecipeInjectorListenerImpl
-									.of(instance -> {
-										for (BiFunction<TypeToken<?>, Object, Object> listener : listeners) {
-											instance = listener.apply(type,
-													instance);
-										}
-										return instance;
-									});
-					}
-					return null;
+				if (typeMatcher.matches(type)) {
+					return new RecipeEnhancerWrapperImpl(instance -> listener
+							.apply(type, instance));
 				}
-			});
+				return null;
+			}
+		});
 	}
 
 	/**

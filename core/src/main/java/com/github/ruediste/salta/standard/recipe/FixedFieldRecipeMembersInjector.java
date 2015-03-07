@@ -21,7 +21,7 @@ import com.github.ruediste.salta.core.compile.MethodRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.util.Accessibility;
 
-public class FixedFieldRecipeMembersInjector extends RecipeMembersInjector {
+public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
 
 	private Field field;
 	private SupplierRecipe recipe;

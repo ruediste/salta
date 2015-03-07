@@ -56,8 +56,8 @@ public class RecipeCompilerTest {
 		FunctionRecipe recipe = new FunctionRecipe() {
 
 			@Override
-			protected Class<?> compileImpl(Class<?> argType,
-					GeneratorAdapter mv, MethodCompilationContext ctx) {
+			public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
+					MethodCompilationContext ctx) {
 				mv.pop();
 				mv.visitInsn(Opcodes.ICONST_3);
 				mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer",
@@ -75,8 +75,8 @@ public class RecipeCompilerTest {
 		FunctionRecipe recipe = new FunctionRecipe() {
 
 			@Override
-			protected Class<?> compileImpl(Class<?> argType,
-					GeneratorAdapter mv, MethodCompilationContext ctx) {
+			public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
+					MethodCompilationContext ctx) {
 				mv.pop();
 				mv.visitInsn(Opcodes.ICONST_3);
 				return int.class;

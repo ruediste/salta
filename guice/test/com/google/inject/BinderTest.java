@@ -21,6 +21,12 @@ import static com.google.inject.Asserts.assertContains;
 import static com.google.inject.Asserts.assertNotSerializable;
 import static com.google.inject.Asserts.getDeclaringSourcePart;
 import static com.google.inject.Asserts.isIncludeStackTraceOff;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -30,7 +36,8 @@ import java.util.concurrent.Callable;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-import junit.framework.TestCase;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import com.github.ruediste.salta.core.SaltaException;
 import com.google.common.collect.Lists;
@@ -42,7 +49,7 @@ import com.google.inject.util.Providers;
 /**
  * @author crazybob@google.com (Bob Lee)
  */
-public class BinderTest extends TestCase {
+public class BinderTest {
 
 	private final List<LogRecord> logRecords = Lists.newArrayList();
 	private final Handler fakeHandler = new Handler() {
@@ -62,6 +69,7 @@ public class BinderTest extends TestCase {
 
 	Provider<Foo> fooProvider;
 
+	@Test
 	public void testProviderFromBinder() {
 		Guice.createInjector(new Module() {
 			@Override
@@ -81,6 +89,7 @@ public class BinderTest extends TestCase {
 	static class Foo {
 	}
 
+	@Test
 	public void testMissingBindings() {
 		try {
 			Guice.createInjector(new AbstractModule() {
@@ -118,6 +127,7 @@ public class BinderTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testMissingDependency() {
 		try {
 			Guice.createInjector(new AbstractModule() {
@@ -141,6 +151,8 @@ public class BinderTest extends TestCase {
 		Runnable runnable;
 	}
 
+	@Test
+	@Ignore("todo")
 	public void testDanglingConstantBinding() {
 		try {
 			Guice.createInjector(new AbstractModule() {
@@ -157,6 +169,7 @@ public class BinderTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testRecursiveBinding() {
 		try {
 			Guice.createInjector(new AbstractModule() {
@@ -164,16 +177,14 @@ public class BinderTest extends TestCase {
 				public void configure() {
 					bind(Runnable.class).to(Runnable.class);
 				}
-			});
+			}).getInstance(Runnable.class);
 			fail();
-		} catch (CreationException expected) {
-			assertContains(expected.getMessage(),
-					"1) Binding points to itself.", "at "
-							+ getClass().getName(),
-					getDeclaringSourcePart(getClass()));
+		} catch (SaltaException expected) {
+			assertContains(expected.getMessage(), "Detected Dependency Circle:");
 		}
 	}
 
+	@Test
 	public void testBindingNullConstant() {
 		try {
 			Guice.createInjector(new AbstractModule() {
@@ -182,19 +193,34 @@ public class BinderTest extends TestCase {
 					String none = null;
 					bindConstant().annotatedWith(Names.named("nullOne")).to(
 							none);
+				}
+			});
+			fail();
+		} catch (SaltaException expected) {
+			assertContains(expected.getMessage(),
+					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
+		}
+	}
+
+	@Test
+	public void testBindingNullInstance() {
+		try {
+			Guice.createInjector(new AbstractModule() {
+				@Override
+				public void configure() {
+					String none = null;
 					bind(String.class).annotatedWith(Names.named("nullTwo"))
 							.toInstance(none);
 				}
 			});
 			fail();
-		} catch (CreationException expected) {
-			assertContains(
-					expected.getMessage(),
-					"1) Binding to null instances is not allowed. Use toProvider(Providers.of(null))",
-					"2) Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
+		} catch (SaltaException expected) {
+			assertContains(expected.getMessage(),
+					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
 		}
 	}
 
+	@Test
 	public void testToStringOnBinderApi() {
 		Guice.createInjector(new AbstractModule() {
 			@Override
@@ -202,7 +228,8 @@ public class BinderTest extends TestCase {
 				assertEquals("Binder", binder().toString());
 				assertEquals("Provider<java.lang.Integer>",
 						getProvider(Integer.class).toString());
-				assertEquals("Provider<java.util.List<java.lang.String>>",
+				assertEquals(
+						"Provider<Key[type=java.util.List<java.lang.String>, annotation=[none]]>",
 						getProvider(Key.get(new TypeLiteral<List<String>>() {
 						})).toString());
 
@@ -219,31 +246,28 @@ public class BinderTest extends TestCase {
 		});
 	}
 
+	@Test
 	public void testNothingIsSerializableInBinderApi() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				public void configure() {
-					try {
-						assertNotSerializable(binder());
-						assertNotSerializable(getProvider(Integer.class));
-						assertNotSerializable(getProvider(Key
-								.get(new TypeLiteral<List<String>>() {
-								})));
-						assertNotSerializable(bind(Integer.class));
-						assertNotSerializable(bind(Integer.class)
-								.annotatedWith(Names.named("a")));
-						assertNotSerializable(bindConstant());
-						assertNotSerializable(bindConstant().annotatedWith(
-								Names.named("b")));
-					} catch (IOException e) {
-						fail(e.getMessage());
-					}
+		Guice.createInjector(new AbstractModule() {
+			@Override
+			public void configure() {
+				try {
+					assertNotSerializable(binder());
+					assertNotSerializable(getProvider(Integer.class));
+					assertNotSerializable(getProvider(Key
+							.get(new TypeLiteral<List<String>>() {
+							})));
+					assertNotSerializable(bind(Integer.class));
+					assertNotSerializable(bind(Integer.class).annotatedWith(
+							Names.named("a")));
+					assertNotSerializable(bindConstant());
+					assertNotSerializable(bindConstant().annotatedWith(
+							Names.named("b")));
+				} catch (IOException e) {
+					fail(e.getMessage());
 				}
-			});
-			fail();
-		} catch (CreationException ignored) {
-		}
+			}
+		});
 	}
 
 	/**
@@ -251,6 +275,7 @@ public class BinderTest extends TestCase {
 	 * GenericArrayTypeImpl(String.class)}, Guice should treat these two types
 	 * interchangeably.
 	 */
+	@Test
 	public void testArrayTypeCanonicalization() {
 		final String[] strings = new String[] { "A" };
 		final Integer[] integers = new Integer[] { 1 };
@@ -332,28 +357,21 @@ public class BinderTest extends TestCase {
 	/**
 	 * Binding something to two different things should give an error.
 	 */
+	@Test
 	public void testSettingBindingTwice() {
 		try {
 			Guice.createInjector(new ParentModule()).getInstance(String.class);
 			fail();
 		} catch (SaltaException expected) {
-			assertContains(
-					expected.getMessage(),
-					"1) A binding to java.lang.String was already configured at "
-							+ ConstantModule.class.getName(),
-					asModuleChain(ParentModule.class, FooModule.class,
-							ConstantModule.class),
-					"at " + ConstantModule.class.getName(),
-					getDeclaringSourcePart(getClass()),
-					asModuleChain(ParentModule.class, BarModule.class,
-							ConstantModule.class));
-			assertContains(expected.getMessage(), "1 error");
+			assertContains(expected.getMessage(),
+					"Duplicate static binding found");
 		}
 	}
 
 	/**
 	 * Binding an @ImplementedBy thing to something else should also fail.
 	 */
+	@Test
 	public void testSettingAtImplementedByTwice() {
 		try {
 			Guice.createInjector(new AbstractModule() {
@@ -364,22 +382,18 @@ public class BinderTest extends TestCase {
 							new HasImplementedBy1() {
 							});
 				}
-			});
+			}).getInstance(HasImplementedBy1.class);
 			fail();
-		} catch (CreationException expected) {
+		} catch (SaltaException expected) {
 			expected.printStackTrace();
-			assertContains(expected.getMessage(), "1) A binding to "
-					+ HasImplementedBy1.class.getName()
-					+ " was already configured at " + getClass().getName(),
-					"at " + getClass().getName(),
-					getDeclaringSourcePart(getClass()));
-			assertContains(expected.getMessage(), "1 error");
+			assertContains(expected.getMessage(), "Duplicate static binding");
 		}
 	}
 
 	/**
 	 * See issue 614, Problem One https://github.com/google/guice/issues/614
 	 */
+	@Test
 	public void testJitDependencyDoesntBlockOtherExplicitBindings() {
 		Injector injector = Guice.createInjector(new AbstractModule() {
 			@Override
@@ -396,6 +410,7 @@ public class BinderTest extends TestCase {
 	/**
 	 * See issue 614, Problem Two https://github.com/google/guice/issues/id=614
 	 */
+	@Test
 	public void testJitDependencyCanUseExplicitDependencies() {
 		Guice.createInjector(new AbstractModule() {
 			@Override
@@ -412,6 +427,7 @@ public class BinderTest extends TestCase {
 	 * annotations if they exist. Otherwise the class should be constructed
 	 * directly.
 	 */
+	@Test
 	public void testUntargettedBinding() {
 		Injector injector = Guice.createInjector(new AbstractModule() {
 			@Override
@@ -434,12 +450,14 @@ public class BinderTest extends TestCase {
 				.getClass());
 	}
 
+	@Test
+	@Ignore("not applicable")
 	public void testPartialInjectorGetInstance() {
 		Injector injector = Guice.createInjector();
 		try {
 			injector.getInstance(MissingParameter.class);
 			fail();
-		} catch (ConfigurationException expected) {
+		} catch (SaltaException expected) {
 			assertContains(expected.getMessage(),
 					"1) Could not find a suitable constructor in "
 							+ NoInjectConstructor.class.getName(), "at "
@@ -448,6 +466,7 @@ public class BinderTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testUserReportedError() {
 		final Message message = new Message(getClass(), "Whoops!");
 		try {
@@ -464,6 +483,7 @@ public class BinderTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBindingToProvider() {
 		try {
 			Guice.createInjector(new AbstractModule() {
@@ -474,11 +494,9 @@ public class BinderTest extends TestCase {
 				}
 			});
 			fail();
-		} catch (CreationException expected) {
+		} catch (SaltaException expected) {
 			assertContains(expected.getMessage(),
-					"1) Binding to Provider is not allowed.", "at "
-							+ BinderTest.class.getName(),
-					getDeclaringSourcePart(getClass()));
+					"Binding to Provider is not allowed.");
 		}
 	}
 
@@ -519,6 +537,8 @@ public class BinderTest extends TestCase {
 		}
 	}
 
+	@Test
+	@Ignore("todo")
 	public void testCannotBindToGuiceTypes() {
 		try {
 			Guice.createInjector(new OuterCoreModule());
@@ -661,7 +681,7 @@ public class BinderTest extends TestCase {
 	static interface JustAnInterface {
 	}
 
-	// public void testBindInterfaceWithoutImplementation() {
+	// @Test public void testBindInterfaceWithoutImplementation() {
 	// Guice.createInjector(new AbstractModule() {
 	// protected void configure() {
 	// bind(Runnable.class);
@@ -673,14 +693,14 @@ public class BinderTest extends TestCase {
 		ROCK, SCISSORS, PAPER
 	}
 
+	@Test
 	public void testInjectRawProvider() {
 		try {
 			Guice.createInjector().getInstance(Provider.class);
 			fail();
-		} catch (ConfigurationException expected) {
+		} catch (SaltaException expected) {
 			Asserts.assertContains(expected.getMessage(),
-					"1) Cannot inject a Provider that has no type parameter",
-					"while locating " + Provider.class.getName());
+					"Cannot inject a Provider that has no type parameter");
 		}
 	}
 }

@@ -78,6 +78,13 @@ Salta uses coarse grained locking to control concurrency. The recipe lock is acq
 Salta does not support circular dependencies. There is simply no way to make them work in a predictable way. Where should cycles be broken? If you encounter a circular dependency, use a provider to resolve it.
 
 ### Standard Module
+The standard module contains common code to implement a guice-like dependency injection framework on top of the core module. It provides fine grained customization points and organizes the cooperation between different modules.
+
+ * **Recipe Creation:** The standard module splits instance creation into the following steps: instantiation, members injection, initialization, enhancement, scoping. Each of these aspects can be configured using rules in the *StandardInjectionConfiguration**. This allows for a very fine grained customization of each of these aspects.
+  
+ * **Scopes:**
+ * **:**
+ * **:**
 
 ## Speed
 Salta uses bytecode generation to speed up instantiation. Expect a 5x to 10x speedup over Guice.

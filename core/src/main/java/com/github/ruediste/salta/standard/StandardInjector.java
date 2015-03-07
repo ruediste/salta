@@ -18,6 +18,7 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.google.common.reflect.TypeToken;
 
@@ -119,15 +120,20 @@ public class StandardInjector implements Injector {
 						coreInjector);
 				List<RecipeMembersInjector> injectors = config
 						.createRecipeMembersInjectors(ctx, type);
+				List<RecipeInitializer> initializers = config
+						.createInitializers(ctx, type);
 				ctx.processQueuedActions();
 				FunctionRecipe recipe = new FunctionRecipe() {
 
 					@Override
-					protected Class<?> compileImpl(Class<?> argumentType,
+					public Class<?> compileImpl(Class<?> argumentType,
 							GeneratorAdapter mv, MethodCompilationContext ctx) {
 						for (RecipeMembersInjector rmi : injectors) {
 							argumentType = rmi.compile(argumentType, ctx);
 						}
+						for (RecipeInitializer initializer : initializers)
+							argumentType = initializer.compile(argumentType,
+									ctx);
 						return argumentType;
 					}
 				};

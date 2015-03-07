@@ -66,6 +66,11 @@ public class MethodCompilationContext {
 		return Type.getMethodDescriptor(Type.getType(returnType), params);
 	}
 
+	/**
+	 * Compile the provided recipe and generate the code to push a
+	 * {@link Supplier} instance to the stack. The supplier will call the code
+	 * which has been compiled for the recipe.
+	 */
 	public void compileToSupplier(SupplierRecipe recipe) {
 		String lambdaName;
 		// generate lambda method
@@ -77,7 +82,9 @@ public class MethodCompilationContext {
 						protected void compileImpl(GeneratorAdapter mv,
 								MethodCompilationContext ctx) {
 
-							recipe.compile(ctx);
+							Class<?> t = recipe.compile(ctx);
+							if (t.isPrimitive())
+								mv.box(Type.getType(t));
 
 							mv.visitInsn(ARETURN);
 						}

@@ -1,6 +1,5 @@
 package com.github.ruediste.salta.standard.util;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -12,50 +11,36 @@ import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.InjectionPoint;
-import com.github.ruediste.salta.standard.recipe.FixedFieldRecipeMembersInjector;
-import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeMembersInjector;
-import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
-import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
+import com.github.ruediste.salta.standard.config.RecipeInitializerFactory;
+import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeInitializer;
+import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
 import com.google.common.reflect.TypeToken;
 
-public abstract class MembersInjectorFactoryBase implements
-		RecipeMembersInjectorFactory {
+public abstract class RecipeInitializerFactoryBase implements
+		RecipeInitializerFactory {
 
 	private CoreInjectorConfiguration config;
 
-	public MembersInjectorFactoryBase(CoreInjectorConfiguration config) {
+	public RecipeInitializerFactoryBase(CoreInjectorConfiguration config) {
 		this.config = config;
 
 	}
 
 	@Override
-	public List<RecipeMembersInjector> createInjectors(
-			RecipeCreationContext ctx, TypeToken<?> typeToken) {
-		ArrayList<RecipeMembersInjector> result = new ArrayList<>();
+	public List<RecipeInitializer> getInitializers(RecipeCreationContext ctx,
+			TypeToken<?> typeToken) {
+		ArrayList<RecipeInitializer> result = new ArrayList<>();
 
 		MethodOverrideIndex overrideIndex = new MethodOverrideIndex(typeToken);
 		// iterate over super types, always processing supertypes before
 		// subtypes
 		for (TypeToken<?> t : overrideIndex.getAncestors()) {
-			for (Field f : t.getRawType().getDeclaredFields()) {
-				if (isInjectableField(t, f)) {
-					f.setAccessible(true);
-
-					// create dependency
-					CoreDependencyKey<?> dependency = new InjectionPoint<>(
-							t.resolveType(f.getGenericType()), f, f, null);
-
-					// add injector
-					result.add(new FixedFieldRecipeMembersInjector(f, ctx
-							.getRecipe(dependency), config.injectionStrategy));
-				}
-			}
 
 			for (Method method : t.getRawType().getDeclaredMethods()) {
 				if (Modifier.isStatic(method.getModifiers())
 						|| Modifier.isAbstract(method.getModifiers()))
 					continue;
-				if (isInjectableMethod(t, method, overrideIndex)) {
+				if (isInitializer(t, method, overrideIndex)) {
 					method.setAccessible(true);
 
 					// create dependencies
@@ -72,18 +57,15 @@ public abstract class MembersInjectorFactoryBase implements
 					}
 
 					// add injector
-					result.add(new FixedMethodRecipeMembersInjector(method,
-							args, config.injectionStrategy));
+					result.add(new FixedMethodRecipeInitializer(method, args,
+							config.injectionStrategy));
 				}
 			}
 		}
 		return result;
 	}
 
-	protected abstract boolean isInjectableField(TypeToken<?> declaringType,
-			Field f);
-
-	protected abstract boolean isInjectableMethod(TypeToken<?> declaringType,
+	protected abstract boolean isInitializer(TypeToken<?> declaringType,
 			Method method, MethodOverrideIndex overrideIndex);
 
 }

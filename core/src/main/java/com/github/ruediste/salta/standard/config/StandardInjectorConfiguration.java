@@ -26,14 +26,19 @@ import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.ScopeRule;
 import com.github.ruediste.salta.standard.Stage;
+import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder;
-import com.github.ruediste.salta.standard.recipe.RecipeInjectionListener;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
+import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
+/**
+ * Configuration for the {@link StandardInjector}.
+ */
 public class StandardInjectorConfiguration {
 	public CoreInjectorConfiguration config;
 	public final Stage stage;
@@ -122,16 +127,26 @@ public class StandardInjectorConfiguration {
 	}
 
 	/**
-	 * List of rules to listen for injections. The listeners of all rules are
-	 * combined.
+	 * List of rules enhance instances. The enhancers of all rules are combined.
 	 */
-	public final List<InjectionListenerRule> injectionListenerRules = new ArrayList<>();
+	public final List<RecipeInitializerFactory> initializerFactories = new ArrayList<>();
 
-	public List<RecipeInjectionListener> createInjectionListeners(
+	public List<RecipeInitializer> createInitializers(
 			RecipeCreationContext ctx, TypeToken<?> type) {
-		return injectionListenerRules.stream()
-				.map(r -> r.getListener(ctx, type)).filter(x -> x != null)
-				.collect(toList());
+		return initializerFactories.stream()
+				.flatMap(r -> r.getInitializers(ctx, type).stream())
+				.filter(x -> x != null).collect(toList());
+	}
+
+	/**
+	 * List of rules enhance instances. The enhancers of all rules are combined.
+	 */
+	public final List<EnhancementRule> enhancerRules = new ArrayList<>();
+
+	public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx,
+			TypeToken<?> type) {
+		return enhancerRules.stream().map(r -> r.getEnhancer(ctx, type))
+				.filter(x -> x != null).collect(toList());
 	}
 
 	/**

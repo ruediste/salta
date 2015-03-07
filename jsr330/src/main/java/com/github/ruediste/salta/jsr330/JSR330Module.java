@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
@@ -14,7 +15,10 @@ import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.StandardModule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
+import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
+import com.github.ruediste.salta.standard.util.RecipeInitializerFactoryBase;
+import com.google.common.reflect.TypeToken;
 
 public class JSR330Module extends AbstractModule {
 
@@ -52,6 +56,25 @@ public class JSR330Module extends AbstractModule {
 				});
 		config.defaultMembersInjectorFactories
 				.add(new JSR330MembersInjectorFactory(config.config));
+
+		config.initializerFactories.add(new RecipeInitializerFactoryBase(
+				config.config) {
+
+			@Override
+			protected boolean isInitializer(TypeToken<?> declaringType,
+					Method method, MethodOverrideIndex overrideIndex) {
+
+				if (method.isAnnotationPresent(PostConstruct.class)) {
+					if (method.getTypeParameters().length > 0) {
+						throw new SaltaException(
+								"@PostConstruct methods may not declare generic type parameters");
+					}
+					return true;
+				}
+
+				return false;
+			}
+		});
 
 		config.config.creationRules.add(new ProviderDependencyFactoryRule(
 				key -> {
