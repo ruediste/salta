@@ -1,13 +1,9 @@
 package com.github.ruediste.salta.standard;
 
-import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
-import static org.objectweb.asm.Opcodes.ANEWARRAY;
-
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -18,6 +14,7 @@ import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.recipe.FixedMethodInvocationFunctionRecipe;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -37,6 +34,7 @@ public abstract class ProviderMethodBinder {
 			if (!isProviderMethod(m)) {
 				continue;
 			}
+			m.setAccessible(true);
 
 			Type boundType = m.getGenericReturnType();
 			Matcher<CoreDependencyKey<?>> matcher = CoreDependencyKey
@@ -48,52 +46,28 @@ public abstract class ProviderMethodBinder {
 
 				@Override
 				protected SupplierRecipe createRecipe(RecipeCreationContext ctx) {
-					SupplierRecipe[] args = new SupplierRecipe[m
-							.getParameterCount()];
+					ArrayList<SupplierRecipe> args = new ArrayList<>();
 					Parameter[] parameters = m.getParameters();
 					for (int i = 0; i < parameters.length; i++) {
 						Parameter p = parameters[i];
-						args[i] = ctx.getRecipe(new InjectionPoint<>(TypeToken
-								.of(p.getType()), m, p, i));
+						args.add(ctx.getRecipe(new InjectionPoint<>(TypeToken
+								.of(p.getType()), m, p, i)));
 					}
-					m.setAccessible(true);
-					return new SupplierRecipe() {
+					FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(
+							m, args, config.config.injectionStrategy);
+					Scope scope = config.getScope(m);
+					return scope.createRecipe(ctx, this,
+							TypeToken.of(boundType), new SupplierRecipe() {
 
-						@Override
-						public Class<?> compileImpl(GeneratorAdapter mv,
-								MethodCompilationContext compilationContext) {
-
-							compilationContext.addFieldAndLoad(Method.class, m);
-							// push module instance to the stack
-							if (Modifier.isStatic(m.getModifiers())) {
-								mv.visitInsn(ACONST_NULL);
-							} else {
-								compilationContext.addFieldAndLoad(
-										Object.class, instance);
-							}
-							// push dependencies as an array
-							mv.push(args.length);
-							mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
-							for (int i = 0; i < args.length; i++) {
-								mv.dup();
-								mv.push(i);
-								Class<?> argType = args[i]
-										.compile(compilationContext);
-								if (argType.isPrimitive())
-									mv.box(org.objectweb.asm.Type
-											.getType(argType));
-								mv.visitInsn(AASTORE);
-							}
-
-							mv.invokeVirtual(
-									org.objectweb.asm.Type
-											.getType(Method.class),
-									new org.objectweb.asm.commons.Method(
-											"invoke",
-											"(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"));
-							return Object.class;
-						}
-					};
+								@Override
+								protected Class<?> compileImpl(
+										GeneratorAdapter mv,
+										MethodCompilationContext ctx) {
+									ctx.addFieldAndLoad(Object.class, instance);
+									return methodRecipe.compile(Object.class,
+											ctx);
+								}
+							});
 				}
 
 				@Override

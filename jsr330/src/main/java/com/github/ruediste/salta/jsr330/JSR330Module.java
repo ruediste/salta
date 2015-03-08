@@ -27,8 +27,8 @@ public class JSR330Module extends AbstractModule {
 		StandardInjectorConfiguration config = binder().getConfiguration();
 
 		// add rule for ProvidedBy and ImplementedBy
-		config.instantiatorRules.add(new JSR330ProvidedByInstantiatorRule());
-		config.instantiatorRules.add(new JSR330ImplementedByInstantiatorRule());
+		config.constructionRules.add(new JSR330ProvidedByInstantiatorRule());
+		config.constructionRules.add(new JSR330ImplementedByConstructionRule());
 
 		// default instantiator rule
 		config.instantiatorRules.add(new JSR330ConstructorInstantiatorRule(

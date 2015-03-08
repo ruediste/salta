@@ -2,11 +2,11 @@ package com.github.ruediste.salta.jsr330;
 
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.binder.InstanceProvider;
-import com.github.ruediste.salta.standard.util.ProvidedByInstantiatorRuleBase;
+import com.github.ruediste.salta.standard.util.ProvidedByConstructionRuleBase;
 import com.google.common.reflect.TypeToken;
 
 public class JSR330ProvidedByInstantiatorRule extends
-		ProvidedByInstantiatorRuleBase {
+		ProvidedByConstructionRuleBase {
 
 	public JSR330ProvidedByInstantiatorRule() {
 		super(InstanceProvider.class);

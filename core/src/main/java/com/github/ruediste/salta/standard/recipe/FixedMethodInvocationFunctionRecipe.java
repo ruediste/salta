@@ -32,30 +32,28 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 	private Method method;
 	private List<SupplierRecipe> argumentRecipes;
 	private InjectionStrategy injectionStrategy;
-	private boolean popResult;
 
 	public FixedMethodInvocationFunctionRecipe(Method method,
 			List<SupplierRecipe> argumentRecipes,
-			InjectionStrategy injectionStrategy, boolean popResult) {
+			InjectionStrategy injectionStrategy) {
 		this.method = method;
 		this.argumentRecipes = argumentRecipes;
 		this.injectionStrategy = injectionStrategy;
-		this.popResult = popResult;
 		method.setAccessible(true);
 	}
 
 	@Override
 	public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext compilationContext) {
+			MethodCompilationContext ctx) {
 
 		if (Accessibility.isMethodPublic(method))
-			return compileDirect(argType, mv, compilationContext);
+			return compileDirect(argType, mv, ctx);
 		else
 			switch (injectionStrategy) {
 			case INVOKE_DYNAMIC:
-				return compileDynamic(argType, mv, compilationContext);
+				return compileDynamic(argType, mv, ctx);
 			case REFLECTION:
-				return compileReflection(argType, mv, compilationContext);
+				return compileReflection(argType, mv, ctx);
 			default:
 				throw new UnsupportedOperationException();
 			}
@@ -66,8 +64,6 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 
 		// cast receiver
 		argType = ctx.castToPublic(argType, method.getDeclaringClass());
-
-		mv.dup();
 
 		// push dependencies as an array
 		for (int i = 0; i < argumentRecipes.size(); i++) {
@@ -82,14 +78,11 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 			mv.invokeVirtual(Type.getType(method.getDeclaringClass()),
 					org.objectweb.asm.commons.Method.getMethod(method));
 
-		if (popResult)
-			ctx.pop(method.getReturnType());
-		return argType;
+		return ctx.castToPublic(method.getReturnType(), method.getReturnType());
 	}
 
 	private Class<?> compileReflection(Class<?> argType, GeneratorAdapter mv,
 			MethodCompilationContext compilationContext) {
-		mv.dup();
 		compilationContext.addFieldAndLoad(Method.class, method);
 		mv.swap();
 
@@ -125,9 +118,11 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 		mv.visitInsn(ATHROW);
 		mv.visitLabel(l2);
 
-		if (popResult || void.class.equals(method.getReturnType()))
+		if (void.class.equals(method.getReturnType())) {
 			mv.pop();
-		return argType;
+			return void.class;
+		}
+		return Object.class;
 	}
 
 	private Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
@@ -136,7 +131,6 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 		Type[] argTypes = new Type[argumentRecipes.size() + 1];
 		argType = ctx.castToPublic(argType, method.getDeclaringClass());
 		argTypes[0] = Type.getType(argType);
-		mv.dup();
 
 		// push arguments
 		for (int i = 0; i < argumentRecipes.size(); i++) {
@@ -182,13 +176,14 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 		// call
 		Handle bsm = new Handle(H_INVOKESTATIC, ctx.getClassCtx()
 				.getInternalClassName(), bootstrapName, bootstrapDesc);
-		mv.invokeDynamic(method.getName(), Type.getMethodDescriptor(
-				Type.getType(method.getReturnType()), argTypes), bsm);
 
-		if (popResult)
-			ctx.pop(method.getReturnType());
+		Class<?> returnType = ctx.publicSuperType(method.getReturnType());
 
-		return argType;
+		mv.invokeDynamic(method.getName(),
+				Type.getMethodDescriptor(Type.getType(returnType), argTypes),
+				bsm);
+
+		return returnType;
 	}
 
 }

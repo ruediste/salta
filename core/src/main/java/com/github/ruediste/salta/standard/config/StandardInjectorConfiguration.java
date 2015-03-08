@@ -20,6 +20,7 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Message;
@@ -57,6 +58,21 @@ public class StandardInjectorConfiguration {
 	 * Strategy to create a {@link RecipeInstantiator} given a constructor.
 	 */
 	public FixedConstructorInstantiatorFactory fixedConstructorInstantiatorFactory;
+
+	/**
+	 * Rules defining how to construct an instance of a type
+	 */
+	public final List<ConstructionRule> constructionRules = new ArrayList<>();
+
+	public SupplierRecipe createConstructionRecipe(RecipeCreationContext ctx,
+			TypeToken<?> type) {
+		for (ConstructionRule rule : constructionRules) {
+			SupplierRecipe result = rule.createConstructionRecipe(ctx, type);
+			if (result != null)
+				return result;
+		}
+		throw new SaltaException("No construction recipe found for " + type);
+	}
 
 	/**
 	 * List of rules to create an instantiator given a type. The first matching
@@ -161,22 +177,26 @@ public class StandardInjectorConfiguration {
 	 * {@link #scopeAnnotationMap}, falling back to the {@link #defaultScope}
 	 */
 	public Scope getScope(TypeToken<?> type) {
-		Scope scope = null;
 
 		// evaluate scope rules
 		for (ScopeRule rule : scopeRules) {
-			scope = rule.getScope(type);
+			Scope scope = rule.getScope(type);
 			if (scope != null)
 				return scope;
 		}
 
+		return getScope(type.getRawType());
+	}
+
+	public Scope getScope(AnnotatedElement element) {
+		Scope scope = null;
 		// scan scope annotation map
 		for (Entry<Class<? extends Annotation>, Scope> entry : scopeAnnotationMap
 				.entrySet()) {
-			if (type.getRawType().isAnnotationPresent(entry.getKey())) {
+			if (element.isAnnotationPresent(entry.getKey())) {
 				if (scope != null)
 					throw new SaltaException(
-							"Multiple scope annotations present on " + type);
+							"Multiple scope annotations present on " + element);
 				scope = entry.getValue();
 			}
 		}

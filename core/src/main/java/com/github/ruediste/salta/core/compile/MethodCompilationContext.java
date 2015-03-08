@@ -164,6 +164,15 @@ public class MethodCompilationContext {
 		throw new SaltaException("Cannot cast from " + from + " to " + to);
 	}
 
+	public Class<?> publicSuperType(Class<?> cls) {
+		if (cls.isPrimitive())
+			return cls;
+		if (cls.isArray() || !Accessibility.isClassPublic(cls)) {
+			return Object.class;
+		}
+		return cls;
+	}
+
 	private int codeSizeOffset;
 
 	public void addCodeSizeOffset(int offset) {

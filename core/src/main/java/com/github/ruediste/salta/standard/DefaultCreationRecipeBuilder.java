@@ -15,20 +15,10 @@ import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
-import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
-import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
-import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.google.common.reflect.TypeToken;
 
 public class DefaultCreationRecipeBuilder {
-
-	public Function<RecipeCreationContext, RecipeInstantiator> instantiatorSupplier;
-	/**
-	 * {@link MembersInjector} get called after the instantiation to inject
-	 * fields and methods
-	 */
-	public Function<RecipeCreationContext, List<RecipeMembersInjector>> membersInjectorsSupplier;
-	public Function<RecipeCreationContext, List<RecipeInitializer>> initializersSupplier;
+	public Function<RecipeCreationContext, SupplierRecipe> constructionRecipeSupplier;
 	public Function<RecipeCreationContext, List<RecipeEnhancer>> enhancersSupplier;
 
 	public Supplier<Scope> scopeSupplier;
@@ -40,11 +30,9 @@ public class DefaultCreationRecipeBuilder {
 
 		this.type = type;
 		this.binding = binding;
-		instantiatorSupplier = ctx -> config
-				.createRecipeInstantiator(ctx, type);
-		membersInjectorsSupplier = ctx -> config.createRecipeMembersInjectors(
+		constructionRecipeSupplier = ctx -> config.createConstructionRecipe(
 				ctx, type);
-		initializersSupplier = ctx -> config.createInitializers(ctx, type);
+
 		enhancersSupplier = ctx -> config.createEnhancers(ctx, type);
 		scopeSupplier = () -> config.getScope(type);
 	}
@@ -52,27 +40,7 @@ public class DefaultCreationRecipeBuilder {
 	public SupplierRecipe build(RecipeCreationContext ctx) {
 
 		// create seed recipe
-		RecipeInstantiator instantiator = instantiatorSupplier.apply(ctx);
-		RecipeMembersInjector[] mem = membersInjectorsSupplier.apply(ctx)
-				.toArray(new RecipeMembersInjector[] {});
-		List<RecipeInitializer> initializers = initializersSupplier.apply(ctx);
-		SupplierRecipe seedRecipe = new SupplierRecipe() {
-
-			@Override
-			public Class<?> compileImpl(GeneratorAdapter mv,
-					MethodCompilationContext compilationContext) {
-				Class<?> result = instantiator.compile(compilationContext);
-				for (RecipeMembersInjector membersInjector : mem) {
-					result = membersInjector
-							.compile(result, compilationContext);
-				}
-				// apply initializers
-				for (RecipeInitializer initializer : initializers) {
-					result = initializer.compile(result, compilationContext);
-				}
-				return result;
-			}
-		};
+		SupplierRecipe seedRecipe = constructionRecipeSupplier.apply(ctx);
 
 		// apply enhancers
 		List<RecipeEnhancer> enhancers = new ArrayList<>(

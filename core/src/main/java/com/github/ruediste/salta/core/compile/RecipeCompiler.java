@@ -125,6 +125,7 @@ public class RecipeCompiler {
 
 		try {
 			cls = loader.defineClass(className, bb);
+			ctx.initFields(cls);
 		} catch (Throwable e) {
 			System.out.println("Error while loading compiled recipe class");
 			ClassReader cr = new ClassReader(bb);
@@ -134,8 +135,6 @@ public class RecipeCompiler {
 
 			throw new SaltaException("Error while loading compiled recipe", e);
 		}
-
-		ctx.initFields(cls);
 
 		// return result
 		return cls;

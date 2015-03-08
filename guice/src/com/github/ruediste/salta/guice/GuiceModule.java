@@ -23,13 +23,14 @@ import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.util.ImplementedByInstantiatorRuleBase;
-import com.github.ruediste.salta.standard.util.ProvidedByInstantiatorRuleBase;
+import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
+import com.github.ruediste.salta.standard.util.ProvidedByConstructionRuleBase;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Injector;
+import com.google.inject.MembersInjector;
 import com.google.inject.ProvidedBy;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
@@ -68,11 +69,28 @@ public class GuiceModule extends AbstractModule {
 		config.defaultMembersInjectorFactories
 				.add(new GuiceMembersInjectorFactory(config.config));
 
+		// provider creation rule
 		config.config.creationRules
 				.add(new ProviderDependencyFactoryRule(key -> key.getRawType()
 						.equals(Provider.class),
 						(type, supplier) -> (Provider<?>) supplier::get,
 						Provider.class));
+
+		// members injector creation rule
+		config.config.creationRules.add(new CreationRule() {
+
+			@Override
+			public SupplierRecipe apply(CoreDependencyKey<?> key,
+					RecipeCreationContext ctx) {
+				if (MembersInjector.class.equals(key.getRawType())) {
+					TypeToken<?> dependency = key.getType().resolveType(
+							MembersInjector.class.getTypeParameters()[0]);
+					injector.getSaltaInjector().getMembersInjector(dependency);
+					foo
+				}
+				return null;
+			}
+		});
 
 		config.requiredQualifierExtractors.add(key -> {
 			return Arrays.stream(key.getAnnotatedElement().getAnnotations())
@@ -135,20 +153,8 @@ public class GuiceModule extends AbstractModule {
 
 		config.staticInitializers.add(injector::setDelegate);
 
-		{
-			install(new JSR330Module());
-			List<InstantiatorRule> tmp = new ArrayList<>(
-					config.instantiatorRules);
-			config.instantiatorRules.clear();
-			config.instantiatorRules
-					.addAll(tmp
-							.stream()
-							.filter(x -> !(x instanceof JSR330ConstructorInstantiatorRule))
-							.collect(toList()));
-		}
-
 		// add rule for ProvidedBy and ImplementedBy
-		config.instantiatorRules.add(new ProvidedByInstantiatorRuleBase(
+		config.constructionRules.add(new ProvidedByConstructionRuleBase(
 				Provider.class) {
 
 			@Override
@@ -161,7 +167,7 @@ public class GuiceModule extends AbstractModule {
 			}
 		});
 
-		config.instantiatorRules.add(new ImplementedByInstantiatorRuleBase() {
+		config.constructionRules.add(new ImplementedByConstructionRuleBase() {
 
 			@Override
 			protected DependencyKey<?> getImplementorKey(TypeToken<?> type) {
@@ -172,8 +178,22 @@ public class GuiceModule extends AbstractModule {
 				return null;
 			}
 		});
+		{
+			install(new JSR330Module());
+			List<InstantiatorRule> tmp = new ArrayList<>(
+					config.instantiatorRules);
+			config.instantiatorRules.clear();
+			config.instantiatorRules
+					.addAll(tmp
+							.stream()
+							.filter(x -> !(x instanceof JSR330ConstructorInstantiatorRule))
+							.collect(toList()));
+		}
 
 		config.instantiatorRules.add(new GuiceConstructorInstantiatorRule(
 				config.config, guiceConfig.requireAtInjectOnConstructors));
+
+		if (guiceConfig.requireExplicitBindings)
+			config.config.jitBindingRules.clear();
 	}
 }

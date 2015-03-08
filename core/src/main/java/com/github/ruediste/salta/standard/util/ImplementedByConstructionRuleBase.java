@@ -6,14 +6,14 @@ import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.config.InstantiatorRule;
+import com.github.ruediste.salta.standard.config.ConstructionRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public abstract class ImplementedByInstantiatorRuleBase implements
-		InstantiatorRule {
+public abstract class ImplementedByConstructionRuleBase implements
+		ConstructionRule {
 
-	public ImplementedByInstantiatorRuleBase() {
+	public ImplementedByConstructionRuleBase() {
 		super();
 	}
 
@@ -24,7 +24,8 @@ public abstract class ImplementedByInstantiatorRuleBase implements
 	protected abstract DependencyKey<?> getImplementorKey(TypeToken<?> type);
 
 	@Override
-	public RecipeInstantiator apply(RecipeCreationContext ctx, TypeToken<?> type) {
+	public SupplierRecipe createConstructionRecipe(RecipeCreationContext ctx,
+			TypeToken<?> type) {
 		DependencyKey<?> implementorKey = getImplementorKey(type);
 		if (implementorKey != null) {
 			SupplierRecipe recipe = ctx.getRecipe(implementorKey);

@@ -10,6 +10,7 @@ import com.github.ruediste.salta.core.JITBinding;
 import com.github.ruediste.salta.core.JITBindingKey;
 import com.github.ruediste.salta.core.JITBindingKeyRule;
 import com.github.ruediste.salta.core.JITBindingRule;
+import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.base.Objects;
 import com.google.common.reflect.TypeToken;
@@ -30,9 +31,8 @@ public class StandardModule extends AbstractModule {
 		StandardInjectorConfiguration config = binder().getConfiguration();
 
 		// stage creation rule
-		config.config.creationRules.add(new CreationRuleImpl(
-				key -> Stage.class.equals(key.getRawType()),
-				key -> () -> config.stage));
+		config.config.creationRules.add(new CreationRuleImpl(key -> Stage.class
+				.equals(key.getRawType()), key -> () -> config.stage));
 
 		config.config.jitBindingKeyRules.add(new JITBindingKeyRule() {
 
@@ -60,5 +60,6 @@ public class StandardModule extends AbstractModule {
 			}
 		});
 
+		config.constructionRules.add(new DefaultConstructionRule(config));
 	}
 }

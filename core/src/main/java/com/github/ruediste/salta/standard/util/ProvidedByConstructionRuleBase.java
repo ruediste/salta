@@ -9,23 +9,23 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.config.InstantiatorRule;
+import com.github.ruediste.salta.standard.config.ConstructionRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public abstract class ProvidedByInstantiatorRuleBase implements
-		InstantiatorRule {
+public abstract class ProvidedByConstructionRuleBase implements
+		ConstructionRule {
 
 	private Class<?> providerClass;
 	private String methodName;
 	private Class<?> returnType;
 	private Class<?>[] parameterTypes;
 
-	public ProvidedByInstantiatorRuleBase(Class<?> providerClass) {
+	public ProvidedByConstructionRuleBase(Class<?> providerClass) {
 		this(providerClass, "get", Object.class);
 	}
 
-	public ProvidedByInstantiatorRuleBase(Class<?> providerClass,
+	public ProvidedByConstructionRuleBase(Class<?> providerClass,
 			String methodName, Class<?> returnType, Class<?>... argumentTypes) {
 		this.providerClass = providerClass;
 		this.methodName = methodName;
@@ -40,7 +40,9 @@ public abstract class ProvidedByInstantiatorRuleBase implements
 	protected abstract DependencyKey<?> getProviderKey(TypeToken<?> type);
 
 	@Override
-	public RecipeInstantiator apply(RecipeCreationContext ctx, TypeToken<?> type) {
+	public SupplierRecipe createConstructionRecipe(RecipeCreationContext ctx,
+			TypeToken<?> type) {
+
 		DependencyKey<?> providerKey = getProviderKey(type);
 		if (providerKey != null) {
 			SupplierRecipe recipe = ctx.getRecipe(providerKey);

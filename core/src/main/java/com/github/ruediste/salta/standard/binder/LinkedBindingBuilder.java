@@ -16,7 +16,9 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
+import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.MemberInjectionToken;
+import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -121,7 +123,9 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 */
 	public ScopedBindingBuilder<T> to(
 			CoreDependencyKey<? extends T> implementation) {
-		data.binding.recipeFactory = ctx -> ctx.getRecipe(implementation);
+		DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
+				data.config, implementation.getType(), data.binding);
+		data.binding.recipeFactory = builder::build;
 
 		return new ScopedBindingBuilder<>(data);
 	}
@@ -265,8 +269,17 @@ public class LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			Constructor<S> constructor, TypeToken<? extends S> type) {
 		DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
 				data.config, type, data.binding);
-		builder.instantiatorSupplier = ctx -> data.config.fixedConstructorInstantiatorFactory
-				.create(type, ctx, constructor);
+		DefaultConstructionRule defaultConstructionRule = new DefaultConstructionRule(
+				data.config) {
+			@Override
+			protected RecipeInstantiator createInstantiationRecipe(
+					RecipeCreationContext ctx, TypeToken<?> type) {
+				return data.config.fixedConstructorInstantiatorFactory.create(
+						type, ctx, constructor);
+			}
+		};
+		builder.constructionRecipeSupplier = ctx -> defaultConstructionRule
+				.createConstructionRecipe(ctx, type);
 
 		data.binding.recipeFactory = builder::build;
 
