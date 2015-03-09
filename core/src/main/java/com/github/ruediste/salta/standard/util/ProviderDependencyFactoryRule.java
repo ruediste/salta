@@ -90,26 +90,6 @@ public class ProviderDependencyFactoryRule implements CreationRule {
 		}
 	}
 
-	private static class CreationRecipeImpl<T> extends SupplierRecipe {
-
-		private T wrappedProvider;
-		private Class<T> providerType;
-
-		public CreationRecipeImpl(Class<?> providedType, T wrappedProvider,
-				Class<T> providerType) {
-			this.wrappedProvider = wrappedProvider;
-			this.providerType = providerType;
-		}
-
-		@Override
-		public Class<?> compileImpl(GeneratorAdapter mv,
-				MethodCompilationContext compilationContext) {
-
-			compilationContext.addFieldAndLoad(providerType, wrappedProvider);
-			return providerType;
-		}
-	}
-
 	/**
 	 * Create a new instance
 	 * 
@@ -159,8 +139,15 @@ public class ProviderDependencyFactoryRule implements CreationRule {
 			Object wrappedProvider = wrapper.apply(dependency, provider);
 
 			// create creation recipe
-			CreationRecipeImpl creationRecipe = new CreationRecipeImpl(
-					providerType, wrappedProvider, providerType);
+			SupplierRecipe creationRecipe = new SupplierRecipe() {
+
+				@Override
+				protected Class<?> compileImpl(GeneratorAdapter mv,
+						MethodCompilationContext ctx) {
+					ctx.addFieldAndLoad((Class) providerType, wrappedProvider);
+					return providerType;
+				}
+			};
 
 			// queue creation and compilation of inner recipe
 			ctx.queueAction(() -> {
