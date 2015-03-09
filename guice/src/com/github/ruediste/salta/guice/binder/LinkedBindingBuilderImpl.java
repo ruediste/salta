@@ -96,10 +96,18 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 	}
 
 	@Override
-	public ScopedBindingBuilder toProvider(
-			Key<? extends javax.inject.Provider<? extends T>> providerKey) {
-		return new ScopedBindingBuilderImpl(delegate.toProvider(
-				KeyAdapter.of(providerKey), null));
+	public <P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProvider(
+			Key<P> providerKey) {
+		return new ScopedBindingBuilderImpl(
+				delegate.toProvider(
+						KeyAdapter.of(providerKey),
+						new java.util.function.Function<P, InstanceProvider<? extends T>>() {
+
+							@Override
+							public InstanceProvider<? extends T> apply(P t) {
+								return () -> t.get();
+							}
+						}));
 	}
 
 	@Override

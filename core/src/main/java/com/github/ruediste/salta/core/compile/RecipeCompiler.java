@@ -49,8 +49,8 @@ public class RecipeCompiler {
 	private AtomicInteger classNumber = new AtomicInteger();
 
 	/**
-	 * Compile a recipe. May be called from multiple threads. May not acquire
-	 * {@link CoreInjector#recipeLock} or {@link CoreInjector#instantiationLock}
+	 * Compile a recipe. May be called from multiple threads. Calling thread
+	 * must holde the {@link CoreInjector#recipeLock}
 	 */
 	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
 		ClassCompilationContext ccc = createClass(CompiledSupplier.class);
@@ -76,9 +76,8 @@ public class RecipeCompiler {
 	}
 
 	/**
-	 * Compile a recipe which takes a parameter. May be called from multiple
-	 * threads. May not acquire {@link CoreInjector#recipeLock} or
-	 * {@link CoreInjector#instantiationLock}
+	 * Compile a recipe which takes a parameter. Calling thread must holde the
+	 * {@link CoreInjector#recipeLock}
 	 */
 	public CompiledFunction compileFunction(FunctionRecipe recipe) {
 		ClassCompilationContext ccc = createClass(CompiledFunction.class);

@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Scope;
+import com.github.ruediste.salta.standard.Stage;
 
 /**
  * See the EDSL examples at {@link Binder}.
@@ -26,7 +27,12 @@ public class ScopedBindingBuilder<T> {
 	public void in(Class<? extends Annotation> scopeAnnotation) {
 		data.recipeBuilder.scopeSupplier = () -> data.config
 				.getScope(scopeAnnotation);
-
+		if (data.config.stage == Stage.PRODUCTION)
+			data.config.dynamicInitializers
+					.add(injector -> {
+						if (data.config.getScope(scopeAnnotation) == data.config.singletonScope)
+							injector.getInstance(data.eagerInstantiationDependency);
+					});
 	}
 
 	/**
@@ -34,6 +40,11 @@ public class ScopedBindingBuilder<T> {
 	 */
 	public void in(Scope scope) {
 		data.recipeBuilder.scopeSupplier = () -> scope;
+		if (data.config.stage == Stage.PRODUCTION)
+			data.config.dynamicInitializers.add(injector -> {
+				if (scope == data.config.singletonScope)
+					injector.getInstance(data.eagerInstantiationDependency);
+			});
 	}
 
 	/**

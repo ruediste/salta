@@ -170,6 +170,7 @@ public class BinderTest {
 	}
 
 	@Test
+	@Ignore("works for salta")
 	public void testRecursiveBinding() {
 		try {
 			Guice.createInjector(new AbstractModule() {

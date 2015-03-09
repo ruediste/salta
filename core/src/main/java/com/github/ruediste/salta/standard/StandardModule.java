@@ -12,7 +12,6 @@ import com.github.ruediste.salta.core.JITBindingKeyRule;
 import com.github.ruediste.salta.core.JITBindingRule;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.google.common.base.Objects;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -49,9 +48,9 @@ public class StandardModule extends AbstractModule {
 			@Override
 			public JITBinding apply(JITBindingKey key) {
 				TypeToken<?> type = jitBindingKeyType.get(key);
-				if (!Objects.equal(
-						config.getAvailableQualifier(type.getRawType()),
-						jitBindingKeyRequiredQualifiers.get(key)))
+				if (!config.doQualifiersMatch(
+						jitBindingKeyRequiredQualifiers.get(key),
+						config.getAvailableQualifier(type.getRawType())))
 					return null;
 				StandardJitBinding binding = new StandardJitBinding(type);
 				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(

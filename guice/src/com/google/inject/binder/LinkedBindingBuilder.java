@@ -80,8 +80,8 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 	/**
 	 * See the EDSL examples at {@link com.google.inject.Binder}.
 	 */
-	ScopedBindingBuilder toProvider(
-			Key<? extends javax.inject.Provider<? extends T>> providerKey);
+	<P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProvider(
+			Key<P> providerKey);
 
 	/**
 	 * See the EDSL examples at {@link com.google.inject.Binder}.

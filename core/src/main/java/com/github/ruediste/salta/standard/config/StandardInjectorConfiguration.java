@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -265,29 +266,31 @@ public class StandardInjectorConfiguration {
 	}
 
 	public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(
-			Annotation qualifier) {
-		return new RequiredQualifierMatcher(this, qualifier);
+			Annotation availableQualifier) {
+		return new RequiredQualifierMatcher(this, availableQualifier);
 	}
 
 	private static final class RequiredQualifierMatcher implements
 			Matcher<CoreDependencyKey<?>> {
-		private Annotation qualifier;
+		private Annotation availableQualifier;
 		private StandardInjectorConfiguration config;
 
 		public RequiredQualifierMatcher(StandardInjectorConfiguration config,
-				Annotation qualifier) {
+				Annotation availableQualifier) {
 			this.config = config;
-			this.qualifier = qualifier;
+			this.availableQualifier = availableQualifier;
 		}
 
 		@Override
 		public boolean matches(CoreDependencyKey<?> key) {
-			return Objects.equals(qualifier, config.getRequiredQualifier(key));
+			return config.doQualifiersMatch(config.getRequiredQualifier(key),
+					availableQualifier);
 		}
 
 		@Override
 		public int hashCode() {
-			return qualifier == null ? 0 : qualifier.hashCode();
+			return availableQualifier == null ? 0 : availableQualifier
+					.hashCode();
 		}
 
 		@Override
@@ -299,12 +302,12 @@ public class StandardInjectorConfiguration {
 			if (obj.getClass() != getClass())
 				return false;
 			RequiredQualifierMatcher other = (RequiredQualifierMatcher) obj;
-			return Objects.equals(qualifier, other.qualifier);
+			return Objects.equals(availableQualifier, other.availableQualifier);
 		}
 
 		@Override
 		public String toString() {
-			return "qualifier=" + qualifier;
+			return "qualifier=" + availableQualifier;
 		}
 	}
 
@@ -313,34 +316,33 @@ public class StandardInjectorConfiguration {
 	 * type
 	 */
 	public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(
-			Class<? extends Annotation> qualifierType) {
-		return new RequiredQualifierTypeMatcher(this, qualifierType);
+			Class<? extends Annotation> availableQualifierType) {
+		return new RequiredQualifierTypeMatcher(this, availableQualifierType);
 	}
 
 	private static final class RequiredQualifierTypeMatcher implements
 			Matcher<CoreDependencyKey<?>> {
 		private StandardInjectorConfiguration config;
-		private Class<? extends Annotation> qualifierType;
+		private Class<? extends Annotation> availableQualifierType;
 
 		public RequiredQualifierTypeMatcher(
 				StandardInjectorConfiguration config,
-				Class<? extends Annotation> qualifierType) {
+				Class<? extends Annotation> availableQualifierType) {
 			this.config = config;
-			this.qualifierType = qualifierType;
+			this.availableQualifierType = availableQualifierType;
 		}
 
 		@Override
 		public boolean matches(CoreDependencyKey<?> key) {
 			Annotation requiredQualifier = config.getRequiredQualifier(key);
-			if (requiredQualifier == null)
-				return qualifierType == null;
-			else
-				return requiredQualifier.annotationType().equals(qualifierType);
+			return config.doQualifiersMatch(requiredQualifier,
+					availableQualifierType);
 		}
 
 		@Override
 		public int hashCode() {
-			return qualifierType == null ? 0 : qualifierType.hashCode();
+			return availableQualifierType == null ? 0 : availableQualifierType
+					.hashCode();
 		}
 
 		@Override
@@ -352,12 +354,13 @@ public class StandardInjectorConfiguration {
 			if (obj.getClass() != getClass())
 				return false;
 			RequiredQualifierTypeMatcher other = (RequiredQualifierTypeMatcher) obj;
-			return Objects.equals(qualifierType, other.qualifierType);
+			return Objects.equals(availableQualifierType,
+					other.availableQualifierType);
 		}
 
 		@Override
 		public String toString() {
-			return "qualifier is" + qualifierType;
+			return "qualifier is" + availableQualifierType;
 		}
 	}
 
@@ -379,6 +382,49 @@ public class StandardInjectorConfiguration {
 			throw new SaltaException("Multiple avalable qualifiers found on "
 					+ element + ": " + qualifiers);
 		return Iterables.getOnlyElement(qualifiers, null);
+	}
+
+	/**
+	 * Rule to determine if an available annotation (second argument) satisfies
+	 * a required annotation (first argument). If no rule matches, the two
+	 * annotations are simply compared for equality
+	 */
+	public final List<BiFunction<Annotation, Annotation, Boolean>> qualifierMatchingAnnotationRules = new ArrayList<>();
+
+	/**
+	 * Check if an available qualifier matches the reqired qualifier
+	 */
+	public boolean doQualifiersMatch(Annotation requiredQualifier,
+			Annotation availableQualifer) {
+		for (BiFunction<Annotation, Annotation, Boolean> func : qualifierMatchingAnnotationRules) {
+			Boolean result = func.apply(requiredQualifier, availableQualifer);
+			if (result != null)
+				return result;
+		}
+		return Objects.equals(requiredQualifier, availableQualifer);
+	}
+
+	/**
+	 * Rule to determine if an available annotation type (second argument)
+	 * satisfies a required annotation (first argument). If no rule matches, it
+	 * is simply checked if the required annotation has the type of the
+	 * available qualifier.
+	 */
+	public final List<BiFunction<Annotation, Class<?>, Boolean>> qualifierMatchingTypeRules = new ArrayList<>();
+
+	/**
+	 * check if an available qualifier type matches a required qualifier
+	 */
+	public boolean doQualifiersMatch(Annotation requiredQualifier,
+			Class<?> availableQualiferType) {
+		for (BiFunction<Annotation, Class<?>, Boolean> func : qualifierMatchingTypeRules) {
+			Boolean result = func.apply(requiredQualifier,
+					availableQualiferType);
+			if (result != null)
+				return result;
+		}
+
+		return requiredQualifier.annotationType().equals(availableQualiferType);
 	}
 
 	/**

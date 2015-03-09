@@ -24,9 +24,12 @@ public class DefaultCreationRecipeBuilder {
 	public Supplier<Scope> scopeSupplier;
 	private Binding binding;
 	private TypeToken<?> type;
+	private StandardInjectorConfiguration config;
 
 	public DefaultCreationRecipeBuilder(StandardInjectorConfiguration config,
 			TypeToken<?> type, Binding binding) {
+
+		this.config = config;
 
 		this.type = type;
 		this.binding = binding;
@@ -49,6 +52,11 @@ public class DefaultCreationRecipeBuilder {
 		SupplierRecipe innerRecipe = createInnerRecipe(enhancers.iterator(),
 				seedRecipe);
 
+		config.dynamicInitializers.add(injector -> {
+			if (config.stage == Stage.PRODUCTION) {
+
+			}
+		});
 		// apply scope
 		return scopeSupplier.get()
 				.createRecipe(ctx, binding, type, innerRecipe);

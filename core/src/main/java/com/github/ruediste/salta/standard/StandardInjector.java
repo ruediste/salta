@@ -2,7 +2,9 @@ package com.github.ruediste.salta.standard;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -10,10 +12,9 @@ import javax.inject.Provider;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.salta.core.CompiledFunction;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
-import com.github.ruediste.salta.core.RecipeCreationContextImpl;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
@@ -109,52 +110,8 @@ public class StandardInjector implements Injector {
 		}
 	}
 
-	private final class MembersInjectorImpl<T> implements MembersInjector<T> {
-		private CompiledFunction compiledRecipe;
-		private TypeToken<T> type;
-
-		public MembersInjectorImpl(TypeToken<T> type) {
-			this.type = type;
-			synchronized (coreInjector.recipeLock) {
-				RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
-						coreInjector);
-				List<RecipeMembersInjector> injectors = config
-						.createRecipeMembersInjectors(ctx, type);
-				List<RecipeInitializer> initializers = config
-						.createInitializers(ctx, type);
-				ctx.processQueuedActions();
-				FunctionRecipe recipe = new FunctionRecipe() {
-
-					@Override
-					public Class<?> compileImpl(Class<?> argumentType,
-							GeneratorAdapter mv, MethodCompilationContext ctx) {
-						for (RecipeMembersInjector rmi : injectors) {
-							argumentType = rmi.compile(argumentType, ctx);
-						}
-						for (RecipeInitializer initializer : initializers)
-							argumentType = initializer.compile(argumentType,
-									ctx);
-						return argumentType;
-					}
-				};
-				compiledRecipe = coreInjector.compileFunction(recipe);
-			}
-		}
-
-		@Override
-		public void injectMembers(T instance) {
-			checkInitialized();
-			try {
-				compiledRecipe.get(instance);
-			} catch (SaltaException e) {
-				throw e;
-			} catch (Throwable e) {
-				throw new SaltaException(
-						"Error while injecting members of instance of " + type
-								+ "\n" + e.getMessage(), e);
-			}
-		}
-	}
+	private ConcurrentHashMap<TypeToken<?>, MembersInjector<?>> membersInjectorCache = new ConcurrentHashMap<>();
+	private HashMap<TypeToken<?>, FunctionRecipe> membersInjectionRecipeCache = new HashMap<>();
 
 	private boolean initialized;
 	private StandardInjectorConfiguration config;
@@ -194,14 +151,46 @@ public class StandardInjector implements Injector {
 		getMembersInjector(type).injectMembers(instance);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-		return new MembersInjectorImpl<T>(typeLiteral);
+
+		return (MembersInjector<T>) membersInjectorCache.computeIfAbsent(
+				typeLiteral, type -> new MembersInjectorImpl<T>(type, this,
+						coreInjector));
 	}
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
 		return getMembersInjector(TypeToken.of(type));
+	}
+
+	@Override
+	public FunctionRecipe getMembersInjectionRecipe(TypeToken<?> typeToken,
+			RecipeCreationContext ctx) {
+		FunctionRecipe recipe = membersInjectionRecipeCache.get(typeToken);
+		if (recipe != null)
+			return recipe;
+
+		List<RecipeMembersInjector> injectors = config
+				.createRecipeMembersInjectors(ctx, typeToken);
+		List<RecipeInitializer> initializers = config.createInitializers(ctx,
+				typeToken);
+		recipe = new FunctionRecipe() {
+
+			@Override
+			public Class<?> compileImpl(Class<?> argumentType,
+					GeneratorAdapter mv, MethodCompilationContext ctx) {
+				for (RecipeMembersInjector rmi : injectors) {
+					argumentType = rmi.compile(argumentType, ctx);
+				}
+				for (RecipeInitializer initializer : initializers)
+					argumentType = initializer.compile(argumentType, ctx);
+				return argumentType;
+			}
+		};
+		membersInjectionRecipeCache.put(typeToken, recipe);
+		return recipe;
 	}
 
 	@Override

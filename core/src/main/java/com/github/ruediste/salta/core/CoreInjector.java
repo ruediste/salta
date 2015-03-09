@@ -103,13 +103,10 @@ public class CoreInjector {
 		if (compiledRecipe != null)
 			return compiledRecipe;
 
-		// possibly slow
-		SupplierRecipe recipe = getRecipe(key);
-
-		// compile the recipe with a lock on the key. Therefore
-		// compile must not do anything fancy
-		return compiledRecipeCache.computeIfAbsent(key,
-				x -> compileSupplier(recipe));
+		synchronized (recipeLock) {
+			return compiledRecipeCache.computeIfAbsent(key,
+					x -> compileSupplier(getRecipe(key)));
+		}
 	}
 
 	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {

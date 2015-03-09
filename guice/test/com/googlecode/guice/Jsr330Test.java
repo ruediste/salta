@@ -210,7 +210,7 @@ public class Jsr330Test extends TestCase {
 				protected void configure() {
 					bind(M.class);
 				}
-			});
+			}).getInstance(M.class);
 			fail();
 		} catch (CreationException expected) {
 			assertContains(expected.getMessage(), "1) Injected method "

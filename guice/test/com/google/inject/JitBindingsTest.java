@@ -211,9 +211,10 @@ public class JitBindingsTest extends TestCase {
 				}
 			}).getInstance(Bar.class);
 			fail("should have failed");
-		} catch (ConfigurationException expected) {
-			assertContains(expected.getMessage(), jitFailed(Bar.class));
-			assertEquals(1, expected.getErrorMessages().size());
+		} catch (SaltaException expected) {
+			if (!expected.getMessage()
+					.contains("Dependency cannot be resolved"))
+				throw expected;
 		}
 	}
 
@@ -259,11 +260,12 @@ public class JitBindingsTest extends TestCase {
 					bind(Foo.class).to(FooImpl.class);
 					bind(ProviderFooBar.class);
 				}
-			});
+			}).getInstance(ProviderFooBar.class);
 			fail("should have failed");
-		} catch (CreationException expected) {
-			assertContains(expected.getMessage(), jitFailed(Bar.class));
-			assertEquals(1, expected.getErrorMessages().size());
+		} catch (SaltaException expected) {
+			if (!expected.getMessage()
+					.contains("Dependency cannot be resolved"))
+				throw expected;
 		}
 	}
 
@@ -285,10 +287,12 @@ public class JitBindingsTest extends TestCase {
 			protected void configure() {
 				binder().requireExplicitBindings();
 				bind(ImplByScoped.class);
+				bind(ImplByScopedImpl.class);
 			}
 		});
 		ensureWorks(injector, ImplByScoped.class);
-		ensureFails(injector, ALLOW_BINDING, ImplByScopedImpl.class);
+		assertSame(injector.getInstance(ImplByScoped.class),
+				injector.getInstance(ImplByScoped.class));
 	}
 
 	public void testProvidedBy() {

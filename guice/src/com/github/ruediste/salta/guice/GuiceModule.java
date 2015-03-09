@@ -2,11 +2,15 @@ package com.github.ruediste.salta.guice;
 
 import static java.util.stream.Collectors.toList;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
+
+import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
@@ -14,6 +18,7 @@ import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
@@ -26,6 +31,7 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
 import com.github.ruediste.salta.standard.util.ProvidedByConstructionRuleBase;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
+import com.google.common.base.Objects;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.ImplementedBy;
@@ -37,6 +43,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Named;
 
 public class GuiceModule extends AbstractModule {
 
@@ -53,6 +60,43 @@ public class GuiceModule extends AbstractModule {
 	protected void configure() {
 
 		StandardInjectorConfiguration config = binder().getConfiguration();
+
+		// make Named annotations of javax.inject and Guice equivalent
+		config.qualifierMatchingAnnotationRules
+				.add(new BiFunction<Annotation, Annotation, Boolean>() {
+					@Override
+					public Boolean apply(Annotation required,
+							Annotation available) {
+						if (required instanceof javax.inject.Named
+								&& available instanceof Named) {
+							return Objects.equal(
+									((javax.inject.Named) required).value(),
+									((Named) available).value());
+						}
+						if (available instanceof javax.inject.Named
+								&& required instanceof Named) {
+							return Objects.equal(((Named) required).value(),
+									((javax.inject.Named) available).value());
+						}
+						return null;
+					}
+				});
+		config.qualifierMatchingTypeRules
+				.add(new BiFunction<Annotation, Class<?>, Boolean>() {
+
+					@Override
+					public Boolean apply(Annotation required,
+							Class<?> availableType) {
+						if (Named.class.equals(availableType)
+								|| javax.inject.Named.class
+										.equals(availableType)) {
+							return Named.class.equals(required.annotationType())
+									|| javax.inject.Named.class.equals(required
+											.annotationType());
+						}
+						return null;
+					}
+				});
 
 		config.config.creationRules.add(new CreationRule() {
 
@@ -79,14 +123,25 @@ public class GuiceModule extends AbstractModule {
 		// members injector creation rule
 		config.config.creationRules.add(new CreationRule() {
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public SupplierRecipe apply(CoreDependencyKey<?> key,
 					RecipeCreationContext ctx) {
 				if (MembersInjector.class.equals(key.getRawType())) {
 					TypeToken<?> dependency = key.getType().resolveType(
 							MembersInjector.class.getTypeParameters()[0]);
-					injector.getSaltaInjector().getMembersInjector(dependency);
-					foo
+					com.github.ruediste.salta.standard.MembersInjector<Object> saltaMembersInjector = (com.github.ruediste.salta.standard.MembersInjector<Object>) injector
+							.getSaltaInjector().getMembersInjector(dependency);
+					return new SupplierRecipe() {
+
+						@Override
+						protected Class<?> compileImpl(GeneratorAdapter mv,
+								MethodCompilationContext ctx) {
+							ctx.addFieldAndLoad(MembersInjector.class,
+									x -> saltaMembersInjector.injectMembers(x));
+							return MembersInjector.class;
+						}
+					};
 				}
 				return null;
 			}

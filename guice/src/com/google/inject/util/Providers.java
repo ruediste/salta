@@ -59,7 +59,7 @@ public final class Providers {
 
 		@Override
 		public T get() {
-			return token.getValue().get();
+			return delegate.get();
 		}
 
 		@Override
@@ -86,8 +86,9 @@ public final class Providers {
 
 		@PostConstruct
 		public void initialize(Injector injector) {
-			token = MemberInjectionToken.getMemberInjectionToken(
-					injector.getSaltaInjector(), delegate);
+			injector.injectMembers(delegate);
+			// token = MemberInjectionToken.getMemberInjectionToken(
+			// injector.getSaltaInjector(), delegate);
 		}
 	}
 
