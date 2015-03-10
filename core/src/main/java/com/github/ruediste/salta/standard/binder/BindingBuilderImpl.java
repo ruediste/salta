@@ -39,7 +39,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	 * overwritten in {@link #register()}
 	 */
 	private StandardStaticBinding binding;
-	private CreationRecipeFactory recipeFactory;
+	private Supplier<CreationRecipeFactory> recipeFactorySupplier;
 	private Supplier<Scope> scopeSupplier;
 	private Injector injector;
 
@@ -53,8 +53,11 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 		this.type = type;
 		eagerInstantiationDependency = DependencyKey.of(type);
 		this.config = config;
-		recipeFactory = ctx -> new DefaultCreationRecipeBuilder(config, type)
-				.build(ctx, binding);
+		recipeFactorySupplier = () -> {
+			config.staticallyBoundTypes.add(type);
+			return ctx -> new DefaultCreationRecipeBuilder(config, type).build(
+					ctx, binding);
+		};
 	}
 
 	public void register() {
@@ -65,7 +68,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					.requredQualifierMatcher((Annotation) null));
 
 		binding.possibleTypes.add(type);
-		binding.recipeFactory = recipeFactory;
+		binding.recipeFactory = recipeFactorySupplier.get();
 
 		config.config.staticBindings.add(binding);
 	}
@@ -84,7 +87,8 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	public ScopedBindingBuilder<T> to(
 			CoreDependencyKey<? extends T> implementation) {
 
-		recipeFactory = ctx -> {
+		recipeFactorySupplier = () -> ctx -> {
+			config.staticallyBoundTypes.add(implementation.getType());
 			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
 					config, implementation.getType());
 			if (scopeSupplier != null)
@@ -101,7 +105,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
 		MemberInjectionToken<T> token = MemberInjectionToken
 				.getMemberInjectionToken(injector, instance);
-		recipeFactory = new CreationRecipeFactory() {
+		recipeFactorySupplier = () -> new CreationRecipeFactory() {
 			boolean recipeCreationInProgress;
 
 			@Override
@@ -134,8 +138,8 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 			InstanceProvider<? extends T> provider) {
 		MemberInjectionToken<InstanceProvider<?>> token = MemberInjectionToken
 				.getMemberInjectionToken(injector, provider);
-		recipeFactory = ctx -> new SupplierRecipeImpl(() -> token.getValue()
-				.get());
+		recipeFactorySupplier = () -> ctx -> new SupplierRecipeImpl(() -> token
+				.getValue().get());
 		return this;
 	}
 
@@ -154,7 +158,6 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	@Override
 	public ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<? extends InstanceProvider<? extends T>> providerKey) {
-
 		return toProvider(providerKey, x -> x);
 	}
 
@@ -198,19 +201,22 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	public <P> ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
 			Function<? super P, InstanceProvider<? extends T>> providerWrapper) {
-		recipeFactory = ctx -> {
-			// entered when creating the recipe
-			ProviderByKeyInvocationRecipe invocationRecipe = new ProviderByKeyInvocationRecipe(
-					providerKey);
-			ctx.queueAction(() -> {
-				SupplierRecipe recipe = ctx.getRecipe(providerKey);
+		recipeFactorySupplier = () -> {
+			config.boundProviders.add(providerKey);
+			return ctx -> {
+				// entered when creating the recipe
+				ProviderByKeyInvocationRecipe invocationRecipe = new ProviderByKeyInvocationRecipe(
+						providerKey);
+				ctx.queueAction(() -> {
+					SupplierRecipe recipe = ctx.getRecipe(providerKey);
 
-				CompiledSupplier compiledSupplier = ctx.getCompiler()
-						.compileSupplier(recipe);
-				invocationRecipe.delegate = providerWrapper
-						.apply((P) compiledSupplier.getNoThrow());
-			});
-			return invocationRecipe;
+					CompiledSupplier compiledSupplier = ctx.getCompiler()
+							.compileSupplier(recipe);
+					invocationRecipe.delegate = providerWrapper
+							.apply((P) compiledSupplier.getNoThrow());
+				});
+				return invocationRecipe;
+			};
 		};
 		return this;
 	}
@@ -225,7 +231,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	@Override
 	public <S extends T> ScopedBindingBuilder<T> toConstructor(
 			Constructor<S> constructor, TypeToken<? extends S> type) {
-		recipeFactory = creationContext -> {
+		recipeFactorySupplier = () -> creationContext -> {
 			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
 					config, type);
 			builder.constructionRecipeSupplier = (ctx) -> config.fixedConstructorInstantiatorFactory

@@ -24,6 +24,13 @@ public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
 	public final List<StaticBinding> staticBindings = new ArrayList<>();
 
 	/**
+	 * Automatically defined statically defined bindings. These bindings are
+	 * evaluated after the {@link #staticBindings}, but before the
+	 * {@link #jitBindingRules}
+	 */
+	public final List<StaticBinding> automaticStaticBindings = new ArrayList<>();
+
+	/**
 	 * Rules to create the key used to lookup and create JIT bindings
 	 */
 	public final List<JITBindingKeyRule> jitBindingKeyRules = new ArrayList<>();

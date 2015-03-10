@@ -24,8 +24,10 @@ import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
 import com.github.ruediste.salta.jsr330.JSR330ConstructorInstantiatorRule;
 import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
+import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
@@ -209,6 +211,19 @@ public class GuiceModule extends AbstractModule {
 		config.staticInitializers.add(injector::setDelegate);
 
 		// add rule for ProvidedBy and ImplementedBy
+		for (TypeToken<?> type : config.staticallyBoundTypes) {
+			ProvidedBy providedBy = type.getRawType().getAnnotation(
+					ProvidedBy.class);
+			if (providedBy != null) {
+				StandardStaticBinding binding = new StandardStaticBinding();
+				binding.dependencyMatcher = DependencyKey
+						.rawTypeMatcher(providedBy.value());
+				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
+						config, TypeToken.of(providedBy.value())).build(ctx,
+						binding);
+				config.config.automaticStaticBindings.add(binding);
+			}
+		}
 		config.constructionRules.add(new ProvidedByConstructionRuleBase(
 				Provider.class) {
 
@@ -216,11 +231,42 @@ public class GuiceModule extends AbstractModule {
 			protected DependencyKey<?> getProviderKey(TypeToken<?> type) {
 				ProvidedBy providedBy = type.getRawType().getAnnotation(
 						ProvidedBy.class);
-				if (providedBy != null)
+				if (providedBy != null) {
+					if (!type.isAssignableFrom(TypeToken.of(providedBy.value())
+							.resolveType(Provider.class.getTypeParameters()[0]))) {
+						throw new SaltaException("Provider "
+								+ providedBy.value()
+								+ " specified by @ProvidedBy does not provide "
+								+ type);
+					}
 					return DependencyKey.of(providedBy.value());
+				}
 				return null;
 			}
 		});
+
+		for (TypeToken<?> type : config.staticallyBoundTypes) {
+			ImplementedBy implementedBy = type.getRawType().getAnnotation(
+					ImplementedBy.class);
+			if (implementedBy != null) {
+
+				StandardStaticBinding binding = new StandardStaticBinding();
+				binding.dependencyMatcher = DependencyKey
+						.rawTypeMatcher(implementedBy.value());
+				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
+						config, TypeToken.of(implementedBy.value())).build(ctx,
+						binding);
+				config.config.automaticStaticBindings.add(binding);
+			}
+		}
+
+		for (CoreDependencyKey<?> foo : config.boundProviders) {
+			StandardStaticBinding binding = new StandardStaticBinding();
+			binding.dependencyMatcher = dep -> dep.equals(foo);
+			binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
+					config, foo.getType()).build(ctx, binding);
+			config.config.automaticStaticBindings.add(binding);
+		}
 
 		config.constructionRules.add(new ImplementedByConstructionRuleBase() {
 
@@ -228,8 +274,21 @@ public class GuiceModule extends AbstractModule {
 			protected DependencyKey<?> getImplementorKey(TypeToken<?> type) {
 				ImplementedBy implementedBy = type.getRawType().getAnnotation(
 						ImplementedBy.class);
-				if (implementedBy != null)
+				if (implementedBy != null) {
+					if (!type.isAssignableFrom(implementedBy.value())) {
+						throw new SaltaException(
+								"Implementation "
+										+ implementedBy.value()
+										+ " specified by @ImplementedBy does not implement "
+										+ type);
+					}
+					if (type.getRawType().equals(implementedBy.value())) {
+						throw new SaltaException(
+								"@ImplementedBy points to the same class it annotates. type: "
+										+ type);
+					}
 					return DependencyKey.of(implementedBy.value());
+				}
 				return null;
 			}
 		});

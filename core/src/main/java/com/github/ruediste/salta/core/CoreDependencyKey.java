@@ -90,7 +90,7 @@ public abstract class CoreDependencyKey<T> {
 
 		@Override
 		public boolean matches(CoreDependencyKey<?> key) {
-			return key.getRawType().equals(key);
+			return key.getRawType().equals(type);
 		}
 
 		@Override

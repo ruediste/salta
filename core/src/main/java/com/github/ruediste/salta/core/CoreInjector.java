@@ -1,19 +1,12 @@
 package com.github.ruediste.salta.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
-import com.github.ruediste.salta.matchers.Matcher;
-import com.google.common.collect.Iterables;
-import com.google.common.reflect.TypeToken;
 
 public class CoreInjector {
 
@@ -32,8 +25,8 @@ public class CoreInjector {
 
 	private HashMap<JITBindingKey, JITBinding> jitBindings = new HashMap<>();
 
-	private HashMap<TypeToken<?>, List<StaticBinding>> staticBindingMap = new HashMap<>();
-	private ArrayList<StaticBinding> nonTypeSpecificStaticBindings = new ArrayList<>();
+	private StaticBindingSet staticBindings;
+	private StaticBindingSet automaticStaticBindings;
 
 	/**
 	 * Create and initialize this injector
@@ -41,34 +34,9 @@ public class CoreInjector {
 	public CoreInjector(CoreInjectorConfiguration config) {
 		this.config = config;
 
-		// check uniqueness of static bindings
-		{
-			HashMap<Matcher<?>, StaticBinding> map = new HashMap<>();
-			for (StaticBinding b : config.staticBindings) {
-				StaticBinding existing = map.put(b.getMatcher(), b);
-				if (existing != null) {
-					throw new SaltaException("Duplicate static binding found\n"
-							+ b + "\n" + existing);
-				}
-			}
-		}
-
-		// initialize static binding map
-		for (StaticBinding binding : config.staticBindings) {
-			Set<TypeToken<?>> possibleTypes = binding.getPossibleTypes();
-			if (possibleTypes == null || possibleTypes.isEmpty())
-				nonTypeSpecificStaticBindings.add(binding);
-			else {
-				for (TypeToken<?> t : possibleTypes) {
-					List<StaticBinding> list = staticBindingMap.get(t);
-					if (list == null) {
-						list = new ArrayList<>();
-						staticBindingMap.put(t, list);
-					}
-					list.add(binding);
-				}
-			}
-		}
+		staticBindings = new StaticBindingSet(config.staticBindings);
+		automaticStaticBindings = new StaticBindingSet(
+				config.automaticStaticBindings);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -175,23 +143,15 @@ public class CoreInjector {
 
 			// check static bindings
 			{
-				StaticBinding binding = null;
-				List<StaticBinding> typeSpecificBindings = staticBindingMap
-						.get(key.getType());
-				if (typeSpecificBindings == null)
-					typeSpecificBindings = Collections.emptyList();
-
-				for (StaticBinding b : Iterables.concat(
-						nonTypeSpecificStaticBindings, typeSpecificBindings)) {
-					if (b.getMatcher().matches(key)) {
-						if (binding != null)
-							throw new SaltaException(
-									"multiple bindings match dependency " + key
-											+ "\n * " + binding + "\n * " + b);
-						binding = b;
-					}
+				StaticBinding binding = staticBindings.getBinding(key);
+				if (binding != null) {
+					return ctx.getOrCreateRecipe(binding);
 				}
+			}
 
+			// check automatic static bindings
+			{
+				StaticBinding binding = automaticStaticBindings.getBinding(key);
 				if (binding != null) {
 					return ctx.getOrCreateRecipe(binding);
 				}

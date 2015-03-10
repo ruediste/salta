@@ -39,6 +39,7 @@ import net.sf.cglib.proxy.ProxyRefDispatcher;
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
@@ -373,6 +374,12 @@ public class Binder {
 	 */
 	public void requestStaticInjection(Class<?>... types) {
 		for (Class<?> type : types) {
+			if (type.isInterface()) {
+				throw new SaltaException(
+						"Requested static injection of "
+								+ type
+								+ ", but interfaces do not have static injection points.");
+			}
 			config.requestedStaticInjections.add(type);
 		}
 	}

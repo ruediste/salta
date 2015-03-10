@@ -22,22 +22,17 @@ public class DefaultCreationRecipeBuilder {
 	public Function<RecipeCreationContext, List<RecipeEnhancer>> enhancersSupplier;
 
 	public Supplier<Scope> scopeSupplier;
-	private Binding binding;
 	private TypeToken<?> type;
-	private StandardInjectorConfiguration config;
 
 	public DefaultCreationRecipeBuilder(StandardInjectorConfiguration config,
-			TypeToken<?> type) {
+			TypeToken<?> boundType) {
 
-		this.config = config;
-
-		this.type = type;
-		this.binding = binding;
+		this.type = boundType;
 		constructionRecipeSupplier = ctx -> config.createConstructionRecipe(
-				ctx, type);
+				ctx, boundType);
 
-		enhancersSupplier = ctx -> config.createEnhancers(ctx, type);
-		scopeSupplier = () -> config.getScope(type);
+		enhancersSupplier = ctx -> config.createEnhancers(ctx, boundType);
+		scopeSupplier = () -> config.getScope(boundType);
 	}
 
 	/**
@@ -54,25 +49,33 @@ public class DefaultCreationRecipeBuilder {
 		// apply enhancers
 		List<RecipeEnhancer> enhancers = new ArrayList<>(
 				enhancersSupplier.apply(ctx));
-		Collections.reverse(enhancers);
-		SupplierRecipe innerRecipe = createInnerRecipe(enhancers.iterator(),
-				seedRecipe);
 
-		config.dynamicInitializers.add(injector -> {
-			if (config.stage == Stage.PRODUCTION) {
+		SupplierRecipe innerRecipe = applyEnhancers(seedRecipe, enhancers);
 
-			}
-		});
 		// apply scope
-		if (binding != null)
-			return scopeSupplier.get().createRecipe(ctx, binding, type,
-					innerRecipe);
-		else
+		if (binding != null) {
+			return applyScope(innerRecipe, scopeSupplier.get(), binding, type,
+					ctx);
+		} else
 			return innerRecipe;
 	}
 
-	private SupplierRecipe createInnerRecipe(Iterator<RecipeEnhancer> iterator,
-			SupplierRecipe seedRecipe) {
+	public static SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
+			List<RecipeEnhancer> enhancers) {
+		Collections.reverse(enhancers);
+		SupplierRecipe innerRecipe = createInnerRecipe(enhancers.iterator(),
+				seedRecipe);
+		return innerRecipe;
+	}
+
+	public static SupplierRecipe applyScope(SupplierRecipe innerRecipe,
+			Scope scope, Binding binding, TypeToken<?> boundType,
+			RecipeCreationContext ctx) {
+		return scope.createRecipe(ctx, binding, boundType, innerRecipe);
+	}
+
+	private static SupplierRecipe createInnerRecipe(
+			Iterator<RecipeEnhancer> iterator, SupplierRecipe seedRecipe) {
 		if (!iterator.hasNext())
 			return seedRecipe;
 

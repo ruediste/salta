@@ -444,4 +444,7 @@ public class StandardInjectorConfiguration {
 			modulePostProcessors.stream().forEach(x -> x.accept(module));
 		}
 	}
+
+	public final ArrayList<TypeToken<?>> staticallyBoundTypes = new ArrayList<>();
+	public final ArrayList<CoreDependencyKey<?>> boundProviders = new ArrayList<>();
 }
