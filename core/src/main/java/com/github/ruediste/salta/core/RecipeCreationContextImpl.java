@@ -66,7 +66,12 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	}
 
 	public void processQueuedActions() {
-		queuedActions.forEach(x -> x.run());
+		while (!queuedActions.isEmpty()) {
+			ArrayList<Runnable> tmp = new ArrayList<Runnable>(queuedActions);
+			queuedActions.clear();
+			for (Runnable r : tmp)
+				r.run();
+		}
 	}
 
 	@Override

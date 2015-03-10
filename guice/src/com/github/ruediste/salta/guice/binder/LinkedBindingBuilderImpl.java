@@ -5,7 +5,6 @@ import java.lang.reflect.Constructor;
 import javax.annotation.PostConstruct;
 
 import com.github.ruediste.salta.guice.KeyAdapter;
-import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.binder.InstanceProvider;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -85,7 +84,7 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 			TypeLiteral<P> providerType) {
 		return new ScopedBindingBuilderImpl(
 				delegate.toProvider(
-						DependencyKey.of(providerType.getTypeToken()),
+						providerType.getTypeToken(),
 						new java.util.function.Function<P, InstanceProvider<? extends T>>() {
 
 							@Override

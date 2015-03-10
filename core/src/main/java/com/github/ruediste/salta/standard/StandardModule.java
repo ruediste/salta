@@ -54,7 +54,7 @@ public class StandardModule extends AbstractModule {
 					return null;
 				StandardJitBinding binding = new StandardJitBinding(type);
 				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-						config, type, binding).build(ctx);
+						config, type).build(ctx, binding);
 				return binding;
 			}
 		});

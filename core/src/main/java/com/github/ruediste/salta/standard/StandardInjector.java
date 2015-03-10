@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -134,8 +135,13 @@ public class StandardInjector implements Injector {
 			initializer.accept(this);
 		}
 		initialized = true;
-		for (Consumer<Injector> initializer : config.dynamicInitializers) {
-			initializer.accept(this);
+		while (!config.dynamicInitializers.isEmpty()) {
+			ArrayList<Consumer<Injector>> tmp = new ArrayList<>(
+					config.dynamicInitializers);
+			config.dynamicInitializers.clear();
+			for (Consumer<Injector> initializer : tmp) {
+				initializer.accept(this);
+			}
 		}
 	}
 

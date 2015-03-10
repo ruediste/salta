@@ -46,6 +46,8 @@ public class Salta {
 			module.configure(binder);
 		}
 
+		binder.close();
+
 		if (!config.errorMessages.isEmpty()) {
 			throw new SaltaException("There were Errors:\n"
 					+ config.errorMessages.stream()

@@ -193,7 +193,6 @@ public class JitBindingsTest extends TestCase {
 			protected void configure() {
 				binder().requireExplicitBindings();
 				bind(Foo.class).toProvider(FooProvider.class);
-				bind(FooProvider.class);
 			}
 		});
 		// Foo was explicitly bound
@@ -275,7 +274,6 @@ public class JitBindingsTest extends TestCase {
 			protected void configure() {
 				binder().requireExplicitBindings();
 				bind(ImplBy.class);
-				bind(ImplByImpl.class);
 			}
 		});
 		ensureWorks(injector, ImplBy.class);
@@ -287,7 +285,6 @@ public class JitBindingsTest extends TestCase {
 			protected void configure() {
 				binder().requireExplicitBindings();
 				bind(ImplByScoped.class);
-				bind(ImplByScopedImpl.class);
 			}
 		});
 		ensureWorks(injector, ImplByScoped.class);
@@ -301,7 +298,6 @@ public class JitBindingsTest extends TestCase {
 			protected void configure() {
 				binder().requireExplicitBindings();
 				bind(ProvBy.class);
-				bind(ProvByProvider.class);
 			}
 		});
 		ensureWorks(injector, ProvBy.class);

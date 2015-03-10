@@ -40,7 +40,6 @@ import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.matchers.Matcher;
-import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.MembersInjector;
@@ -48,7 +47,6 @@ import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Module;
 import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.EnhancementRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
@@ -246,6 +244,8 @@ public class Binder {
 	private StandardInjectorConfiguration config;
 	private Injector injector;
 
+	BindingBuilderImpl<?> currentBindingBuilder;
+
 	public Binder(StandardInjectorConfiguration config, Injector injector) {
 		this.config = config;
 		this.injector = injector;
@@ -310,27 +310,17 @@ public class Binder {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
-		StandardStaticBinding binding = new StandardStaticBinding();
-		DefaultCreationRecipeBuilder recipeBuilder = new DefaultCreationRecipeBuilder(
-				config, type, binding);
+		if (currentBindingBuilder != null)
+			currentBindingBuilder.register();
+		BindingBuilderImpl<T> tmp = new BindingBuilderImpl<>(
+				CoreDependencyKey.typeMatcher(type), type, config, injector);
+		currentBindingBuilder = tmp;
+		return tmp;
+	}
 
-		binding.possibleTypes.add(type);
-		binding.recipeFactory = ctx -> recipeBuilder.build(ctx);
-
-		config.config.staticBindings.add(binding);
-
-		BindingBuilderData<T> data = new BindingBuilderData<>();
-		data.binding = binding;
-		data.setTypeMatcher(CoreDependencyKey.typeMatcher(type));
-		data.setAnnotationMatcher(config
-				.requredQualifierMatcher((Annotation) null));
-		data.injector = injector;
-		data.eagerInstantiationDependency = DependencyKey.of(type);
-		data.config = config;
-		data.recipeBuilder = recipeBuilder;
-		data.boundType = type;
-
-		return new AnnotatedBindingBuilder<>(data);
+	public void close() {
+		if (currentBindingBuilder != null)
+			currentBindingBuilder.register();
 	}
 
 	/**
@@ -370,7 +360,8 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public void requestInjection(Object instance) {
-		config.dynamicInitializers.add(injector -> injector.injectMembers(instance));
+		config.dynamicInitializers.add(injector -> injector
+				.injectMembers(instance));
 	}
 
 	/**

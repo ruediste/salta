@@ -424,7 +424,11 @@ public class StandardInjectorConfiguration {
 				return result;
 		}
 
-		return requiredQualifier.annotationType().equals(availableQualiferType);
+		if (requiredQualifier == null)
+			return availableQualiferType == null;
+		else
+			return requiredQualifier.annotationType().equals(
+					availableQualiferType);
 	}
 
 	/**

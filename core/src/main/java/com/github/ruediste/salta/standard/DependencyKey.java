@@ -74,8 +74,10 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 		return Collections.unmodifiableMap(annotations);
 	}
 
+	@SafeVarargs
 	@SuppressWarnings("unchecked")
-	public DependencyKey<T> withAnnotations(Class<? extends Annotation>... cls) {
+	public final DependencyKey<T> withAnnotations(
+			Class<? extends Annotation>... cls) {
 		Annotation[] annotations = new Annotation[cls.length];
 		for (int i = 0; i < cls.length; i++) {
 			annotations[i] = AnnotationProxy.newProxy(cls[i]);

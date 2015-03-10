@@ -27,7 +27,7 @@ public class DefaultCreationRecipeBuilder {
 	private StandardInjectorConfiguration config;
 
 	public DefaultCreationRecipeBuilder(StandardInjectorConfiguration config,
-			TypeToken<?> type, Binding binding) {
+			TypeToken<?> type) {
 
 		this.config = config;
 
@@ -40,7 +40,13 @@ public class DefaultCreationRecipeBuilder {
 		scopeSupplier = () -> config.getScope(type);
 	}
 
-	public SupplierRecipe build(RecipeCreationContext ctx) {
+	/**
+	 * Build the recipe.
+	 * 
+	 * @param binding
+	 *            binding to be used for scoping. If null, no scoping will occur
+	 */
+	public SupplierRecipe build(RecipeCreationContext ctx, Binding binding) {
 
 		// create seed recipe
 		SupplierRecipe seedRecipe = constructionRecipeSupplier.apply(ctx);
@@ -58,8 +64,11 @@ public class DefaultCreationRecipeBuilder {
 			}
 		});
 		// apply scope
-		return scopeSupplier.get()
-				.createRecipe(ctx, binding, type, innerRecipe);
+		if (binding != null)
+			return scopeSupplier.get().createRecipe(ctx, binding, type,
+					innerRecipe);
+		else
+			return innerRecipe;
 	}
 
 	private SupplierRecipe createInnerRecipe(Iterator<RecipeEnhancer> iterator,

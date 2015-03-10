@@ -19,7 +19,7 @@ import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
-import com.github.ruediste.salta.standard.binder.LinkedBindingBuilder.RecursiveAccessOfInstanceOfProviderClassException;
+import com.github.ruediste.salta.standard.binder.BindingBuilderImpl.RecursiveAccessOfInstanceOfProviderClassException;
 
 public class LinkedBindingBuilderTest {
 

@@ -226,8 +226,7 @@ public class CoreInjector {
 		} catch (SaltaException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new SaltaException("Error creating recipe for " + key + "\n"
-					+ e.getMessage(), e);
+			throw new SaltaException("Error creating recipe for " + key, e);
 		}
 		throw new SaltaException("Dependency cannot be resolved:\n" + key);
 	}
