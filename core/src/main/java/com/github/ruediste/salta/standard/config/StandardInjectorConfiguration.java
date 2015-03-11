@@ -21,11 +21,11 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Message;
-import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.ScopeRule;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardInjector;
@@ -445,6 +445,6 @@ public class StandardInjectorConfiguration {
 		}
 	}
 
-	public final ArrayList<TypeToken<?>> staticallyBoundTypes = new ArrayList<>();
-	public final ArrayList<CoreDependencyKey<?>> boundProviders = new ArrayList<>();
+	public final ArrayList<TypeToken<?>> typesBoundToDefaultCreationRecipe = new ArrayList<>();
+	public final ArrayList<CoreDependencyKey<?>> implicitlyBoundKeys = new ArrayList<>();
 }

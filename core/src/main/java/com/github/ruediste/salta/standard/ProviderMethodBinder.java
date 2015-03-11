@@ -9,6 +9,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.StaticBinding;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -55,19 +56,15 @@ public abstract class ProviderMethodBinder {
 					}
 					FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(
 							m, args, config.config.injectionStrategy);
-					Scope scope = config.getScope(m);
-					return scope.createRecipe(ctx, this,
-							TypeToken.of(boundType), new SupplierRecipe() {
+					return new SupplierRecipe() {
 
-								@Override
-								protected Class<?> compileImpl(
-										GeneratorAdapter mv,
-										MethodCompilationContext ctx) {
-									ctx.addFieldAndLoad(Object.class, instance);
-									return methodRecipe.compile(Object.class,
-											ctx);
-								}
-							});
+						@Override
+						protected Class<?> compileImpl(GeneratorAdapter mv,
+								MethodCompilationContext ctx) {
+							ctx.addFieldAndLoad(Object.class, instance);
+							return methodRecipe.compile(Object.class, ctx);
+						}
+					};
 				}
 
 				@Override
@@ -78,6 +75,11 @@ public abstract class ProviderMethodBinder {
 				@Override
 				public Matcher<CoreDependencyKey<?>> getMatcher() {
 					return matcher;
+				}
+
+				@Override
+				protected Scope getScopeImpl() {
+					return config.getScope(m);
 				}
 			});
 		}

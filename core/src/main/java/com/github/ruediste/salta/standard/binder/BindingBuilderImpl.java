@@ -13,6 +13,7 @@ import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
@@ -21,7 +22,6 @@ import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
-import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.MemberInjectionToken;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
@@ -54,10 +54,11 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 		eagerInstantiationDependency = DependencyKey.of(type);
 		this.config = config;
 		recipeFactorySupplier = () -> {
-			config.staticallyBoundTypes.add(type);
-			return ctx -> new DefaultCreationRecipeBuilder(config, type).build(
-					ctx, binding);
+			config.typesBoundToDefaultCreationRecipe.add(type);
+			return ctx -> new DefaultCreationRecipeBuilder(config, type)
+					.build(ctx);
 		};
+		scopeSupplier = () -> config.getScope(type);
 	}
 
 	public void register() {
@@ -69,6 +70,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
 		binding.possibleTypes.add(type);
 		binding.recipeFactory = recipeFactorySupplier.get();
+		binding.scopeSupplier = scopeSupplier;
 
 		config.config.staticBindings.add(binding);
 	}
@@ -88,13 +90,13 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 			CoreDependencyKey<? extends T> implementation) {
 
 		recipeFactorySupplier = () -> ctx -> {
-			config.staticallyBoundTypes.add(implementation.getType());
+			config.typesBoundToDefaultCreationRecipe.add(implementation
+					.getType());
 			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
 					config, implementation.getType());
-			if (scopeSupplier != null)
-				builder.scopeSupplier = scopeSupplier;
-			return builder.build(ctx, binding);
+			return builder.build(ctx);
 		};
+		scopeSupplier = () -> config.getScope(implementation.getType());
 		return this;
 	}
 
@@ -105,6 +107,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
 		MemberInjectionToken<T> token = MemberInjectionToken
 				.getMemberInjectionToken(injector, instance);
+		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> new CreationRecipeFactory() {
 			boolean recipeCreationInProgress;
 
@@ -138,6 +141,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 			InstanceProvider<? extends T> provider) {
 		MemberInjectionToken<InstanceProvider<?>> token = MemberInjectionToken
 				.getMemberInjectionToken(injector, provider);
+		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> ctx -> new SupplierRecipeImpl(() -> token
 				.getValue().get());
 		return this;
@@ -201,8 +205,9 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	public <P> ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
 			Function<? super P, InstanceProvider<? extends T>> providerWrapper) {
+		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> {
-			config.boundProviders.add(providerKey);
+			config.implicitlyBoundKeys.add(providerKey);
 			return ctx -> {
 				// entered when creating the recipe
 				ProviderByKeyInvocationRecipe invocationRecipe = new ProviderByKeyInvocationRecipe(
@@ -236,7 +241,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					config, type);
 			builder.constructionRecipeSupplier = (ctx) -> config.fixedConstructorInstantiatorFactory
 					.create(type, ctx, constructor);
-			return builder.build(creationContext, binding);
+			return builder.build(creationContext);
 		};
 		return this;
 	}

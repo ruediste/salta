@@ -37,6 +37,40 @@ public abstract class CoreDependencyKey<T> {
 		return new TypeTokenMatcher(type);
 	}
 
+	private static final class EqualityMatcher implements
+			Matcher<CoreDependencyKey<?>> {
+		private CoreDependencyKey<?> key;
+
+		public EqualityMatcher(CoreDependencyKey<?> key) {
+			this.key = key;
+		}
+
+		@Override
+		public boolean matches(CoreDependencyKey<?> t) {
+			return Objects.equals(key, t);
+		}
+
+		@Override
+		public int hashCode() {
+			return key.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this)
+				return true;
+			if (obj instanceof EqualityMatcher) {
+				return Objects.equals(key, ((EqualityMatcher) obj).key);
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return "=" + key;
+		}
+	}
+
 	public static class TypeTokenMatcher implements
 			Matcher<CoreDependencyKey<?>> {
 
@@ -109,5 +143,10 @@ public abstract class CoreDependencyKey<T> {
 		public String toString() {
 			return "rawType=" + type;
 		}
+	}
+
+	public static Matcher<CoreDependencyKey<?>> matcher(CoreDependencyKey<?> key) {
+		return new EqualityMatcher(key);
+
 	}
 }

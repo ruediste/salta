@@ -222,4 +222,9 @@ public class StandardInjector implements Injector {
 		checkInitialized();
 		return coreInjector.getInstance(new ClassDependencyKey<T>(type));
 	}
+
+	@Override
+	public CoreInjector getCoreInjector() {
+		return coreInjector;
+	}
 }

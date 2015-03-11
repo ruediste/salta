@@ -9,6 +9,7 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
 public abstract class Binding extends AttachedPropertyBearerBase {
 
 	private SupplierRecipe recipe;
+	private Scope scope;
 	boolean creatingRecipe;
 
 	public static class RecursiveRecipeCreationDetectedException extends
@@ -45,4 +46,11 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	 */
 	protected abstract SupplierRecipe createRecipe(RecipeCreationContext ctx);
 
+	public Scope getScope() {
+		if (scope == null)
+			scope = getScopeImpl();
+		return scope;
+	}
+
+	protected abstract Scope getScopeImpl();
 }

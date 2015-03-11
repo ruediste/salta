@@ -1,7 +1,6 @@
 package com.github.ruediste.salta.core;
 
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
-import com.github.ruediste.salta.standard.Scope;
 
 /**
  * When looking up a key, the {@link CoreInjector} first checks these rules. If

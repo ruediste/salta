@@ -34,7 +34,6 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
-import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -212,9 +211,10 @@ public class Jsr330Test extends TestCase {
 				}
 			}).getInstance(M.class);
 			fail();
-		} catch (CreationException expected) {
-			assertContains(expected.getMessage(), "1) Injected method "
-					+ AbstractM.class.getName() + ".setB() cannot be abstract.");
+		} catch (SaltaException expected) {
+			if (!expected.getMessage()
+					.contains("Method annotated with @Inject"))
+				throw expected;
 		}
 	}
 

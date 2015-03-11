@@ -2,8 +2,8 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 
+import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.standard.Injector;
-import com.github.ruediste.salta.standard.Scope;
 
 /**
  * See the EDSL examples at {@link Binder}.

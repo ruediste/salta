@@ -58,6 +58,7 @@ public class ConstantBindingBuilder {
 				};
 			}
 		};
+		binding.scopeSupplier = () -> config.defaultScope;
 		return binding;
 	}
 

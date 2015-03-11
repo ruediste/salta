@@ -52,8 +52,7 @@ public abstract class MembersInjectorFactoryBase implements
 			}
 
 			for (Method method : t.getRawType().getDeclaredMethods()) {
-				if (Modifier.isStatic(method.getModifiers())
-						|| Modifier.isAbstract(method.getModifiers()))
+				if (Modifier.isStatic(method.getModifiers()))
 					continue;
 				if (isInjectableMethod(t, method, overrideIndex)) {
 					method.setAccessible(true);

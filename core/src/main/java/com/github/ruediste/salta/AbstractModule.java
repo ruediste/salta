@@ -29,11 +29,11 @@ import javax.inject.Provider;
 import net.sf.cglib.proxy.Callback;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Module;
-import com.github.ruediste.salta.standard.Scope;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;

@@ -1,7 +1,5 @@
-package com.github.ruediste.salta.standard;
+package com.github.ruediste.salta.core;
 
-import com.github.ruediste.salta.core.Binding;
-import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.google.common.reflect.TypeToken;
 
@@ -13,7 +11,8 @@ public interface Scope {
 
 	/**
 	 * Create a recipe. No incoming parameter on the stack. The scoped instance
-	 * is expected afterwards
+	 * is expected afterwards. The calling thread always holds the
+	 * {@link CoreInjector#recipeLock}
 	 * 
 	 * @param ctx
 	 * @param binding
@@ -25,6 +24,6 @@ public interface Scope {
 	 * @return
 	 */
 	SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding,
-			TypeToken<?> boundType, SupplierRecipe innerRecipe);
+			TypeToken<?> requestedType, SupplierRecipe innerRecipe);
 
 }

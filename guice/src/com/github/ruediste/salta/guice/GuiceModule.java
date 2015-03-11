@@ -3,20 +3,26 @@ package com.github.ruediste.salta.guice;
 import static java.util.stream.Collectors.toList;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.AbstractModule;
+import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -29,6 +35,7 @@ import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
+import com.github.ruediste.salta.standard.config.SingletonScope;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
 import com.github.ruediste.salta.standard.util.ProvidedByConstructionRuleBase;
@@ -155,10 +162,16 @@ public class GuiceModule extends AbstractModule {
 							BindingAnnotation.class));
 		});
 
-		config.availableQualifierExtractors.add(annotated -> Arrays.stream(
-				annotated.getAnnotations()).filter(
-				a -> a.annotationType().isAnnotationPresent(
-						BindingAnnotation.class)));
+		config.availableQualifierExtractors
+				.add(new Function<AnnotatedElement, Stream<Annotation>>() {
+					@Override
+					public Stream<Annotation> apply(AnnotatedElement annotated) {
+						return Arrays.stream(annotated.getAnnotations())
+								.filter(a -> a.annotationType()
+										.isAnnotationPresent(
+												BindingAnnotation.class));
+					}
+				});
 
 		// Rule for type literals
 		config.config.creationRules
@@ -211,7 +224,7 @@ public class GuiceModule extends AbstractModule {
 		config.staticInitializers.add(injector::setDelegate);
 
 		// add rule for ProvidedBy and ImplementedBy
-		for (TypeToken<?> type : config.staticallyBoundTypes) {
+		for (TypeToken<?> type : config.typesBoundToDefaultCreationRecipe) {
 			ProvidedBy providedBy = type.getRawType().getAnnotation(
 					ProvidedBy.class);
 			if (providedBy != null) {
@@ -219,8 +232,9 @@ public class GuiceModule extends AbstractModule {
 				binding.dependencyMatcher = DependencyKey
 						.rawTypeMatcher(providedBy.value());
 				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-						config, TypeToken.of(providedBy.value())).build(ctx,
-						binding);
+						config, TypeToken.of(providedBy.value())).build(ctx);
+				binding.scopeSupplier = () -> config.getScope(providedBy
+						.value());
 				config.config.automaticStaticBindings.add(binding);
 			}
 		}
@@ -245,27 +259,38 @@ public class GuiceModule extends AbstractModule {
 			}
 		});
 
-		for (TypeToken<?> type : config.staticallyBoundTypes) {
-			ImplementedBy implementedBy = type.getRawType().getAnnotation(
-					ImplementedBy.class);
-			if (implementedBy != null) {
-
-				StandardStaticBinding binding = new StandardStaticBinding();
-				binding.dependencyMatcher = DependencyKey
-						.rawTypeMatcher(implementedBy.value());
-				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-						config, TypeToken.of(implementedBy.value())).build(ctx,
-						binding);
-				config.config.automaticStaticBindings.add(binding);
+		if (guiceConfig.requireExplicitBindings) {
+			HashSet<Class<?>> rawTypes = new HashSet<Class<?>>();
+			for (TypeToken<?> type : config.typesBoundToDefaultCreationRecipe) {
+				ImplementedBy implementedBy = type.getRawType().getAnnotation(
+						ImplementedBy.class);
+				if (implementedBy != null) {
+					if (rawTypes.add(implementedBy.value())) {
+						StandardStaticBinding binding = new StandardStaticBinding();
+						binding.dependencyMatcher = DependencyKey
+								.rawTypeMatcher(implementedBy.value());
+						binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
+								config, TypeToken.of(implementedBy.value()))
+								.build(ctx);
+						binding.scopeSupplier = () -> config
+								.getScope(implementedBy.value());
+						config.config.automaticStaticBindings.add(binding);
+					}
+				}
 			}
-		}
 
-		for (CoreDependencyKey<?> foo : config.boundProviders) {
-			StandardStaticBinding binding = new StandardStaticBinding();
-			binding.dependencyMatcher = dep -> dep.equals(foo);
-			binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-					config, foo.getType()).build(ctx, binding);
-			config.config.automaticStaticBindings.add(binding);
+			HashSet<CoreDependencyKey<?>> keys = new HashSet<>();
+			for (CoreDependencyKey<?> foo : config.implicitlyBoundKeys) {
+				if (keys.add(foo)) {
+					StandardStaticBinding binding = new StandardStaticBinding();
+					binding.dependencyMatcher = DependencyKey.matcher(foo);
+					binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
+							config, foo.getType()).build(ctx);
+					binding.scopeSupplier = () -> config
+							.getScope(foo.getType());
+					config.config.automaticStaticBindings.add(binding);
+				}
+			}
 		}
 
 		config.constructionRules.add(new ImplementedByConstructionRuleBase() {
@@ -275,13 +300,7 @@ public class GuiceModule extends AbstractModule {
 				ImplementedBy implementedBy = type.getRawType().getAnnotation(
 						ImplementedBy.class);
 				if (implementedBy != null) {
-					if (!type.isAssignableFrom(implementedBy.value())) {
-						throw new SaltaException(
-								"Implementation "
-										+ implementedBy.value()
-										+ " specified by @ImplementedBy does not implement "
-										+ type);
-					}
+
 					if (type.getRawType().equals(implementedBy.value())) {
 						throw new SaltaException(
 								"@ImplementedBy points to the same class it annotates. type: "
@@ -309,5 +328,20 @@ public class GuiceModule extends AbstractModule {
 
 		if (guiceConfig.requireExplicitBindings)
 			config.config.jitBindingRules.clear();
+
+		config.dynamicInitializers
+				.add(injector -> {
+					if (guiceConfig.stage == Stage.PRODUCTION) {
+						for (Binding b : config.config.staticBindings) {
+							if (b.getScope() instanceof SingletonScope) {
+								RecipeCreationContext ctx = new RecipeCreationContextImpl(
+										injector.getCoreInjector());
+								((SingletonScope) b.getScope()).instantiate(
+										ctx, b, ctx.getOrCreateRecipe(b));
+							}
+						}
+					}
+				});
 	}
+
 }

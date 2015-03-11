@@ -129,4 +129,5 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 			result += annotations.values();
 		return result;
 	}
+
 }

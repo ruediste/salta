@@ -9,6 +9,7 @@ import org.objectweb.asm.commons.Method;
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.google.common.reflect.TypeToken;

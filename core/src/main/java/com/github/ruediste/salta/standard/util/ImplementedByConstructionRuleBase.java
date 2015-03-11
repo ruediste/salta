@@ -3,6 +3,7 @@ package com.github.ruediste.salta.standard.util;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -28,6 +29,11 @@ public abstract class ImplementedByConstructionRuleBase implements
 			TypeToken<?> type) {
 		DependencyKey<?> implementorKey = getImplementorKey(type);
 		if (implementorKey != null) {
+			if (!type.isAssignableFrom(implementorKey.getType())) {
+				throw new SaltaException("Implementation " + implementorKey
+						+ " specified by @ImplementedBy does not implement "
+						+ type);
+			}
 			SupplierRecipe recipe = ctx.getRecipe(implementorKey);
 			return new RecipeInstantiator() {
 

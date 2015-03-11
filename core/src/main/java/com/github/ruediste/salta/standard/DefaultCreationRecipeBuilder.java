@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
@@ -21,7 +21,6 @@ public class DefaultCreationRecipeBuilder {
 	public Function<RecipeCreationContext, SupplierRecipe> constructionRecipeSupplier;
 	public Function<RecipeCreationContext, List<RecipeEnhancer>> enhancersSupplier;
 
-	public Supplier<Scope> scopeSupplier;
 	private TypeToken<?> type;
 
 	public DefaultCreationRecipeBuilder(StandardInjectorConfiguration config,
@@ -32,16 +31,12 @@ public class DefaultCreationRecipeBuilder {
 				ctx, boundType);
 
 		enhancersSupplier = ctx -> config.createEnhancers(ctx, boundType);
-		scopeSupplier = () -> config.getScope(boundType);
 	}
 
 	/**
 	 * Build the recipe.
-	 * 
-	 * @param binding
-	 *            binding to be used for scoping. If null, no scoping will occur
 	 */
-	public SupplierRecipe build(RecipeCreationContext ctx, Binding binding) {
+	public SupplierRecipe build(RecipeCreationContext ctx) {
 
 		// create seed recipe
 		SupplierRecipe seedRecipe = constructionRecipeSupplier.apply(ctx);
@@ -52,12 +47,7 @@ public class DefaultCreationRecipeBuilder {
 
 		SupplierRecipe innerRecipe = applyEnhancers(seedRecipe, enhancers);
 
-		// apply scope
-		if (binding != null) {
-			return applyScope(innerRecipe, scopeSupplier.get(), binding, type,
-					ctx);
-		} else
-			return innerRecipe;
+		return innerRecipe;
 	}
 
 	public static SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,

@@ -23,6 +23,9 @@ public class JSR330MembersInjectorFactory extends MembersInjectorFactoryBase {
 			Method method, MethodOverrideIndex index) {
 		if (!method.isAnnotationPresent(Inject.class))
 			return false;
+		if (Modifier.isAbstract(method.getModifiers()))
+			throw new SaltaException(
+					"Method annotated with @Inject is abstract: " + method);
 		if (method.getTypeParameters().length > 0) {
 			throw new SaltaException(
 					"Method is annotated with @Inject but declares type parameters. Method:\n"

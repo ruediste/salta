@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import org.junit.Test;
 
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
-import com.github.ruediste.salta.standard.Scope;
+import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.standard.Stage;
 import com.google.common.reflect.TypeToken;
 

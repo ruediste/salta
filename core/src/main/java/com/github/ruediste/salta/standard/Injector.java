@@ -130,4 +130,5 @@ public interface Injector {
 	 */
 	<T> T getInstance(Class<T> type);
 
+	CoreInjector getCoreInjector();
 }
