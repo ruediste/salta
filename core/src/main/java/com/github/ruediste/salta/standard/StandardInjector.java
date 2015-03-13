@@ -3,25 +3,16 @@ package com.github.ruediste.salta.standard;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.inject.Provider;
 
-import org.objectweb.asm.commons.GeneratorAdapter;
-
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
-import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.compile.FunctionRecipe;
-import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
-import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjector implements Injector {
@@ -111,9 +102,6 @@ public class StandardInjector implements Injector {
 		}
 	}
 
-	private ConcurrentHashMap<TypeToken<?>, MembersInjector<?>> membersInjectorCache = new ConcurrentHashMap<>();
-	private HashMap<TypeToken<?>, FunctionRecipe> membersInjectionRecipeCache = new HashMap<>();
-
 	private boolean initialized;
 	private StandardInjectorConfiguration config;
 	private CoreInjector coreInjector;
@@ -160,49 +148,16 @@ public class StandardInjector implements Injector {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-
-		return (MembersInjector<T>) membersInjectorCache.computeIfAbsent(
-				typeLiteral, type -> new MembersInjectorImpl<T>(type, this,
-						this));
+		TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
+			private static final long serialVersionUID = 1L;
+		}.where(new TypeParameter<T>() {
+		}, typeLiteral);
+		return getInstance(DependencyKey.of(injectorType));
 	}
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
 		return getMembersInjector(TypeToken.of(type));
-	}
-
-	@Override
-	public FunctionRecipe getMembersInjectionRecipe(TypeToken<?> typeToken,
-			RecipeCreationContext ctx) {
-		FunctionRecipe recipe = membersInjectionRecipeCache.get(typeToken);
-		if (recipe != null)
-			return recipe;
-
-		try {
-			List<RecipeMembersInjector> injectors = config
-					.createRecipeMembersInjectors(ctx, typeToken);
-			List<RecipeInitializer> initializers = config.createInitializers(
-					ctx, typeToken);
-			recipe = new FunctionRecipe() {
-
-				@Override
-				public Class<?> compileImpl(Class<?> argumentType,
-						GeneratorAdapter mv, MethodCompilationContext ctx) {
-					for (RecipeMembersInjector rmi : injectors) {
-						argumentType = rmi.compile(argumentType, ctx);
-					}
-					for (RecipeInitializer initializer : initializers)
-						argumentType = initializer.compile(argumentType, ctx);
-					return argumentType;
-				}
-			};
-		} catch (Throwable t) {
-			throw new SaltaException(
-					"Error while creating MembersInjection recipe for "
-							+ typeToken, t);
-		}
-		membersInjectionRecipeCache.put(typeToken, recipe);
-		return recipe;
 	}
 
 	@Override

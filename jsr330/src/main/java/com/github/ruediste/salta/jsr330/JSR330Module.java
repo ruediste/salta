@@ -3,6 +3,7 @@ package com.github.ruediste.salta.jsr330;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Provider;
@@ -10,11 +11,14 @@ import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
 import com.github.ruediste.salta.AbstractModule;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.StandardModule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
+import com.github.ruediste.salta.standard.util.MembersInjectorCreationRuleBase;
 import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
 import com.github.ruediste.salta.standard.util.RecipeInitializerFactoryBase;
@@ -82,6 +86,44 @@ public class JSR330Module extends AbstractModule {
 				}, (type, supplier) -> (Provider<?>) supplier::get,
 				Provider.class));
 
+		config.config.creationRules.add(new MembersInjectorCreationRuleBase(
+				config) {
+
+			@Override
+			protected Object wrapInjector(Consumer<Object> saltaMembersInjector) {
+				return new MembersInjector<Object>() {
+
+					@Override
+					public void injectMembers(Object instance) {
+						saltaMembersInjector.accept(instance);
+					}
+
+					@Override
+					public String toString() {
+						return saltaMembersInjector.toString();
+					};
+				};
+			}
+
+			@Override
+			protected Class<?> getWrappedInjectorType() {
+				return MembersInjector.class;
+			}
+
+			@Override
+			protected TypeToken<?> getDependency(CoreDependencyKey<?> key) {
+				if (!MembersInjector.class.equals(key.getRawType()))
+					return null;
+
+				if (key.getType().getType() instanceof Class) {
+					throw new SaltaException(
+							"Cannot inject a MembersInjector that has no type parameter");
+				}
+				TypeToken<?> dependency = key.getType().resolveType(
+						MembersInjector.class.getTypeParameters()[0]);
+				return dependency;
+			}
+		});
 		config.requiredQualifierExtractors.add(annotatedElement -> Arrays
 				.stream(annotatedElement.getAnnotations()).filter(
 						a -> a.annotationType().isAnnotationPresent(

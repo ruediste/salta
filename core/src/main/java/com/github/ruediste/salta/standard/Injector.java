@@ -22,9 +22,7 @@ import javax.naming.ConfigurationException;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
-import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.google.common.reflect.TypeToken;
 
 public interface Injector {
@@ -60,13 +58,6 @@ public interface Injector {
 	 * @since 2.0
 	 */
 	<T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral);
-
-	/**
-	 * Create a recipe to inject the members of the given type. Calling thread
-	 * must hold the {@link CoreInjector#recipeLock}
-	 */
-	FunctionRecipe getMembersInjectionRecipe(TypeToken<?> type,
-			RecipeCreationContext ctx);
 
 	/**
 	 * Returns the members injector used to inject dependencies into methods and

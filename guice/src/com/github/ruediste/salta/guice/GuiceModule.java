@@ -11,10 +11,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.Binding;
@@ -24,7 +23,6 @@ import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
@@ -38,6 +36,7 @@ import com.github.ruediste.salta.standard.config.InstantiatorRule;
 import com.github.ruediste.salta.standard.config.SingletonScope;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
+import com.github.ruediste.salta.standard.util.MembersInjectorCreationRuleBase;
 import com.github.ruediste.salta.standard.util.ProvidedByConstructionRuleBase;
 import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
 import com.google.common.base.Objects;
@@ -130,44 +129,42 @@ public class GuiceModule extends AbstractModule {
 						Provider.class));
 
 		// members injector creation rule
-		config.config.creationRules.add(new CreationRule() {
-
-			@SuppressWarnings("unchecked")
+		config.config.creationRules.add(new MembersInjectorCreationRuleBase(
+				config) {
 			@Override
-			public SupplierRecipe apply(CoreDependencyKey<?> key,
-					RecipeCreationContext ctx) {
-				if (MembersInjector.class.equals(key.getRawType())) {
-					if (key.getType().getType() instanceof Class) {
-						throw new SaltaException(
-								"Cannot inject a MembersInjector that has no type parameter");
-					}
-					TypeToken<?> dependency = key.getType().resolveType(
-							MembersInjector.class.getTypeParameters()[0]);
-					com.github.ruediste.salta.standard.MembersInjector<Object> saltaMembersInjector = (com.github.ruediste.salta.standard.MembersInjector<Object>) injector
-							.getSaltaInjector().getMembersInjector(dependency);
-					MembersInjector<?> membersInjector = new MembersInjector<Object>() {
-						@Override
-						public void injectMembers(Object x) {
-							saltaMembersInjector.injectMembers(x);
-						}
+			protected TypeToken<?> getDependency(CoreDependencyKey<?> key) {
+				if (!MembersInjector.class.equals(key.getRawType()))
+					return null;
 
-						@Override
-						public String toString() {
-							return saltaMembersInjector.toString();
-						};
-					};
-					return new SupplierRecipe() {
-
-						@Override
-						protected Class<?> compileImpl(GeneratorAdapter mv,
-								MethodCompilationContext ctx) {
-							ctx.addFieldAndLoad(MembersInjector.class,
-									membersInjector);
-							return MembersInjector.class;
-						}
-					};
+				if (key.getType().getType() instanceof Class) {
+					throw new SaltaException(
+							"Cannot inject a MembersInjector that has no type parameter");
 				}
-				return null;
+				TypeToken<?> dependency = key.getType().resolveType(
+						MembersInjector.class.getTypeParameters()[0]);
+				return dependency;
+			}
+
+			@Override
+			protected Object wrapInjector(Consumer<Object> saltaMembersInjector) {
+				Object wrappedInjector = new MembersInjector<Object>() {
+					@SuppressWarnings({ "unchecked", "rawtypes" })
+					@Override
+					public void injectMembers(Object x) {
+						saltaMembersInjector.accept(x);
+					}
+
+					@Override
+					public String toString() {
+						return saltaMembersInjector.toString();
+					};
+				};
+				return wrappedInjector;
+			}
+
+			@Override
+			protected Class<?> getWrappedInjectorType() {
+				return MembersInjector.class;
 			}
 		});
 
