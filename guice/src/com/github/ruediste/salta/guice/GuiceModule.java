@@ -38,7 +38,7 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
 import com.github.ruediste.salta.standard.util.MembersInjectorCreationRuleBase;
 import com.github.ruediste.salta.standard.util.ProvidedByConstructionRuleBase;
-import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
+import com.github.ruediste.salta.standard.util.ProviderCreationRule;
 import com.google.common.base.Objects;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.BindingAnnotation;
@@ -123,7 +123,7 @@ public class GuiceModule extends AbstractModule {
 
 		// provider creation rule
 		config.config.creationRules
-				.add(new ProviderDependencyFactoryRule(key -> key.getRawType()
+				.add(new ProviderCreationRule(key -> key.getRawType()
 						.equals(Provider.class),
 						(type, supplier) -> (Provider<?>) supplier::get,
 						Provider.class));

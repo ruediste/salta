@@ -25,15 +25,9 @@ public class SingletonScope implements Scope {
 	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
 			Binding binding, TypeToken<?> requestedType,
 			SupplierRecipe innerRecipe) {
-		if (!instance.isSet(binding)) {
-			ctx.queueAction(() -> {
-				if (!instance.isSet(binding)) {
-					instance.set(binding,
-							ctx.getCompiler().compileSupplier(innerRecipe)
-									.getNoThrow());
-				}
-			});
-		}
+
+		instantiate(ctx, binding, innerRecipe);
+
 		return new SupplierRecipe() {
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -51,6 +45,9 @@ public class SingletonScope implements Scope {
 		};
 	}
 
+	/**
+	 * Instantiate the instance
+	 */
 	public void instantiate(RecipeCreationContext ctx, Binding binding,
 			SupplierRecipe innerRecipe) {
 		if (!instance.isSet(binding)) {

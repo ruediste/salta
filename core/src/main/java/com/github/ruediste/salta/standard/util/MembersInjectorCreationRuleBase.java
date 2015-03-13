@@ -2,7 +2,6 @@ package com.github.ruediste.salta.standard.util;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -22,7 +21,7 @@ import com.google.common.reflect.TypeToken;
 
 public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 
-	private ConcurrentHashMap<TypeToken<?>, Consumer<?>> membersInjectorCache = new ConcurrentHashMap<>();
+	private HashMap<TypeToken<?>, Consumer<?>> membersInjectorCache = new HashMap<>();
 	private HashMap<TypeToken<?>, FunctionRecipe> membersInjectionRecipeCache = new HashMap<>();
 	private StandardInjectorConfiguration config;
 
@@ -31,14 +30,18 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> Consumer<T> getMembersInjector(TypeToken<T> typeLiteral,
+	private <T> Consumer<T> getMembersInjector(TypeToken<T> typeLiteral,
 			RecipeCreationContext ctx) {
 
-		return (Consumer<T>) membersInjectorCache.computeIfAbsent(typeLiteral,
-				type -> getMembersInjectorNoCache(type, ctx));
+		Consumer<?> result = membersInjectorCache.get(typeLiteral);
+		if (result == null) {
+			result = getMembersInjectorNoCache(typeLiteral, ctx);
+			membersInjectorCache.put(typeLiteral, result);
+		}
+		return (Consumer<T>) result;
 	}
 
-	public <T> Consumer<T> getMembersInjectorNoCache(TypeToken<T> type,
+	private <T> Consumer<T> getMembersInjectorNoCache(TypeToken<T> type,
 			RecipeCreationContext ctx) {
 		CompiledFunction function = ctx.getCompiler().compileFunction(
 				getMembersInjectionRecipe(type, ctx));
@@ -56,7 +59,7 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 		};
 	}
 
-	public FunctionRecipe getMembersInjectionRecipe(TypeToken<?> typeToken,
+	private FunctionRecipe getMembersInjectionRecipe(TypeToken<?> typeToken,
 			RecipeCreationContext ctx) {
 		FunctionRecipe recipe = membersInjectionRecipeCache.get(typeToken);
 		if (recipe != null)

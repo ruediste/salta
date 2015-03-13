@@ -497,7 +497,7 @@ public class BinderTest {
 			fail();
 		} catch (SaltaException expected) {
 			assertContains(expected.getMessage(),
-					"Binding to Provider is not allowed.");
+					"Binding to core guice framework type is not allowed: Provider.");
 		}
 	}
 

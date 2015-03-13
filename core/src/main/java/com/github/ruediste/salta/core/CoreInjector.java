@@ -67,13 +67,18 @@ public class CoreInjector {
 	}
 
 	public CompiledSupplier getCompiledRecipe(CoreDependencyKey<?> key) {
+		// use Double Checked Locking
 		CompiledSupplier compiledRecipe = compiledRecipeCache.get(key);
 		if (compiledRecipe != null)
 			return compiledRecipe;
 
 		synchronized (recipeLock) {
-			return compiledRecipeCache.computeIfAbsent(key,
-					x -> compileSupplier(getRecipe(key)));
+			compiledRecipe = compiledRecipeCache.get(key);
+			if (compiledRecipe == null) {
+				compiledRecipe = compileSupplier(getRecipe(key));
+				compiledRecipeCache.put(key, compiledRecipe);
+			}
+			return compiledRecipe;
 		}
 	}
 

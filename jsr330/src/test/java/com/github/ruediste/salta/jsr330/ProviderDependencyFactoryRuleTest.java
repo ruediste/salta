@@ -13,8 +13,8 @@ import org.junit.Test;
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.Injector;
-import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule.ProviderAccessBeforeInstanceCreationFinishedException;
-import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule.ProviderAccessBeforeRecipeCreationFinishedException;
+import com.github.ruediste.salta.standard.util.ProviderCreationRule.ProviderAccessBeforeInstanceCreationFinishedException;
+import com.github.ruediste.salta.standard.util.ProviderCreationRule.ProviderAccessBeforeRecipeCreationFinishedException;
 
 public class ProviderDependencyFactoryRuleTest {
 

@@ -178,52 +178,47 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 		}
 	}
 
-	private static class ProviderByKeyInvocationRecipe extends SupplierRecipe {
-
-		InstanceProvider<?> delegate;
-		private CoreDependencyKey<?> providerKey;
-
-		public ProviderByKeyInvocationRecipe(CoreDependencyKey<?> providerKey) {
-			this.providerKey = providerKey;
-		}
-
-		@Override
-		protected Class<?> compileImpl(GeneratorAdapter mv,
-				MethodCompilationContext ctx) {
-
-			if (delegate == null)
-				throw new RecursiveAccessOfInstanceOfProviderClassException(
-						providerKey.toString());
-
-			ctx.addFieldAndLoad(InstanceProvider.class, delegate);
-			mv.invokeInterface(Type.getType(InstanceProvider.class),
-					Method.getMethod("Object get()"));
-			return Object.class;
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <P> ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
 			Function<? super P, InstanceProvider<? extends T>> providerWrapper) {
 		scopeSupplier = () -> config.defaultScope;
-		recipeFactorySupplier = () -> {
-			config.implicitlyBoundKeys.add(providerKey);
-			return ctx -> {
-				// entered when creating the recipe
-				ProviderByKeyInvocationRecipe invocationRecipe = new ProviderByKeyInvocationRecipe(
-						providerKey);
-				ctx.queueAction(() -> {
-					SupplierRecipe recipe = ctx.getRecipe(providerKey);
+		recipeFactorySupplier = new Supplier<CreationRecipeFactory>() {
+			@Override
+			public CreationRecipeFactory get() {
+				config.implicitlyBoundKeys.add(providerKey);
+				return new CreationRecipeFactory() {
+					@Override
+					public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
+						// entered when creating the recipe
+						SupplierRecipe recipe = ctx.getRecipe(providerKey);
 
-					CompiledSupplier compiledSupplier = ctx.getCompiler()
-							.compileSupplier(recipe);
-					invocationRecipe.delegate = providerWrapper
-							.apply((P) compiledSupplier.getNoThrow());
-				});
-				return invocationRecipe;
-			};
+						CompiledSupplier compiledSupplier = ctx.getCompiler()
+								.compileSupplier(recipe);
+						InstanceProvider<? extends T> provider = providerWrapper
+								.apply((P) compiledSupplier.getNoThrow());
+
+						return new SupplierRecipe() {
+
+							@Override
+							protected Class<?> compileImpl(GeneratorAdapter mv,
+									MethodCompilationContext ctx) {
+								ctx.addFieldAndLoad(Function.class,
+										providerWrapper);
+								recipe.compile(ctx);
+								mv.invokeInterface(
+										Type.getType(Function.class),
+										Method.getMethod("Object apply(Object)"));
+								mv.invokeInterface(
+										Type.getType(InstanceProvider.class),
+										Method.getMethod("Object get()"));
+								return Object.class;
+							}
+						};
+					}
+				};
+			}
 		};
 		return this;
 	}

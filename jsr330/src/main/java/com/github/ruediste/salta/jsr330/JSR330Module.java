@@ -20,7 +20,7 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.util.MembersInjectorCreationRuleBase;
 import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
-import com.github.ruediste.salta.standard.util.ProviderDependencyFactoryRule;
+import com.github.ruediste.salta.standard.util.ProviderCreationRule;
 import com.github.ruediste.salta.standard.util.RecipeInitializerFactoryBase;
 import com.google.common.reflect.TypeToken;
 
@@ -80,7 +80,7 @@ public class JSR330Module extends AbstractModule {
 			}
 		});
 
-		config.config.creationRules.add(new ProviderDependencyFactoryRule(
+		config.config.creationRules.add(new ProviderCreationRule(
 				key -> {
 					return key.getType().getRawType().equals(Provider.class);
 				}, (type, supplier) -> (Provider<?>) supplier::get,

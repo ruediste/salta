@@ -19,7 +19,6 @@ import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
-import com.github.ruediste.salta.standard.binder.BindingBuilderImpl.RecursiveAccessOfInstanceOfProviderClassException;
 
 public class LinkedBindingBuilderTest {
 
@@ -233,7 +232,7 @@ public class LinkedBindingBuilderTest {
 				TestIA.class).withAnnotations(Names.named("y")));
 		assertNotSame(retrievedX, retrievedY);
 
-		assertSame(retrievedX, injector.getInstance(DependencyKey.of(
+		assertNotSame(retrievedX, injector.getInstance(DependencyKey.of(
 				TestIA.class).withAnnotations(Names.named("x"))));
 	}
 
@@ -263,9 +262,7 @@ public class LinkedBindingBuilderTest {
 		try {
 			injector.getInstance(TestIA.class);
 		} catch (SaltaException e) {
-			if (!e.getRecursiveCauses()
-					.anyMatch(
-							x -> x instanceof RecursiveAccessOfInstanceOfProviderClassException)) {
+			if (!e.getMessage().contains("Dependency Circle")) {
 				throw e;
 			}
 		}

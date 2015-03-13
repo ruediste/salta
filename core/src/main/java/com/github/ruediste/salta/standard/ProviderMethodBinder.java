@@ -52,7 +52,7 @@ public abstract class ProviderMethodBinder {
 					for (int i = 0; i < parameters.length; i++) {
 						Parameter p = parameters[i];
 						args.add(ctx.getRecipe(new InjectionPoint<>(TypeToken
-								.of(p.getType()), m, p, i)));
+								.of(p.getParameterizedType()), m, p, i)));
 					}
 					FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(
 							m, args, config.config.injectionStrategy);

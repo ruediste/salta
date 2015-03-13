@@ -29,7 +29,7 @@ import com.google.common.reflect.TypeToken;
  * {@link Supplier}.
  * </p>
  */
-public class ProviderDependencyFactoryRule implements CreationRule {
+public class ProviderCreationRule implements CreationRule {
 
 	private Matcher<? super CoreDependencyKey<?>> matcher;
 	private BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper;
@@ -88,6 +88,12 @@ public class ProviderDependencyFactoryRule implements CreationRule {
 				isGetting.remove();
 			}
 		}
+
+		@Override
+		public String toString() {
+			// TODO Auto-generated method stub
+			return "Provider<" + dependency + ">";
+		}
 	}
 
 	/**
@@ -100,8 +106,7 @@ public class ProviderDependencyFactoryRule implements CreationRule {
 	 *            wrapper of a supplier to the actual instance which gets
 	 *            injected
 	 */
-	public ProviderDependencyFactoryRule(
-			Matcher<? super CoreDependencyKey<?>> matcher,
+	public ProviderCreationRule(Matcher<? super CoreDependencyKey<?>> matcher,
 			BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper,
 			Class<?> providerType) {
 		this.matcher = matcher;
@@ -111,32 +116,32 @@ public class ProviderDependencyFactoryRule implements CreationRule {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public SupplierRecipe apply(CoreDependencyKey<?> dependency,
+	public SupplierRecipe apply(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
 
-		if (matcher.matches(dependency)) {
-			if (dependency.getType().getType() instanceof Class) {
+		if (matcher.matches(key)) {
+			if (key.getType().getType() instanceof Class) {
 				throw new SaltaException(
 						"Cannot inject a Provider that has no type parameter");
 			}
 			// determine dependency
-			TypeToken<?> requestedType = dependency.getType().resolveType(
+			TypeToken<?> requestedType = key.getType().resolveType(
 					providerType.getTypeParameters()[0]);
 
 			CoreDependencyKey<?> dep;
-			if (dependency instanceof InjectionPoint) {
-				InjectionPoint p = (InjectionPoint) dependency;
+			if (key instanceof InjectionPoint) {
+				InjectionPoint p = (InjectionPoint) key;
 				dep = new InjectionPoint(requestedType, p.getMember(),
 						p.getAnnotatedElement(), p.getParameterIndex());
 
 			} else {
 				dep = DependencyKey.of(requestedType).withAnnotations(
-						dependency.getAnnotatedElement().getAnnotations());
+						key.getAnnotatedElement().getAnnotations());
 			}
 
 			// create and wrap provider instance
-			ProviderImpl provider = new ProviderImpl(dependency);
-			Object wrappedProvider = wrapper.apply(dependency, provider);
+			ProviderImpl provider = new ProviderImpl(key);
+			Object wrappedProvider = wrapper.apply(key, provider);
 
 			// create creation recipe
 			SupplierRecipe creationRecipe = new SupplierRecipe() {

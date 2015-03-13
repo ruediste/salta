@@ -26,7 +26,13 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	 * yet. If the binding is already created, the passed context will be
 	 * ignored. This method is always called with the
 	 * {@link CoreInjector#recipeLock} held, thus no thread synchronization is
-	 * needed
+	 * needed.
+	 * 
+	 * <p>
+	 * The returned recipe is ready to be compiled, even before the actions
+	 * queued with {@link RecipeCreationContext#queueAction(Runnable)}s are
+	 * processed.
+	 * </p>
 	 */
 	public SupplierRecipe getOrCreateRecipe(RecipeCreationContext ctx) {
 		if (recipe == null) {
@@ -41,8 +47,13 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 
 	/**
 	 * Create a recipe for this binding. This method will only be called once
-	 * per binding. Any expensive operations to create the recipe should be done
-	 * in this method
+	 * per binding. Any expensive operations needed for compilation should be
+	 * done in this method if possible.
+	 * <p>
+	 * The returned recipe MUST be ready to be compiled, even before the actions
+	 * queued with {@link RecipeCreationContext#queueAction(Runnable)}s are
+	 * processed.
+	 * </p>
 	 */
 	protected abstract SupplierRecipe createRecipe(RecipeCreationContext ctx);
 
