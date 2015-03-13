@@ -32,7 +32,7 @@ public class JSR330Module extends AbstractModule {
 
 		// default instantiator rule
 		config.instantiatorRules.add(new JSR330ConstructorInstantiatorRule(
-				config.config));
+				config));
 
 		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
 				.of(type, ctx, cstr, config.config.injectionStrategy);
@@ -55,7 +55,7 @@ public class JSR330Module extends AbstractModule {
 					}
 				});
 		config.defaultMembersInjectorFactories
-				.add(new JSR330MembersInjectorFactory(config.config));
+				.add(new JSR330MembersInjectorFactory(config));
 
 		config.initializerFactories.add(new RecipeInitializerFactoryBase(
 				config.config) {
@@ -82,9 +82,10 @@ public class JSR330Module extends AbstractModule {
 				}, (type, supplier) -> (Provider<?>) supplier::get,
 				Provider.class));
 
-		config.requiredQualifierExtractors.add(key -> Arrays.stream(
-				key.getAnnotatedElement().getAnnotations()).filter(
-				a -> a.annotationType().isAnnotationPresent(Qualifier.class)));
+		config.requiredQualifierExtractors.add(annotatedElement -> Arrays
+				.stream(annotatedElement.getAnnotations()).filter(
+						a -> a.annotationType().isAnnotationPresent(
+								Qualifier.class)));
 
 		config.availableQualifierExtractors.add(annotated -> Arrays.stream(
 				annotated.getAnnotations()).filter(

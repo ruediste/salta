@@ -90,11 +90,10 @@ public abstract class StaticMembersInjectorBase {
 			try {
 				m.invoke(null, args.toArray());
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new SaltaException("Error while setting static " + m
-						+ "\n" + e.getMessage(), e);
+				throw new SaltaException("Error while setting static " + m, e);
 			} catch (InvocationTargetException e) {
-				throw new SaltaException("Error while setting static " + m
-						+ "\n" + e.getCause().getMessage(), e.getCause());
+				throw new SaltaException("Error while setting static " + m,
+						e.getCause());
 			}
 		}
 	}

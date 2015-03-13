@@ -26,7 +26,6 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ProvisionListener;
-import com.google.inject.spi.TypeListener;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
@@ -223,7 +222,7 @@ public interface Binder {
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	<T> AnnotatedBindingBuilder<T> bind(Key<T> typeLiteral);
+	<T> LinkedBindingBuilder<T> bind(Key<T> typeLiteral);
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
@@ -377,20 +376,6 @@ public interface Binder {
 	 * @since 2.0
 	 */
 	Binder skipSources(Class<?>... classesToSkip);
-
-	/**
-	 * Registers a listener for injectable types. Guice will notify the listener
-	 * when it encounters injectable types matched by the given type matcher.
-	 *
-	 * @param typeMatcher
-	 *            that matches injectable types the listener should be notified
-	 *            of
-	 * @param listener
-	 *            for injectable types matched by typeMatcher
-	 * @since 2.0
-	 */
-	void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-			TypeListener listener);
 
 	/**
 	 * Registers listeners for provisioned objects. Guice will notify the

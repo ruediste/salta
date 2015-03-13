@@ -250,18 +250,23 @@ public class StandardInjectorConfiguration {
 	 * extractors are invoked. If more than one qualifier is found, an error is
 	 * raised
 	 */
-	public final List<Function<CoreDependencyKey<?>, Stream<Annotation>>> requiredQualifierExtractors = new ArrayList<>();
+	public final List<Function<AnnotatedElement, Stream<Annotation>>> requiredQualifierExtractors = new ArrayList<>();
 
 	/**
 	 * Use the {@link #requiredQualifierExtractors} to determine the required
 	 * qualifier of a key (or null)
 	 */
 	public Annotation getRequiredQualifier(CoreDependencyKey<?> key) {
+		return getRequiredQualifier(key, key.getAnnotatedElement());
+	}
+
+	public Annotation getRequiredQualifier(Object source,
+			AnnotatedElement annotatedElement) {
 		List<Annotation> qualifiers = requiredQualifierExtractors.stream()
-				.flatMap(f -> f.apply(key)).collect(toList());
+				.flatMap(f -> f.apply(annotatedElement)).collect(toList());
 		if (qualifiers.size() > 1)
 			throw new SaltaException("Multiple required qualifiers found on "
-					+ key + ": " + qualifiers);
+					+ source + ": " + qualifiers);
 		return Iterables.getOnlyElement(qualifiers, null);
 	}
 

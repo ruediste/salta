@@ -27,7 +27,6 @@ import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ProvisionListener;
-import com.google.inject.spi.TypeListener;
 
 /**
  * A support class for {@link Module}s which reduces repetition and results in a
@@ -105,10 +104,7 @@ public abstract class AbstractModule implements Module {
 	 * @see Binder#bind(Class)
 	 */
 	protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-		if (TypeLiteral.class.equals(clazz)) {
-			throw new com.github.ruediste.salta.core.SaltaException(
-					"Binding to core guice framework type is not allowed: TypeLiteral");
-		}
+
 		return binder().bind(clazz);
 	}
 
@@ -225,16 +221,6 @@ public abstract class AbstractModule implements Module {
 	 */
 	protected <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
 		return binder().getMembersInjector(type);
-	}
-
-	/**
-	 * @see Binder#bindListener(com.google.inject.matcher.Matcher,
-	 *      com.google.inject.spi.TypeListener)
-	 * @since 2.0
-	 */
-	protected void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-			TypeListener listener) {
-		binder().bindListener(typeMatcher, listener);
 	}
 
 	/**

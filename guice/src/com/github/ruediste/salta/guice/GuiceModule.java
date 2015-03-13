@@ -120,7 +120,7 @@ public class GuiceModule extends AbstractModule {
 		});
 
 		config.defaultMembersInjectorFactories
-				.add(new GuiceMembersInjectorFactory(config.config));
+				.add(new GuiceMembersInjectorFactory(config));
 
 		// provider creation rule
 		config.config.creationRules
@@ -137,17 +137,32 @@ public class GuiceModule extends AbstractModule {
 			public SupplierRecipe apply(CoreDependencyKey<?> key,
 					RecipeCreationContext ctx) {
 				if (MembersInjector.class.equals(key.getRawType())) {
+					if (key.getType().getType() instanceof Class) {
+						throw new SaltaException(
+								"Cannot inject a MembersInjector that has no type parameter");
+					}
 					TypeToken<?> dependency = key.getType().resolveType(
 							MembersInjector.class.getTypeParameters()[0]);
 					com.github.ruediste.salta.standard.MembersInjector<Object> saltaMembersInjector = (com.github.ruediste.salta.standard.MembersInjector<Object>) injector
 							.getSaltaInjector().getMembersInjector(dependency);
+					MembersInjector<?> membersInjector = new MembersInjector<Object>() {
+						@Override
+						public void injectMembers(Object x) {
+							saltaMembersInjector.injectMembers(x);
+						}
+
+						@Override
+						public String toString() {
+							return saltaMembersInjector.toString();
+						};
+					};
 					return new SupplierRecipe() {
 
 						@Override
 						protected Class<?> compileImpl(GeneratorAdapter mv,
 								MethodCompilationContext ctx) {
 							ctx.addFieldAndLoad(MembersInjector.class,
-									x -> saltaMembersInjector.injectMembers(x));
+									membersInjector);
 							return MembersInjector.class;
 						}
 					};
@@ -156,9 +171,9 @@ public class GuiceModule extends AbstractModule {
 			}
 		});
 
-		config.requiredQualifierExtractors.add(key -> {
-			return Arrays.stream(key.getAnnotatedElement().getAnnotations())
-					.filter(a -> a.annotationType().isAnnotationPresent(
+		config.requiredQualifierExtractors.add(annotatedElement -> {
+			return Arrays.stream(annotatedElement.getAnnotations()).filter(
+					a -> a.annotationType().isAnnotationPresent(
 							BindingAnnotation.class));
 		});
 
@@ -324,7 +339,7 @@ public class GuiceModule extends AbstractModule {
 		}
 
 		config.instantiatorRules.add(new GuiceConstructorInstantiatorRule(
-				config.config, guiceConfig.requireAtInjectOnConstructors));
+				config, guiceConfig.requireAtInjectOnConstructors));
 
 		if (guiceConfig.requireExplicitBindings)
 			config.config.jitBindingRules.clear();

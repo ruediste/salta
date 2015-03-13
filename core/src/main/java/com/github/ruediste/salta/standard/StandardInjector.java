@@ -163,7 +163,7 @@ public class StandardInjector implements Injector {
 
 		return (MembersInjector<T>) membersInjectorCache.computeIfAbsent(
 				typeLiteral, type -> new MembersInjectorImpl<T>(type, this,
-						coreInjector));
+						this));
 	}
 
 	@Override
@@ -178,23 +178,29 @@ public class StandardInjector implements Injector {
 		if (recipe != null)
 			return recipe;
 
-		List<RecipeMembersInjector> injectors = config
-				.createRecipeMembersInjectors(ctx, typeToken);
-		List<RecipeInitializer> initializers = config.createInitializers(ctx,
-				typeToken);
-		recipe = new FunctionRecipe() {
+		try {
+			List<RecipeMembersInjector> injectors = config
+					.createRecipeMembersInjectors(ctx, typeToken);
+			List<RecipeInitializer> initializers = config.createInitializers(
+					ctx, typeToken);
+			recipe = new FunctionRecipe() {
 
-			@Override
-			public Class<?> compileImpl(Class<?> argumentType,
-					GeneratorAdapter mv, MethodCompilationContext ctx) {
-				for (RecipeMembersInjector rmi : injectors) {
-					argumentType = rmi.compile(argumentType, ctx);
+				@Override
+				public Class<?> compileImpl(Class<?> argumentType,
+						GeneratorAdapter mv, MethodCompilationContext ctx) {
+					for (RecipeMembersInjector rmi : injectors) {
+						argumentType = rmi.compile(argumentType, ctx);
+					}
+					for (RecipeInitializer initializer : initializers)
+						argumentType = initializer.compile(argumentType, ctx);
+					return argumentType;
 				}
-				for (RecipeInitializer initializer : initializers)
-					argumentType = initializer.compile(argumentType, ctx);
-				return argumentType;
-			}
-		};
+			};
+		} catch (Throwable t) {
+			throw new SaltaException(
+					"Error while creating MembersInjection recipe for "
+							+ typeToken, t);
+		}
 		membersInjectionRecipeCache.put(typeToken, recipe);
 		return recipe;
 	}
@@ -225,6 +231,7 @@ public class StandardInjector implements Injector {
 
 	@Override
 	public CoreInjector getCoreInjector() {
+		checkInitialized();
 		return coreInjector;
 	}
 }

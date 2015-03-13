@@ -299,4 +299,33 @@ public class LinkedBindingBuilderTest {
 		}, new JSR330Module());
 		assertEquals(1, injector.getInstance(TwoConstructors.class).value);
 	}
+
+	private static class TestConstructorMembersInjected {
+		public TestConstructorMembersInjected() {
+
+		}
+
+		@Inject
+		TestB b;
+	}
+
+	@Test
+	public void testToConstructorMembersInjected() {
+		injector = Salta.createInjector(new AbstractModule() {
+
+			@Override
+			protected void configure() {
+				try {
+					bind(TestConstructorMembersInjected.class).toConstructor(
+							TestConstructorMembersInjected.class
+									.getConstructor());
+				} catch (NoSuchMethodException | SecurityException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}, new JSR330Module());
+
+		assertNotNull(injector
+				.getInstance(TestConstructorMembersInjected.class).b);
+	}
 }

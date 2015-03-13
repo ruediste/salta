@@ -23,8 +23,10 @@ import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
+import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.MemberInjectionToken;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
 public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
@@ -236,13 +238,22 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	@Override
 	public <S extends T> ScopedBindingBuilder<T> toConstructor(
 			Constructor<S> constructor, TypeToken<? extends S> type) {
+		DefaultConstructionRule rule = new DefaultConstructionRule(config) {
+			@Override
+			protected RecipeInstantiator createInstantiationRecipe(
+					RecipeCreationContext ctx, TypeToken<?> type) {
+				return config.fixedConstructorInstantiatorFactory.create(type,
+						ctx, constructor);
+			}
+		};
 		recipeFactorySupplier = () -> creationContext -> {
 			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
 					config, type);
-			builder.constructionRecipeSupplier = (ctx) -> config.fixedConstructorInstantiatorFactory
-					.create(type, ctx, constructor);
+			builder.constructionRecipeSupplier = (ctx) -> rule
+					.createConstructionRecipe(ctx, type);
 			return builder.build(creationContext);
 		};
+		scopeSupplier = () -> config.getScope(constructor.getDeclaringClass());
 		return this;
 	}
 
@@ -282,4 +293,8 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		return "BindingBuilder<" + eagerInstantiationDependency.getType() + ">";
+	}
 }

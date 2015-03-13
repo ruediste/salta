@@ -24,7 +24,19 @@ public class GuiceInjectorImpl implements Injector {
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		return delegate.getMembersInjector(type)::injectMembers;
+		com.github.ruediste.salta.standard.MembersInjector<T> membersInjector = delegate
+				.getMembersInjector(type);
+		return new MembersInjector<T>() {
+			@Override
+			public void injectMembers(T i) {
+				membersInjector.injectMembers(i);
+			}
+
+			@Override
+			public String toString() {
+				return membersInjector.toString();
+			}
+		};
 	}
 
 	@Override

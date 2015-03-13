@@ -3,9 +3,9 @@ package com.github.ruediste.salta.guice;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 
-import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
 import com.google.common.reflect.TypeToken;
@@ -16,7 +16,8 @@ public class GuiceConstructorInstantiatorRule extends
 		ConstructorInstantiatorRuleBase {
 	private boolean requireAtInjectOnConstructors;
 
-	public GuiceConstructorInstantiatorRule(CoreInjectorConfiguration config,
+	public GuiceConstructorInstantiatorRule(
+			StandardInjectorConfiguration config,
 			boolean requireAtInjectOnConstructors) {
 		super(config);
 		this.requireAtInjectOnConstructors = requireAtInjectOnConstructors;

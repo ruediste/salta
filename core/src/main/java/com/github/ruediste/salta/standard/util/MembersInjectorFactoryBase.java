@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.InjectionPoint;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedFieldRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
@@ -21,9 +22,9 @@ import com.google.common.reflect.TypeToken;
 public abstract class MembersInjectorFactoryBase implements
 		RecipeMembersInjectorFactory {
 
-	private CoreInjectorConfiguration config;
+	private StandardInjectorConfiguration config;
 
-	public MembersInjectorFactoryBase(CoreInjectorConfiguration config) {
+	public MembersInjectorFactoryBase(StandardInjectorConfiguration config) {
 		this.config = config;
 
 	}
@@ -47,7 +48,8 @@ public abstract class MembersInjectorFactoryBase implements
 
 					// add injector
 					result.add(new FixedFieldRecipeMembersInjector(f, ctx
-							.getRecipe(dependency), config.injectionStrategy));
+							.getRecipe(dependency),
+							config.config.injectionStrategy));
 				}
 			}
 
@@ -56,6 +58,29 @@ public abstract class MembersInjectorFactoryBase implements
 					continue;
 				if (isInjectableMethod(t, method, overrideIndex)) {
 					method.setAccessible(true);
+
+					// check that no qualifiers are given on the method itself
+					if (config.getRequiredQualifier(method, method) != null) {
+						/*
+						 * In Scala, fields automatically get accessor methods
+						 * with the same name. So we don't do misplaced-binding
+						 * annotation detection if the offending method has a
+						 * matching field.
+						 */
+						boolean fieldFound = false;
+						for (Field f : method.getDeclaringClass()
+								.getDeclaredFields()) {
+							if (f.getName().equals(method.getName())) {
+								fieldFound = true;
+								break;
+							}
+						}
+						if (!fieldFound)
+							throw new SaltaException(
+									"Qualifier has been specified on "
+											+ method
+											+ ".\nSpecify qualifiers on parameters instead");
+					}
 
 					// create dependencies
 					ArrayList<SupplierRecipe> args = new ArrayList<>();
@@ -72,7 +97,7 @@ public abstract class MembersInjectorFactoryBase implements
 
 					// add injector
 					result.add(new FixedMethodRecipeMembersInjector(method,
-							args, config.injectionStrategy));
+							args, config.config.injectionStrategy));
 				}
 			}
 		}

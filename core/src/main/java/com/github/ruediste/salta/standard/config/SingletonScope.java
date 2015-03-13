@@ -25,20 +25,27 @@ public class SingletonScope implements Scope {
 	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
 			Binding binding, TypeToken<?> requestedType,
 			SupplierRecipe innerRecipe) {
-		instantiate(ctx, binding, innerRecipe);
+		if (!instance.isSet(binding)) {
+			ctx.queueAction(() -> {
+				if (!instance.isSet(binding)) {
+					instance.set(binding,
+							ctx.getCompiler().compileSupplier(innerRecipe)
+									.getNoThrow());
+				}
+			});
+		}
 		return new SupplierRecipe() {
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public Class<?> compileImpl(GeneratorAdapter mv,
-					MethodCompilationContext compilationContext) {
+					MethodCompilationContext ctx) {
 
 				Class<?> fieldType = requestedType.getRawType();
 				if (!Accessibility.isClassPublic(fieldType)) {
 					fieldType = Object.class;
 				}
-				compilationContext.addFieldAndLoad((Class) fieldType,
-						instance.get(binding));
+				ctx.addFieldAndLoad((Class) fieldType, instance.get(binding));
 				return fieldType;
 			}
 		};

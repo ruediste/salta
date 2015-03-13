@@ -1,7 +1,9 @@
 package com.github.ruediste.salta.standard;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
+import java.lang.reflect.Parameter;
 import java.util.Objects;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
@@ -62,6 +64,9 @@ public class InjectionPoint<T> extends CoreDependencyKey<T> {
 
 	@Override
 	public String toString() {
+		if (member instanceof Executable && annotated instanceof Parameter) {
+			return "parameter " + annotated + " of " + member;
+		}
 		return member.toString();
 	}
 

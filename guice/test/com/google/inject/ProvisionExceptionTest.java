@@ -31,6 +31,8 @@ import java.lang.annotation.Target;
 
 import junit.framework.TestCase;
 
+import com.github.ruediste.salta.core.SaltaException;
+
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
@@ -41,14 +43,9 @@ public class ProvisionExceptionTest extends TestCase {
 		try {
 			Guice.createInjector().getInstance(A.class);
 			fail();
-		} catch (ProvisionException e) {
-			assertTrue(e.getCause() instanceof UnsupportedOperationException);
-			assertContains(
-					e.getMessage(),
-					"Error injecting constructor",
-					"for parameter 0 at com.google.inject.ProvisionExceptionTest$C.setD",
-					"for field at com.google.inject.ProvisionExceptionTest$B.c",
-					"for parameter 0 at com.google.inject.ProvisionExceptionTest$A");
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("UnsupportedOperationException"))
+				throw e;
 		}
 	}
 
@@ -66,15 +63,10 @@ public class ProvisionExceptionTest extends TestCase {
 				}
 			}).getInstance(A.class);
 			fail();
-		} catch (ProvisionException e) {
-			assertTrue(e.getCause() instanceof UnsupportedOperationException);
-			assertFalse(e.getMessage().contains("custom provider"));
-			assertContains(
-					e.getMessage(),
-					"Error injecting constructor",
-					"for parameter 0 at com.google.inject.ProvisionExceptionTest$C.setD",
-					"for field at com.google.inject.ProvisionExceptionTest$B.c",
-					"for parameter 0 at com.google.inject.ProvisionExceptionTest$A");
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains(
+					UnsupportedOperationException.class.getName()))
+				throw e;
 		}
 	}
 
@@ -82,11 +74,9 @@ public class ProvisionExceptionTest extends TestCase {
 		try {
 			Guice.createInjector().getInstance(E.class);
 			fail();
-		} catch (ProvisionException e) {
-			assertTrue(e.getCause() instanceof UnsupportedOperationException);
-			assertContains(e.getMessage(), "Error injecting method", "at "
-					+ E.class.getName()
-					+ ".setObject(ProvisionExceptionTest.java:");
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("UnsupportedOperationException"))
+				throw e;
 		}
 	}
 
@@ -99,13 +89,9 @@ public class ProvisionExceptionTest extends TestCase {
 				}
 			}).getInstance(D.class);
 			fail();
-		} catch (ProvisionException e) {
-			assertTrue(e.getCause() instanceof UnsupportedOperationException);
-			assertContains(
-					e.getMessage(),
-					"1) Error in custom provider, java.lang.UnsupportedOperationException",
-					"at " + ProvisionExceptionTest.class.getName(),
-					getDeclaringSourcePart(getClass()));
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("UnsupportedOperationException"))
+				throw e;
 		}
 	}
 
@@ -135,10 +121,9 @@ public class ProvisionExceptionTest extends TestCase {
 				}
 			}).getInstance(F.class);
 			fail();
-		} catch (ProvisionException e) {
-			assertContains(e.getMessage(), "1) User Exception",
-					"while locating ", FProvider.class.getName(),
-					"while locating ", F.class.getName());
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("User Exception"))
+				throw e;
 		}
 	}
 
@@ -164,19 +149,9 @@ public class ProvisionExceptionTest extends TestCase {
 		try {
 			Guice.createInjector().getInstance(A.class);
 			fail();
-		} catch (ProvisionException expected) {
-			ProvisionException reserialized = reserialize(expected);
-			assertContains(
-					reserialized.getMessage(),
-					"1) Error injecting constructor, java.lang.UnsupportedOperationException",
-					"at com.google.inject.ProvisionExceptionTest$RealD.<init>()",
-					"at Key[type=com.google.inject.ProvisionExceptionTest$RealD, annotation=[none]]",
-					"@com.google.inject.ProvisionExceptionTest$C.setD()[0]",
-					"at Key[type=com.google.inject.ProvisionExceptionTest$C, annotation=[none]]",
-					"@com.google.inject.ProvisionExceptionTest$B.c",
-					"at Key[type=com.google.inject.ProvisionExceptionTest$B, annotation=[none]]",
-					"@com.google.inject.ProvisionExceptionTest$A.<init>()[0]",
-					"at Key[type=com.google.inject.ProvisionExceptionTest$A, annotation=[none]]");
+		} catch (SaltaException expected) {
+			SaltaException reserialized = reserialize(expected);
+			assertEquals(expected.getMessage(), reserialized.getMessage());
 		}
 	}
 
@@ -184,15 +159,10 @@ public class ProvisionExceptionTest extends TestCase {
 		try {
 			Guice.createInjector().getInstance(G.class);
 			fail();
-		} catch (ProvisionException e) {
-			assertContains(
-					e.getMessage(),
-					"1) Error injecting method, java.lang.IllegalArgumentException",
-					"Caused by: java.lang.IllegalArgumentException: java.lang.UnsupportedOperationException",
-					"Caused by: java.lang.UnsupportedOperationException: Unsupported",
-					"2) Error injecting method, java.lang.NullPointerException: can't inject second either",
-					"Caused by: java.lang.NullPointerException: can't inject second either",
-					"2 errors");
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("Unsupported")
+					&& !e.getMessage().contains("either"))
+				throw e;
 		}
 	}
 
@@ -201,10 +171,9 @@ public class ProvisionExceptionTest extends TestCase {
 		try {
 			injector.getInstance(InnerClass.class);
 			fail();
-		} catch (Exception expected) {
-			assertContains(expected.getMessage(),
-					"Injecting into inner classes is not supported.",
-					"while locating " + InnerClass.class.getName());
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("non-static inner classes"))
+				throw e;
 		}
 	}
 
@@ -216,10 +185,9 @@ public class ProvisionExceptionTest extends TestCase {
 		try {
 			injector.getInstance(LocalClass.class);
 			fail();
-		} catch (Exception expected) {
-			assertContains(expected.getMessage(),
-					"Injecting into inner classes is not supported.",
-					"while locating " + LocalClass.class.getName());
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("non-static inner classes"))
+				throw e;
 		}
 	}
 
@@ -228,31 +196,18 @@ public class ProvisionExceptionTest extends TestCase {
 			Injector injector = Guice.createInjector();
 			injector.getInstance(MethodWithBindingAnnotation.class);
 			fail();
-		} catch (ConfigurationException expected) {
-			assertContains(
-					expected.getMessage(),
-					MethodWithBindingAnnotation.class.getName()
-							+ ".injectMe() is annotated with @",
-					Green.class.getName() + "(), ",
-					"but binding annotations should be applied to its parameters instead.",
-					"while locating "
-							+ MethodWithBindingAnnotation.class.getName());
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("on parameters instead"))
+				throw e;
 		}
 
 		try {
 			Guice.createInjector().getInstance(
 					ConstructorWithBindingAnnotation.class);
 			fail();
-		} catch (ConfigurationException expected) {
-			assertContains(
-					expected.getMessage(),
-					ConstructorWithBindingAnnotation.class.getName()
-							+ ".<init>() is annotated with @",
-					Green.class.getName() + "(), ",
-					"but binding annotations should be applied to its parameters instead.",
-					"at " + ConstructorWithBindingAnnotation.class.getName()
-							+ ".class", "while locating "
-							+ ConstructorWithBindingAnnotation.class.getName());
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("on parameters instead"))
+				throw e;
 		}
 	}
 
@@ -278,11 +233,10 @@ public class ProvisionExceptionTest extends TestCase {
 		try {
 			injector.getInstance(D.class);
 			fail();
-		} catch (ProvisionException expected) {
-			assertContains(expected.getMessage(), "at " + RealD.class.getName()
-					+ ".<init>(ProvisionExceptionTest.java:", "while locating "
-					+ RealD.class.getName(),
-					"while locating " + D.class.getName());
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains(
+					UnsupportedOperationException.class.getName()))
+				throw e;
 		}
 	}
 
@@ -297,10 +251,10 @@ public class ProvisionExceptionTest extends TestCase {
 		try {
 			injector.getInstance(D.class);
 			fail();
-		} catch (ProvisionException expected) {
-			assertContains(expected.getMessage(), "while locating "
-					+ DProvider.class.getName(),
-					"while locating " + D.class.getName());
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains(
+					UnsupportedOperationException.class.getName()))
+				throw e;
 		}
 	}
 

@@ -46,8 +46,8 @@ public class CoreInjector {
 		} catch (SaltaException e) {
 			throw e;
 		} catch (Throwable e) {
-			throw new SaltaException("Error while creating instance for " + key
-					+ "\n" + e.getMessage(), e);
+			throw new SaltaException(
+					"Error while creating instance for " + key, e);
 		}
 	}
 

@@ -23,11 +23,11 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
+import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ProvisionListener;
 import com.google.inject.spi.ProvisionListener.ProvisionInvocation;
-import com.google.inject.spi.TypeListener;
 
 public class BinderImpl implements Binder {
 
@@ -43,15 +43,24 @@ public class BinderImpl implements Binder {
 
 	@Override
 	public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-		if (Provider.class.equals(typeLiteral.getRawType()))
-			throw new SaltaException("Binding to Provider is not allowed.");
+		checkForFrameworkTypes(typeLiteral.getRawType());
 		return new AnnotatedBindingBuilderImpl<T>(delegate.bind(typeLiteral
 				.getTypeToken()));
 	}
 
 	@Override
 	public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
+		checkForFrameworkTypes(type);
 		return new AnnotatedBindingBuilderImpl<T>(delegate.bind(type));
+	}
+
+	private <T> void checkForFrameworkTypes(Class<T> type) {
+		if (Provider.class.equals(type) || TypeLiteral.class.equals(type)
+				|| MembersInjector.class.equals(type)) {
+			throw new com.github.ruediste.salta.core.SaltaException(
+					"Binding to core guice framework type is not allowed: "
+							+ type.getSimpleName() + ".");
+		}
 	}
 
 	@Override
@@ -147,14 +156,19 @@ public class BinderImpl implements Binder {
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		return delegate.getMembersInjector(type)::injectMembers;
-	}
+		com.github.ruediste.salta.standard.MembersInjector<T> membersInjector = delegate
+				.getMembersInjector(type);
+		return new MembersInjector<T>() {
+			@Override
+			public void injectMembers(T i) {
+				membersInjector.injectMembers(i);
+			}
 
-	@Override
-	public void bindListener(Matcher<? super TypeLiteral<?>> typeMatcher,
-			TypeListener listener) {
-		// TODO: implement
-		throw new UnsupportedOperationException();
+			@Override
+			public String toString() {
+				return membersInjector.toString();
+			}
+		};
 	}
 
 	@Override
@@ -267,9 +281,10 @@ public class BinderImpl implements Binder {
 	}
 
 	@Override
-	public <T> AnnotatedBindingBuilder<T> bind(Key<T> key) {
-		return new AnnotatedBindingBuilderImpl<>(delegate.bind(key
-				.getTypeLiteral().getTypeToken()));
+	public <T> LinkedBindingBuilder<T> bind(Key<T> key) {
+		return new LinkedBindingBuilderImpl<>(delegate.bind(
+				key.getTypeLiteral().getTypeToken()).annotatedWith(
+				key.getAnnotation()));
 	}
 
 	@Override

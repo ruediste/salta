@@ -22,17 +22,13 @@ import static com.google.inject.name.Names.named;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
+import com.github.ruediste.salta.core.SaltaException;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Runnables;
-import com.google.inject.matcher.Matchers;
-import com.google.inject.spi.TypeEncounter;
-import com.google.inject.spi.TypeListener;
 
 /**
  * @author crazybob@google.com (Bob Lee)
@@ -53,13 +49,18 @@ public class BindingTest extends TestCase {
 	}
 
 	public void testExplicitCyclicDependency() {
-		Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(A.class);
-				bind(B.class);
-			}
-		}).getInstance(A.class);
+		try {
+			Guice.createInjector(new AbstractModule() {
+				@Override
+				protected void configure() {
+					bind(A.class);
+					bind(B.class);
+				}
+			}).getInstance(A.class);
+		} catch (SaltaException e) {
+			if (!e.getMessage().contains("Circle"))
+				throw e;
+		}
 	}
 
 	static class A {
@@ -125,11 +126,12 @@ public class BindingTest extends TestCase {
 				protected void configure() {
 					bind(Collection.class).to(List.class);
 				}
-			});
+			}).getInstance(Collection.class);
 			fail();
-		} catch (CreationException expected) {
-			assertContains(expected.getMessage(),
-					"No implementation for java.util.List was bound.");
+		} catch (SaltaException expected) {
+			if (!expected.getMessage().contains(
+					"No instantiator found for java.util.List"))
+				throw expected;
 		}
 	}
 
@@ -196,7 +198,7 @@ public class BindingTest extends TestCase {
 		assertBindingSucceeds(ProtectedNoArg.class);
 		assertBindingSucceeds(PackagePrivateNoArg.class);
 		assertBindingSucceeds(PrivateNoArgInPrivateClass.class);
-		assertBindingFails(PrivateNoArg.class);
+		assertBindingSucceeds(PrivateNoArg.class);
 	}
 
 	static class PublicNoArg {
@@ -246,14 +248,9 @@ public class BindingTest extends TestCase {
 		try {
 			Guice.createInjector().getInstance(TooManyConstructors.class);
 			fail();
-		} catch (ConfigurationException expected) {
-			assertContains(
-					expected.getMessage(),
-					TooManyConstructors.class.getName()
-							+ " has more than one constructor annotated with "
-							+ "@Inject. Classes must have either one (and only one) constructor",
-					"at " + TooManyConstructors.class.getName()
-							+ ".class(BindingTest.java:");
+		} catch (SaltaException expected) {
+			if (!expected.getMessage().contains("Ambigous"))
+				throw expected;
 		}
 	}
 
@@ -323,14 +320,11 @@ public class BindingTest extends TestCase {
 				protected void configure() {
 					bind(Object.class).toConstructor(constructor);
 				}
-			});
+			}).getInstance(Object.class);
 			fail();
-		} catch (CreationException expected) {
-			assertContains(expected.getMessage(),
-					"1) T cannot be used as a key; It is not fully specified.",
-					"at " + C.class.getName() + ".<init>(BindingTest.java:",
-					"2) T cannot be used as a key; It is not fully specified.",
-					"at " + C.class.getName() + ".anotherT(BindingTest.java:");
+		} catch (SaltaException expected) {
+			if (!expected.getMessage().contains("Unknown type T"))
+				throw expected;
 		}
 	}
 
@@ -384,31 +378,6 @@ public class BindingTest extends TestCase {
 			builder.add(injector.getInstance(k));
 		}
 		assertEquals(expectedCount, builder.build().size());
-	}
-
-	public void testToConstructorSpiData() throws NoSuchMethodException {
-		final Set<TypeLiteral<?>> heardTypes = Sets.newHashSet();
-
-		final Constructor<D> constructor = D.class.getConstructor(Stage.class);
-		final TypeListener listener = new TypeListener() {
-			@Override
-			public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-				if (!heardTypes.add(type)) {
-					fail("Heard " + type + " multiple times!");
-				}
-			}
-		};
-
-		Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(Object.class).toConstructor(constructor);
-				bind(D.class).toConstructor(constructor);
-				bindListener(Matchers.any(), listener);
-			}
-		});
-
-		assertEquals(ImmutableSet.of(TypeLiteral.get(D.class)), heardTypes);
 	}
 
 	public void testInterfaceToImplementationConstructor()

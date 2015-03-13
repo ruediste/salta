@@ -8,10 +8,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
@@ -23,9 +23,9 @@ import com.google.common.reflect.TypeToken;
 public abstract class ConstructorInstantiatorRuleBase implements
 		InstantiatorRule {
 
-	private CoreInjectorConfiguration config;
+	private StandardInjectorConfiguration config;
 
-	public ConstructorInstantiatorRuleBase(CoreInjectorConfiguration config) {
+	public ConstructorInstantiatorRuleBase(StandardInjectorConfiguration config) {
 		this.config = config;
 
 	}
@@ -84,8 +84,13 @@ public abstract class ConstructorInstantiatorRuleBase implements
 			return null;
 		}
 
+		Constructor<?> constructor = highestPriorityConstructors.get(0);
+		if (config.getRequiredQualifier(constructor, constructor) != null) {
+			throw new SaltaException("Qualifier specified on " + constructor
+					+ ".\nSpecify qualifiers on parameters instead");
+		}
 		return FixedConstructorRecipeInstantiator.of(typeToken, ctx,
-				highestPriorityConstructors.get(0), config.injectionStrategy);
+				constructor, config.config.injectionStrategy);
 
 	}
 

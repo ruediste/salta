@@ -4,8 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.MembersInjectorFactoryBase;
 import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
 import com.google.common.reflect.TypeToken;
@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 
 public class GuiceMembersInjectorFactory extends MembersInjectorFactoryBase {
 
-	public GuiceMembersInjectorFactory(CoreInjectorConfiguration config) {
+	public GuiceMembersInjectorFactory(StandardInjectorConfiguration config) {
 		super(config);
 	}
 
