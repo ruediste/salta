@@ -1,9 +1,9 @@
 package com.github.ruediste.salta.standard.config;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
-import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.google.common.reflect.TypeToken;
 
@@ -13,9 +13,9 @@ import com.google.common.reflect.TypeToken;
 public interface MembersInjectorRule {
 
 	/**
-	 * Create the {@link RecipeMembersInjector}s. If null is returned, the next
-	 * rule is tried
+	 * Create the {@link RecipeMembersInjector}s. If {@link Optional#empty()} is
+	 * returned, the next rule is tried
 	 */
-	List<RecipeMembersInjector> getMembersInjectors(TypeToken<?> type);
+	Optional<List<RecipeMembersInjector>> getMembersInjectors(TypeToken<?> type);
 
 }

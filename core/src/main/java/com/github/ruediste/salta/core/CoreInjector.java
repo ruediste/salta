@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.core;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -21,7 +22,7 @@ public class CoreInjector {
 
 	private ConcurrentHashMap<CoreDependencyKey<?>, CompiledSupplier> compiledRecipeCache = new ConcurrentHashMap<>();
 
-	private HashMap<CoreDependencyKey<?>, SupplierRecipe> recipeCache = new HashMap<>();
+	private HashMap<CoreDependencyKey<?>, Optional<SupplierRecipe>> recipeCache = new HashMap<>();
 
 	private HashMap<JITBindingKey, JITBinding> jitBindings = new HashMap<>();
 
@@ -117,9 +118,21 @@ public class CoreInjector {
 	 */
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
+		Optional<SupplierRecipe> result = tryGetRecipe(key, ctx);
+		if (!result.isPresent()) {
+			throw new SaltaException("Dependency cannot be resolved:\n" + key);
+		}
+		return result.get();
+	}
+
+	/**
+	 * Get the recipe for a key
+	 */
+	public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> key,
+			RecipeCreationContext ctx) {
 		// acquire the recipe lock
 		synchronized (recipeLock) {
-			SupplierRecipe result = recipeCache.get(key);
+			Optional<SupplierRecipe> result = recipeCache.get(key);
 			if (result == null) {
 				try {
 					result = createRecipe(key, ctx);
@@ -136,22 +149,23 @@ public class CoreInjector {
 	/**
 	 * Create a recipe. Expects the {@link #recipeLock} to be acquired
 	 */
-	private SupplierRecipe createRecipe(CoreDependencyKey<?> key,
+	private Optional<SupplierRecipe> createRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
 		try {
 			// check rules
 			for (CreationRule rule : config.creationRules) {
 				SupplierRecipe recipe = rule.apply(key, ctx);
 				if (recipe != null)
-					return recipe;
+					return Optional.of(recipe);
 			}
 
 			// check static bindings
 			{
 				StaticBinding binding = staticBindings.getBinding(key);
 				if (binding != null) {
-					return binding.getScope().createRecipe(ctx, binding,
-							key.getType(), ctx.getOrCreateRecipe(binding));
+					return Optional.of(binding.getScope().createRecipe(ctx,
+							binding, key.getType(),
+							ctx.getOrCreateRecipe(binding)));
 				}
 			}
 
@@ -159,8 +173,9 @@ public class CoreInjector {
 			{
 				StaticBinding binding = automaticStaticBindings.getBinding(key);
 				if (binding != null) {
-					return binding.getScope().createRecipe(ctx, binding,
-							key.getType(), ctx.getOrCreateRecipe(binding));
+					return Optional.of(binding.getScope().createRecipe(ctx,
+							binding, key.getType(),
+							ctx.getOrCreateRecipe(binding)));
 				}
 			}
 
@@ -187,8 +202,9 @@ public class CoreInjector {
 
 				// use binding if available
 				if (jitBinding != null) {
-					return jitBinding.getScope().createRecipe(ctx, jitBinding,
-							key.getType(), ctx.getOrCreateRecipe(jitBinding));
+					return Optional.of(jitBinding.getScope().createRecipe(ctx,
+							jitBinding, key.getType(),
+							ctx.getOrCreateRecipe(jitBinding)));
 				}
 			}
 		} catch (SaltaException e) {
@@ -196,7 +212,7 @@ public class CoreInjector {
 		} catch (Exception e) {
 			throw new SaltaException("Error creating recipe for " + key, e);
 		}
-		throw new SaltaException("Dependency cannot be resolved:\n" + key);
+		return Optional.empty();
 	}
 
 	public RecipeCompiler getCompiler() {

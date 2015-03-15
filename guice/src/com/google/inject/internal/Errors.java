@@ -46,11 +46,8 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
-import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ScopeBinding;
-import com.google.inject.spi.TypeConverterBinding;
-import com.google.inject.spi.TypeListenerBinding;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter,
@@ -158,40 +155,6 @@ public final class Errors implements Serializable {
 				"Explicit @Inject annotations are required on constructors,"
 						+ " but %s has no constructors annotated with @Inject.",
 				clazz);
-	}
-
-	public Errors converterReturnedNull(String stringValue, Object source,
-			TypeLiteral<?> type, TypeConverterBinding typeConverterBinding) {
-		return addMessage("Received null converting '%s' (bound at %s) to %s%n"
-				+ " using %s.", stringValue, convert(source), type,
-				typeConverterBinding);
-	}
-
-	public Errors conversionTypeError(String stringValue, Object source,
-			TypeLiteral<?> type, TypeConverterBinding typeConverterBinding,
-			Object converted) {
-		return addMessage("Type mismatch converting '%s' (bound at %s) to %s%n"
-				+ " using %s.%n" + " Converter returned %s.", stringValue,
-				convert(source), type, typeConverterBinding, converted);
-	}
-
-	public Errors conversionError(String stringValue, Object source,
-			TypeLiteral<?> type, TypeConverterBinding typeConverterBinding,
-			RuntimeException cause) {
-		return errorInUserCode(cause,
-				"Error converting '%s' (bound at %s) to %s%n" + " using %s.%n"
-						+ " Reason: %s", stringValue, convert(source), type,
-				typeConverterBinding, cause);
-	}
-
-	public Errors ambiguousTypeConversion(String stringValue, Object source,
-			TypeLiteral<?> type, TypeConverterBinding a, TypeConverterBinding b) {
-		return addMessage(
-				"Multiple converters can convert '%s' (bound at %s) to %s:%n"
-						+ " %s and%n"
-						+ " %s.%n"
-						+ " Please adjust your type converter configuration to avoid overlapping matches.",
-				stringValue, convert(source), type, a, b);
 	}
 
 	public Errors bindingToProvider() {
@@ -382,14 +345,6 @@ public final class Errors implements Serializable {
 		return errorInUserCode(cause, "Error injecting method, %s", cause);
 	}
 
-	public Errors errorNotifyingTypeListener(TypeListenerBinding listener,
-			TypeLiteral<?> type, Throwable cause) {
-		return errorInUserCode(cause,
-				"Error notifying TypeListener %s (bound at %s) of %s.%n"
-						+ " Reason: %s", listener.getListener(),
-				convert(listener.getSource()), type, cause);
-	}
-
 	public Errors errorInjectingConstructor(Throwable cause) {
 		return errorInUserCode(cause, "Error injecting constructor, %s", cause);
 	}
@@ -404,15 +359,6 @@ public final class Errors implements Serializable {
 			TypeLiteral<?> type, RuntimeException cause) {
 		return errorInUserCode(cause, "Error injecting %s using %s.%n"
 				+ " Reason: %s", type, listener, cause);
-	}
-
-	public Errors errorNotifyingInjectionListener(
-			InjectionListener<?> listener, TypeLiteral<?> type,
-			RuntimeException cause) {
-		return errorInUserCode(
-				cause,
-				"Error notifying InjectionListener %s of %s.%n" + " Reason: %s",
-				listener, type, cause);
 	}
 
 	public Errors exposedButNotBound(Key<?> key) {

@@ -1,6 +1,5 @@
 package com.github.ruediste.salta.jsr330;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -41,23 +40,6 @@ public class JSR330Module extends AbstractModule {
 		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
 				.of(type, ctx, cstr, config.config.injectionStrategy);
 
-		config.noInstantiatorFoundErrorProducers
-				.add(typeToken -> {
-					Class<?> clazz = typeToken.getRawType();
-					Class<?> enclosingClass = clazz.getEnclosingClass();
-					if (enclosingClass != null) {
-						for (Constructor<?> c : clazz.getDeclaredConstructors()) {
-							if (c.getParameterCount() == 1
-									&& enclosingClass.equals(c
-											.getParameterTypes()[0])) {
-								throw new SaltaException(
-										"No suitable constructor found for inner non-static class "
-												+ typeToken
-												+ ".\nCannot instantiate non-static inner classes. Forgotten to make class static?");
-							}
-						}
-					}
-				});
 		config.defaultMembersInjectorFactories
 				.add(new JSR330MembersInjectorFactory(config));
 
@@ -80,11 +62,9 @@ public class JSR330Module extends AbstractModule {
 			}
 		});
 
-		config.config.creationRules.add(new ProviderCreationRule(
-				key -> {
-					return key.getType().getRawType().equals(Provider.class);
-				}, (type, supplier) -> (Provider<?>) supplier::get,
-				Provider.class));
+		config.config.creationRules.add(new ProviderCreationRule(key -> {
+			return key.getType().getRawType().equals(Provider.class);
+		}, (type, supplier) -> (Provider<?>) supplier::get, Provider.class));
 
 		config.config.creationRules.add(new MembersInjectorCreationRuleBase(
 				config) {

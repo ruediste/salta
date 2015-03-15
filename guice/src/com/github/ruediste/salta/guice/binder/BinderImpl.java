@@ -14,6 +14,7 @@ import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
+import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Module;
@@ -56,7 +57,8 @@ public class BinderImpl implements Binder {
 
 	private <T> void checkForFrameworkTypes(Class<T> type) {
 		if (Provider.class.equals(type) || TypeLiteral.class.equals(type)
-				|| MembersInjector.class.equals(type)) {
+				|| MembersInjector.class.equals(type)
+				|| Injector.class.equals(type)) {
 			throw new com.github.ruediste.salta.core.SaltaException(
 					"Binding to core guice framework type is not allowed: "
 							+ type.getSimpleName() + ".");
@@ -172,12 +174,12 @@ public class BinderImpl implements Binder {
 	}
 
 	@Override
-	public void bindListener(Matcher<? super Binding<?>> bindingMatcher,
+	public void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
 			ProvisionListener... listeners) {
 
 		for (int i = 0; i < listeners.length; i++) {
 			ProvisionListener listener = listeners[i];
-			delegate.getConfiguration().enhancerRules
+			delegate.getConfiguration().enhancerFactories
 					.add(new EnhancementRule() {
 
 						final class ProvisionInvocationImpl extends
@@ -209,24 +211,15 @@ public class BinderImpl implements Binder {
 							@Override
 							public Binding<Object> getBinding() {
 								return new BindingImpl<>(
-										Key.get(type.getType()),
-										new Provider<Object>() {
-											@Override
-											public Object get() {
-												return supplier.get();
-											}
-
-											@Override
-											public String toString() {
-												return supplier.toString();
-											}
-										});
+										Key.get(type.getType()), null);
 							}
 						}
 
 						@Override
 						public RecipeEnhancer getEnhancer(
 								RecipeCreationContext ctx, TypeToken<?> type) {
+							if (!typeMatcher.matches(type))
+								return null;
 							return new RecipeEnhancerWrapperImpl(
 									supplier -> {
 										ProvisionInvocationImpl invocation = new ProvisionInvocationImpl(

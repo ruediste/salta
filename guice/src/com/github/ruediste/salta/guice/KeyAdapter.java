@@ -78,4 +78,17 @@ public class KeyAdapter<T> extends CoreDependencyKey<T> {
 		};
 	}
 
+	@Override
+	public int hashCode() {
+		return key.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof KeyAdapter) {
+			KeyAdapter<?> other = (KeyAdapter<?>) obj;
+			return key.equals(other.key);
+		}
+		return false;
+	}
 }

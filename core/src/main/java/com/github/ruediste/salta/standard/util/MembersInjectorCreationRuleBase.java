@@ -10,7 +10,6 @@ import com.github.ruediste.salta.core.CompiledFunction;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -65,29 +64,24 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 		if (recipe != null)
 			return recipe;
 
-		try {
-			List<RecipeMembersInjector> injectors = config
-					.createRecipeMembersInjectors(ctx, typeToken);
-			List<RecipeInitializer> initializers = config.createInitializers(
-					ctx, typeToken);
-			recipe = new FunctionRecipe() {
+		List<RecipeMembersInjector> injectors = config
+				.createRecipeMembersInjectors(ctx, typeToken);
+		List<RecipeInitializer> initializers = config.createInitializers(ctx,
+				typeToken);
+		recipe = new FunctionRecipe() {
 
-				@Override
-				public Class<?> compileImpl(Class<?> argumentType,
-						GeneratorAdapter mv, MethodCompilationContext ctx) {
-					for (RecipeMembersInjector rmi : injectors) {
-						argumentType = rmi.compile(argumentType, ctx);
-					}
-					for (RecipeInitializer initializer : initializers)
-						argumentType = initializer.compile(argumentType, ctx);
-					return argumentType;
+			@Override
+			public Class<?> compileImpl(Class<?> argumentType,
+					GeneratorAdapter mv, MethodCompilationContext ctx) {
+				for (RecipeMembersInjector rmi : injectors) {
+					argumentType = rmi.compile(argumentType, ctx);
 				}
-			};
-		} catch (Throwable t) {
-			throw new SaltaException(
-					"Error while creating MembersInjection recipe for "
-							+ typeToken, t);
-		}
+				for (RecipeInitializer initializer : initializers)
+					argumentType = initializer.compile(argumentType, ctx);
+				return argumentType;
+			}
+		};
+
 		membersInjectionRecipeCache.put(typeToken, recipe);
 		return recipe;
 	}

@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.standard.config;
 
 import java.lang.reflect.Constructor;
+import java.util.Optional;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -14,6 +15,6 @@ public interface FixedConstructorInstantiatorFactory {
 	 * Create the {@link RecipeInstantiator} for the given constructor in type
 	 * typeToken
 	 */
-	RecipeInstantiator create(TypeToken<?> typeToken,
+	Optional<RecipeInstantiator> create(TypeToken<?> typeToken,
 			RecipeCreationContext ctx, Constructor<?> constructor);
 }

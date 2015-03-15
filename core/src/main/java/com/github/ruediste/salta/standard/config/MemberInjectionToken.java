@@ -14,7 +14,7 @@ import com.google.common.reflect.TypeToken;
 public class MemberInjectionToken<T> {
 	private Injector injector;
 	private T value;
-	private boolean injected;
+	private volatile boolean injected;
 	private TypeToken<T> type;
 
 	private MemberInjectionToken(Injector injector, T value, TypeToken<T> type) {
@@ -24,12 +24,13 @@ public class MemberInjectionToken<T> {
 	}
 
 	public T getValue() {
-		synchronized (this) {
-			if (!injected) {
-				injector.injectMembers(type, value);
-				injected = true;
+		if (!injected)
+			synchronized (injector.getCoreInjector().recipeLock) {
+				if (!injected) {
+					injector.injectMembers(type, value);
+					injected = true;
+				}
 			}
-		}
 		return value;
 	}
 

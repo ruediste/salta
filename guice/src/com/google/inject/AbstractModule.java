@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.lang.annotation.Annotation;
 
+import com.google.common.reflect.TypeToken;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -55,7 +56,6 @@ public abstract class AbstractModule implements Module {
 	public final synchronized void configure(Binder binder) {
 		checkState(this.binder == null, "Re-entry is not allowed.");
 
-		binder.getDelegate().getConfiguration().modules.add(this);
 		this.binder = checkNotNull(binder, "binder");
 		try {
 			configure();
@@ -104,7 +104,6 @@ public abstract class AbstractModule implements Module {
 	 * @see Binder#bind(Class)
 	 */
 	protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-
 		return binder().bind(clazz);
 	}
 
@@ -227,8 +226,8 @@ public abstract class AbstractModule implements Module {
 	 * @see Binder#bindListener(Matcher, ProvisionListener...)
 	 * @since 4.0
 	 */
-	protected void bindListener(Matcher<? super Binding<?>> bindingMatcher,
+	protected void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
 			ProvisionListener... listener) {
-		binder().bindListener(bindingMatcher, listener);
+		binder().bindListener(typeMatcher, listener);
 	}
 }

@@ -20,6 +20,7 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -389,6 +390,7 @@ public class Binder {
 	 */
 	public void install(Module module) {
 		module.configure(this);
+		config.modules.add(module);
 	}
 
 	/**
@@ -491,17 +493,17 @@ public class Binder {
 	 */
 	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
 			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
-		config.enhancerRules.add(new EnhancementRule() {
+		config.enhancerFactories.add(new EnhancementRule() {
 
 			@Override
-			public RecipeEnhancer getEnhancer(RecipeCreationContext ctx,
-					TypeToken<?> type) {
+			public Optional<RecipeEnhancer> getEnhancer(
+					RecipeCreationContext ctx, TypeToken<?> type) {
 
 				if (typeMatcher.matches(type)) {
-					return new RecipeEnhancerWrapperImpl(instance -> listener
-							.apply(type, instance));
+					return Optional.of(new RecipeEnhancerWrapperImpl(
+							instance -> listener.apply(type, instance)));
 				}
-				return null;
+				return Optional.empty();
 			}
 		});
 	}

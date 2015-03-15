@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -109,6 +110,10 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
 		MemberInjectionToken<T> token = MemberInjectionToken
 				.getMemberInjectionToken(injector, instance);
+
+		// initialize the instance when creating the injector
+		config.dynamicInitializers.add(i -> token.getValue());
+
 		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> new CreationRecipeFactory() {
 			boolean recipeCreationInProgress;
@@ -235,18 +240,23 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 			Constructor<S> constructor, TypeToken<? extends S> type) {
 		DefaultConstructionRule rule = new DefaultConstructionRule(config) {
 			@Override
-			protected RecipeInstantiator createInstantiationRecipe(
+			protected Optional<RecipeInstantiator> createInstantiationRecipe(
 					RecipeCreationContext ctx, TypeToken<?> type) {
-				return config.fixedConstructorInstantiatorFactory.create(type,
-						ctx, constructor);
+				Optional<RecipeInstantiator> result = config.fixedConstructorInstantiatorFactory
+						.create(type, ctx, constructor);
+				result.orElseThrow(() -> new SaltaException(
+						"Cannot create instantiator for constructor "
+								+ constructor));
+				return result;
 			}
 		};
-		recipeFactorySupplier = () -> creationContext -> {
-			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
-					config, type);
-			builder.constructionRecipeSupplier = (ctx) -> rule
-					.createConstructionRecipe(ctx, type);
-			return builder.build(creationContext);
+		recipeFactorySupplier = () -> ctx -> {
+			SupplierRecipe seed = rule.createConstructionRecipe(ctx, type)
+					.orElseThrow(
+							() -> new SaltaException(
+									"Cannot create recipe for " + constructor));
+			return DefaultCreationRecipeBuilder.applyEnhancers(seed,
+					config.createEnhancers(ctx, type));
 		};
 		scopeSupplier = () -> config.getScope(constructor.getDeclaringClass());
 		return this;

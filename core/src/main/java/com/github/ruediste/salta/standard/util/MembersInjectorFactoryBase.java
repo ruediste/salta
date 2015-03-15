@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
@@ -26,7 +27,10 @@ public abstract class MembersInjectorFactoryBase implements
 
 	public MembersInjectorFactoryBase(StandardInjectorConfiguration config) {
 		this.config = config;
+	}
 
+	protected enum InjectionInstruction {
+		NO_INJECTION, INJECT, INJECT_OPTIONAL
 	}
 
 	@Override
@@ -39,7 +43,9 @@ public abstract class MembersInjectorFactoryBase implements
 		// subtypes
 		for (TypeToken<?> t : overrideIndex.getAncestors()) {
 			for (Field f : t.getRawType().getDeclaredFields()) {
-				if (isInjectableField(t, f)) {
+				InjectionInstruction injectionInstruction = getInjectionInstruction(
+						t, f);
+				if (injectionInstruction != InjectionInstruction.NO_INJECTION) {
 					f.setAccessible(true);
 
 					// create dependency
@@ -47,16 +53,28 @@ public abstract class MembersInjectorFactoryBase implements
 							t.resolveType(f.getGenericType()), f, f, null);
 
 					// add injector
-					result.add(new FixedFieldRecipeMembersInjector(f, ctx
-							.getRecipe(dependency),
+					SupplierRecipe recipe;
+					if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
+						Optional<SupplierRecipe> tryGetRecipe = ctx
+								.tryGetRecipe(dependency);
+						if (!tryGetRecipe.isPresent())
+							continue;
+						recipe = tryGetRecipe.get();
+					} else
+						recipe = ctx.getRecipe(dependency);
+
+					result.add(new FixedFieldRecipeMembersInjector(f, recipe,
 							config.config.injectionStrategy));
 				}
 			}
 
-			for (Method method : t.getRawType().getDeclaredMethods()) {
+			methodLoop: for (Method method : t.getRawType()
+					.getDeclaredMethods()) {
 				if (Modifier.isStatic(method.getModifiers()))
 					continue;
-				if (isInjectableMethod(t, method, overrideIndex)) {
+				InjectionInstruction injectionInstruction = getInjectionInstruction(
+						t, method, overrideIndex);
+				if (injectionInstruction != InjectionInstruction.NO_INJECTION) {
 					method.setAccessible(true);
 
 					// check that no qualifiers are given on the method itself
@@ -92,7 +110,16 @@ public abstract class MembersInjectorFactoryBase implements
 								(TypeToken) t.resolveType(parameter
 										.getParameterizedType()), method,
 								parameter, i);
-						args.add(ctx.getRecipe(dependency));
+						SupplierRecipe recipe;
+						if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
+							Optional<SupplierRecipe> tryGetRecipe = ctx
+									.tryGetRecipe(dependency);
+							if (!tryGetRecipe.isPresent())
+								continue methodLoop;
+							recipe = tryGetRecipe.get();
+						} else
+							recipe = ctx.getRecipe(dependency);
+						args.add(recipe);
 					}
 
 					// add injector
@@ -104,10 +131,11 @@ public abstract class MembersInjectorFactoryBase implements
 		return result;
 	}
 
-	protected abstract boolean isInjectableField(TypeToken<?> declaringType,
-			Field f);
+	protected abstract InjectionInstruction getInjectionInstruction(
+			TypeToken<?> declaringType, Field f);
 
-	protected abstract boolean isInjectableMethod(TypeToken<?> declaringType,
-			Method method, MethodOverrideIndex overrideIndex);
+	protected abstract InjectionInstruction getInjectionInstruction(
+			TypeToken<?> declaringType, Method method,
+			MethodOverrideIndex overrideIndex);
 
 }

@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.joining;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -58,6 +59,11 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	@Override
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> dependency) {
 		return coreInjector.getRecipe(dependency, this);
+	}
+
+	@Override
+	public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency) {
+		return coreInjector.tryGetRecipe(dependency, this);
 	}
 
 	@Override

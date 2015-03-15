@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.standard;
 
+import java.util.Optional;
+
 import org.junit.Test;
 
 import com.github.ruediste.salta.AbstractModule;
@@ -30,13 +32,13 @@ public class EnhancingTest {
 
 			@Override
 			protected void configure() {
-				getConfiguration().enhancerRules.add(new EnhancementRule() {
+				getConfiguration().enhancerFactories.add(new EnhancementRule() {
 
 					@Override
-					public RecipeEnhancer getEnhancer(
+					public Optional<RecipeEnhancer> getEnhancer(
 							RecipeCreationContext ctx, TypeToken<?> type) {
 						if (type.getRawType().equals(TestA.class)) {
-							return new RecipeEnhancer() {
+							return Optional.of(new RecipeEnhancer() {
 
 								@Override
 								public Class<?> compile(
@@ -45,9 +47,9 @@ public class EnhancingTest {
 									// TODO Auto-generated method stub
 									return null;
 								}
-							};
+							});
 						}
-						return null;
+						return Optional.empty();
 					}
 				});
 			}

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -65,14 +66,12 @@ public class StandardInjectorConfiguration {
 	 */
 	public final List<ConstructionRule> constructionRules = new ArrayList<>();
 
-	public SupplierRecipe createConstructionRecipe(RecipeCreationContext ctx,
-			TypeToken<?> type) {
-		for (ConstructionRule rule : constructionRules) {
-			SupplierRecipe result = rule.createConstructionRecipe(ctx, type);
-			if (result != null)
-				return result;
-		}
-		throw new SaltaException("No construction recipe found for " + type);
+	public Optional<SupplierRecipe> createConstructionRecipe(
+			RecipeCreationContext ctx, TypeToken<?> type) {
+		return constructionRules.stream()
+				.map(rule -> rule.createConstructionRecipe(ctx, type))
+				.filter(Optional::isPresent).map(Optional::get).findFirst();
+		// throw new SaltaException("No construction recipe found for " + type);
 	}
 
 	/**
@@ -82,29 +81,17 @@ public class StandardInjectorConfiguration {
 	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
 
 	/**
-	 * When no matching {@link #instantiatorRules} is found, the type is passed
-	 * to these producers. They should throw an appropriate exception.
-	 */
-	public final List<Consumer<TypeToken<?>>> noInstantiatorFoundErrorProducers = new ArrayList<>();
-
-	/**
 	 * Create an {@link RecipeInstantiator} using the {@link #instantiatorRules}
 	 * If no instantiator is found, an error is raised using
 	 * {@link #noInstantiatorFoundErrorProducers} or a fallback
 	 */
-	public <T> RecipeInstantiator createRecipeInstantiator(
+	public Optional<RecipeInstantiator> createRecipeInstantiator(
 			RecipeCreationContext ctx, TypeToken<?> type) {
-		for (InstantiatorRule rule : instantiatorRules) {
-			RecipeInstantiator instantiator = rule.apply(ctx, type);
-			if (instantiator != null) {
-				return instantiator;
-			}
-		}
-		// throw error
-		for (Consumer<TypeToken<?>> producer : noInstantiatorFoundErrorProducers) {
-			producer.accept(type);
-		}
-		throw new SaltaException("No instantiator found for " + type);
+
+		return instantiatorRules.stream().map(rule -> rule.apply(ctx, type))
+				.filter(Optional::isPresent).map(Optional::get).findFirst();
+
+		// throw new SaltaException("No instantiator found for " + type);
 	}
 
 	/**
@@ -129,10 +116,10 @@ public class StandardInjectorConfiguration {
 			RecipeCreationContext ctx, TypeToken<?> type) {
 		// test rules
 		for (MembersInjectorRule rule : membersInjectorRules) {
-			List<RecipeMembersInjector> membersInjectors = rule
+			Optional<List<RecipeMembersInjector>> membersInjectors = rule
 					.getMembersInjectors(type);
-			if (membersInjectors != null)
-				return membersInjectors;
+			if (membersInjectors.isPresent())
+				return membersInjectors.get();
 		}
 
 		// use default factories
@@ -158,12 +145,13 @@ public class StandardInjectorConfiguration {
 	/**
 	 * List of rules enhance instances. The enhancers of all rules are combined.
 	 */
-	public final List<EnhancementRule> enhancerRules = new ArrayList<>();
+	public final List<EnhancementRule> enhancerFactories = new ArrayList<>();
 
 	public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx,
 			TypeToken<?> type) {
-		return enhancerRules.stream().map(r -> r.getEnhancer(ctx, type))
-				.filter(x -> x != null).collect(toList());
+		return enhancerFactories.stream().map(r -> r.getEnhancer(ctx, type))
+				.filter(Optional::isPresent).map(Optional::get)
+				.collect(toList());
 	}
 
 	/**
@@ -179,14 +167,9 @@ public class StandardInjectorConfiguration {
 	 */
 	public Scope getScope(TypeToken<?> type) {
 
-		// evaluate scope rules
-		for (ScopeRule rule : scopeRules) {
-			Scope scope = rule.getScope(type);
-			if (scope != null)
-				return scope;
-		}
-
-		return getScope(type.getRawType());
+		return scopeRules.stream().map(r -> r.getScope(type))
+				.filter(Optional::isPresent).map(Optional::get).findFirst()
+				.orElse(getScope(type.getRawType()));
 	}
 
 	public Scope getScope(AnnotatedElement element) {

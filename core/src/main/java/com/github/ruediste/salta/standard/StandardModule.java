@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.standard;
 
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
 import com.github.ruediste.salta.AbstractModule;
@@ -46,12 +47,13 @@ public class StandardModule extends AbstractModule {
 		config.config.jitBindingRules.add(new JITBindingRule() {
 
 			@Override
-			public JITBinding apply(JITBindingKey key) {
+			public Optional<JITBinding> apply(JITBindingKey key) {
 				TypeToken<?> type = jitBindingKeyType.get(key);
 				if (!config.doQualifiersMatch(
 						jitBindingKeyRequiredQualifiers.get(key),
 						config.getAvailableQualifier(type.getRawType())))
-					return null;
+					return Optional.empty();
+
 				StandardJitBinding binding = new StandardJitBinding(type);
 				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
 						config, type).build(ctx);

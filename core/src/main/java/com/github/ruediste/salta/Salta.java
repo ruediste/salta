@@ -43,7 +43,7 @@ public class Salta {
 		StandardInjector injector = new StandardInjector();
 		Binder binder = new Binder(config, injector);
 		for (Module module : modules) {
-			module.configure(binder);
+			binder.install(module);
 		}
 
 		binder.close();

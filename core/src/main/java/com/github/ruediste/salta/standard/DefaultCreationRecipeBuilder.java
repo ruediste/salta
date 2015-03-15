@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -21,14 +23,17 @@ public class DefaultCreationRecipeBuilder {
 	public Function<RecipeCreationContext, SupplierRecipe> constructionRecipeSupplier;
 	public Function<RecipeCreationContext, List<RecipeEnhancer>> enhancersSupplier;
 
-	private TypeToken<?> type;
-
 	public DefaultCreationRecipeBuilder(StandardInjectorConfiguration config,
 			TypeToken<?> boundType) {
 
-		this.type = boundType;
-		constructionRecipeSupplier = ctx -> config.createConstructionRecipe(
-				ctx, boundType);
+		constructionRecipeSupplier = ctx -> {
+			Optional<SupplierRecipe> result = config.createConstructionRecipe(
+					ctx, boundType);
+			if (!result.isPresent())
+				throw new SaltaException("No construction recipe found for "
+						+ boundType);
+			return result.get();
+		};
 
 		enhancersSupplier = ctx -> config.createEnhancers(ctx, boundType);
 	}

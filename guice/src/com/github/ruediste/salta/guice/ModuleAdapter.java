@@ -6,7 +6,7 @@ import com.github.ruediste.salta.standard.Module;
 import com.github.ruediste.salta.standard.binder.Binder;
 
 public class ModuleAdapter implements Module {
-	private com.google.inject.Module delegate;
+	private final com.google.inject.Module delegate;
 	private GuiceInjectorConfiguration config;
 
 	public ModuleAdapter(com.google.inject.Module delegate,
@@ -17,7 +17,10 @@ public class ModuleAdapter implements Module {
 
 	@Override
 	public void configure(Binder binder) {
-		delegate.configure(new BinderImpl(binder, config));
+		getDelegate().configure(new BinderImpl(binder, config));
 	}
 
+	public com.google.inject.Module getDelegate() {
+		return delegate;
+	}
 }

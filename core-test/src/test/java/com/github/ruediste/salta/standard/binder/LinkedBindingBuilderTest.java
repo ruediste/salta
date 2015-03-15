@@ -119,15 +119,15 @@ public class LinkedBindingBuilderTest {
 	public void testToInstanceCircular() throws Exception {
 		TestC1 c1 = new TestC1();
 		TestC2 c2 = new TestC2();
-		injector = Salta.createInjector(new AbstractModule() {
-
-			@Override
-			protected void configure() {
-				bind(TestC1.class).toInstance(c1);
-				bind(TestC2.class).toInstance(c2);
-			}
-		}, new JSR330Module());
 		try {
+			injector = Salta.createInjector(new AbstractModule() {
+
+				@Override
+				protected void configure() {
+					bind(TestC1.class).toInstance(c1);
+					bind(TestC2.class).toInstance(c2);
+				}
+			}, new JSR330Module());
 			injector.getInstance(TestC1.class);
 		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(

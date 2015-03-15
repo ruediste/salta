@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.standard.config;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -30,30 +31,36 @@ public class DefaultConstructionRule implements ConstructionRule {
 	}
 
 	@Override
-	public SupplierRecipe createConstructionRecipe(RecipeCreationContext ctx,
-			TypeToken<?> type) {
+	public Optional<SupplierRecipe> createConstructionRecipe(
+			RecipeCreationContext ctx, TypeToken<?> type) {
 		// create seed recipe
-		RecipeInstantiator instantiator = createInstantiationRecipe(ctx, type);
-		List<RecipeMembersInjector> memberInjectors = createMembersInjectors(
-				ctx, type);
-		List<RecipeInitializer> initializers = createInitializers(ctx, type);
-		return new SupplierRecipe() {
+		return createInstantiationRecipe(ctx, type)
+				.map(instantiator -> {
+					List<RecipeMembersInjector> memberInjectors = createMembersInjectors(
+							ctx, type);
+					List<RecipeInitializer> initializers = createInitializers(
+							ctx, type);
+					return new SupplierRecipe() {
 
-			@Override
-			public Class<?> compileImpl(GeneratorAdapter mv,
-					MethodCompilationContext compilationContext) {
-				Class<?> result = instantiator.compile(compilationContext);
-				for (RecipeMembersInjector membersInjector : memberInjectors) {
-					result = membersInjector
-							.compile(result, compilationContext);
-				}
-				// apply initializers
-				for (RecipeInitializer initializer : initializers) {
-					result = initializer.compile(result, compilationContext);
-				}
-				return result;
-			}
-		};
+						@Override
+						public Class<?> compileImpl(GeneratorAdapter mv,
+								MethodCompilationContext compilationContext) {
+							Class<?> result = instantiator
+									.compile(compilationContext);
+							// apply initializers
+							for (RecipeMembersInjector membersInjector : memberInjectors) {
+								result = membersInjector.compile(result,
+										compilationContext);
+							}
+							// apply initializers
+							for (RecipeInitializer initializer : initializers) {
+								result = initializer.compile(result,
+										compilationContext);
+							}
+							return result;
+						}
+					};
+				});
 	}
 
 	protected List<RecipeInitializer> createInitializers(
@@ -66,7 +73,7 @@ public class DefaultConstructionRule implements ConstructionRule {
 		return config.createRecipeMembersInjectors(ctx, type);
 	}
 
-	protected RecipeInstantiator createInstantiationRecipe(
+	protected Optional<RecipeInstantiator> createInstantiationRecipe(
 			RecipeCreationContext ctx, TypeToken<?> type) {
 		return config.createRecipeInstantiator(ctx, type);
 	}

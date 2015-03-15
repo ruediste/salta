@@ -1,11 +1,15 @@
 package com.github.ruediste.salta.core;
 
+import java.util.Optional;
+
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 public interface RecipeCreationContext {
 
 	SupplierRecipe getRecipe(CoreDependencyKey<?> dependency);
+
+	Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency);
 
 	SupplierRecipe getRecipeInNewContext(CoreDependencyKey<?> dependency);
 

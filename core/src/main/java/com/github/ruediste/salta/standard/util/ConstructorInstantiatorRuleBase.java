@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
@@ -31,7 +32,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 	}
 
 	@Override
-	public RecipeInstantiator apply(RecipeCreationContext ctx,
+	public Optional<RecipeInstantiator> apply(RecipeCreationContext ctx,
 			TypeToken<?> typeToken) {
 
 		Type type = typeToken.getType();
@@ -42,13 +43,13 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		} else if (type instanceof ParameterizedType) {
 			clazz = (Class<?>) ((ParameterizedType) type).getRawType();
 		} else
-			throw new SaltaException("Unknown type " + typeToken);
+			return Optional.empty();
 
 		if (clazz.isInterface()) {
-			return null;
+			return Optional.empty();
 		}
 		if (Modifier.isAbstract(clazz.getModifiers())) {
-			return null;
+			return Optional.empty();
 		}
 		ArrayList<Constructor<?>> highestPriorityConstructors = new ArrayList<>();
 		Integer highestPriority = null;
@@ -81,7 +82,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 					highestPriorityConstructors);
 
 		if (highestPriorityConstructors.isEmpty()) {
-			return null;
+			return Optional.empty();
 		}
 
 		Constructor<?> constructor = highestPriorityConstructors.get(0);

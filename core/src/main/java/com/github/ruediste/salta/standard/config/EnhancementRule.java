@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.standard.config;
 
+import java.util.Optional;
+
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.google.common.reflect.TypeToken;
@@ -10,9 +12,10 @@ import com.google.common.reflect.TypeToken;
 public interface EnhancementRule {
 
 	/**
-	 * Create a {@link RecipeEnhancer} based on a type. If null is returned, the
-	 * result is ignored
+	 * Create a {@link RecipeEnhancer} based on a type. If
+	 * {@link Optional#empty()} is returned, the result is ignored
 	 */
-	RecipeEnhancer getEnhancer(RecipeCreationContext ctx, TypeToken<?> type);
+	Optional<RecipeEnhancer> getEnhancer(RecipeCreationContext ctx,
+			TypeToken<?> type);
 
 }

@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.standard.util;
 
+import java.util.Optional;
+
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
@@ -40,13 +42,13 @@ public abstract class ProvidedByConstructionRuleBase implements
 	protected abstract DependencyKey<?> getProviderKey(TypeToken<?> type);
 
 	@Override
-	public SupplierRecipe createConstructionRecipe(RecipeCreationContext ctx,
-			TypeToken<?> type) {
+	public Optional<SupplierRecipe> createConstructionRecipe(
+			RecipeCreationContext ctx, TypeToken<?> type) {
 
 		DependencyKey<?> providerKey = getProviderKey(type);
 		if (providerKey != null) {
 			SupplierRecipe recipe = ctx.getRecipe(providerKey);
-			return new RecipeInstantiator() {
+			return Optional.of(new RecipeInstantiator() {
 
 				@Override
 				public Class<?> compileImpl(GeneratorAdapter mv,
@@ -63,9 +65,9 @@ public abstract class ProvidedByConstructionRuleBase implements
 					mv.invokeInterface(Type.getType(providerClass), method);
 					return returnType;
 				}
-			};
+			});
 		}
 
-		return null;
+		return Optional.empty();
 	}
 }

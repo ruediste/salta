@@ -19,10 +19,10 @@ public class JSR330MembersInjectorFactory extends MembersInjectorFactoryBase {
 	}
 
 	@Override
-	protected boolean isInjectableMethod(TypeToken<?> declaringType,
-			Method method, MethodOverrideIndex index) {
+	protected InjectionInstruction getInjectionInstruction(
+			TypeToken<?> declaringType, Method method, MethodOverrideIndex index) {
 		if (!method.isAnnotationPresent(Inject.class))
-			return false;
+			return InjectionInstruction.NO_INJECTION;
 		if (Modifier.isAbstract(method.getModifiers()))
 			throw new SaltaException(
 					"Method annotated with @Inject is abstract: " + method);
@@ -32,18 +32,20 @@ public class JSR330MembersInjectorFactory extends MembersInjectorFactoryBase {
 							+ method);
 		}
 		if (index.isOverridden(method))
-			return false;
-		return true;
+			return InjectionInstruction.NO_INJECTION;
+		return InjectionInstruction.INJECT;
 	}
 
 	@Override
-	protected boolean isInjectableField(TypeToken<?> declaringType, Field f) {
+	protected InjectionInstruction getInjectionInstruction(
+			TypeToken<?> declaringType, Field f) {
 		boolean annotationPresent = f.isAnnotationPresent(Inject.class);
 		if (annotationPresent && Modifier.isFinal(f.getModifiers())) {
 			throw new SaltaException("Final field annotated with @Inject");
 		}
 		if (Modifier.isStatic(f.getModifiers()))
-			return false;
-		return annotationPresent;
+			return InjectionInstruction.NO_INJECTION;
+		return annotationPresent ? InjectionInstruction.INJECT
+				: InjectionInstruction.NO_INJECTION;
 	}
 }

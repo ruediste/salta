@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
@@ -391,7 +392,7 @@ public interface Binder {
 	 *            for provisioned objects matched by bindingMatcher
 	 * @since 4.0
 	 */
-	void bindListener(Matcher<? super Binding<?>> bindingMatcher,
+	void bindListener(Matcher<? super TypeToken<?>> bindingMatcher,
 			ProvisionListener... listeners);
 
 	/**

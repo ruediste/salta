@@ -18,10 +18,12 @@ public class GuiceMembersInjectorFactory extends MembersInjectorFactoryBase {
 	}
 
 	@Override
-	protected boolean isInjectableMethod(TypeToken<?> declaringType,
-			Method method, MethodOverrideIndex index) {
-		if (!method.isAnnotationPresent(Inject.class))
-			return false;
+	protected InjectionInstruction getInjectionInstruction(
+			TypeToken<?> declaringType, Method method, MethodOverrideIndex index) {
+		Inject inject = method.getAnnotation(Inject.class);
+		if (inject == null)
+			return InjectionInstruction.NO_INJECTION;
+
 		if (Modifier.isAbstract(method.getModifiers()))
 			throw new SaltaException(
 					"Method annotated with @Inject is abstract: " + method);
@@ -31,18 +33,26 @@ public class GuiceMembersInjectorFactory extends MembersInjectorFactoryBase {
 							+ method);
 		}
 		if (index.isOverridden(method))
-			return false;
-		return true;
+			return InjectionInstruction.NO_INJECTION;
+
+		return inject.optional() ? InjectionInstruction.INJECT_OPTIONAL
+				: InjectionInstruction.INJECT;
 	}
 
 	@Override
-	protected boolean isInjectableField(TypeToken<?> declaringType, Field f) {
-		boolean annotationPresent = f.isAnnotationPresent(Inject.class);
-		if (annotationPresent && Modifier.isFinal(f.getModifiers())) {
+	protected InjectionInstruction getInjectionInstruction(
+			TypeToken<?> declaringType, Field f) {
+		Inject inject = f.getAnnotation(Inject.class);
+		if (inject == null)
+			return InjectionInstruction.NO_INJECTION;
+
+		if (Modifier.isFinal(f.getModifiers())) {
 			throw new SaltaException("Final field annotated with @Inject");
 		}
 		if (Modifier.isStatic(f.getModifiers()))
-			return false;
-		return annotationPresent;
+			return InjectionInstruction.NO_INJECTION;
+
+		return inject.optional() ? InjectionInstruction.INJECT_OPTIONAL
+				: InjectionInstruction.INJECT;
 	}
 }

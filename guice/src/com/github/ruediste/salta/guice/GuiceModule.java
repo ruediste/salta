@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.github.ruediste.salta.AbstractModule;
@@ -30,6 +32,7 @@ import com.github.ruediste.salta.jsr330.JSR330ConstructorInstantiatorRule;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
+import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
@@ -69,6 +72,27 @@ public class GuiceModule extends AbstractModule {
 
 		StandardInjectorConfiguration config = binder().getConfiguration();
 
+		// rule for loggers
+		config.config.creationRules.add(new CreationRule() {
+
+			@Override
+			public SupplierRecipe apply(CoreDependencyKey<?> key,
+					RecipeCreationContext ctx) {
+				Class<?> rawType = key.getRawType();
+				if (Logger.class.equals(rawType)) {
+					if (key instanceof InjectionPoint) {
+						Member member = ((InjectionPoint<?>) key).getMember();
+						return new SupplierRecipeImpl(
+								() -> Logger.getLogger(member
+										.getDeclaringClass().getName()));
+
+					}
+					return new SupplierRecipeImpl(() -> Logger
+							.getAnonymousLogger());
+				}
+				return null;
+			}
+		});
 		// make Named annotations of javax.inject and Guice equivalent
 		config.qualifierMatchingAnnotationRules
 				.add(new BiFunction<Annotation, Annotation, Boolean>() {
@@ -123,8 +147,8 @@ public class GuiceModule extends AbstractModule {
 
 		// provider creation rule
 		config.config.creationRules
-				.add(new ProviderCreationRule(key -> key.getRawType()
-						.equals(Provider.class),
+				.add(new ProviderCreationRule(key -> key.getRawType().equals(
+						Provider.class),
 						(type, supplier) -> (Provider<?>) supplier::get,
 						Provider.class));
 
@@ -229,7 +253,11 @@ public class GuiceModule extends AbstractModule {
 					return true;
 				}
 			};
-			config.modulePostProcessors.add(b::bindProviderMethodsOf);
+			config.modulePostProcessors.add(m -> {
+				if (m instanceof ModuleAdapter) {
+					b.bindProviderMethodsOf(((ModuleAdapter) m).getDelegate());
+				}
+			});
 		}
 		bindScope(Singleton.class, config.singletonScope);
 
@@ -355,5 +383,4 @@ public class GuiceModule extends AbstractModule {
 					}
 				});
 	}
-
 }
