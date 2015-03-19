@@ -16,7 +16,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -54,7 +53,7 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 		this.argumentDependencies = new ArrayList<>(argumentDependencies);
 	}
 
-	public static Optional<RecipeInstantiator> of(TypeToken<?> typeToken,
+	public static FixedConstructorRecipeInstantiator of(TypeToken<?> typeToken,
 			RecipeCreationContext ctx, Constructor<?> constructor,
 			InjectionStrategy strategy) {
 		ArrayList<SupplierRecipe> args = new ArrayList<>();
@@ -66,13 +65,10 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 			CoreDependencyKey<Object> dependency = new InjectionPoint(
 					typeToken.resolveType(parameter.getParameterizedType()),
 					constructor, parameter, i);
-			Optional<SupplierRecipe> recipe = ctx.tryGetRecipe(dependency);
-			if (!recipe.isPresent())
-				return Optional.empty();
-			args.add(recipe.get());
+			args.add(ctx.getRecipe(dependency));
 		}
-		return Optional.of(new FixedConstructorRecipeInstantiator(constructor,
-				args, strategy));
+		return new FixedConstructorRecipeInstantiator(constructor, args,
+				strategy);
 	}
 
 	@Override

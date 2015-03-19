@@ -1,6 +1,6 @@
 package com.github.ruediste.salta.standard.util;
 
-import java.util.Optional;
+import java.util.function.Function;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -42,32 +42,34 @@ public abstract class ProvidedByConstructionRuleBase implements
 	protected abstract DependencyKey<?> getProviderKey(TypeToken<?> type);
 
 	@Override
-	public Optional<SupplierRecipe> createConstructionRecipe(
-			RecipeCreationContext ctx, TypeToken<?> type) {
+	public Function<RecipeCreationContext, SupplierRecipe> createConstructionRecipe(
+			TypeToken<?> type) {
 
 		DependencyKey<?> providerKey = getProviderKey(type);
 		if (providerKey != null) {
-			SupplierRecipe recipe = ctx.getRecipe(providerKey);
-			return Optional.of(new RecipeInstantiator() {
+			return ctx -> {
+				SupplierRecipe recipe = ctx.getRecipe(providerKey);
+				return new RecipeInstantiator() {
 
-				@Override
-				public Class<?> compileImpl(GeneratorAdapter mv,
-						MethodCompilationContext compilationContext) {
-					recipe.compile(compilationContext);
-					Method method;
-					try {
-						method = Method.getMethod(providerClass.getMethod(
-								methodName, parameterTypes));
-					} catch (NoSuchMethodException | SecurityException e) {
-						throw new SaltaException(
-								"Error while retrieving method", e);
+					@Override
+					public Class<?> compileImpl(GeneratorAdapter mv,
+							MethodCompilationContext compilationContext) {
+						recipe.compile(compilationContext);
+						Method method;
+						try {
+							method = Method.getMethod(providerClass.getMethod(
+									methodName, parameterTypes));
+						} catch (NoSuchMethodException | SecurityException e) {
+							throw new SaltaException(
+									"Error while retrieving method", e);
+						}
+						mv.invokeInterface(Type.getType(providerClass), method);
+						return returnType;
 					}
-					mv.invokeInterface(Type.getType(providerClass), method);
-					return returnType;
-				}
-			});
+				};
+			};
 		}
 
-		return Optional.empty();
+		return null;
 	}
 }

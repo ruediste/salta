@@ -62,8 +62,7 @@ public class AnnotatedBindingBuilderTest {
 			fail();
 		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(
-					x -> x.getMessage().contains(
-							"Dependency cannot be resolved")))
+					x -> x.getMessage().contains("No recipe found for field")))
 				throw e;
 		}
 	}
@@ -75,8 +74,7 @@ public class AnnotatedBindingBuilderTest {
 			fail();
 		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(
-					x -> x.getMessage().contains(
-							"Dependency cannot be resolved")))
+					x -> x.getMessage().contains("No recipe found for field")))
 				throw e;
 		}
 	}

@@ -32,9 +32,9 @@ public interface Injector {
 	 * Ignores the presence or absence of an injectable constructor.
 	 *
 	 * <p>
-	 * Whenever Guice creates an instance, it performs this injection
+	 * Whenever Salta creates an instance, it performs this injection
 	 * automatically (after first performing constructor injection), so if
-	 * you're able to let Guice create all your objects for you, you'll never
+	 * you're able to let Salta create all your objects for you, you'll never
 	 * need to use this method.
 	 *
 	 * @param instance
@@ -75,7 +75,7 @@ public interface Injector {
 
 	/**
 	 * Returns the provider used to obtain instances for the given injection
-	 * key. When feasible, avoid using this method, in favor of having Guice
+	 * key. When feasible, avoid using this method, in favor of having Salta
 	 * inject your dependencies ahead of time.
 	 *
 	 * @throws ConfigurationException
@@ -87,7 +87,7 @@ public interface Injector {
 
 	/**
 	 * Returns the provider used to obtain instances for the given type. When
-	 * feasible, avoid using this method, in favor of having Guice inject your
+	 * feasible, avoid using this method, in favor of having Salta inject your
 	 * dependencies ahead of time.
 	 *
 	 * @throws ConfigurationException
@@ -100,7 +100,7 @@ public interface Injector {
 	/**
 	 * Returns the appropriate instance for the given injection key; equivalent
 	 * to {@code getProvider(key).get()}. When feasible, avoid using this
-	 * method, in favor of having Guice inject your dependencies ahead of time.
+	 * method, in favor of having Salta inject your dependencies ahead of time.
 	 *
 	 * @throws ConfigurationException
 	 *             if this injector cannot find or create the provider.
@@ -112,7 +112,7 @@ public interface Injector {
 	/**
 	 * Returns the appropriate instance for the given injection type; equivalent
 	 * to {@code getProvider(type).get()}. When feasible, avoid using this
-	 * method, in favor of having Guice inject your dependencies ahead of time.
+	 * method, in favor of having Salta inject your dependencies ahead of time.
 	 *
 	 * @throws ConfigurationException
 	 *             if this injector cannot find or create the provider.

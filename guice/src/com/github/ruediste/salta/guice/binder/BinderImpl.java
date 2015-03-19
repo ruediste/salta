@@ -8,7 +8,7 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.guice.ModuleAdapter;
 import com.github.ruediste.salta.standard.ScopeImpl;
-import com.github.ruediste.salta.standard.config.EnhancementRule;
+import com.github.ruediste.salta.standard.config.EnhancerFactory;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
 import com.google.common.reflect.TypeToken;
@@ -180,7 +180,7 @@ public class BinderImpl implements Binder {
 		for (int i = 0; i < listeners.length; i++) {
 			ProvisionListener listener = listeners[i];
 			delegate.getConfiguration().enhancerFactories
-					.add(new EnhancementRule() {
+					.add(new EnhancerFactory() {
 
 						final class ProvisionInvocationImpl extends
 								ProvisionInvocation<Object> {

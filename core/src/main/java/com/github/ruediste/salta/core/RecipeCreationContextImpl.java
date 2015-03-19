@@ -5,6 +5,8 @@ import static java.util.stream.Collectors.joining;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -24,6 +26,7 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	private LinkedHashSet<Binding> currentBindings = new LinkedHashSet<>();
 
 	private ArrayList<Runnable> queuedActions = new ArrayList<>();
+	private boolean closed;
 
 	private void removeBinding(Binding b) {
 		currentBindings.remove(b);
@@ -47,10 +50,10 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	}
 
 	@Override
-	public SupplierRecipe getOrCreateRecipe(Binding binding) {
+	public <T> T withBinding(Binding binding, Supplier<T> supplier) {
 		addBinding(binding);
 		try {
-			return binding.getOrCreateRecipe(this);
+			return supplier.get();
 		} finally {
 			removeBinding(binding);
 		}
@@ -61,27 +64,25 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 		return coreInjector.getRecipe(dependency, this);
 	}
 
-	@Override
-	public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency) {
-		return coreInjector.tryGetRecipe(dependency, this);
-	}
-
-	@Override
-	public SupplierRecipe getRecipeInNewContext(CoreDependencyKey<?> dependency) {
-		return coreInjector.getRecipe(dependency);
+	private void requireNotClosed() {
+		if (closed)
+			throw new SaltaException("RecipeCreationContext already closed");
 	}
 
 	public void processQueuedActions() {
+		requireNotClosed();
 		while (!queuedActions.isEmpty()) {
 			ArrayList<Runnable> tmp = new ArrayList<Runnable>(queuedActions);
 			queuedActions.clear();
 			for (Runnable r : tmp)
 				r.run();
 		}
+		closed = true;
 	}
 
 	@Override
 	public void queueAction(Runnable action) {
+		requireNotClosed();
 		queuedActions.add(action);
 	}
 
@@ -94,4 +95,17 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
 	public Object getRecipeLock() {
 		return coreInjector.recipeLock;
 	}
+
+	@Override
+	public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency) {
+		return coreInjector.tryGetRecipeFunc(dependency)
+				.map(f -> f.apply(this));
+	}
+
+	@Override
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(
+			CoreDependencyKey<?> dependency) {
+		return coreInjector.tryGetRecipeFunc(dependency);
+	}
+
 }

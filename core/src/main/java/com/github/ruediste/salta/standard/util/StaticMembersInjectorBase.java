@@ -7,9 +7,11 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.Injector;
@@ -21,15 +23,19 @@ import com.google.common.reflect.TypeToken;
  */
 public abstract class StaticMembersInjectorBase {
 
+	protected enum InjectionInstruction {
+		NO_INJECT, INJECT, INJECT_OPTIONAL
+	}
+
 	/**
 	 * Determine if a field should be injected. Called for static fields only;
 	 */
-	protected abstract boolean shouldInject(Field field);
+	protected abstract InjectionInstruction shouldInject(Field field);
 
 	/**
 	 * Determine if a method should be injected. Called for static methods only;
 	 */
-	protected abstract boolean shouldInject(Method method);
+	protected abstract InjectionInstruction shouldInject(Method method);
 
 	/**
 	 * Injects all
@@ -51,31 +57,38 @@ public abstract class StaticMembersInjectorBase {
 			performStaticInjections(cls.getSuperclass(), injector,
 					injectedClasses);
 
-			performStaticInjections(injector, cls);
+			performStaticInjections(injector.getCoreInjector(), cls);
 		}
 	}
 
-	private void performStaticInjections(Injector injector, Class<?> cls) {
+	private void performStaticInjections(CoreInjector injector, Class<?> cls) {
 		// inject fields
 		for (Field f : cls.getDeclaredFields()) {
 			if (!Modifier.isStatic(f.getModifiers()))
 				continue;
-			if (!shouldInject(f))
+			InjectionInstruction injectionInstruction = shouldInject(f);
+			if (injectionInstruction == InjectionInstruction.NO_INJECT)
 				continue;
 			InjectionPoint<?> d = new InjectionPoint<>(TypeToken.of(f
 					.getGenericType()), f, f, null);
 			f.setAccessible(true);
-			try {
-				f.set(null, injector.getInstance(d));
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new SaltaException("Error while setting static " + f, e);
-			}
+			Optional<?> instance = injector.tryGetInstance(d);
+			if (instance.isPresent()
+					|| injectionInstruction != InjectionInstruction.INJECT_OPTIONAL)
+				try {
+					f.set(null, instance.get());
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new SaltaException("Error while setting static " + f,
+							e);
+				}
 		}
+
 		// inject methods
-		for (Method m : cls.getDeclaredMethods()) {
+		methodLoop: for (Method m : cls.getDeclaredMethods()) {
 			if (!Modifier.isStatic(m.getModifiers()))
 				continue;
-			if (!shouldInject(m))
+			InjectionInstruction injectionInstruction = shouldInject(m);
+			if (injectionInstruction == InjectionInstruction.NO_INJECT)
 				continue;
 			ArrayList<Object> args = new ArrayList<>();
 			Parameter[] parameters = m.getParameters();
@@ -83,7 +96,13 @@ public abstract class StaticMembersInjectorBase {
 				Parameter p = parameters[i];
 				CoreDependencyKey<?> d = new InjectionPoint<>(TypeToken.of(p
 						.getParameterizedType()), m, p, i);
-				args.add(injector.getInstance(d));
+				if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
+					Optional<?> tmp = injector.tryGetInstance(d);
+					if (!tmp.isPresent())
+						continue methodLoop;
+					args.add(tmp.get());
+				} else
+					args.add(injector.getInstance(d));
 			}
 
 			m.setAccessible(true);
@@ -95,6 +114,7 @@ public abstract class StaticMembersInjectorBase {
 				throw new SaltaException("Error while setting static " + m,
 						e.getCause());
 			}
+
 		}
 	}
 

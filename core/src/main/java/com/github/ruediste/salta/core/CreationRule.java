@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.core;
 
+import java.util.function.Function;
+
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 /**
@@ -15,5 +17,6 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public interface CreationRule {
 
-	SupplierRecipe apply(CoreDependencyKey<?> key, RecipeCreationContext ctx);
+	Function<RecipeCreationContext, SupplierRecipe> apply(
+			CoreDependencyKey<?> key);
 }

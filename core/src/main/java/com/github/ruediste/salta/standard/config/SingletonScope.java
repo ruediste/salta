@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.standard.config;
 
+import java.util.function.Function;
+
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
@@ -22,26 +24,28 @@ public class SingletonScope implements Scope {
 	}
 
 	@Override
-	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
+	public Function<RecipeCreationContext, SupplierRecipe> createRecipe(
 			Binding binding, TypeToken<?> requestedType,
-			SupplierRecipe innerRecipe) {
+			Function<RecipeCreationContext, SupplierRecipe> innerRecipe) {
+		return ctx -> {
+			instantiate(ctx, binding, innerRecipe.apply(ctx));
 
-		instantiate(ctx, binding, innerRecipe);
+			return new SupplierRecipe() {
 
-		return new SupplierRecipe() {
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				@Override
+				public Class<?> compileImpl(GeneratorAdapter mv,
+						MethodCompilationContext ctx) {
 
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			@Override
-			public Class<?> compileImpl(GeneratorAdapter mv,
-					MethodCompilationContext ctx) {
-
-				Class<?> fieldType = requestedType.getRawType();
-				if (!Accessibility.isClassPublic(fieldType)) {
-					fieldType = Object.class;
+					Class<?> fieldType = requestedType.getRawType();
+					if (!Accessibility.isClassPublic(fieldType)) {
+						fieldType = Object.class;
+					}
+					ctx.addFieldAndLoad((Class) fieldType,
+							instance.get(binding));
+					return fieldType;
 				}
-				ctx.addFieldAndLoad((Class) fieldType, instance.get(binding));
-				return fieldType;
-			}
+			};
 		};
 	}
 

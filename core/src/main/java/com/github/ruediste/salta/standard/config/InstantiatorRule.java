@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.standard.config;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -12,9 +13,9 @@ import com.google.common.reflect.TypeToken;
 public interface InstantiatorRule {
 
 	/**
-	 * Create the instantiator or return {@link Optional#empty()} if the next
-	 * rule should be tried.
+	 * Return a function creating a {@link RecipeInstantiator}, or
+	 * {@link Optional#empty()} if the next rule should be tried
 	 */
-	Optional<RecipeInstantiator> apply(RecipeCreationContext ctx,
+	Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(
 			TypeToken<?> type);
 }

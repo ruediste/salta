@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -27,6 +28,7 @@ import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.MemberInjectionToken;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
@@ -110,10 +112,6 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
 		MemberInjectionToken<T> token = MemberInjectionToken
 				.getMemberInjectionToken(injector, instance);
-
-		// initialize the instance when creating the injector
-		config.dynamicInitializers.add(i -> token.getValue());
-
 		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> new CreationRecipeFactory() {
 			boolean recipeCreationInProgress;
@@ -240,23 +238,20 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 			Constructor<S> constructor, TypeToken<? extends S> type) {
 		DefaultConstructionRule rule = new DefaultConstructionRule(config) {
 			@Override
-			protected Optional<RecipeInstantiator> createInstantiationRecipe(
-					RecipeCreationContext ctx, TypeToken<?> type) {
-				Optional<RecipeInstantiator> result = config.fixedConstructorInstantiatorFactory
-						.create(type, ctx, constructor);
-				result.orElseThrow(() -> new SaltaException(
-						"Cannot create instantiator for constructor "
-								+ constructor));
-				return result;
+			protected Optional<Function<RecipeCreationContext, RecipeInstantiator>> createInstantiationRecipe(
+					TypeToken<?> type) {
+				return Optional
+						.of(ctx -> config.fixedConstructorInstantiatorFactory
+								.create(type, ctx, constructor));
 			}
 		};
-		recipeFactorySupplier = () -> ctx -> {
-			SupplierRecipe seed = rule.createConstructionRecipe(ctx, type)
-					.orElseThrow(
-							() -> new SaltaException(
-									"Cannot create recipe for " + constructor));
-			return DefaultCreationRecipeBuilder.applyEnhancers(seed,
-					config.createEnhancers(ctx, type));
+		recipeFactorySupplier = () -> creationContext -> {
+			Function<RecipeCreationContext, SupplierRecipe> seedRecipe = rule
+					.createConstructionRecipe(type);
+			List<RecipeEnhancer> enhancers = config.createEnhancers(
+					creationContext, type);
+			return DefaultCreationRecipeBuilder.applyEnhancers(
+					seedRecipe.apply(creationContext), enhancers);
 		};
 		scopeSupplier = () -> config.getScope(constructor.getDeclaringClass());
 		return this;

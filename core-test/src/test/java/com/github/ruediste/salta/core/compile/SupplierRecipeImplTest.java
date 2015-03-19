@@ -2,6 +2,8 @@ package com.github.ruediste.salta.core.compile;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.function.Function;
+
 import javax.inject.Inject;
 
 import org.junit.Before;
@@ -29,14 +31,15 @@ public class SupplierRecipeImplTest {
 						.add(new CreationRule() {
 
 							@Override
-							public SupplierRecipe apply(
-									CoreDependencyKey<?> key,
-									RecipeCreationContext ctx) {
+							public Function<RecipeCreationContext, SupplierRecipe> apply(
+									CoreDependencyKey<?> key) {
 								if (key.getRawType().equals(int.class)) {
-									return new SupplierRecipeImpl(() -> 2);
+									return ctx -> new SupplierRecipeImpl(
+											() -> 2);
 								}
 								return null;
 							}
+
 						});
 			}
 		}, new JSR330Module());

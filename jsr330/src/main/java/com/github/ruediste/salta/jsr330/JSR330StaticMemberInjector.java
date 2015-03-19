@@ -10,12 +10,14 @@ import com.github.ruediste.salta.standard.util.StaticMembersInjectorBase;
 final class JSR330StaticMemberInjector extends StaticMembersInjectorBase {
 
 	@Override
-	protected boolean shouldInject(Method method) {
-		return method.isAnnotationPresent(Inject.class);
+	protected InjectionInstruction shouldInject(Method method) {
+		return method.isAnnotationPresent(Inject.class) ? InjectionInstruction.INJECT
+				: InjectionInstruction.NO_INJECT;
 	}
 
 	@Override
-	protected boolean shouldInject(Field field) {
-		return field.isAnnotationPresent(Inject.class);
+	protected InjectionInstruction shouldInject(Field field) {
+		return field.isAnnotationPresent(Inject.class) ? InjectionInstruction.INJECT
+				: InjectionInstruction.NO_INJECT;
 	}
 }

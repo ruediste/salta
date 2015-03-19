@@ -1,7 +1,6 @@
 package com.github.ruediste.salta.jsr330;
 
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -80,9 +79,14 @@ public class ProviderDependencyFactoryRuleTest {
 		assertNotSame(otherA1, otherA2);
 	}
 
-	@Test(expected = ProviderAccessBeforeInstanceCreationFinishedException.class)
+	@Test
 	public void testForbiddenProviderAccess() {
-		injector.getInstance(TestClassC.class);
+		try {
+			injector.getInstance(TestClassC.class);
+		} catch (SaltaException e) {
+			if (!(e.getCause() instanceof ProviderAccessBeforeInstanceCreationFinishedException))
+				throw e;
+		}
 	}
 
 	@Test
@@ -90,7 +94,8 @@ public class ProviderDependencyFactoryRuleTest {
 		try {
 			injector.getInstance(TestClassE.class);
 		} catch (SaltaException e) {
-			assertTrue(e.getCause() instanceof ProviderAccessBeforeRecipeCreationFinishedException);
+			if (!(e.getCause() instanceof ProviderAccessBeforeRecipeCreationFinishedException))
+				throw e;
 		}
 
 	}

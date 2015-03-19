@@ -1,7 +1,5 @@
 package com.github.ruediste.salta.core;
 
-import java.util.Optional;
-
 import com.github.ruediste.salta.standard.Injector;
 
 /**
@@ -10,5 +8,5 @@ import com.github.ruediste.salta.standard.Injector;
  */
 public interface JITBindingRule {
 
-	Optional<JITBinding> apply(JITBindingKey key);
+	JITBinding apply(JITBindingKey key);
 }

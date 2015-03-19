@@ -66,12 +66,15 @@ public class StandardInjectorConfiguration {
 	 */
 	public final List<ConstructionRule> constructionRules = new ArrayList<>();
 
-	public Optional<SupplierRecipe> createConstructionRecipe(
-			RecipeCreationContext ctx, TypeToken<?> type) {
-		return constructionRules.stream()
-				.map(rule -> rule.createConstructionRecipe(ctx, type))
-				.filter(Optional::isPresent).map(Optional::get).findFirst();
-		// throw new SaltaException("No construction recipe found for " + type);
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
+			TypeToken<?> type) {
+		for (ConstructionRule rule : constructionRules) {
+			Function<RecipeCreationContext, SupplierRecipe> result = rule
+					.createConstructionRecipe(type);
+			if (result != null)
+				return Optional.of(result);
+		}
+		return Optional.empty();
 	}
 
 	/**
@@ -85,13 +88,16 @@ public class StandardInjectorConfiguration {
 	 * If no instantiator is found, an error is raised using
 	 * {@link #noInstantiatorFoundErrorProducers} or a fallback
 	 */
-	public Optional<RecipeInstantiator> createRecipeInstantiator(
-			RecipeCreationContext ctx, TypeToken<?> type) {
-
-		return instantiatorRules.stream().map(rule -> rule.apply(ctx, type))
-				.filter(Optional::isPresent).map(Optional::get).findFirst();
-
-		// throw new SaltaException("No instantiator found for " + type);
+	public Optional<Function<RecipeCreationContext, RecipeInstantiator>> createRecipeInstantiator(
+			TypeToken<?> type) {
+		for (InstantiatorRule rule : instantiatorRules) {
+			Optional<Function<RecipeCreationContext, RecipeInstantiator>> instantiator = rule
+					.apply(type);
+			if (instantiator.isPresent()) {
+				return instantiator;
+			}
+		}
+		return Optional.empty();
 	}
 
 	/**
@@ -116,10 +122,10 @@ public class StandardInjectorConfiguration {
 			RecipeCreationContext ctx, TypeToken<?> type) {
 		// test rules
 		for (MembersInjectorRule rule : membersInjectorRules) {
-			Optional<List<RecipeMembersInjector>> membersInjectors = rule
+			List<RecipeMembersInjector> membersInjectors = rule
 					.getMembersInjectors(type);
-			if (membersInjectors.isPresent())
-				return membersInjectors.get();
+			if (membersInjectors != null)
+				return membersInjectors;
 		}
 
 		// use default factories
@@ -143,15 +149,14 @@ public class StandardInjectorConfiguration {
 	}
 
 	/**
-	 * List of rules enhance instances. The enhancers of all rules are combined.
+	 * List of enhancer factories. The enhancers of all factories are combined.
 	 */
-	public final List<EnhancementRule> enhancerFactories = new ArrayList<>();
+	public final List<EnhancerFactory> enhancerFactories = new ArrayList<>();
 
 	public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx,
 			TypeToken<?> type) {
 		return enhancerFactories.stream().map(r -> r.getEnhancer(ctx, type))
-				.filter(Optional::isPresent).map(Optional::get)
-				.collect(toList());
+				.filter(x -> x != null).collect(toList());
 	}
 
 	/**
@@ -167,9 +172,14 @@ public class StandardInjectorConfiguration {
 	 */
 	public Scope getScope(TypeToken<?> type) {
 
-		return scopeRules.stream().map(r -> r.getScope(type))
-				.filter(Optional::isPresent).map(Optional::get).findFirst()
-				.orElse(getScope(type.getRawType()));
+		// evaluate scope rules
+		for (ScopeRule rule : scopeRules) {
+			Scope scope = rule.getScope(type);
+			if (scope != null)
+				return scope;
+		}
+
+		return getScope(type.getRawType());
 	}
 
 	public Scope getScope(AnnotatedElement element) {

@@ -6,13 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
@@ -20,19 +19,19 @@ import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.google.common.reflect.TypeToken;
 
 public class DefaultCreationRecipeBuilder {
-	public Function<RecipeCreationContext, SupplierRecipe> constructionRecipeSupplier;
+	public Supplier<Function<RecipeCreationContext, SupplierRecipe>> constructionRecipeSupplier;
 	public Function<RecipeCreationContext, List<RecipeEnhancer>> enhancersSupplier;
 
 	public DefaultCreationRecipeBuilder(StandardInjectorConfiguration config,
 			TypeToken<?> boundType) {
 
-		constructionRecipeSupplier = ctx -> {
-			Optional<SupplierRecipe> result = config.createConstructionRecipe(
-					ctx, boundType);
-			if (!result.isPresent())
-				throw new SaltaException("No construction recipe found for "
+		constructionRecipeSupplier = () -> {
+			Optional<Function<RecipeCreationContext, SupplierRecipe>> tmp = config
+					.createConstructionRecipe(boundType);
+			if (!tmp.isPresent())
+				throw new SaltaException("Cannot find construction rule for "
 						+ boundType);
-			return result.get();
+			return tmp.get();
 		};
 
 		enhancersSupplier = ctx -> config.createEnhancers(ctx, boundType);
@@ -44,7 +43,7 @@ public class DefaultCreationRecipeBuilder {
 	public SupplierRecipe build(RecipeCreationContext ctx) {
 
 		// create seed recipe
-		SupplierRecipe seedRecipe = constructionRecipeSupplier.apply(ctx);
+		SupplierRecipe seedRecipe = constructionRecipeSupplier.get().apply(ctx);
 
 		// apply enhancers
 		List<RecipeEnhancer> enhancers = new ArrayList<>(
@@ -61,12 +60,6 @@ public class DefaultCreationRecipeBuilder {
 		SupplierRecipe innerRecipe = createInnerRecipe(enhancers.iterator(),
 				seedRecipe);
 		return innerRecipe;
-	}
-
-	public static SupplierRecipe applyScope(SupplierRecipe innerRecipe,
-			Scope scope, Binding binding, TypeToken<?> boundType,
-			RecipeCreationContext ctx) {
-		return scope.createRecipe(ctx, binding, boundType, innerRecipe);
 	}
 
 	private static SupplierRecipe createInnerRecipe(
@@ -90,5 +83,11 @@ public class DefaultCreationRecipeBuilder {
 			}
 
 		};
+	}
+
+	public static SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
+			StandardInjectorConfiguration config, RecipeCreationContext ctx,
+			TypeToken<?> type) {
+		return applyEnhancers(seedRecipe, config.createEnhancers(ctx, type));
 	}
 }

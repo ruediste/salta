@@ -8,6 +8,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
@@ -32,7 +33,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 	}
 
 	@Override
-	public Optional<RecipeInstantiator> apply(RecipeCreationContext ctx,
+	public Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(
 			TypeToken<?> typeToken) {
 
 		Type type = typeToken.getType();
@@ -43,7 +44,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 		} else if (type instanceof ParameterizedType) {
 			clazz = (Class<?>) ((ParameterizedType) type).getRawType();
 		} else
-			return Optional.empty();
+			throw new SaltaException("Unknown type " + typeToken);
 
 		if (clazz.isInterface()) {
 			return Optional.empty();
@@ -90,8 +91,8 @@ public abstract class ConstructorInstantiatorRuleBase implements
 			throw new SaltaException("Qualifier specified on " + constructor
 					+ ".\nSpecify qualifiers on parameters instead");
 		}
-		return FixedConstructorRecipeInstantiator.of(typeToken, ctx,
-				constructor, config.config.injectionStrategy);
+		return Optional.of(ctx -> FixedConstructorRecipeInstantiator.of(
+				typeToken, ctx, constructor, config.config.injectionStrategy));
 
 	}
 

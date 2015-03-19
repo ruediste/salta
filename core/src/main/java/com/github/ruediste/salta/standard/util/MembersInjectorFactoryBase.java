@@ -53,18 +53,17 @@ public abstract class MembersInjectorFactoryBase implements
 							t.resolveType(f.getGenericType()), f, f, null);
 
 					// add injector
-					SupplierRecipe recipe;
-					if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
-						Optional<SupplierRecipe> tryGetRecipe = ctx
-								.tryGetRecipe(dependency);
-						if (!tryGetRecipe.isPresent())
-							continue;
-						recipe = tryGetRecipe.get();
-					} else
-						recipe = ctx.getRecipe(dependency);
+					Optional<SupplierRecipe> recipe;
+					recipe = ctx.tryGetRecipe(dependency);
+					if (recipe.isPresent()) {
+						result.add(new FixedFieldRecipeMembersInjector(f,
+								recipe.get(), config.config.injectionStrategy));
+					} else {
+						if (injectionInstruction != InjectionInstruction.INJECT_OPTIONAL)
+							throw new SaltaException(
+									"No recipe found for field\n" + f);
+					}
 
-					result.add(new FixedFieldRecipeMembersInjector(f, recipe,
-							config.config.injectionStrategy));
 				}
 			}
 
@@ -110,16 +109,14 @@ public abstract class MembersInjectorFactoryBase implements
 								(TypeToken) t.resolveType(parameter
 										.getParameterizedType()), method,
 								parameter, i);
-						SupplierRecipe recipe;
-						if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
-							Optional<SupplierRecipe> tryGetRecipe = ctx
-									.tryGetRecipe(dependency);
-							if (!tryGetRecipe.isPresent())
-								continue methodLoop;
-							recipe = tryGetRecipe.get();
-						} else
-							recipe = ctx.getRecipe(dependency);
-						args.add(recipe);
+						Optional<SupplierRecipe> recipe;
+						recipe = ctx.tryGetRecipe(dependency);
+						if (!recipe.isPresent()
+								&& injectionInstruction == InjectionInstruction.INJECT_OPTIONAL)
+							continue methodLoop;
+
+						args.add(recipe.orElseThrow(() -> new SaltaException(
+								"Unable to get recipe for " + dependency)));
 					}
 
 					// add injector

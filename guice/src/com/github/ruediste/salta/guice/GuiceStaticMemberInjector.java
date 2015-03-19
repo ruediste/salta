@@ -9,12 +9,22 @@ import com.google.inject.Inject;
 final class GuiceStaticMemberInjector extends StaticMembersInjectorBase {
 
 	@Override
-	protected boolean shouldInject(Method method) {
-		return method.isAnnotationPresent(Inject.class);
+	protected InjectionInstruction shouldInject(Method method) {
+		Inject inject = method.getAnnotation(Inject.class);
+		if (inject == null) {
+			return InjectionInstruction.NO_INJECT;
+		}
+		return inject.optional() ? InjectionInstruction.INJECT_OPTIONAL
+				: InjectionInstruction.INJECT;
 	}
 
 	@Override
-	protected boolean shouldInject(Field field) {
-		return field.isAnnotationPresent(Inject.class);
+	protected InjectionInstruction shouldInject(Field field) {
+		Inject inject = field.getAnnotation(Inject.class);
+		if (inject == null) {
+			return InjectionInstruction.NO_INJECT;
+		}
+		return inject.optional() ? InjectionInstruction.INJECT_OPTIONAL
+				: InjectionInstruction.INJECT;
 	}
 }

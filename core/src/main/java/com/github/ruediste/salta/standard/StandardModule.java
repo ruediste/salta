@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
 import com.github.ruediste.salta.AbstractModule;
@@ -11,6 +12,8 @@ import com.github.ruediste.salta.core.JITBinding;
 import com.github.ruediste.salta.core.JITBindingKey;
 import com.github.ruediste.salta.core.JITBindingKeyRule;
 import com.github.ruediste.salta.core.JITBindingRule;
+import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
@@ -47,19 +50,27 @@ public class StandardModule extends AbstractModule {
 		config.config.jitBindingRules.add(new JITBindingRule() {
 
 			@Override
-			public Optional<JITBinding> apply(JITBindingKey key) {
+			public JITBinding apply(JITBindingKey key) {
 				TypeToken<?> type = jitBindingKeyType.get(key);
 				if (!config.doQualifiersMatch(
 						jitBindingKeyRequiredQualifiers.get(key),
 						config.getAvailableQualifier(type.getRawType())))
-					return Optional.empty();
+					return null;
+
+				Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = config
+						.createConstructionRecipe(type).map(
+								seed -> ctx -> DefaultCreationRecipeBuilder
+										.applyEnhancers(seed.apply(ctx), config
+												.createEnhancers(ctx, type)));
+				if (!recipe.isPresent())
+					return null;
 
 				StandardJitBinding binding = new StandardJitBinding(type);
-				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-						config, type).build(ctx);
+				binding.recipeFactory = recipe.get()::apply;
 				binding.scopeSupplier = () -> config.getScope(type);
 				return binding;
 			}
+
 		});
 
 		config.constructionRules.add(new DefaultConstructionRule(config));

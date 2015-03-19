@@ -3,6 +3,7 @@ package com.github.ruediste.salta.core;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.compile.FunctionRecipe;
@@ -10,7 +11,6 @@ import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 public class CoreInjector {
-
 	/**
 	 * Lock object for recipe creation and compilation.
 	 */
@@ -20,9 +20,9 @@ public class CoreInjector {
 
 	private final RecipeCompiler compiler = new RecipeCompiler();
 
-	private ConcurrentHashMap<CoreDependencyKey<?>, CompiledSupplier> compiledRecipeCache = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<CoreDependencyKey<?>, Optional<CompiledSupplier>> compiledRecipeCache = new ConcurrentHashMap<>();
 
-	private HashMap<CoreDependencyKey<?>, Optional<SupplierRecipe>> recipeCache = new HashMap<>();
+	private HashMap<CoreDependencyKey<?>, Optional<Function<RecipeCreationContext, SupplierRecipe>>> recipeCache = new HashMap<>();
 
 	private HashMap<JITBindingKey, JITBinding> jitBindings = new HashMap<>();
 
@@ -40,12 +40,28 @@ public class CoreInjector {
 				config.automaticStaticBindings);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T getInstance(CoreDependencyKey<T> key) {
+		Optional<T> tryGetInstance = tryGetInstance(key);
+		if (!tryGetInstance.isPresent())
+			throw new SaltaException("No instance found for " + key);
+		return tryGetInstance.get();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> Optional<T> tryGetInstance(CoreDependencyKey<T> key) {
 		try {
-			return (T) getCompiledRecipe(key).get();
-		} catch (SaltaException e) {
-			throw e;
+			return (Optional<T>) tryGetCompiledRecipe(key).map(
+					s -> {
+						try {
+							return s.get();
+						} catch (SaltaException e) {
+							throw e;
+						} catch (Throwable e) {
+							throw new SaltaException(
+									"Error while creating instance for " + key,
+									e);
+						}
+					});
 		} catch (Throwable e) {
 			throw new SaltaException(
 					"Error while creating instance for " + key, e);
@@ -68,15 +84,21 @@ public class CoreInjector {
 	}
 
 	public CompiledSupplier getCompiledRecipe(CoreDependencyKey<?> key) {
+		return tryGetCompiledRecipe(key).get();
+	}
+
+	public Optional<CompiledSupplier> tryGetCompiledRecipe(
+			CoreDependencyKey<?> key) {
 		// use Double Checked Locking
-		CompiledSupplier compiledRecipe = compiledRecipeCache.get(key);
+		Optional<CompiledSupplier> compiledRecipe = compiledRecipeCache
+				.get(key);
 		if (compiledRecipe != null)
 			return compiledRecipe;
 
 		synchronized (recipeLock) {
 			compiledRecipe = compiledRecipeCache.get(key);
 			if (compiledRecipe == null) {
-				compiledRecipe = compileSupplier(getRecipe(key));
+				compiledRecipe = tryGetRecipe(key).map(x -> compileSupplier(x));
 				compiledRecipeCache.put(key, compiledRecipe);
 			}
 			return compiledRecipe;
@@ -96,65 +118,72 @@ public class CoreInjector {
 	}
 
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> key) {
-		synchronized (recipeLock) {
-			RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
-					CoreInjector.this);
-
-			SupplierRecipe result = getRecipe(key, ctx);
-
-			try {
-				ctx.processQueuedActions();
-			} catch (SaltaException e) {
-				throw new SaltaException(
-						"Error while processing queued actions for " + key, e);
-			}
-
-			return result;
-		}
+		return getFromOptional(tryGetRecipe(key), key);
 	}
 
-	/**
-	 * Get the recipe for a key
-	 */
+	public <T> T withRecipeCreationContext(
+			Function<RecipeCreationContext, T> func) {
+		RecipeCreationContextImpl ctx = new RecipeCreationContextImpl(
+				CoreInjector.this);
+		T result = func.apply(ctx);
+		try {
+			ctx.processQueuedActions();
+		} catch (SaltaException e) {
+			throw new SaltaException("Error while processing queued actions", e);
+		}
+		return result;
+	}
+
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
-		Optional<SupplierRecipe> result = tryGetRecipe(key, ctx);
-		if (!result.isPresent()) {
-			throw new SaltaException("Dependency cannot be resolved:\n" + key);
-		}
-		return result.get();
+		return getFromOptional(tryGetRecipeFunc(key), key).apply(ctx);
+	}
+
+	private <T> T getFromOptional(Optional<T> optional, CoreDependencyKey<?> key) {
+		if (optional.isPresent())
+			return optional.get();
+		throw new SaltaException("Dependency cannot be resolved:\n" + key);
+	}
+
+	public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> key) {
+		return withRecipeCreationContext(ctx -> tryGetRecipeFunc(key).map(
+				f -> f.apply(ctx)));
 	}
 
 	/**
 	 * Get the recipe for a key
 	 */
-	public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> key,
-			RecipeCreationContext ctx) {
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(
+			CoreDependencyKey<?> key) {
 		// acquire the recipe lock
 		synchronized (recipeLock) {
-			Optional<SupplierRecipe> result = recipeCache.get(key);
+			Optional<Function<RecipeCreationContext, SupplierRecipe>> result = recipeCache
+					.get(key);
 			if (result == null) {
 				try {
-					result = createRecipe(key, ctx);
-				} catch (Exception e) {
+					result = createRecipe(key);
+					recipeCache.put(key, result);
+				} catch (Throwable t) {
+					recipeCache.remove(key);
 					throw new SaltaException("Error while creating recipe for "
-							+ key, e);
+							+ key, t);
 				}
-				recipeCache.put(key, result);
 			}
 			return result;
 		}
 	}
 
 	/**
-	 * Create a recipe. Expects the {@link #recipeLock} to be acquired
+	 * Create a recipe. Expects the calling thread to own the
+	 * {@link #recipeLock}
 	 */
-	private Optional<SupplierRecipe> createRecipe(CoreDependencyKey<?> key,
-			RecipeCreationContext ctx) {
+	private Optional<Function<RecipeCreationContext, SupplierRecipe>> createRecipe(
+			CoreDependencyKey<?> key) {
 		try {
 			// check rules
 			for (CreationRule rule : config.creationRules) {
-				SupplierRecipe recipe = rule.apply(key, ctx);
+				Function<RecipeCreationContext, SupplierRecipe> recipe = rule
+						.apply(key);
 				if (recipe != null)
 					return Optional.of(recipe);
 			}
@@ -163,9 +192,8 @@ public class CoreInjector {
 			{
 				StaticBinding binding = staticBindings.getBinding(key);
 				if (binding != null) {
-					return Optional.of(binding.getScope().createRecipe(ctx,
-							binding, key.getType(),
-							ctx.getOrCreateRecipe(binding)));
+					return Optional.of(binding.getScope().createRecipe(binding,
+							key.getType(), binding.getOrCreateRecipe()));
 				}
 			}
 
@@ -173,9 +201,8 @@ public class CoreInjector {
 			{
 				StaticBinding binding = automaticStaticBindings.getBinding(key);
 				if (binding != null) {
-					return Optional.of(binding.getScope().createRecipe(ctx,
-							binding, key.getType(),
-							ctx.getOrCreateRecipe(binding)));
+					return Optional.of(binding.getScope().createRecipe(binding,
+							key.getType(), binding.getOrCreateRecipe()));
 				}
 			}
 
@@ -202,9 +229,9 @@ public class CoreInjector {
 
 				// use binding if available
 				if (jitBinding != null) {
-					return Optional.of(jitBinding.getScope().createRecipe(ctx,
-							jitBinding, key.getType(),
-							ctx.getOrCreateRecipe(jitBinding)));
+					JITBinding tmp = jitBinding;
+					return Optional.of(tmp.getScope().createRecipe(tmp,
+							key.getType(), tmp.getOrCreateRecipe()));
 				}
 			}
 		} catch (SaltaException e) {

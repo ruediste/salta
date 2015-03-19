@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.core;
 
+import java.util.function.Function;
+
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.google.common.reflect.TypeToken;
 
@@ -14,16 +16,17 @@ public interface Scope {
 	 * is expected afterwards. The calling thread always holds the
 	 * {@link CoreInjector#recipeLock}
 	 * 
-	 * @param ctx
 	 * @param binding
 	 *            binding which is beeing scoped
-	 * @param boundType
-	 *            type the binding was created for
 	 * @param innerRecipe
 	 *            recipe resulting in the unscoped instance
+	 * @param boundType
+	 *            type the binding was created for
+	 * 
 	 * @return
 	 */
-	SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding,
-			TypeToken<?> requestedType, SupplierRecipe innerRecipe);
+	Function<RecipeCreationContext, SupplierRecipe> createRecipe(
+			Binding binding, TypeToken<?> requestedType,
+			Function<RecipeCreationContext, SupplierRecipe> innerRecipe);
 
 }

@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.core;
 
+import java.util.function.Function;
+
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
@@ -34,15 +36,20 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	 * processed.
 	 * </p>
 	 */
-	public SupplierRecipe getOrCreateRecipe(RecipeCreationContext ctx) {
-		if (recipe == null) {
-			if (creatingRecipe)
-				throw new RecursiveRecipeCreationDetectedException();
-			creatingRecipe = true;
-			recipe = createRecipe(ctx);
-			creatingRecipe = false;
-		}
-		return recipe;
+	public Function<RecipeCreationContext, SupplierRecipe> getOrCreateRecipe() {
+		return ctx -> ctx.withBinding(this, () -> {
+			if (recipe == null) {
+				if (creatingRecipe)
+					throw new RecursiveRecipeCreationDetectedException();
+				creatingRecipe = true;
+				try {
+					recipe = createRecipe(ctx);
+				} finally {
+					creatingRecipe = false;
+				}
+			}
+			return recipe;
+		});
 	}
 
 	/**

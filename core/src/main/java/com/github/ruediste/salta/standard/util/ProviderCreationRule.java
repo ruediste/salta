@@ -1,6 +1,8 @@
 package com.github.ruediste.salta.standard.util;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -91,7 +93,6 @@ public class ProviderCreationRule implements CreationRule {
 
 		@Override
 		public String toString() {
-			// TODO Auto-generated method stub
 			return "Provider<" + dependency + ">";
 		}
 	}
@@ -114,10 +115,10 @@ public class ProviderCreationRule implements CreationRule {
 		this.providerType = providerType;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public SupplierRecipe apply(CoreDependencyKey<?> key,
-			RecipeCreationContext ctx) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Function<RecipeCreationContext, SupplierRecipe> apply(
+			CoreDependencyKey<?> key) {
 
 		if (matcher.matches(key)) {
 			if (key.getType().getType() instanceof Class) {
@@ -139,30 +140,36 @@ public class ProviderCreationRule implements CreationRule {
 						key.getAnnotatedElement().getAnnotations());
 			}
 
-			// create and wrap provider instance
-			ProviderImpl provider = new ProviderImpl(key);
-			Object wrappedProvider = wrapper.apply(key, provider);
+			return ctx -> {
+				Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = ctx
+						.tryGetRecipeFunc(dep);
+				if (!innerRecipe.isPresent())
+					return null;
 
-			// create creation recipe
-			SupplierRecipe creationRecipe = new SupplierRecipe() {
+				// create and wrap provider instance
+				ProviderImpl provider = new ProviderImpl(key);
+				Object wrappedProvider = wrapper.apply(key, provider);
 
-				@Override
-				protected Class<?> compileImpl(GeneratorAdapter mv,
-						MethodCompilationContext ctx) {
-					ctx.addFieldAndLoad((Class) providerType, wrappedProvider);
-					return providerType;
-				}
+				// create creation recipe
+				SupplierRecipe creationRecipe = new SupplierRecipe() {
+
+					@Override
+					protected Class<?> compileImpl(GeneratorAdapter mv,
+							MethodCompilationContext ctx) {
+						ctx.addFieldAndLoad((Class) providerType,
+								wrappedProvider);
+						return providerType;
+					}
+				};
+
+				// queue creation and compilation of inner recipe
+				ctx.queueAction(() -> {
+					provider.compiledRecipe = ctx.getCompiler()
+							.compileSupplier(innerRecipe.get().apply(ctx));
+				});
+
+				return creationRecipe;
 			};
-
-			// queue creation and compilation of inner recipe
-			ctx.queueAction(() -> {
-				SupplierRecipe innerRecipe = ctx.getRecipeInNewContext(dep);
-				provider.compiledRecipe = ctx.getCompiler().compileSupplier(
-						innerRecipe);
-			});
-
-			return creationRecipe;
-
 		}
 
 		return null;

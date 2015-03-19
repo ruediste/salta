@@ -1,7 +1,5 @@
 package com.github.ruediste.salta.standard;
 
-import java.util.Optional;
-
 import org.junit.Test;
 
 import com.github.ruediste.salta.AbstractModule;
@@ -10,7 +8,7 @@ import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.jsr330.JSR330Module;
-import com.github.ruediste.salta.standard.config.EnhancementRule;
+import com.github.ruediste.salta.standard.config.EnhancerFactory;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.google.common.reflect.TypeToken;
 
@@ -32,13 +30,13 @@ public class EnhancingTest {
 
 			@Override
 			protected void configure() {
-				getConfiguration().enhancerFactories.add(new EnhancementRule() {
+				getConfiguration().enhancerFactories.add(new EnhancerFactory() {
 
 					@Override
-					public Optional<RecipeEnhancer> getEnhancer(
+					public RecipeEnhancer getEnhancer(
 							RecipeCreationContext ctx, TypeToken<?> type) {
 						if (type.getRawType().equals(TestA.class)) {
-							return Optional.of(new RecipeEnhancer() {
+							return new RecipeEnhancer() {
 
 								@Override
 								public Class<?> compile(
@@ -47,9 +45,9 @@ public class EnhancingTest {
 									// TODO Auto-generated method stub
 									return null;
 								}
-							});
+							};
 						}
-						return Optional.empty();
+						return null;
 					}
 				});
 			}

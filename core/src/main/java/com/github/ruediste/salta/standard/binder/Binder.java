@@ -20,7 +20,6 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -49,7 +48,7 @@ import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Module;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.config.EnhancementRule;
+import com.github.ruediste.salta.standard.config.EnhancerFactory;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
@@ -390,7 +389,6 @@ public class Binder {
 	 */
 	public void install(Module module) {
 		module.configure(this);
-		config.modules.add(module);
 	}
 
 	/**
@@ -493,17 +491,17 @@ public class Binder {
 	 */
 	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
 			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
-		config.enhancerFactories.add(new EnhancementRule() {
+		config.enhancerFactories.add(new EnhancerFactory() {
 
 			@Override
-			public Optional<RecipeEnhancer> getEnhancer(
-					RecipeCreationContext ctx, TypeToken<?> type) {
+			public RecipeEnhancer getEnhancer(RecipeCreationContext ctx,
+					TypeToken<?> type) {
 
 				if (typeMatcher.matches(type)) {
-					return Optional.of(new RecipeEnhancerWrapperImpl(
-							instance -> listener.apply(type, instance)));
+					return new RecipeEnhancerWrapperImpl(instance -> listener
+							.apply(type, instance));
 				}
-				return Optional.empty();
+				return null;
 			}
 		});
 	}

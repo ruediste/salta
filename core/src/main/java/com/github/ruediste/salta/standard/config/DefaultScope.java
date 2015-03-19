@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.standard.config;
 
+import java.util.function.Function;
+
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.Scope;
@@ -14,8 +16,9 @@ final class DefaultScope implements Scope {
 	}
 
 	@Override
-	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
-			Binding binding, TypeToken<?> type, SupplierRecipe innerRecipe) {
+	public Function<RecipeCreationContext, SupplierRecipe> createRecipe(
+			Binding binding, TypeToken<?> requestedType,
+			Function<RecipeCreationContext, SupplierRecipe> innerRecipe) {
 		return innerRecipe;
 	}
 }

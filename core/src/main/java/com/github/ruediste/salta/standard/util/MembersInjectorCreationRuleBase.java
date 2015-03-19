@@ -3,6 +3,7 @@ package com.github.ruediste.salta.standard.util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -88,26 +89,28 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public SupplierRecipe apply(CoreDependencyKey<?> key,
-			RecipeCreationContext ctx) {
+	public Function<RecipeCreationContext, SupplierRecipe> apply(
+			CoreDependencyKey<?> key) {
 		TypeToken<?> dependency = getDependency(key);
 		if (dependency == null)
 			return null;
 
-		Consumer<?> saltaMembersInjector = getMembersInjector(dependency, ctx);
+		return ctx -> {
+			Consumer<?> saltaMembersInjector = getMembersInjector(dependency,
+					ctx);
+			Object wrappedInjector = wrapInjector((Consumer) saltaMembersInjector);
+			return new SupplierRecipe() {
 
-		Object wrappedInjector = wrapInjector((Consumer) saltaMembersInjector);
-		return new SupplierRecipe() {
+				@Override
+				protected Class<?> compileImpl(GeneratorAdapter mv,
+						MethodCompilationContext ctx) {
+					Class<?> wrappedInjectorType = getWrappedInjectorType();
+					ctx.addFieldAndLoad((Class) wrappedInjectorType,
+							wrappedInjector);
+					return wrappedInjectorType;
+				}
 
-			@Override
-			protected Class<?> compileImpl(GeneratorAdapter mv,
-					MethodCompilationContext ctx) {
-				Class<?> wrappedInjectorType = getWrappedInjectorType();
-				ctx.addFieldAndLoad((Class) wrappedInjectorType,
-						wrappedInjector);
-				return wrappedInjectorType;
-			}
-
+			};
 		};
 	}
 

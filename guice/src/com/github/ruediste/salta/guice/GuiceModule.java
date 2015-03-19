@@ -23,7 +23,6 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
@@ -369,18 +368,20 @@ public class GuiceModule extends AbstractModule {
 		if (guiceConfig.requireExplicitBindings)
 			config.config.jitBindingRules.clear();
 
-		config.dynamicInitializers
-				.add(injector -> {
-					if (guiceConfig.stage == Stage.PRODUCTION) {
-						for (Binding b : config.config.staticBindings) {
-							if (b.getScope() instanceof SingletonScope) {
-								RecipeCreationContext ctx = new RecipeCreationContextImpl(
-										injector.getCoreInjector());
-								((SingletonScope) b.getScope()).instantiate(
-										ctx, b, ctx.getOrCreateRecipe(b));
-							}
-						}
+		config.dynamicInitializers.add(injector -> {
+			if (guiceConfig.stage == Stage.PRODUCTION) {
+				for (Binding b : config.config.staticBindings) {
+					if (b.getScope() instanceof SingletonScope) {
+						injector.getCoreInjector().withRecipeCreationContext(
+								ctx -> {
+									((SingletonScope) b.getScope())
+											.instantiate(ctx, b,
+													ctx.getOrCreateRecipe(b));
+									return null;
+								});
 					}
-				});
+				}
+			}
+		});
 	}
 }
