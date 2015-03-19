@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
@@ -72,11 +73,12 @@ public abstract class StaticMembersInjectorBase {
 			InjectionPoint<?> d = new InjectionPoint<>(TypeToken.of(f
 					.getGenericType()), f, f, null);
 			f.setAccessible(true);
-			Optional<?> instance = injector.tryGetInstance(d);
+			Optional<CompiledSupplier> instance = injector
+					.tryGetCompiledRecipe(d);
 			if (instance.isPresent()
 					|| injectionInstruction != InjectionInstruction.INJECT_OPTIONAL)
 				try {
-					f.set(null, instance.get());
+					f.set(null, instance.get().getNoThrow());
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					throw new SaltaException("Error while setting static " + f,
 							e);
@@ -97,10 +99,11 @@ public abstract class StaticMembersInjectorBase {
 				CoreDependencyKey<?> d = new InjectionPoint<>(TypeToken.of(p
 						.getParameterizedType()), m, p, i);
 				if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
-					Optional<?> tmp = injector.tryGetInstance(d);
+					Optional<CompiledSupplier> tmp = injector
+							.tryGetCompiledRecipe(d);
 					if (!tmp.isPresent())
 						continue methodLoop;
-					args.add(tmp.get());
+					args.add(tmp.get().getNoThrow());
 				} else
 					args.add(injector.getInstance(d));
 			}

@@ -135,7 +135,7 @@ public class NamedEquivalanceTest extends TestCase {
 			Guice.createInjector().getInstance(clientType);
 			fail("should have thrown ConfigurationException");
 		} catch (SaltaException e) {
-			assertContains(e.getMessage(), "Dependency cannot be resolved");
+			assertContains(e.getMessage(), "No recipe found for field");
 		}
 	}
 

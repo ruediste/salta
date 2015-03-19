@@ -16,7 +16,6 @@
 
 package com.google.inject.spi;
 
-import static com.google.inject.Asserts.assertContains;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.ElementType;
@@ -32,12 +31,12 @@ import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 
+import com.github.ruediste.salta.core.SaltaException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.BindingAnnotation;
-import com.google.inject.CreationException;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -205,12 +204,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 				}
 			});
 			fail();
-		} catch (CreationException expected) {
-			assertContains(
-					expected.getMessage(),
-					"more than one annotation annotated with @BindingAnnotation:",
-					"Named", "Blue", "at " + getClass().getName(),
-					".provideString(ProviderMethodsTest.java:");
+		} catch (SaltaException expected) {
+			if (!expected.getMessage().contains(
+					"Multiple avalable qualifiers found on"))
+				throw expected;
 		}
 
 	}
@@ -320,7 +317,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		Module installsSelf = new AbstractModule() {
 			@Override
 			protected void configure() {
-				install(this);
+				// not supported by Salta
+				// install(this);
 				bind(Integer.class).toInstance(5);
 			}
 
@@ -405,12 +403,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 				}
 			});
 			fail();
-		} catch (CreationException expected) {
-			assertContains(
-					expected.getMessage(),
-					"1) Provider methods must return a value. Do not return void.",
-					getClass().getName(),
-					".provideFoo(ProviderMethodsTest.java:");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("@Provides method may not return void")))
+				throw e;
 		}
 	}
 
@@ -516,11 +512,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new Sub1Module(), new Sub2Module());
 			fail("Expected injector creation failure");
-		} catch (CreationException expected) {
-			// both of our super class bindings cause errors
-			assertContains(expected.getMessage(),
-					"A binding to java.lang.Long was already configured",
-					"A binding to java.lang.Integer was already configured");
+		} catch (SaltaException expected) {
+			if (!expected.getMessage().contains(
+					"Duplicate static binding found"))
+				throw expected;
 		}
 	}
 
@@ -563,10 +558,13 @@ public class ProviderMethodsTest extends TestCase implements Module {
 
 	/* if[AOP] */
 	public void testShareFastClass() {
-		CallerInspecterModule module = new CallerInspecterModule();
-		Guice.createInjector(Stage.PRODUCTION, module);
-		assertEquals(module.fooCallerClass, module.barCallerClass);
-		assertTrue(module.fooCallerClass.contains("$$FastClassByGuice$$"));
+		// not applicable for salta
+		if (false) {
+			CallerInspecterModule module = new CallerInspecterModule();
+			Guice.createInjector(Stage.PRODUCTION, module);
+			assertEquals(module.fooCallerClass, module.barCallerClass);
+			assertTrue(module.fooCallerClass.contains("$$FastClassByGuice$$"));
+		}
 	}
 
 	private static class CallerInspecterModule extends AbstractModule {
@@ -596,15 +594,18 @@ public class ProviderMethodsTest extends TestCase implements Module {
 	}
 
 	public void testShareFastClassWithSuperClass() {
-		CallerInspecterSubClassModule module = new CallerInspecterSubClassModule();
-		Guice.createInjector(Stage.PRODUCTION, module);
-		assertEquals(
-				"Expected provider methods in the same class to share fastclass classes",
-				module.fooCallerClass, module.barCallerClass);
-		assertFalse(
-				"Did not expect provider methods in the subclasses to share fastclass classes "
-						+ "with their parent classes",
-				module.bazCallerClass.equals(module.barCallerClass));
+		// not applicable
+		if (false) {
+			CallerInspecterSubClassModule module = new CallerInspecterSubClassModule();
+			Guice.createInjector(Stage.PRODUCTION, module);
+			assertEquals(
+					"Expected provider methods in the same class to share fastclass classes",
+					module.fooCallerClass, module.barCallerClass);
+			assertFalse(
+					"Did not expect provider methods in the subclasses to share fastclass classes "
+							+ "with their parent classes",
+					module.bazCallerClass.equals(module.barCallerClass));
+		}
 	}
 
 	private static class CallerInspecterSubClassModule extends
@@ -678,13 +679,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".providerMethod()", "overridden by: "
-							+ SubClassModule.class.getName()
-							+ ".providerMethod()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -700,13 +698,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".providerMethod()", "overridden by: "
-							+ SubClassModule.class.getName()
-							+ ".providerMethod()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -720,13 +715,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".providerMethod()", "overridden by: "
-							+ SubClassModule.class.getName()
-							+ ".providerMethod()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -741,13 +733,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".providerMethod()", "overridden by: "
-							+ SubClassModule.class.getName()
-							+ ".providerMethod()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -761,13 +750,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".providerMethod()", "overridden by: "
-							+ SubClassModule.class.getName()
-							+ ".providerMethod()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -782,13 +768,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".providerMethod()", "overridden by: "
-							+ SubClassModule.class.getName()
-							+ ".providerMethod()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -813,13 +796,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".annotatedGenericProviderMethod()",
-					"overridden by: " + SubClassModule.class.getName()
-							+ ".annotatedGenericProviderMethod()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -833,13 +813,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".annotatedGenericParameterProviderMethod()",
-					"overridden by: " + SubClassModule.class.getName()
-							+ ".annotatedGenericParameterProviderMethod()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -854,12 +831,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + SuperClassModule.class.getName()
-							+ ".rawProvider()", "overridden by: "
-							+ SubClassModule.class.getName() + ".rawProvider()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 
@@ -870,9 +845,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		}
 	}
 
-	// This is a tricky case where signatures don't match, but it is an override
-	// (facilitated via a
-	// bridge method)
+	/**
+	 * This is a tricky case where signatures don't match, but it is an override
+	 * (facilitated via a bridge method)
+	 */
 	public void testOverrideProviderMethod_erasureBasedOverrides() {
 		class SubClassModule extends GenericSuperModule<Integer> {
 			@Override
@@ -888,12 +864,10 @@ public class ProviderMethodsTest extends TestCase implements Module {
 		try {
 			Guice.createInjector(new SubClassModule());
 			fail();
-		} catch (CreationException e) {
-			assertContains(e.getMessage(),
-					"Overriding @Provides methods is not allowed.",
-					"@Provides method: " + GenericSuperModule.class.getName()
-							+ ".provide()", "overridden by: "
-							+ SubClassModule.class.getName() + ".provide()");
+		} catch (SaltaException e) {
+			if (!(e.getMessage()
+					.contains("Overriding @Provides methods is not allowed")))
+				throw e;
 		}
 	}
 

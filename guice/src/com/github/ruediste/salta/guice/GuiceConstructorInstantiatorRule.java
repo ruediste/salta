@@ -2,6 +2,8 @@ package com.github.ruediste.salta.guice;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
@@ -24,18 +26,25 @@ public class GuiceConstructorInstantiatorRule extends
 	}
 
 	@Override
-	public RecipeInstantiator apply(RecipeCreationContext ctx,
+	public Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(
 			TypeToken<?> typeToken) {
+
 		if (TypeLiteral.class.equals(typeToken.getType())) {
 			throw new SaltaException(
 					"Cannot inject a TypeLiteral that has no type parameter");
 		}
 
-		return super.apply(ctx, typeToken);
+		return super.apply(typeToken);
 	}
 
 	@Override
 	protected Integer getConstructorPriority(Constructor<?> c) {
+		Inject guiceInject = c.getAnnotation(Inject.class);
+		if (guiceInject != null && guiceInject.optional()) {
+			throw new SaltaException(
+					c
+							+ " is annotated @Inject(optional=true), but constructors cannot be optional");
+		}
 		if (c.isAnnotationPresent(Inject.class)
 				|| c.isAnnotationPresent(javax.inject.Inject.class))
 			return 2;

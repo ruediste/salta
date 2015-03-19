@@ -38,7 +38,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
 			}).getInstance(NoCxtors.class);
 			fail();
 		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("No instantiator found"))
+			if (!ce.getMessage().contains("Cannot find construction rule"))
 				throw ce;
 		}
 	}
@@ -54,7 +54,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
 			injector.getInstance(NoCxtors.class);
 			fail();
 		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("No instantiator found"))
+			if (!ce.getMessage().contains("inner class"))
 				throw ce;
 		}
 	}
@@ -70,7 +70,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
 			}).getInstance(Interface.class);
 			fail();
 		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("No instantiator found"))
+			if (!ce.getMessage().contains("Cannot find construction rule"))
 				throw ce;
 		}
 	}
@@ -91,7 +91,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
 			}).getInstance(NoCxtors.class);
 			fail();
 		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("No instantiator found"))
+			if (!ce.getMessage().contains("Cannot find construction rule"))
 				throw ce;
 		}
 	}
@@ -107,7 +107,7 @@ public class RequireAtInjectOnConstructorsTest extends TestCase {
 			}).getInstance(ManyConstructors.class);
 			fail();
 		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("No instantiator found"))
+			if (!ce.getMessage().contains("Cannot find construction rule"))
 				throw ce;
 		}
 	}

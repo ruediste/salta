@@ -1,11 +1,11 @@
 package com.github.ruediste.salta.standard.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
 import com.github.ruediste.simpledi.standard.util.testPackageA.TestClassA;
 import com.github.ruediste.simpledi.standard.util.testPackageA.TestClassC;
 import com.github.ruediste.simpledi.standard.util.testPackageB.TestClassB;
@@ -31,7 +31,7 @@ public class MethodOverrideIndexTest {
 	}
 
 	@Test
-	public void testMy() throws NoSuchMethodException, SecurityException {
+	public void testSimple() throws NoSuchMethodException, SecurityException {
 		MethodOverrideIndex idx = new MethodOverrideIndex(MyTestB.class);
 		assertFalse(idx.isOverridden(MyTestA.class.getDeclaredMethod("a")));
 		assertTrue(idx.isOverridden(MyTestA.class.getDeclaredMethod("b")));
@@ -67,5 +67,16 @@ public class MethodOverrideIndexTest {
 		assertFalse(idx.isOverridden(TestClassD.class.getDeclaredMethod("bd")));
 		assertFalse(idx.isOverridden(TestClassD.class.getDeclaredMethod("cd")));
 		assertFalse(idx.isOverridden(TestClassD.class.getDeclaredMethod("d")));
+	}
+
+	@Test
+	public void testGetOverridingMethods() throws Exception {
+		MethodOverrideIndex idx = new MethodOverrideIndex(MyTestB.class);
+		assertEquals(0,
+				idx.getOverridingMethods(MyTestA.class.getDeclaredMethod("a"))
+						.size());
+		assertEquals(1,
+				idx.getOverridingMethods(MyTestA.class.getDeclaredMethod("b"))
+						.size());
 	}
 }

@@ -88,8 +88,11 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 	public DependencyKey<T> withAnnotations(Annotation... additionalAnnotations) {
 		HashMap<Class<? extends Annotation>, Annotation> tmp = new HashMap<>(
 				annotations);
-		for (Annotation a : additionalAnnotations)
+		for (Annotation a : additionalAnnotations) {
+			if (a == null)
+				continue;
 			tmp.put(a.annotationType(), a);
+		}
 		return new DependencyKey<>(type, rawType, tmp);
 	}
 

@@ -101,7 +101,7 @@ public class ImplicitBindingTest extends TestCase {
 					Key.get(I.class, Names.named("i")));
 			fail();
 		} catch (SaltaException expected) {
-			if (!expected.getMessage().contains("cannot be resolved"))
+			if (!expected.getMessage().contains("No instance found for"))
 				throw expected;
 		}
 	}

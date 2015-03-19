@@ -112,6 +112,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
 		MemberInjectionToken<T> token = MemberInjectionToken
 				.getMemberInjectionToken(injector, instance);
+		config.dynamicInitializers.add(i -> token.getValue());
 		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> new CreationRecipeFactory() {
 			boolean recipeCreationInProgress;

@@ -212,9 +212,7 @@ public class MembersInjectorTest extends TestCase {
 					.injectMembers(new A<>());
 			fail();
 		} catch (SaltaException expected) {
-			if (!expected.getMessage().contains(
-					"No instantiator found for "
-							+ Unimplemented.class.getName()))
+			if (!expected.getMessage().contains("No recipe found for field"))
 				throw expected;
 		}
 	}

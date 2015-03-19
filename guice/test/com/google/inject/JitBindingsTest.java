@@ -211,8 +211,7 @@ public class JitBindingsTest extends TestCase {
 			}).getInstance(Bar.class);
 			fail("should have failed");
 		} catch (SaltaException expected) {
-			if (!expected.getMessage()
-					.contains("Dependency cannot be resolved"))
+			if (!expected.getMessage().contains("No instance found for"))
 				throw expected;
 		}
 	}
@@ -262,8 +261,7 @@ public class JitBindingsTest extends TestCase {
 			}).getInstance(ProviderFooBar.class);
 			fail("should have failed");
 		} catch (SaltaException expected) {
-			if (!expected.getMessage()
-					.contains("Dependency cannot be resolved"))
+			if (!expected.getMessage().contains("No recipe found for field"))
 				throw expected;
 		}
 	}
@@ -358,8 +356,7 @@ public class JitBindingsTest extends TestCase {
 				fail("should have failed tring to retrieve class: "
 						+ classes[i]);
 			} catch (SaltaException expected) {
-				if (!expected.getMessage().contains(
-						"Dependency cannot be resolved"))
+				if (!expected.getMessage().contains("No instance found for"))
 					throw expected;
 			}
 
@@ -368,8 +365,7 @@ public class JitBindingsTest extends TestCase {
 				fail("should have failed tring to retrieve class: "
 						+ classes[i]);
 			} catch (SaltaException expected) {
-				if (!expected.getMessage().contains(
-						"Dependency cannot be resolved"))
+				if (!expected.getMessage().contains("No recipe found for"))
 					throw expected;
 			}
 
@@ -386,8 +382,7 @@ public class JitBindingsTest extends TestCase {
 					if (getBinding == GetBindingCheck.ALLOW_BINDING_PROVIDER) {
 						throw expected;
 					}
-					if (!expected.getMessage().contains(
-							"Dependency cannot be resolved")) {
+					if (!expected.getMessage().contains("No recipe found for")) {
 						throw expected;
 					}
 				}

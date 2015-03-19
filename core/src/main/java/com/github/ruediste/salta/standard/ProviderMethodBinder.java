@@ -1,8 +1,8 @@
 package com.github.ruediste.salta.standard;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -30,58 +30,71 @@ public abstract class ProviderMethodBinder {
 	}
 
 	public void bindProviderMethodsOf(Object instance) {
-		for (Method m : instance.getClass().getDeclaredMethods()) {
-
-			if (!isProviderMethod(m)) {
+		for (TypeToken<?> t : TypeToken.of(instance.getClass()).getTypes()) {
+			Class<?> cls = t.getRawType();
+			if (cls.isInterface())
 				continue;
-			}
-			m.setAccessible(true);
 
-			Type boundType = m.getGenericReturnType();
-			Matcher<CoreDependencyKey<?>> matcher = CoreDependencyKey
-					.typeMatcher(TypeToken.of(boundType)).and(
-							config.requredQualifierMatcher(config
-									.getAvailableQualifier(m)));
+			for (Method m : cls.getDeclaredMethods()) {
+				if (Modifier.isStatic(m.getModifiers()) || m.isBridge()
+						|| m.isSynthetic()) {
+					continue;
+				}
+				if (!isProviderMethod(m)) {
+					continue;
+				}
+				m.setAccessible(true);
 
-			config.config.staticBindings.add(new StaticBinding() {
+				TypeToken<?> boundType = t
+						.resolveType(m.getGenericReturnType());
+				Matcher<CoreDependencyKey<?>> matcher = CoreDependencyKey
+						.typeMatcher(boundType).and(
+								config.requredQualifierMatcher(config
+										.getAvailableQualifier(m)));
 
-				@Override
-				protected SupplierRecipe createRecipe(RecipeCreationContext ctx) {
-					ArrayList<SupplierRecipe> args = new ArrayList<>();
-					Parameter[] parameters = m.getParameters();
-					for (int i = 0; i < parameters.length; i++) {
-						Parameter p = parameters[i];
-						args.add(ctx.getRecipe(new InjectionPoint<>(TypeToken
-								.of(p.getParameterizedType()), m, p, i)));
-					}
-					FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(
-							m, args, config.config.injectionStrategy);
-					return new SupplierRecipe() {
+				config.config.staticBindings.add(new StaticBinding() {
 
-						@Override
-						protected Class<?> compileImpl(GeneratorAdapter mv,
-								MethodCompilationContext ctx) {
-							ctx.addFieldAndLoad(Object.class, instance);
-							return methodRecipe.compile(Object.class, ctx);
+					@Override
+					protected SupplierRecipe createRecipe(
+							RecipeCreationContext ctx) {
+						ArrayList<SupplierRecipe> args = new ArrayList<>();
+						Parameter[] parameters = m.getParameters();
+						for (int i = 0; i < parameters.length; i++) {
+							Parameter p = parameters[i];
+							args.add(ctx.getRecipe(new InjectionPoint<>(t
+									.resolveType(p.getParameterizedType()), m,
+									p, i)));
 						}
-					};
-				}
+						FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(
+								m, args, config.config.injectionStrategy);
+						return new SupplierRecipe() {
 
-				@Override
-				public String toString() {
-					return "ProviderMethodBinding " + m;
-				}
+							@Override
+							protected Class<?> compileImpl(GeneratorAdapter mv,
+									MethodCompilationContext ctx) {
+								ctx.addFieldAndLoad(Object.class, instance);
+								return methodRecipe.compile(Object.class, ctx);
+							}
+						};
+					}
 
-				@Override
-				public Matcher<CoreDependencyKey<?>> getMatcher() {
-					return matcher;
-				}
+					@Override
+					public String toString() {
+						return "ProviderMethodBinding " + m;
+					}
 
-				@Override
-				protected Scope getScopeImpl() {
-					return config.getScope(m);
-				}
-			});
+					@Override
+					public Matcher<CoreDependencyKey<?>> getMatcher() {
+						return matcher;
+					}
+
+					@Override
+					protected Scope getScopeImpl() {
+						return config.getScope(m);
+					}
+				});
+			}
+			cls = cls.getSuperclass();
 		}
 	}
 

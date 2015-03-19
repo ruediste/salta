@@ -106,8 +106,7 @@ public class RequestInjectionTest extends TestCase {
 				}
 			});
 		} catch (SaltaException expected) {
-			if (!(expected.getMessage().contains(
-					"No instantiator found for java.lang.Runnable") && expected
+			if (!(expected.getMessage().contains("No recipe found for field") && expected
 					.getMessage().contains(NeedsRunnable.class.getName())))
 				throw expected;
 		}

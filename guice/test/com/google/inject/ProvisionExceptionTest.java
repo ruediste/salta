@@ -172,7 +172,7 @@ public class ProvisionExceptionTest extends TestCase {
 			injector.getInstance(InnerClass.class);
 			fail();
 		} catch (SaltaException e) {
-			if (!e.getMessage().contains("non-static inner classes"))
+			if (!e.getMessage().contains("inner class"))
 				throw e;
 		}
 	}
@@ -186,7 +186,7 @@ public class ProvisionExceptionTest extends TestCase {
 			injector.getInstance(LocalClass.class);
 			fail();
 		} catch (SaltaException e) {
-			if (!e.getMessage().contains("non-static inner classes"))
+			if (!e.getMessage().contains("inner class"))
 				throw e;
 		}
 	}

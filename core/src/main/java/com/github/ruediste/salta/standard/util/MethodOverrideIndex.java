@@ -22,6 +22,9 @@ import com.google.common.reflect.TypeToken;
 public class MethodOverrideIndex {
 
 	private final HashMap<Signature, Set<Method>> leafMethods = new HashMap<>();
+	private final HashMap<Signature, Set<Method>> methodsBySignature = new HashMap<>();
+	private final HashSet<Method> scannedMethods = new HashSet<>();
+
 	private final List<TypeToken<?>> ancestors;
 
 	public MethodOverrideIndex(Class<?> leafClass) {
@@ -32,28 +35,43 @@ public class MethodOverrideIndex {
 		ancestors = Collections.unmodifiableList(Lists.reverse(new ArrayList<>(
 				leafType.getTypes())));
 
+		// we visit parent classes always before child classes
 		for (TypeToken<?> type : ancestors) {
 			for (Method m : type.getRawType().getDeclaredMethods()) {
-				if (Modifier.isStatic(m.getModifiers()) || m.isBridge()
-						|| m.isSynthetic()) {
+				if (Modifier.isStatic(m.getModifiers())
+				// || m.isBridge()
+				// || m.isSynthetic()
+				) {
 					continue;
 				}
 
+				scannedMethods.add(m);
+
 				Signature signature = new Signature(m);
-				Set<Method> set = leafMethods.get(signature);
-				if (set == null) {
-					set = new HashSet<>();
+
+				// record the methods
+				methodsBySignature.computeIfAbsent(signature,
+						s -> new HashSet<>()).add(m);
+
+				// get current leaf methods for the signature
+				Set<Method> oldLeaves = leafMethods.get(signature);
+				if (oldLeaves == null) {
+					oldLeaves = new HashSet<>();
 				}
 
-				Set<Method> newSet = new HashSet<>();
-				for (Method ancestorMethod : set) {
-					if (!doesOverride(m, ancestorMethod)) {
-						newSet.add(ancestorMethod);
-					}
-				}
-				newSet.add(m);
+				// filter those methods out which are being overridden by this
+				// method
+				Set<Method> newLeaves = new HashSet<>();
+				for (Method ancestorMethod : oldLeaves) {
+					if (!doesOverride(m, ancestorMethod))
+						newLeaves.add(ancestorMethod);
 
-				leafMethods.put(signature, newSet);
+				}
+
+				// the current method is of course a leaf
+				newLeaves.add(m);
+
+				leafMethods.put(signature, newLeaves);
 			}
 		}
 
@@ -78,9 +96,32 @@ public class MethodOverrideIndex {
 		return false;
 	}
 
+	public HashSet<Method> getOverridingMethods(Method ancestor) {
+		HashSet<Method> result = new HashSet<>();
+		Set<Method> set = methodsBySignature.get(new Signature(ancestor));
+		if (set == null)
+			throw new RuntimeException("Method " + ancestor
+					+ " was not scanned by this override index");
+		for (Method m : set) {
+			if (ancestor.equals(m))
+				continue;
+			if (doesOverride(m, ancestor))
+				result.add(m);
+		}
+		return result;
+
+	}
+
+	public boolean wasScanned(Method m) {
+		return scannedMethods.contains(m);
+	}
+
 	public boolean isOverridden(Method m) {
-		Set<Method> set = leafMethods.get(new Signature(m));
-		return !(set != null && set.contains(m));
+		Set<Method> leaves = leafMethods.get(new Signature(m));
+		if (leaves == null)
+			throw new RuntimeException("Method " + m
+					+ " was not scanned by this override index");
+		return !leaves.contains(m);
 	}
 
 	public List<TypeToken<?>> getAncestors() {

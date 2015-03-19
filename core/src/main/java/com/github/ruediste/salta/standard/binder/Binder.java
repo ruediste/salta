@@ -388,6 +388,7 @@ public class Binder {
 	 * Uses the given module to configure more bindings.
 	 */
 	public void install(Module module) {
+		config.modules.add(module);
 		module.configure(this);
 	}
 

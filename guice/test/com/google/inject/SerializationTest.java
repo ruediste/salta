@@ -14,50 +14,58 @@
  * limitations under the License.
  */
 
-
 package com.google.inject;
 
 import static com.google.inject.Asserts.assertSimilarWhenReserialized;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
+
+import com.github.ruediste.salta.core.SaltaException;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class SerializationTest extends TestCase {
 
-  public void testAbstractModuleIsSerializable() throws IOException {
-    Asserts.reserialize(new MyAbstractModule());
-  }
-  static class MyAbstractModule extends AbstractModule implements Serializable {
-    protected void configure() {}
-  }
+	public void testAbstractModuleIsSerializable() throws IOException {
+		Asserts.reserialize(new MyAbstractModule());
+	}
 
-  public void testCreationExceptionIsSerializable() throws IOException {
-    assertSimilarWhenReserialized(createCreationException());
-  }
+	static class MyAbstractModule extends AbstractModule implements
+			Serializable {
+		@Override
+		protected void configure() {
+		}
+	}
 
-  private CreationException createCreationException() {
-    try {
-      Guice.createInjector(new AbstractModule() {
-        protected void configure() {
-          bind(List.class);
-        }
-      });
-      throw new AssertionFailedError();
-    } catch (CreationException e) {
-      return e;
-    }
-  }
+	public void testCreationExceptionIsSerializable() throws IOException {
+		assertSimilarWhenReserialized(createCreationException());
+	}
 
-  static class A {
-    @Inject B b;
-  }
+	private SaltaException createCreationException() {
+		try {
+			Guice.createInjector(new AbstractModule() {
+				@Override
+				protected void configure() {
+					bind(List.class);
+				}
+			}).getInstance(List.class);
+			throw new AssertionFailedError();
+		} catch (SaltaException e) {
+			return e;
+		}
+	}
 
-  static class B {}
+	static class A {
+		@Inject
+		B b;
+	}
+
+	static class B {
+	}
 }

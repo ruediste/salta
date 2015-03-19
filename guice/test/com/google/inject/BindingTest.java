@@ -130,7 +130,7 @@ public class BindingTest extends TestCase {
 			fail();
 		} catch (SaltaException expected) {
 			if (!expected.getMessage().contains(
-					"No instantiator found for java.util.List"))
+					"Cannot find construction rule for java.util.List"))
 				throw expected;
 		}
 	}

@@ -85,8 +85,7 @@ public class BindingAnnotationTest extends TestCase {
 
 			fail();
 		} catch (com.github.ruediste.salta.core.SaltaException expected) {
-			assertContains(expected.getMessage(),
-					"Dependency cannot be resolved");
+			assertContains(expected.getMessage(), "No recipe found for field");
 		}
 	}
 

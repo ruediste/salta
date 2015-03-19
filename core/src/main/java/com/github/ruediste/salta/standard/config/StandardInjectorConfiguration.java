@@ -377,8 +377,8 @@ public class StandardInjectorConfiguration {
 		List<Annotation> qualifiers = availableQualifierExtractors.stream()
 				.flatMap(f -> f.apply(element)).collect(toList());
 		if (qualifiers.size() > 1)
-			throw new SaltaException("Multiple avalable qualifiers found on "
-					+ element + ": " + qualifiers);
+			throw new SaltaException("Multiple avalable qualifiers found on\n"
+					+ element + ":\n" + qualifiers);
 		return Iterables.getOnlyElement(qualifiers, null);
 	}
 

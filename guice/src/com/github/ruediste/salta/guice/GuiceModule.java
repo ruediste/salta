@@ -75,19 +75,23 @@ public class GuiceModule extends AbstractModule {
 		config.config.creationRules.add(new CreationRule() {
 
 			@Override
-			public SupplierRecipe apply(CoreDependencyKey<?> key,
-					RecipeCreationContext ctx) {
+			public Function<RecipeCreationContext, SupplierRecipe> apply(
+					CoreDependencyKey<?> key) {
+
 				Class<?> rawType = key.getRawType();
 				if (Logger.class.equals(rawType)) {
-					if (key instanceof InjectionPoint) {
-						Member member = ((InjectionPoint<?>) key).getMember();
-						return new SupplierRecipeImpl(
-								() -> Logger.getLogger(member
-										.getDeclaringClass().getName()));
+					return ctx -> {
+						if (key instanceof InjectionPoint) {
+							Member member = ((InjectionPoint<?>) key)
+									.getMember();
+							return new SupplierRecipeImpl(() -> Logger
+									.getLogger(member.getDeclaringClass()
+											.getName()));
 
-					}
-					return new SupplierRecipeImpl(() -> Logger
-							.getAnonymousLogger());
+						}
+						return new SupplierRecipeImpl(() -> Logger
+								.getAnonymousLogger());
+					};
 				}
 				return null;
 			}
@@ -129,16 +133,19 @@ public class GuiceModule extends AbstractModule {
 					}
 				});
 
+		// stage rule
 		config.config.creationRules.add(new CreationRule() {
 
 			@Override
-			public SupplierRecipe apply(CoreDependencyKey<?> key,
-					RecipeCreationContext ctx) {
+			public Function<RecipeCreationContext, SupplierRecipe> apply(
+					CoreDependencyKey<?> key) {
 				if (Stage.class.equals(key.getType().getType()))
-					return new SupplierRecipeImpl(() -> guiceConfig.stage);
+					return ctx -> new SupplierRecipeImpl(
+							() -> guiceConfig.stage);
 				else
 					return null;
 			}
+
 		});
 
 		config.defaultMembersInjectorFactories
@@ -191,6 +198,7 @@ public class GuiceModule extends AbstractModule {
 			}
 		});
 
+		// qualifiers
 		config.requiredQualifierExtractors.add(annotatedElement -> {
 			return Arrays.stream(annotatedElement.getAnnotations()).filter(
 					a -> a.annotationType().isAnnotationPresent(
@@ -247,8 +255,9 @@ public class GuiceModule extends AbstractModule {
 						return false;
 					if (void.class.equals(m.getReturnType())) {
 						throw new SaltaException(
-								"@Provides method may not return void");
+								"@Provides method may not return void:\n" + m);
 					}
+
 					return true;
 				}
 			};
@@ -257,6 +266,8 @@ public class GuiceModule extends AbstractModule {
 					b.bindProviderMethodsOf(((ModuleAdapter) m).getDelegate());
 				}
 			});
+
+			config.modulePostProcessors.add(new GuiceModuleCheck());
 		}
 		bindScope(Singleton.class, config.singletonScope);
 
@@ -277,6 +288,8 @@ public class GuiceModule extends AbstractModule {
 				config.config.automaticStaticBindings.add(binding);
 			}
 		}
+
+		// rule for @ProvidedBy
 		config.constructionRules.add(new ProvidedByConstructionRuleBase(
 				Provider.class) {
 
@@ -332,6 +345,7 @@ public class GuiceModule extends AbstractModule {
 			}
 		}
 
+		// rule for @ImplementedBy
 		config.constructionRules.add(new ImplementedByConstructionRuleBase() {
 
 			@Override
@@ -350,6 +364,8 @@ public class GuiceModule extends AbstractModule {
 				return null;
 			}
 		});
+
+		// install jsr330 module
 		{
 			install(new JSR330Module());
 			List<InstantiatorRule> tmp = new ArrayList<>(
@@ -362,6 +378,7 @@ public class GuiceModule extends AbstractModule {
 							.collect(toList()));
 		}
 
+		// rule for constructor instantiation
 		config.instantiatorRules.add(new GuiceConstructorInstantiatorRule(
 				config, guiceConfig.requireAtInjectOnConstructors));
 
@@ -376,7 +393,8 @@ public class GuiceModule extends AbstractModule {
 								ctx -> {
 									((SingletonScope) b.getScope())
 											.instantiate(ctx, b,
-													ctx.getOrCreateRecipe(b));
+													b.getOrCreateRecipe()
+															.apply(ctx));
 									return null;
 								});
 					}

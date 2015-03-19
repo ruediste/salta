@@ -40,32 +40,24 @@ public class CoreInjector {
 				config.automaticStaticBindings);
 	}
 
-	public <T> T getInstance(CoreDependencyKey<T> key) {
-		Optional<T> tryGetInstance = tryGetInstance(key);
-		if (!tryGetInstance.isPresent())
-			throw new SaltaException("No instance found for " + key);
-		return tryGetInstance.get();
-	}
-
 	@SuppressWarnings("unchecked")
-	public <T> Optional<T> tryGetInstance(CoreDependencyKey<T> key) {
+	public <T> T getInstance(CoreDependencyKey<T> key) {
+		Optional<CompiledSupplier> tryGetCompiledRecipe;
 		try {
-			return (Optional<T>) tryGetCompiledRecipe(key).map(
-					s -> {
-						try {
-							return s.get();
-						} catch (SaltaException e) {
-							throw e;
-						} catch (Throwable e) {
-							throw new SaltaException(
-									"Error while creating instance for " + key,
-									e);
-						}
-					});
+			tryGetCompiledRecipe = tryGetCompiledRecipe(key);
 		} catch (Throwable e) {
 			throw new SaltaException(
 					"Error while creating instance for " + key, e);
 		}
+
+		if (!tryGetCompiledRecipe.isPresent()) {
+			Class<T> rawType = key.getRawType();
+			if (rawType.getEnclosingClass() != null)
+				throw new SaltaException("No instance found for inner class "
+						+ key + ".\nForgotten to make inner class static?");
+			throw new SaltaException("No instance found for " + key);
+		}
+		return (T) tryGetCompiledRecipe.get().getNoThrow();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -84,7 +76,10 @@ public class CoreInjector {
 	}
 
 	public CompiledSupplier getCompiledRecipe(CoreDependencyKey<?> key) {
-		return tryGetCompiledRecipe(key).get();
+		Optional<CompiledSupplier> tryGetCompiledRecipe = tryGetCompiledRecipe(key);
+		if (!tryGetCompiledRecipe.isPresent())
+			throw new SaltaException("No recipe found for " + key);
+		return tryGetCompiledRecipe.get();
 	}
 
 	public Optional<CompiledSupplier> tryGetCompiledRecipe(

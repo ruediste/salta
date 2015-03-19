@@ -11,6 +11,7 @@ import com.github.ruediste.salta.core.CompiledFunction;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -49,7 +50,13 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 
 			@Override
 			public void accept(T t) {
-				function.getNoThrow(t);
+				try {
+					function.get(t);
+				} catch (Throwable e) {
+					throw new SaltaException(
+							"Error while injecting members of instance of "
+									+ type, e);
+				}
 			}
 
 			@Override
