@@ -43,11 +43,9 @@ import com.google.inject.Key;
 import com.google.inject.MembersInjector;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
-import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.util.Classes;
 import com.google.inject.spi.Message;
-import com.google.inject.spi.ScopeBinding;
 
 /**
  * A collection of error messages. If this type is passed as a method parameter,
@@ -69,6 +67,7 @@ import com.google.inject.spi.ScopeBinding;
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
+@SuppressWarnings({ "rawtypes", "serial" })
 public final class Errors implements Serializable {
 
 	private static final Logger logger = Logger
@@ -80,28 +79,16 @@ public final class Errors implements Serializable {
 	private final Errors root;
 
 	/**
-	 * The parent errors object. Used to obtain the chain of source objects.
-	 */
-	private final Errors parent;
-
-	/**
 	 * null unless (root == this) and error messages exist. Never an empty list.
 	 */
 	private List<Message> errors; // lazy, use getErrorsForAdd()
 
 	public Errors() {
 		this.root = this;
-		this.parent = null;
 	}
 
 	public Errors(Object source) {
 		this.root = this;
-		this.parent = null;
-	}
-
-	private Errors(Errors parent, Object source) {
-		this.root = parent.root;
-		this.parent = parent;
 	}
 
 	/**
@@ -238,14 +225,6 @@ public final class Errors implements Serializable {
 	public Errors constructorNotDefinedByType(Constructor<?> constructor,
 			TypeLiteral<?> type) {
 		return addMessage("%s does not define %s", type, constructor);
-	}
-
-	public Errors duplicateScopes(ScopeBinding existing,
-			Class<? extends Annotation> annotationType, Scope scope) {
-		return addMessage(
-				"Scope %s is already bound to %s at %s.%n Cannot bind %s.",
-				existing.getScope(), annotationType, existing.getSource(),
-				scope);
 	}
 
 	public Errors voidProviderMethod() {

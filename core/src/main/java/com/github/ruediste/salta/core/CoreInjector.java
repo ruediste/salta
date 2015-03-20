@@ -57,7 +57,12 @@ public class CoreInjector {
 						+ key + ".\nForgotten to make inner class static?");
 			throw new SaltaException("No instance found for " + key);
 		}
-		return (T) tryGetCompiledRecipe.get().getNoThrow();
+		try {
+			return (T) tryGetCompiledRecipe.get().get();
+		} catch (Throwable e) {
+			throw new SaltaException(
+					"Error while creating instance for " + key, e);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

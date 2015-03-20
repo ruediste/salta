@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -153,11 +154,15 @@ public class GuiceModule extends AbstractModule {
 				.add(new GuiceMembersInjectorFactory(config));
 
 		// provider creation rule
-		config.config.creationRules
-				.add(new ProviderCreationRule(key -> key.getRawType().equals(
-						Provider.class),
-						(type, supplier) -> (Provider<?>) supplier::get,
-						Provider.class));
+		config.config.creationRules.add(new ProviderCreationRule(key -> key
+				.getRawType().equals(Provider.class),
+				new BiFunction<CoreDependencyKey<?>, Supplier<?>, Object>() {
+					@Override
+					public Object apply(CoreDependencyKey<?> type,
+							Supplier<?> supplier) {
+						return (Provider<Object>) () -> supplier.get();
+					}
+				}, Provider.class));
 
 		// members injector creation rule
 		config.config.creationRules.add(new MembersInjectorCreationRuleBase(
