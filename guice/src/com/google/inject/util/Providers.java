@@ -18,7 +18,7 @@ package com.google.inject.util;
 
 import javax.annotation.PostConstruct;
 
-import com.github.ruediste.salta.standard.config.MemberInjectionToken;
+import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.google.common.base.Objects;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -51,7 +51,7 @@ public final class Providers {
 
 	private static final class GuicifiedProvider<T> implements Provider<T> {
 		private javax.inject.Provider<T> delegate;
-		private MemberInjectionToken<javax.inject.Provider<T>> token;
+		private MembersInjectionToken<javax.inject.Provider<T>> token;
 
 		public GuicifiedProvider(javax.inject.Provider<T> delegate) {
 			this.delegate = delegate;

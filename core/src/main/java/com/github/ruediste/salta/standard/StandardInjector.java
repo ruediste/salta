@@ -3,6 +3,8 @@ package com.github.ruediste.salta.standard;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -11,6 +13,7 @@ import javax.inject.Provider;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
@@ -105,6 +108,7 @@ public class StandardInjector implements Injector {
 	private boolean initialized;
 	private StandardInjectorConfiguration config;
 	private CoreInjector coreInjector;
+	private final Map<Object, MembersInjectionToken<?>> memberInjectionTokens = new IdentityHashMap<>();
 
 	private void checkInitialized() {
 		if (!initialized) {
@@ -152,7 +156,28 @@ public class StandardInjector implements Injector {
 			private static final long serialVersionUID = 1L;
 		}.where(new TypeParameter<T>() {
 		}, typeLiteral);
-		return getInstance(DependencyKey.of(injectorType));
+		return new MembersInjector<T>() {
+			volatile boolean injected;
+			MembersInjector<T> delegate;
+
+			@Override
+			public void injectMembers(T instance) {
+				checkInitialized();
+				if (!injected) {
+					synchronized (coreInjector.recipeLock) {
+						delegate = getInstance(DependencyKey.of(injectorType));
+						injected = true;
+					}
+				}
+				delegate.injectMembers(instance);
+			}
+
+			@Override
+			public String toString() {
+				// TODO Auto-generated method stub
+				return "MembersInjector<" + typeLiteral + ">";
+			}
+		};
 	}
 
 	@Override
@@ -189,4 +214,28 @@ public class StandardInjector implements Injector {
 		checkInitialized();
 		return coreInjector;
 	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> MembersInjectionToken<T> getMembersInjectionToken(T value) {
+		return getMembersInjectionToken(value,
+				(TypeToken<T>) TypeToken.of(value.getClass()));
+	}
+
+	@Override
+	public <T> MembersInjectionToken<T> getMembersInjectionToken(T value,
+			TypeToken<T> type) {
+		synchronized (memberInjectionTokens) {
+			@SuppressWarnings("unchecked")
+			MembersInjectionToken<T> token = (MembersInjectionToken<T>) memberInjectionTokens
+					.get(value);
+
+			if (token == null) {
+				token = new MembersInjectionToken<T>(this, value, type);
+				memberInjectionTokens.put(value, token);
+			}
+			return token;
+		}
+	}
+
 }

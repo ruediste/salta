@@ -386,7 +386,6 @@ public class BinderTest {
 			}).getInstance(HasImplementedBy1.class);
 			fail();
 		} catch (SaltaException expected) {
-			expected.printStackTrace();
 			assertContains(expected.getMessage(), "Duplicate static binding");
 		}
 	}

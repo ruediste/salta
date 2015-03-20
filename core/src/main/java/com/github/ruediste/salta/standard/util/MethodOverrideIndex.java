@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,7 +24,8 @@ public class MethodOverrideIndex {
 
 	private final HashMap<Signature, Set<Method>> leafMethods = new HashMap<>();
 	private final HashMap<Signature, Set<Method>> methodsBySignature = new HashMap<>();
-	private final HashSet<Method> scannedMethods = new HashSet<>();
+
+	private final HashMap<Method, TypeToken<?>> scannedMethods = new HashMap<>();
 
 	private final List<TypeToken<?>> ancestors;
 
@@ -38,16 +40,14 @@ public class MethodOverrideIndex {
 		// we visit parent classes always before child classes
 		for (TypeToken<?> type : ancestors) {
 			for (Method m : type.getRawType().getDeclaredMethods()) {
-				if (Modifier.isStatic(m.getModifiers())
-				// || m.isBridge()
-				// || m.isSynthetic()
-				) {
+				if (Modifier.isStatic(m.getModifiers()) || m.isBridge()
+						|| m.isSynthetic()) {
 					continue;
 				}
 
-				scannedMethods.add(m);
+				scannedMethods.put(m, type);
 
-				Signature signature = new Signature(m);
+				Signature signature = new Signature(type, m);
 
 				// record the methods
 				methodsBySignature.computeIfAbsent(signature,
@@ -97,12 +97,12 @@ public class MethodOverrideIndex {
 	}
 
 	public HashSet<Method> getOverridingMethods(Method ancestor) {
-		HashSet<Method> result = new HashSet<>();
-		Set<Method> set = methodsBySignature.get(new Signature(ancestor));
-		if (set == null)
+		TypeToken<?> type = scannedMethods.get(ancestor);
+		if (type == null)
 			throw new RuntimeException("Method " + ancestor
 					+ " was not scanned by this override index");
-		for (Method m : set) {
+		HashSet<Method> result = new HashSet<>();
+		for (Method m : methodsBySignature.get(new Signature(type, ancestor))) {
 			if (ancestor.equals(m))
 				continue;
 			if (doesOverride(m, ancestor))
@@ -113,14 +113,15 @@ public class MethodOverrideIndex {
 	}
 
 	public boolean wasScanned(Method m) {
-		return scannedMethods.contains(m);
+		return scannedMethods.containsKey(m);
 	}
 
 	public boolean isOverridden(Method m) {
-		Set<Method> leaves = leafMethods.get(new Signature(m));
-		if (leaves == null)
+		TypeToken<?> type = scannedMethods.get(m);
+		if (type == null)
 			throw new RuntimeException("Method " + m
 					+ " was not scanned by this override index");
+		Set<Method> leaves = leafMethods.get(new Signature(type, m));
 		return !leaves.contains(m);
 	}
 
@@ -133,9 +134,14 @@ public class MethodOverrideIndex {
 		private String name;
 		private Class<?>[] parameterTypes;
 
-		public Signature(Method m) {
+		public Signature(TypeToken<?> type, Method m) {
 			name = m.getName();
-			parameterTypes = m.getParameterTypes();
+			parameterTypes = new Class<?>[m.getParameterCount()];
+			Type[] genericParameterTypes = m.getGenericParameterTypes();
+			for (int i = 0; i < m.getParameterCount(); i++) {
+				parameterTypes[i] = type.resolveType(genericParameterTypes[i])
+						.getRawType();
+			}
 		}
 
 		@Override

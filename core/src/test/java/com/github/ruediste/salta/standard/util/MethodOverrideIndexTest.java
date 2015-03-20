@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import com.github.ruediste.simpledi.standard.util.testPackageA.TestClassA;
@@ -78,5 +80,39 @@ public class MethodOverrideIndexTest {
 		assertEquals(1,
 				idx.getOverridingMethods(MyTestA.class.getDeclaredMethod("b"))
 						.size());
+	}
+
+	@SuppressWarnings("unused")
+	private static class BBase<T> {
+
+		void set(T value) {
+		}
+
+		void foo(List<String> arg) {
+		}
+	}
+
+	private static class BDerived extends BBase<Integer> {
+		@Override
+		void set(Integer value) {
+		}
+
+		@Override
+		void foo(@SuppressWarnings("rawtypes") List arg) {
+		}
+	}
+
+	@Test
+	public void testGenericOverride() throws Exception {
+		MethodOverrideIndex idx = new MethodOverrideIndex(BDerived.class);
+		assertTrue(idx.isOverridden(BBase.class.getDeclaredMethod("set",
+				Object.class)));
+	}
+
+	@Test
+	public void testSubclassRawOverride() throws Exception {
+		MethodOverrideIndex idx = new MethodOverrideIndex(BDerived.class);
+		assertTrue(idx.isOverridden(BBase.class.getDeclaredMethod("foo",
+				List.class)));
 	}
 }

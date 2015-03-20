@@ -26,7 +26,7 @@ import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
-import com.github.ruediste.salta.standard.config.MemberInjectionToken;
+import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -87,7 +87,14 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
 	@Override
 	public ScopedBindingBuilder<T> to(TypeToken<? extends T> implementation) {
-		return to(DependencyKey.of(implementation));
+		recipeFactorySupplier = () -> ctx -> {
+			config.typesBoundToDefaultCreationRecipe.add(implementation);
+			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
+					config, implementation);
+			return builder.build(ctx);
+		};
+		scopeSupplier = () -> config.getScope(implementation);
+		return this;
 	}
 
 	@Override
@@ -95,13 +102,9 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 			CoreDependencyKey<? extends T> implementation) {
 
 		recipeFactorySupplier = () -> ctx -> {
-			config.typesBoundToDefaultCreationRecipe.add(implementation
-					.getType());
-			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
-					config, implementation.getType());
-			return builder.build(ctx);
+			return ctx.getRecipe(implementation);
 		};
-		scopeSupplier = () -> config.getScope(implementation.getType());
+		scopeSupplier = () -> config.defaultScope;
 		return this;
 	}
 
@@ -110,8 +113,8 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 		if (instance == null)
 			throw new SaltaException(
 					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
-		MemberInjectionToken<T> token = MemberInjectionToken
-				.getMemberInjectionToken(injector, instance);
+		MembersInjectionToken<T> token = injector.getMembersInjectionToken(
+				instance, (TypeToken<T>) TypeToken.of(instance.getClass()));
 		config.dynamicInitializers.add(i -> token.getValue());
 		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> new CreationRecipeFactory() {
@@ -145,8 +148,10 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	@Override
 	public ScopedBindingBuilder<T> toProvider(
 			InstanceProvider<? extends T> provider) {
-		MemberInjectionToken<InstanceProvider<?>> token = MemberInjectionToken
-				.getMemberInjectionToken(injector, provider);
+		MembersInjectionToken<InstanceProvider<?>> token = injector
+				.getMembersInjectionToken(provider,
+						(TypeToken<InstanceProvider<?>>) TypeToken.of(provider
+								.getClass()));
 		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> ctx -> new SupplierRecipeImpl(() -> token
 				.getValue().get());

@@ -23,6 +23,7 @@ import javax.naming.ConfigurationException;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.google.common.reflect.TypeToken;
 
 public interface Injector {
@@ -46,6 +47,23 @@ public interface Injector {
 	void injectMembers(Object instance);
 
 	<T> void injectMembers(TypeToken<T> type, T instance);
+
+	/**
+	 * Create a token to access the value which makes sure that the members of
+	 * the value are injected when {@link MembersInjectionToken#getValue()}
+	 * returns. Only a single token for a single value (compared by identity) is
+	 * ever created.
+	 */
+	<T> MembersInjectionToken<T> getMembersInjectionToken(T value);
+
+	/**
+	 * Create a token to access the value which makes sure that the members of
+	 * the value are injected when {@link MembersInjectionToken#getValue()}
+	 * returns. Only a single token for a single value (compared by identity) is
+	 * ever created.
+	 */
+	<T> MembersInjectionToken<T> getMembersInjectionToken(T value,
+			TypeToken<T> type);
 
 	/**
 	 * Returns the members injector used to inject dependencies into methods and
