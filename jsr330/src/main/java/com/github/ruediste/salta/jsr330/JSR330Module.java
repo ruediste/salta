@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -23,7 +24,6 @@ import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.binder.InstanceProvider;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
@@ -284,7 +284,7 @@ public class JSR330Module extends AbstractModule {
 	private void addProvidedByConstructionRule(
 			StandardInjectorConfiguration config) {
 		config.constructionRules.add(new ProvidedByConstructionRuleBase(
-				InstanceProvider.class) {
+				Supplier.class) {
 			@Override
 			protected DependencyKey<?> getProviderKey(TypeToken<?> type) {
 				ProvidedBy providedBy = type.getRawType().getAnnotation(

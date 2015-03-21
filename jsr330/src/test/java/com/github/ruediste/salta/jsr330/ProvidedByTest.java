@@ -3,12 +3,13 @@ package com.github.ruediste.salta.jsr330;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.function.Supplier;
+
 import javax.inject.Inject;
 
 import org.junit.Test;
 
 import com.github.ruediste.salta.Salta;
-import com.github.ruediste.salta.standard.binder.InstanceProvider;
 
 public class ProvidedByTest {
 
@@ -20,7 +21,7 @@ public class ProvidedByTest {
 		int value;
 	}
 
-	private static class AProvider implements InstanceProvider<IA> {
+	private static class AProvider implements Supplier<IA> {
 
 		@Override
 		public IA get() {
@@ -45,7 +46,7 @@ public class ProvidedByTest {
 		}
 	}
 
-	private static class TestBProvider implements InstanceProvider<TestB> {
+	private static class TestBProvider implements Supplier<TestB> {
 
 		@Override
 		public TestB get() {

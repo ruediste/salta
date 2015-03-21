@@ -21,8 +21,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-
-import com.github.ruediste.salta.standard.binder.InstanceProvider;
+import java.util.function.Supplier;
 
 /**
  * A pointer to the default provider type for a type.
@@ -36,5 +35,5 @@ public @interface ProvidedBy {
 	/**
 	 * The implementation type.
 	 */
-	Class<? extends InstanceProvider<?>> value();
+	Class<? extends Supplier<?>> value();
 }

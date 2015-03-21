@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.reflect.Constructor;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.google.common.reflect.TypeToken;
@@ -40,26 +41,25 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 *
 	 */
-	public ScopedBindingBuilder<T> toProvider(
-			InstanceProvider<? extends T> provider);
+	public ScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider);
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public ScopedBindingBuilder<T> toProvider(
-			Class<? extends InstanceProvider<? extends T>> providerType);
+			Class<? extends Supplier<? extends T>> providerType);
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public ScopedBindingBuilder<T> toProvider(
-			TypeToken<? extends InstanceProvider<? extends T>> providerType);
+			TypeToken<? extends Supplier<? extends T>> providerType);
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public ScopedBindingBuilder<T> toProvider(
-			CoreDependencyKey<? extends InstanceProvider<? extends T>> providerKey);
+			CoreDependencyKey<? extends Supplier<? extends T>> providerKey);
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
@@ -71,7 +71,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	 */
 	public <P> ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
-			Function<? super P, InstanceProvider<? extends T>> providerWrapper);
+			Function<? super P, Supplier<? extends T>> providerWrapper);
 
 	/**
 	 * See the EDSL examples at {@link Binder}.

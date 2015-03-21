@@ -145,11 +145,10 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public ScopedBindingBuilder<T> toProvider(
-			InstanceProvider<? extends T> provider) {
-		MembersInjectionToken<InstanceProvider<?>> token = injector
+	public ScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider) {
+		MembersInjectionToken<Supplier<?>> token = injector
 				.getMembersInjectionToken(provider,
-						(TypeToken<InstanceProvider<?>>) TypeToken.of(provider
+						(TypeToken<Supplier<?>>) TypeToken.of(provider
 								.getClass()));
 		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> ctx -> new SupplierRecipeImpl(() -> token
@@ -159,19 +158,19 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
 	@Override
 	public ScopedBindingBuilder<T> toProvider(
-			Class<? extends InstanceProvider<? extends T>> providerType) {
+			Class<? extends Supplier<? extends T>> providerType) {
 		return toProvider(TypeToken.of(providerType));
 	}
 
 	@Override
 	public ScopedBindingBuilder<T> toProvider(
-			TypeToken<? extends InstanceProvider<? extends T>> providerType) {
+			TypeToken<? extends Supplier<? extends T>> providerType) {
 		return toProvider(DependencyKey.of(providerType));
 	}
 
 	@Override
 	public ScopedBindingBuilder<T> toProvider(
-			CoreDependencyKey<? extends InstanceProvider<? extends T>> providerKey) {
+			CoreDependencyKey<? extends Supplier<? extends T>> providerKey) {
 		return toProvider(providerKey, x -> x);
 	}
 
@@ -189,7 +188,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	@Override
 	public <P> ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
-			Function<? super P, InstanceProvider<? extends T>> providerWrapper) {
+			Function<? super P, Supplier<? extends T>> providerWrapper) {
 		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = new Supplier<CreationRecipeFactory>() {
 			@Override
@@ -213,7 +212,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 										Type.getType(Function.class),
 										Method.getMethod("Object apply(Object)"));
 								mv.invokeInterface(
-										Type.getType(InstanceProvider.class),
+										Type.getType(Supplier.class),
 										Method.getMethod("Object get()"));
 								return Object.class;
 							}

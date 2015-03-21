@@ -1,12 +1,12 @@
 package com.github.ruediste.salta.guice.binder;
 
 import java.lang.reflect.Constructor;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.binder.InstanceProvider;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -51,7 +51,7 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 	public ScopedBindingBuilder toProvider(Provider<? extends T> provider) {
 
 		return new ScopedBindingBuilderImpl(
-				delegate.toProvider(new InstanceProvider<T>() {
+				delegate.toProvider(new Supplier<T>() {
 					@Override
 					public T get() {
 						return provider.get();
@@ -84,31 +84,29 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 
 	private <P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProviderImpl(
 			TypeLiteral<P> providerType) {
-		return new ScopedBindingBuilderImpl(
-				delegate.toProvider(
-						DependencyKey.of(providerType.getTypeToken()),
-						new java.util.function.Function<P, InstanceProvider<? extends T>>() {
+		return new ScopedBindingBuilderImpl(delegate.toProvider(
+				DependencyKey.of(providerType.getTypeToken()),
+				new java.util.function.Function<P, Supplier<? extends T>>() {
 
-							@Override
-							public InstanceProvider<? extends T> apply(P t) {
-								return () -> t.get();
-							}
-						}));
+					@Override
+					public Supplier<? extends T> apply(P t) {
+						return () -> t.get();
+					}
+				}));
 	}
 
 	@Override
 	public <P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProvider(
 			Key<P> providerKey) {
-		return new ScopedBindingBuilderImpl(
-				delegate.toProvider(
-						KeyAdapter.of(providerKey),
-						new java.util.function.Function<P, InstanceProvider<? extends T>>() {
+		return new ScopedBindingBuilderImpl(delegate.toProvider(
+				KeyAdapter.of(providerKey),
+				new java.util.function.Function<P, Supplier<? extends T>>() {
 
-							@Override
-							public InstanceProvider<? extends T> apply(P t) {
-								return () -> t.get();
-							}
-						}));
+					@Override
+					public Supplier<? extends T> apply(P t) {
+						return () -> t.get();
+					}
+				}));
 	}
 
 	@Override
