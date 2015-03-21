@@ -8,11 +8,11 @@ import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
+import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
 import com.github.ruediste.salta.standard.DependencyKey;

@@ -106,7 +106,7 @@ public final class Guice {
 			Iterable<? extends Module> modules) {
 		GuiceInjectorConfiguration config = new GuiceInjectorConfiguration(
 				stage);
-		ArrayList<com.github.ruediste.salta.standard.Module> wrappedModules = StreamSupport
+		ArrayList<com.github.ruediste.salta.standard.SaltaModule> wrappedModules = StreamSupport
 				.stream(modules.spliterator(), false)
 				.map(m -> new ModuleAdapter(m, config))
 				.collect(toCollection(ArrayList::new));

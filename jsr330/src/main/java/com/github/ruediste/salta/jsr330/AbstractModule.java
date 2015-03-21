@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.salta;
+package com.github.ruediste.salta.jsr330;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -33,7 +33,7 @@ import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
-import com.github.ruediste.salta.standard.Module;
+import com.github.ruediste.salta.standard.SaltaModule;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
@@ -42,7 +42,7 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
 /**
- * A support class for {@link Module}s which reduces repetition and results in a
+ * A support class for {@link SaltaModule}s which reduces repetition and results in a
  * more readable configuration. Simply extend this class, implement
  * {@link #configure()}, and call the inherited methods which mirror those found
  * in {@link Binder}. For example:
@@ -60,7 +60,7 @@ import com.google.common.reflect.TypeToken;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public abstract class AbstractModule implements Module {
+public abstract class AbstractModule implements SaltaModule {
 
 	Binder binder;
 
@@ -113,9 +113,9 @@ public abstract class AbstractModule implements Module {
 	}
 
 	/**
-	 * @see Binder#install(Module)
+	 * @see Binder#install(SaltaModule)
 	 */
-	protected void install(Module module) {
+	protected void install(SaltaModule module) {
 		binder().install(module);
 	}
 

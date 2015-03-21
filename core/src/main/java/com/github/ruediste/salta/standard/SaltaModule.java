@@ -18,7 +18,6 @@
 
 package com.github.ruediste.salta.standard;
 
-import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.standard.binder.Binder;
 
 /**
@@ -36,7 +35,7 @@ import com.github.ruediste.salta.standard.binder.Binder;
  * be created for all methods annotated with {@literal @}{@link Provides}. Use
  * scope and binding annotations on these methods to configure the bindings.
  */
-public interface Module {
+public interface SaltaModule {
 
 	/**
 	 * Contributes bindings and other configurations for this module to

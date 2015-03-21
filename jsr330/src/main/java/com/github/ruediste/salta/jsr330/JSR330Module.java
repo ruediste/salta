@@ -14,7 +14,6 @@ import javax.inject.Provider;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
-import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.SaltaException;

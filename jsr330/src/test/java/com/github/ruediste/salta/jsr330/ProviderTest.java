@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.junit.Test;
 
-import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.standard.Injector;
 

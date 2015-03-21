@@ -19,7 +19,6 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRule;
@@ -35,7 +34,9 @@ import com.github.ruediste.salta.standard.DefaultJITBindingRule;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
+import com.github.ruediste.salta.standard.SaltaModule;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
+import com.github.ruediste.salta.standard.binder.Binder;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
@@ -64,11 +65,12 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 
-public class GuiceModule extends AbstractModule {
+public class GuiceModule implements SaltaModule {
 
 	private GuiceInjectorConfiguration guiceConfig;
 	private GuiceInjectorImpl injector;
 	private StandardInjectorConfiguration config;
+	private Binder binder;
 
 	public GuiceModule(GuiceInjectorConfiguration guiceConfig,
 			GuiceInjectorImpl injector) {
@@ -76,9 +78,14 @@ public class GuiceModule extends AbstractModule {
 		this.injector = injector;
 	}
 
-	@Override
-	protected void configure() {
+	protected Binder binder() {
+		return binder;
+	}
 
+	@Override
+	public void configure(Binder binder) {
+
+		this.binder = binder;
 		config = binder().getConfiguration();
 		addLoggerCreationRule();
 
@@ -96,7 +103,7 @@ public class GuiceModule extends AbstractModule {
 
 		addTypeLiteralCreationRule();
 
-		bind(Injector.class).toInstance(injector);
+		binder().bind(Injector.class).toInstance(injector);
 
 		addStaticMembersInjectionDynamicInitializer();
 
@@ -177,8 +184,8 @@ public class GuiceModule extends AbstractModule {
 		if (guiceConfig.stage == Stage.PRODUCTION)
 			addEagerInstantiationDynamicInitializer();
 
-		bindScope(Singleton.class, config.singletonScope);
-		bindScope(javax.inject.Singleton.class, config.singletonScope);
+		binder().bindScope(Singleton.class, config.singletonScope);
+		binder().bindScope(javax.inject.Singleton.class, config.singletonScope);
 
 		config.constructionRules.add(new DefaultConstructionRule(config));
 		addStageCreationRule();

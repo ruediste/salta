@@ -36,7 +36,6 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.proxy.ProxyRefDispatcher;
 
-import com.github.ruediste.salta.AbstractModule;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
@@ -46,7 +45,7 @@ import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
-import com.github.ruediste.salta.standard.Module;
+import com.github.ruediste.salta.standard.SaltaModule;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.config.EnhancerFactory;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
@@ -57,8 +56,8 @@ import com.google.common.reflect.TypeToken;
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
  * used to create an {@link Injector}. Guice provides this object to your
- * application's {@link Module} implementors so they may each contribute their
- * own bindings and other registrations.
+ * application's {@link SaltaModule} implementors so they may each contribute
+ * their own bindings and other registrations.
  *
  * <h3>The Guice Binding EDSL</h3>
  *
@@ -76,7 +75,7 @@ import com.google.common.reflect.TypeToken;
  *
  * This statement does essentially nothing; it "binds the {@code ServiceImpl}
  * class to itself" and does not change Guice's default behavior. You may still
- * want to use this if you prefer your {@link Module} class to serve as an
+ * want to use this if you prefer your {@link SaltaModule} class to serve as an
  * explicit <i>manifest</i> for the services it provides. Also, in rare cases,
  * Guice may be unable to validate a binding at injector creation time unless it
  * is given explicitly.
@@ -387,7 +386,7 @@ public class Binder {
 	/**
 	 * Uses the given module to configure more bindings.
 	 */
-	public void install(Module module) {
+	public void install(SaltaModule module) {
 		config.modules.add(module);
 		module.configure(this);
 	}
