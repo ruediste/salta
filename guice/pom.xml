@@ -31,8 +31,12 @@
 		</dependency>
 		<dependency>
 			<groupId>com.github.ruediste.salta</groupId>
-			<artifactId>salta-jsr330</artifactId>
+			<artifactId>salta-core</artifactId>
 			<version>0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
 		</dependency>
 	</dependencies>
 	

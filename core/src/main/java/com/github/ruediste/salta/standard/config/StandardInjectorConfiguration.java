@@ -18,8 +18,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
+import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
@@ -62,7 +64,14 @@ public class StandardInjectorConfiguration {
 	public FixedConstructorInstantiatorFactory fixedConstructorInstantiatorFactory;
 
 	/**
-	 * Rules defining how to construct an instance of a type
+	 * Rules defining how to construct an instance of a type. This can is used
+	 * from various places like {@link Binding}s or {@link CreationRule}s.
+	 * 
+	 * <p>
+	 * Not to be confused with the
+	 * {@link CoreInjectorConfiguration#creationRules}, which determine how to
+	 * create a rule given a {@link CoreDependencyKey}
+	 * </p>
 	 */
 	public final List<ConstructionRule> constructionRules = new ArrayList<>();
 

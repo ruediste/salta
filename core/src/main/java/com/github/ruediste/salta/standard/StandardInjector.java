@@ -174,7 +174,6 @@ public class StandardInjector implements Injector {
 
 			@Override
 			public String toString() {
-				// TODO Auto-generated method stub
 				return "MembersInjector<" + typeLiteral + ">";
 			}
 		};

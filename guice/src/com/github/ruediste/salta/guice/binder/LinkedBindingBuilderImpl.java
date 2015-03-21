@@ -2,7 +2,7 @@ package com.github.ruediste.salta.guice.binder;
 
 import java.lang.reflect.Constructor;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -49,6 +49,7 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 
 	@Override
 	public ScopedBindingBuilder toProvider(Provider<? extends T> provider) {
+
 		return new ScopedBindingBuilderImpl(
 				delegate.toProvider(new InstanceProvider<T>() {
 					@Override
@@ -56,7 +57,7 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 						return provider.get();
 					}
 
-					@PostConstruct
+					@Inject
 					public void init(Injector injector) {
 						injector.injectMembers(provider);
 					}
