@@ -27,12 +27,12 @@ public class ScopeImpl implements Scope {
 		 *            supplier of the unscoped instance
 		 * @param binding
 		 *            binding beeing scoped
-		 * @param type
-		 *            type the binding was created for
+		 * @param requestedType
+		 *            type beeing requested by the injection point
 		 * @return
 		 */
 		Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-				TypeToken<?> type);
+				TypeToken<?> requestedType);
 	}
 
 	public ScopeImpl(ScopeHandler handler) {
@@ -41,11 +41,10 @@ public class ScopeImpl implements Scope {
 
 	@Override
 	public Function<RecipeCreationContext, SupplierRecipe> createRecipe(
-			Binding binding, TypeToken<?> requestedType,
-			Function<RecipeCreationContext, SupplierRecipe> innerRecipe) {
+			Binding binding, TypeToken<?> requestedType) {
 		return ctx -> {
 			CompiledSupplier compilerInnerRecipe = ctx.getCompiler()
-					.compileSupplier(innerRecipe.apply(ctx));
+					.compileSupplier(binding.getOrCreateRecipe().apply(ctx));
 
 			Supplier<Object> scoped = handler.scope(
 					compilerInnerRecipe::getNoThrow, binding, requestedType);

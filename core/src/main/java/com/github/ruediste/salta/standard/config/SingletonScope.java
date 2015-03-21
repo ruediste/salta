@@ -25,10 +25,10 @@ public class SingletonScope implements Scope {
 
 	@Override
 	public Function<RecipeCreationContext, SupplierRecipe> createRecipe(
-			Binding binding, TypeToken<?> requestedType,
-			Function<RecipeCreationContext, SupplierRecipe> innerRecipe) {
+			Binding binding, TypeToken<?> requestedType) {
 		return ctx -> {
-			instantiate(ctx, binding, innerRecipe.apply(ctx));
+			// make sure to create the instance when first creating the recipe
+			instantiate(ctx, binding);
 
 			return new SupplierRecipe() {
 
@@ -49,12 +49,18 @@ public class SingletonScope implements Scope {
 		};
 	}
 
+	@Override
+	public void performEagerInstantiation(RecipeCreationContext ctx,
+			Binding binding) {
+		instantiate(ctx, binding);
+	}
+
 	/**
 	 * Instantiate the instance
 	 */
-	public void instantiate(RecipeCreationContext ctx, Binding binding,
-			SupplierRecipe innerRecipe) {
+	public void instantiate(RecipeCreationContext ctx, Binding binding) {
 		if (!instance.isSet(binding)) {
+			SupplierRecipe innerRecipe = binding.getOrCreateRecipe().apply(ctx);
 			instance.set(binding, ctx.getCompiler()
 					.compileSupplier(innerRecipe).getNoThrow());
 		}

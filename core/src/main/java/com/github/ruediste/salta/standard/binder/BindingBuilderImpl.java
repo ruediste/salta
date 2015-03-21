@@ -11,7 +11,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
@@ -33,7 +32,6 @@ import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
 public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
-	protected DependencyKey<T> eagerInstantiationDependency;
 	protected Matcher<CoreDependencyKey<?>> typeMatcher;
 	protected Matcher<CoreDependencyKey<?>> annotationMatcher;
 
@@ -56,7 +54,6 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
 		this.typeMatcher = typeMatcher;
 		this.type = type;
-		eagerInstantiationDependency = DependencyKey.of(type);
 		this.config = config;
 		recipeFactorySupplier = () -> {
 			config.typesBoundToDefaultCreationRecipe.add(type);
@@ -108,6 +105,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void toInstance(T instance) {
 		if (instance == null)
@@ -145,6 +143,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public ScopedBindingBuilder<T> toProvider(
 			InstanceProvider<? extends T> provider) {
@@ -187,7 +186,6 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <P> ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
@@ -202,11 +200,6 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
 						// entered when creating the recipe
 						SupplierRecipe recipe = ctx.getRecipe(providerKey);
-
-						CompiledSupplier compiledSupplier = ctx.getCompiler()
-								.compileSupplier(recipe);
-						InstanceProvider<? extends T> provider = providerWrapper
-								.apply((P) compiledSupplier.getNoThrow());
 
 						return new SupplierRecipe() {
 
@@ -277,15 +270,16 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	@Override
 	public void asEagerSingleton() {
 		this.scopeSupplier = () -> config.singletonScope;
-		config.dynamicInitializers.add(injector -> injector
-				.getInstance(eagerInstantiationDependency));
+		config.dynamicInitializers.add(injector -> injector.getCoreInjector()
+				.withRecipeCreationContext(ctx -> {
+					binding.getScope().performEagerInstantiation(ctx, binding);
+					return null;
+				}));
 	}
 
 	@Override
 	public LinkedBindingBuilder<T> annotatedWith(
 			Class<? extends Annotation> availableAnnotationType) {
-		eagerInstantiationDependency = eagerInstantiationDependency
-				.withAnnotations(availableAnnotationType);
 		annotationMatcher = config
 				.requredQualifierMatcher(availableAnnotationType);
 		return this;
@@ -293,14 +287,12 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
 	@Override
 	public LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
-		eagerInstantiationDependency = eagerInstantiationDependency
-				.withAnnotations(availableAnnotation);
 		annotationMatcher = config.requredQualifierMatcher(availableAnnotation);
 		return this;
 	}
 
 	@Override
 	public String toString() {
-		return "BindingBuilder<" + eagerInstantiationDependency.getType() + ">";
+		return "BindingBuilder<" + type + ">";
 	}
 }

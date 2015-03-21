@@ -17,8 +17,7 @@ final class DefaultScope implements Scope {
 
 	@Override
 	public Function<RecipeCreationContext, SupplierRecipe> createRecipe(
-			Binding binding, TypeToken<?> requestedType,
-			Function<RecipeCreationContext, SupplierRecipe> innerRecipe) {
-		return innerRecipe;
+			Binding binding, TypeToken<?> requestedType) {
+		return binding.getOrCreateRecipe();
 	}
 }

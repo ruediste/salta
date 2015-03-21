@@ -193,7 +193,7 @@ public class CoreInjector {
 				StaticBinding binding = staticBindings.getBinding(key);
 				if (binding != null) {
 					return Optional.of(binding.getScope().createRecipe(binding,
-							key.getType(), binding.getOrCreateRecipe()));
+							key.getType()));
 				}
 			}
 
@@ -202,7 +202,7 @@ public class CoreInjector {
 				StaticBinding binding = automaticStaticBindings.getBinding(key);
 				if (binding != null) {
 					return Optional.of(binding.getScope().createRecipe(binding,
-							key.getType(), binding.getOrCreateRecipe()));
+							key.getType()));
 				}
 			}
 
@@ -231,7 +231,7 @@ public class CoreInjector {
 				if (jitBinding != null) {
 					JITBinding tmp = jitBinding;
 					return Optional.of(tmp.getScope().createRecipe(tmp,
-							key.getType(), tmp.getOrCreateRecipe()));
+							key.getType()));
 				}
 			}
 		} catch (SaltaException e) {

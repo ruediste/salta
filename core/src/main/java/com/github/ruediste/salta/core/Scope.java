@@ -12,21 +12,26 @@ import com.google.common.reflect.TypeToken;
 public interface Scope {
 
 	/**
-	 * Create a recipe. No incoming parameter on the stack. The scoped instance
-	 * is expected afterwards. The calling thread always holds the
+	 * Create a recipe. No incoming parameter is on the stack. The scoped
+	 * instance is expected afterwards. The calling thread always holds the
 	 * {@link CoreInjector#recipeLock}
 	 * 
 	 * @param binding
 	 *            binding which is beeing scoped
-	 * @param innerRecipe
-	 *            recipe resulting in the unscoped instance
 	 * @param boundType
 	 *            type the binding was created for
-	 * 
 	 * @return
 	 */
 	Function<RecipeCreationContext, SupplierRecipe> createRecipe(
-			Binding binding, TypeToken<?> requestedType,
-			Function<RecipeCreationContext, SupplierRecipe> innerRecipe);
+			Binding binding, TypeToken<?> requestedType);
+
+	/**
+	 * Perform an eager instantiation if applicable for this scope. Only called
+	 * if eager instantiations should actually be perfomed, so the scope does
+	 * not have to check a configuration by itself.
+	 * @param ctx TODO
+	 */
+	default void performEagerInstantiation(RecipeCreationContext ctx, Binding binding) {
+	}
 
 }

@@ -37,7 +37,6 @@ import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.InstantiatorRule;
-import com.github.ruediste.salta.standard.config.SingletonScope;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
 import com.github.ruediste.salta.standard.util.MembersInjectorCreationRuleBase;
@@ -401,15 +400,11 @@ public class GuiceModule extends AbstractModule {
 	protected void eagerlyInstantiate(
 			com.github.ruediste.salta.standard.Injector injector,
 			List<StaticBinding> bindings) {
-		for (Binding b : bindings) {
-			if (b.getScope() instanceof SingletonScope) {
-				injector.getCoreInjector().withRecipeCreationContext(
-						ctx -> {
-							((SingletonScope) b.getScope()).instantiate(ctx, b,
-									b.getOrCreateRecipe().apply(ctx));
-							return null;
-						});
+		injector.getCoreInjector().withRecipeCreationContext(ctx -> {
+			for (Binding b : bindings) {
+				b.getScope().performEagerInstantiation(ctx, b);
 			}
-		}
+			return null;
+		});
 	}
 }
