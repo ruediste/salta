@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.standard;
 
+import static java.util.stream.Collectors.joining;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
@@ -119,6 +121,13 @@ public class StandardInjector implements Injector {
 
 	public void initialize(StandardInjectorConfiguration config) {
 		this.config = config;
+
+		if (!config.errorMessages.isEmpty()) {
+			throw new SaltaException("There were Errors:\n"
+					+ config.errorMessages.stream()
+							.map(msg -> msg.getMessage())
+							.collect(joining("\n")));
+		}
 
 		config.postProcessModules();
 

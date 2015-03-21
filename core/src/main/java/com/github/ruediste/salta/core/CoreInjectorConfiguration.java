@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
-import com.github.ruediste.salta.standard.SaltaModule;
 
 /**
- * Contains the whole configuration of an injector. Passed to all {@link SaltaModule}
- * s of an injector in order to be initialized.
- * 
+ * Contains the whole configuration of an injector.
  */
 public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
 

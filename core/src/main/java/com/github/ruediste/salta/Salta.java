@@ -1,12 +1,9 @@
 package com.github.ruediste.salta;
 
-import static java.util.stream.Collectors.joining;
-
 import java.util.Arrays;
 import java.util.List;
 
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
-import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.SaltaModule;
 import com.github.ruediste.salta.standard.Stage;
@@ -48,12 +45,6 @@ public class Salta {
 
 		binder.close();
 
-		if (!config.errorMessages.isEmpty()) {
-			throw new SaltaException("There were Errors:\n"
-					+ config.errorMessages.stream()
-							.map(msg -> msg.getMessage())
-							.collect(joining("\n")));
-		}
 		injector.initialize(config);
 
 		return injector;
