@@ -57,7 +57,7 @@ public class DependencyCircleTest {
 
 	@Before
 	public void setup() {
-		injector = Salta.createInjector(new JSR330Module());
+		injector = Salta.createInjector();
 	}
 
 	@Test(expected = SaltaException.class)

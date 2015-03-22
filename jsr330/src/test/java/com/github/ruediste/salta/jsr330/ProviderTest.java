@@ -30,7 +30,7 @@ public class ProviderTest {
 				bind(int.class).toInstance(2);
 				bind(String.class).toProvider(provider);
 			}
-		}, new JSR330Module());
+		});
 
 		assertEquals("s2", injector.getInstance(String.class));
 	}

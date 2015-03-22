@@ -27,7 +27,7 @@ public class LinkedBindingBuilderTest {
 
 	@Before
 	public void setup() {
-		injector = Salta.createInjector(new JSR330Module());
+		injector = Salta.createInjector();
 	}
 
 	private interface TestIA {
@@ -60,7 +60,7 @@ public class LinkedBindingBuilderTest {
 			protected void configure() {
 				bind(TestIA.class).toInstance(instance);
 			}
-		}, new JSR330Module());
+		});
 
 		TestIA retrieved = injector.getInstance(TestIA.class);
 		assertSame("original instance retrieved", instance, retrieved);
@@ -75,7 +75,7 @@ public class LinkedBindingBuilderTest {
 			protected void configure() {
 				bind(int.class).toInstance(4);
 			}
-		}, new JSR330Module());
+		});
 
 		assertEquals(Integer.valueOf(4), injector.getInstance(int.class));
 	}
@@ -92,7 +92,7 @@ public class LinkedBindingBuilderTest {
 				bind(TestIA.class).annotatedWith(Names.named("y")).toInstance(
 						instance);
 			}
-		}, new JSR330Module());
+		});
 
 		TestIA retrievedX = injector.getInstance(DependencyKey.of(TestIA.class)
 				.withAnnotations(Names.named("x")));
@@ -128,7 +128,7 @@ public class LinkedBindingBuilderTest {
 					bind(TestC1.class).toInstance(c1);
 					bind(TestC2.class).toInstance(c2);
 				}
-			}, new JSR330Module());
+			});
 			injector.getInstance(TestC1.class);
 		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(
@@ -177,7 +177,7 @@ public class LinkedBindingBuilderTest {
 				bind(TestIA.class).annotatedWith(Names.named("y")).toProvider(
 						provider);
 			}
-		}, new JSR330Module());
+		});
 
 		TestIA retrieved = injector.getInstance(DependencyKey.of(TestIA.class)
 				.withAnnotations(Names.named("x")));
@@ -222,7 +222,7 @@ public class LinkedBindingBuilderTest {
 				bind(TestIA.class).annotatedWith(Names.named("y")).toProvider(
 						ProviderIA1.class);
 			}
-		}, new JSR330Module());
+		});
 
 		TestA retrievedX = (TestA) injector.getInstance(DependencyKey.of(
 				TestIA.class).withAnnotations(Names.named("x")));
@@ -258,7 +258,7 @@ public class LinkedBindingBuilderTest {
 			protected void configure() {
 				bind(TestIA.class).toProvider(ProviderIACircular.class);
 			}
-		}, new JSR330Module());
+		});
 
 		try {
 			injector.getInstance(TestIA.class);
@@ -294,7 +294,7 @@ public class LinkedBindingBuilderTest {
 					throw new RuntimeException(e);
 				}
 			}
-		}, new JSR330Module());
+		});
 		assertEquals(1, injector.getInstance(TwoConstructors.class).value);
 	}
 
@@ -321,7 +321,7 @@ public class LinkedBindingBuilderTest {
 					throw new RuntimeException(e);
 				}
 			}
-		}, new JSR330Module());
+		});
 
 		assertNotNull(injector
 				.getInstance(TestConstructorMembersInjected.class).b);

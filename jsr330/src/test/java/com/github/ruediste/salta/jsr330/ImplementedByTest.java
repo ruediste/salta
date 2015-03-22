@@ -40,7 +40,7 @@ public class ImplementedByTest {
 
 	@Before
 	public void before() {
-		injector = Salta.createInjector(new JSR330Module());
+		injector = Salta.createInjector();
 
 	}
 

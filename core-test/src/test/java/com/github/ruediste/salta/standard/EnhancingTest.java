@@ -52,6 +52,6 @@ public class EnhancingTest {
 							}
 						});
 			}
-		}, new JSR330Module());
+		});
 	}
 }

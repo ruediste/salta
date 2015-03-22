@@ -32,7 +32,7 @@ public class ConstantBindingBuilderTest {
 				bindConstant().annotatedWith(Names.named("foo")).to("bar");
 				bindConstant().annotatedWith(Names.named("foo")).to(3);
 			}
-		}, new JSR330Module());
+		});
 	}
 
 	public static class TestClass {

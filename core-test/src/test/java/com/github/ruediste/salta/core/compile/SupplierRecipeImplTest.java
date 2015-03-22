@@ -42,7 +42,7 @@ public class SupplierRecipeImplTest {
 
 						});
 			}
-		}, new JSR330Module());
+		});
 
 	}
 

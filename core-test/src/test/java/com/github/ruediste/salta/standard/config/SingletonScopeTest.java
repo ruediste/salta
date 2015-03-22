@@ -62,7 +62,7 @@ public class SingletonScopeTest {
 
 	@Before
 	public void setup() {
-		injector = Salta.createInjector(new JSR330Module());
+		injector = Salta.createInjector();
 	}
 
 	@Test

@@ -46,7 +46,7 @@ public class AnnotatedBindingBuilderTest {
 				bind(TestB.class).annotatedWith(Names.named("foo")).to(
 						TestB.class);
 			}
-		}, new JSR330Module()).getInstance(TestA.class).b);
+		}).getInstance(TestA.class).b);
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class AnnotatedBindingBuilderTest {
 				protected void configure() {
 					bind(TestB.class).to(TestB.class);
 				}
-			}, new JSR330Module()).getInstance(TestA.class);
+			}).getInstance(TestA.class);
 			fail();
 		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(
@@ -70,7 +70,7 @@ public class AnnotatedBindingBuilderTest {
 	@Test
 	public void unannotatedClassNotUsedForAnnotatedJIT() {
 		try {
-			Salta.createInjector(new JSR330Module()).getInstance(TestA.class);
+			Salta.createInjector().getInstance(TestA.class);
 			fail();
 		} catch (SaltaException e) {
 			if (!e.getRecursiveCauses().anyMatch(
@@ -81,6 +81,6 @@ public class AnnotatedBindingBuilderTest {
 
 	@Test
 	public void annotationPresentOnImplementation() {
-		Salta.createInjector(new JSR330Module()).getInstance(TestC.class);
+		Salta.createInjector().getInstance(TestC.class);
 	}
 }

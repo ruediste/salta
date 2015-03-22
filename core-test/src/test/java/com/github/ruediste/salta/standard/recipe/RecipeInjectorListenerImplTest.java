@@ -28,7 +28,7 @@ public class RecipeInjectorListenerImplTest {
 							return i;
 						});
 			}
-		}, new JSR330Module());
+		});
 		count = 0;
 		injector.getInstance(TestClass.class);
 		assertEquals(1, count);

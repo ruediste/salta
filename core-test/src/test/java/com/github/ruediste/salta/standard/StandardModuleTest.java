@@ -23,7 +23,7 @@ public class StandardModuleTest {
 
 	@Test
 	public void canInjectStage() {
-		Injector injector = Salta.createInjector(new JSR330Module());
+		Injector injector = Salta.createInjector();
 		assertNotNull(injector.getInstance(Stage.class));
 		assertNotNull(injector.getInstance(A.class));
 	}

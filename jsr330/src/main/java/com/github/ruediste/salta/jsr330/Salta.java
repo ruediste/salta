@@ -40,6 +40,8 @@ public class Salta {
 			binder.install(module);
 		}
 
+		binder.install(new JSR330Module());
+
 		binder.close();
 
 		config.postProcessModules();

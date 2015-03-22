@@ -30,7 +30,7 @@ public class MembersInjectorCreationRuleBaseTest {
 
 	@Test
 	public void canInjectMembersInjector() {
-		TestB b = Salta.createInjector(new JSR330Module()).getInstance(
+		TestB b = Salta.createInjector().getInstance(
 				TestB.class);
 		b.i.injectMembers(new TestB1());
 	}

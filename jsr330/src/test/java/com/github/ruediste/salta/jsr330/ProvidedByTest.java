@@ -32,7 +32,7 @@ public class ProvidedByTest {
 
 	@Test
 	public void test() {
-		assertEquals(3, ((A) Salta.createInjector(new JSR330Module())
+		assertEquals(3, ((A) Salta.createInjector()
 				.getInstance(IA.class)).value);
 	}
 
@@ -55,6 +55,6 @@ public class ProvidedByTest {
 
 	@Test
 	public void constructedInstanceShouldNotBeInjected() {
-		Salta.createInjector(new JSR330Module()).getInstance(TestB.class);
+		Salta.createInjector().getInstance(TestB.class);
 	}
 }

@@ -20,7 +20,7 @@ public class StandardInjectorTest {
 
 	@Before
 	public void setup() {
-		injector = Salta.createInjector(new JSR330Module());
+		injector = Salta.createInjector();
 	}
 
 	public static class TestClassA {

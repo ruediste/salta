@@ -21,7 +21,7 @@ public class PostConstructTest {
 	public void testPostConstructCalled() {
 		assertTrue(
 				"expected initialized",
-				Salta.createInjector(new JSR330Module()).getInstance(
+				Salta.createInjector().getInstance(
 						TestClass.class).initialized);
 	}
 }

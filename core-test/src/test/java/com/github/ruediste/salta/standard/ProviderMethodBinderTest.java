@@ -32,7 +32,7 @@ public class ProviderMethodBinderTest {
 			TestA produceTestA() {
 				return new TestA(5);
 			}
-		}, new JSR330Module()).getInstance(TestA.class);
+		}).getInstance(TestA.class);
 
 		assertEquals(5, a.value);
 	}
@@ -52,7 +52,7 @@ public class ProviderMethodBinderTest {
 			TestA produceTestA(MembersInjector<TestB> foo) {
 				return new TestA(5);
 			}
-		}, new JSR330Module()).getInstance(TestA.class);
+		}).getInstance(TestA.class);
 
 		assertEquals(5, a.value);
 	}

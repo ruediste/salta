@@ -21,7 +21,7 @@ public class FixedConstructorRecipeInstantiatorTest {
 
 	@Before
 	public void setup() {
-		injector = Salta.createInjector(new JSR330Module());
+		injector = Salta.createInjector();
 		injector.injectMembers(this);
 	}
 

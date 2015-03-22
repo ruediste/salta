@@ -42,7 +42,7 @@ public class JSR330MembersInjectorFactoryTest {
 
 	@Before
 	public void before() {
-		injector = Salta.createInjector(new JSR330Module());
+		injector = Salta.createInjector();
 	}
 
 	@Test
