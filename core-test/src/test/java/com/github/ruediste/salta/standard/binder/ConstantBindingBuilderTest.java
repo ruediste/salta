@@ -12,11 +12,11 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContextImpl;
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.jsr330.AbstractModule;
+import com.github.ruediste.salta.jsr330.Injector;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
 import com.github.ruediste.salta.jsr330.Salta;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 
 public class ConstantBindingBuilderTest {

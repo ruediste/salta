@@ -1,6 +1,6 @@
 package com.github.ruediste.salta.standard.config;
 
-import com.github.ruediste.salta.standard.Injector;
+import com.github.ruediste.salta.standard.StandardInjector;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -8,12 +8,13 @@ import com.google.common.reflect.TypeToken;
  * before the value is returned.
  */
 public class MembersInjectionToken<T> {
-	private Injector injector;
+	private StandardInjector injector;
 	private T value;
 	private volatile boolean injected;
 	private TypeToken<T> type;
 
-	public MembersInjectionToken(Injector injector, T value, TypeToken<T> type) {
+	public MembersInjectionToken(StandardInjector injector, T value,
+			TypeToken<T> type) {
 		this.injector = injector;
 		this.value = value;
 		this.type = type;

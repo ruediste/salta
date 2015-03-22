@@ -15,7 +15,7 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.InjectionPoint;
-import com.github.ruediste.salta.standard.Injector;
+import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
@@ -43,15 +43,15 @@ public abstract class StaticMembersInjectorBase {
 	 * {@link StandardInjectorConfiguration#requestedStaticInjections}
 	 */
 	public void injectStaticMembers(StandardInjectorConfiguration config,
-			Injector injector) {
+			StandardInjector injector) {
 		Set<Class<?>> injectedClasses = new HashSet<>();
 		for (Class<?> cls : config.requestedStaticInjections) {
 			performStaticInjections(cls, injector, injectedClasses);
 		}
 	}
 
-	private void performStaticInjections(Class<?> cls, Injector injector,
-			Set<Class<?>> injectedClasses) {
+	private void performStaticInjections(Class<?> cls,
+			StandardInjector injector, Set<Class<?>> injectedClasses) {
 		if (cls == null)
 			return;
 		if (injectedClasses.add(cls)) {

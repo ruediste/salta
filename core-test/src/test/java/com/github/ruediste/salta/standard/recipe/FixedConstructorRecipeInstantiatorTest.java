@@ -12,9 +12,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.jsr330.Injector;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Salta;
-import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class FixedConstructorRecipeInstantiatorTest {

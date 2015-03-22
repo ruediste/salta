@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.salta.standard;
+package com.github.ruediste.salta.jsr330;
 
 import javax.inject.Provider;
 import javax.naming.ConfigurationException;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.standard.MembersInjector;
+import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.google.common.reflect.TypeToken;
 
@@ -139,5 +140,5 @@ public interface Injector {
 	 */
 	<T> T getInstance(Class<T> type);
 
-	CoreInjector getCoreInjector();
+	StandardInjector getDelegate();
 }

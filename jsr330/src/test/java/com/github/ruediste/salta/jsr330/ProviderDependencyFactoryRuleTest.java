@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.util.ProviderCreationRule.ProviderAccessBeforeInstanceCreationFinishedException;
 import com.github.ruediste.salta.standard.util.ProviderCreationRule.ProviderAccessBeforeRecipeCreationFinishedException;
 

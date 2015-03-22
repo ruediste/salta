@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.github.ruediste.salta.jsr330.AbstractModule;
+import com.github.ruediste.salta.jsr330.Injector;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Salta;
-import com.github.ruediste.salta.standard.Injector;
 
 public class RecipeInjectorListenerImplTest {
 

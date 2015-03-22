@@ -7,10 +7,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
@@ -20,7 +17,7 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
-public class StandardInjector implements Injector {
+public class StandardInjector {
 
 	private final static class ClassDependencyKey<T> extends
 			CoreDependencyKey<T> {
@@ -80,7 +77,7 @@ public class StandardInjector implements Injector {
 		}
 	}
 
-	private final class ProviderImpl<T> implements Provider<T> {
+	private final class ProviderImpl<T> implements Supplier<T> {
 
 		volatile private Supplier<T> supplier;
 		private CoreDependencyKey<T> key;
@@ -133,33 +130,36 @@ public class StandardInjector implements Injector {
 		}
 
 		coreInjector = new CoreInjector(config.config);
-		for (Consumer<Injector> initializer : config.staticInitializers) {
-			initializer.accept(this);
+
+		while (!config.staticInitializers.isEmpty()) {
+			ArrayList<Runnable> tmp = new ArrayList<>(config.staticInitializers);
+			config.staticInitializers.clear();
+			for (Runnable initializer : tmp) {
+				initializer.run();
+			}
 		}
+
 		initialized = true;
 		while (!config.dynamicInitializers.isEmpty()) {
-			ArrayList<Consumer<Injector>> tmp = new ArrayList<>(
+			ArrayList<Runnable> tmp = new ArrayList<>(
 					config.dynamicInitializers);
 			config.dynamicInitializers.clear();
-			for (Consumer<Injector> initializer : tmp) {
-				initializer.accept(this);
+			for (Runnable initializer : tmp) {
+				initializer.run();
 			}
 		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
 	public void injectMembers(Object instance) {
 		injectMembers((TypeToken) TypeToken.of(instance.getClass()), instance);
 	}
 
-	@Override
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
 		checkInitialized();
 		getMembersInjector(type).injectMembers(instance);
 	}
 
-	@Override
 	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
 		TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
 			private static final long serialVersionUID = 1L;
@@ -188,49 +188,41 @@ public class StandardInjector implements Injector {
 		};
 	}
 
-	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
 		return getMembersInjector(TypeToken.of(type));
 	}
 
-	@Override
-	public <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
+	public <T> Supplier<T> getProvider(CoreDependencyKey<T> key) {
 
 		return new ProviderImpl<T>(key);
 	}
 
-	@Override
-	public <T> Provider<T> getProvider(Class<T> type) {
+	public <T> Supplier<T> getProvider(Class<T> type) {
 		return getProvider(DependencyKey.of(type));
 	}
 
-	@Override
 	public <T> T getInstance(CoreDependencyKey<T> key) {
 
 		checkInitialized();
 		return coreInjector.getInstance(key);
 	}
 
-	@Override
 	public <T> T getInstance(Class<T> type) {
 		checkInitialized();
 		return coreInjector.getInstance(new ClassDependencyKey<T>(type));
 	}
 
-	@Override
 	public CoreInjector getCoreInjector() {
 		checkInitialized();
 		return coreInjector;
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public <T> MembersInjectionToken<T> getMembersInjectionToken(T value) {
 		return getMembersInjectionToken(value,
 				(TypeToken<T>) TypeToken.of(value.getClass()));
 	}
 
-	@Override
 	public <T> MembersInjectionToken<T> getMembersInjectionToken(T value,
 			TypeToken<T> type) {
 		synchronized (memberInjectionTokens) {

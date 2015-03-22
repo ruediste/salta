@@ -33,7 +33,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 *
-	 * @see com.github.ruediste.salta.standard.core.inject.Injector#injectMembers
+	 * @see com.github.ruediste.salta.jsr330.core.inject.Injector#injectMembers
 	 */
 	public void toInstance(T instance);
 

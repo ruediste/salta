@@ -29,16 +29,16 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.ImplementedBy;
+import com.github.ruediste.salta.jsr330.Injector;
+import com.github.ruediste.salta.jsr330.InjectorImpl;
 import com.github.ruediste.salta.jsr330.JSR330InjectorConfiguration;
 import com.github.ruediste.salta.jsr330.ProvidedBy;
 import com.github.ruediste.salta.jsr330.SaltaModule;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
 import com.github.ruediste.salta.standard.binder.SaltaBinder;
 import com.google.common.reflect.TypeToken;
@@ -233,10 +233,12 @@ public class Binder {
 
 	SaltaBinder delegate;
 	private JSR330InjectorConfiguration config;
+	private InjectorImpl injector;
 
-	public Binder(JSR330InjectorConfiguration config, StandardInjector injector) {
+	public Binder(JSR330InjectorConfiguration config, InjectorImpl injector) {
 		this.config = config;
-		this.delegate = new SaltaBinder(config.config, injector);
+		this.injector = injector;
+		this.delegate = new SaltaBinder(config.config, injector.getDelegate());
 	}
 
 	/**
@@ -252,7 +254,7 @@ public class Binder {
 	 * instances. But it is possible to store a reference for later use.
 	 */
 	public Injector getInjector() {
-		return delegate.getInjector();
+		return injector;
 	}
 
 	/**
@@ -380,7 +382,19 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
-		return delegate.getProvider(key);
+		Supplier<T> result = delegate.getProvider(key);
+		return new Provider<T>() {
+
+			@Override
+			public T get() {
+				return result.get();
+			}
+
+			@Override
+			public String toString() {
+				return result.toString();
+			}
+		};
 	}
 
 	/**

@@ -2,8 +2,9 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 
+import javax.xml.bind.Binder;
+
 import com.github.ruediste.salta.core.Scope;
-import com.github.ruediste.salta.standard.Injector;
 
 /**
  * See the EDSL examples at {@link Binder}.
@@ -23,9 +24,9 @@ public interface ScopedBindingBuilder<T> {
 	void in(Scope scope);
 
 	/**
-	 * Instructs the {@link Injector} to eagerly initialize this
-	 * singleton-scoped binding upon creation. Useful for application
-	 * initialization logic. See the EDSL examples at {@link Binder}.
+	 * Instructs the injector to eagerly initialize this singleton-scoped
+	 * binding upon creation. Useful for application initialization logic. See
+	 * the EDSL examples at {@link Binder}.
 	 */
 	void asEagerSingleton();
 }

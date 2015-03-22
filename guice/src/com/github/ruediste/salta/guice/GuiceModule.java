@@ -280,7 +280,7 @@ public class GuiceModule implements Module {
 
 	private void addStaticMembersInjectionDynamicInitializer() {
 		// register initializer for requested static injections
-		config.dynamicInitializers.add(i -> new StaticMembersInjectorBase() {
+		config.dynamicInitializers.add(() -> new StaticMembersInjectorBase() {
 
 			@Override
 			protected InjectionInstruction shouldInject(Method method) {
@@ -305,17 +305,18 @@ public class GuiceModule implements Module {
 				return (guiceInject != null && guiceInject.optional()) ? InjectionInstruction.INJECT_OPTIONAL
 						: InjectionInstruction.INJECT;
 			}
-		}.injectStaticMembers(config, i));
+		}.injectStaticMembers(config, injector.getSaltaInjector()));
 	}
 
 	private void addEagerInstantiationDynamicInitializer() {
-		config.dynamicInitializers.add(injector -> {
-			injector.getCoreInjector().withRecipeCreationContext(ctx -> {
-				for (Binding b : config.config.staticBindings) {
-					b.getScope().performEagerInstantiation(ctx, b);
-				}
-				return null;
-			});
+		config.dynamicInitializers.add(() -> {
+			injector.getSaltaInjector().getCoreInjector()
+					.withRecipeCreationContext(ctx -> {
+						for (Binding b : config.config.staticBindings) {
+							b.getScope().performEagerInstantiation(ctx, b);
+						}
+						return null;
+					});
 		});
 	}
 

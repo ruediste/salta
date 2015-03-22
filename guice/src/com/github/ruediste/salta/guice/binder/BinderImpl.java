@@ -121,8 +121,7 @@ public class BinderImpl implements Binder {
 
 	@Override
 	public <T> Provider<T> getProvider(Key<T> key) {
-		javax.inject.Provider<T> provider = delegate
-				.getProvider(new KeyAdapter<>(key));
+		Supplier<T> provider = delegate.getProvider(new KeyAdapter<>(key));
 		return new Provider<T>() {
 			@Override
 			public T get() {
@@ -138,7 +137,7 @@ public class BinderImpl implements Binder {
 
 	@Override
 	public <T> Provider<T> getProvider(Class<T> type) {
-		javax.inject.Provider<T> provider = delegate.getProvider(type);
+		Supplier<T> provider = delegate.getProvider(type);
 		return new Provider<T>() {
 			@Override
 			public T get() {

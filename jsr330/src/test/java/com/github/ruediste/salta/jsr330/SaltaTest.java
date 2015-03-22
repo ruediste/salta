@@ -22,7 +22,6 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 
 import com.github.ruediste.salta.jsr330.Salta;
-import com.github.ruediste.salta.standard.Injector;
 
 public class SaltaTest {
 

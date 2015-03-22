@@ -22,7 +22,7 @@ import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.Injector;
+import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
@@ -44,11 +44,11 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	private StandardStaticBinding binding;
 	private Supplier<CreationRecipeFactory> recipeFactorySupplier;
 	private Supplier<Scope> scopeSupplier;
-	private Injector injector;
+	private StandardInjector injector;
 
 	public BindingBuilderImpl(Matcher<CoreDependencyKey<?>> typeMatcher,
 			TypeToken<T> type, StandardInjectorConfiguration config,
-			Injector injector) {
+			StandardInjector injector) {
 		this.injector = injector;
 		binding = new StandardStaticBinding();
 
@@ -113,7 +113,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
 		MembersInjectionToken<T> token = injector.getMembersInjectionToken(
 				instance, (TypeToken<T>) TypeToken.of(instance.getClass()));
-		config.dynamicInitializers.add(i -> token.getValue());
+		config.dynamicInitializers.add(() -> token.getValue());
 		scopeSupplier = () -> config.defaultScope;
 		recipeFactorySupplier = () -> new CreationRecipeFactory() {
 			boolean recipeCreationInProgress;
@@ -285,7 +285,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	@Override
 	public void asEagerSingleton() {
 		this.scopeSupplier = () -> config.singletonScope;
-		config.dynamicInitializers.add(injector -> injector.getCoreInjector()
+		config.dynamicInitializers.add(() -> injector.getCoreInjector()
 				.withRecipeCreationContext(ctx -> {
 					binding.getScope().performEagerInstantiation(ctx, binding);
 					return null;

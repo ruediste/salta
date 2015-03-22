@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.standard.Injector;
 
 public class JSR330ConstructorInstantiatorRuleTest {
 

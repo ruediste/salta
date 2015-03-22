@@ -7,8 +7,6 @@ import javax.inject.Provider;
 
 import org.junit.Test;
 
-import com.github.ruediste.salta.standard.Injector;
-
 public class ProviderTest {
 
 	@Test

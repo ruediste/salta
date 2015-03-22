@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -27,7 +26,6 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
-import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.ScopeRule;
 import com.github.ruediste.salta.standard.Stage;
@@ -231,22 +229,20 @@ public class StandardInjectorConfiguration {
 	 * Initializers run once the Injector is constructed. These initializers may
 	 * not create request instances from the injector.
 	 */
-	public final List<Consumer<Injector>> staticInitializers = new ArrayList<>();
+	public final List<Runnable> staticInitializers = new ArrayList<>();
 
 	/**
 	 * Initializers run once the Injector is constructed. Run after the
 	 * {@link #staticInitializers}. These initializers can freely use the
 	 * injector
 	 */
-	public final List<Consumer<Injector>> dynamicInitializers = new ArrayList<>();
+	public final List<Runnable> dynamicInitializers = new ArrayList<>();
 
 	/**
 	 * List of dependencies which sould be created after the creation of the
 	 * injector
 	 */
 	public final List<CoreDependencyKey<?>> requestedEagerInstantiations = new ArrayList<>();
-
-	public boolean requireAtInjectOnConstructors;
 
 	/**
 	 * Extractors of the required qualifier. This qualifier will be matched

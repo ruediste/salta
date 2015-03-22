@@ -3,7 +3,7 @@ package com.github.ruediste.salta.jsr330.binder;
 import java.lang.annotation.Annotation;
 
 import com.github.ruediste.salta.core.Scope;
-import com.github.ruediste.salta.standard.Injector;
+import com.github.ruediste.salta.jsr330.Injector;
 
 /**
  * See the EDSL examples at {@link Binder}.

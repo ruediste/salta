@@ -1,5 +1,7 @@
 package com.github.ruediste.salta.guice;
 
+import java.util.function.Supplier;
+
 import com.github.ruediste.salta.guice.binder.BindingImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
 import com.github.ruediste.salta.standard.StandardInjector;
@@ -47,8 +49,7 @@ public class GuiceInjectorImpl implements Injector {
 
 	@Override
 	public <T> Provider<T> getProvider(Key<T> key) {
-		javax.inject.Provider<T> provider = delegate
-				.getProvider(new KeyAdapter<>(key));
+		Supplier<T> provider = delegate.getProvider(new KeyAdapter<>(key));
 		return new Provider<T>() {
 			@Override
 			public T get() {
@@ -64,7 +65,7 @@ public class GuiceInjectorImpl implements Injector {
 
 	@Override
 	public <T> Provider<T> getProvider(Class<T> type) {
-		javax.inject.Provider<T> provider = delegate.getProvider(type);
+		Supplier<T> provider = delegate.getProvider(type);
 		return new Provider<T>() {
 			@Override
 			public T get() {
@@ -100,7 +101,7 @@ public class GuiceInjectorImpl implements Injector {
 	}
 
 	@Override
-	public com.github.ruediste.salta.standard.Injector getSaltaInjector() {
+	public StandardInjector getSaltaInjector() {
 		return delegate;
 	}
 

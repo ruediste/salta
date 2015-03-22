@@ -23,11 +23,6 @@ import java.lang.reflect.Method;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import javax.xml.bind.Binder;
-
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Dispatcher;
 import net.sf.cglib.proxy.FixedValue;
@@ -43,10 +38,10 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
+import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.EnhancerFactory;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
@@ -140,11 +135,7 @@ import com.google.common.reflect.TypeToken;
  * was specified with an annotation on the {@code ServiceImpl} class.
  * 
  * <p>
- * Besides {@link Singleton}/{@link Scopes#SINGLETON}, there are
- * servlet-specific scopes available in
- * {@code com.google.inject.servlet.ServletScopes}, and your Modules can
- * contribute their own custom scopes for use here as well.
- *
+ * 
  * <pre>
  * bind(new TypeToken&lt;PaymentService&lt;CreditCard&gt;&gt;() {
  * }).to(CreditCardPaymentService.class);
@@ -242,11 +233,12 @@ import com.google.common.reflect.TypeToken;
 public class SaltaBinder {
 
 	private StandardInjectorConfiguration config;
-	private Injector injector;
+	private StandardInjector injector;
 
 	BindingBuilderImpl<?> currentBindingBuilder;
 
-	public SaltaBinder(StandardInjectorConfiguration config, Injector injector) {
+	public SaltaBinder(StandardInjectorConfiguration config,
+			StandardInjector injector) {
 		this.config = config;
 		this.injector = injector;
 
@@ -264,7 +256,7 @@ public class SaltaBinder {
 	 * during configuration, so it can not be used to create or inject
 	 * instances. But it is possible to store a reference for later use.
 	 */
-	public Injector getInjector() {
+	public StandardInjector getInjector() {
 		return injector;
 	}
 
@@ -307,7 +299,7 @@ public class SaltaBinder {
 	}
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
 		if (currentBindingBuilder != null)
@@ -324,14 +316,14 @@ public class SaltaBinder {
 	}
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
 		return bind(TypeToken.of(type));
 	}
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public AnnotatedConstantBindingBuilder bindConstant() {
 		return new AnnotatedConstantBindingBuilder(config);
@@ -348,7 +340,8 @@ public class SaltaBinder {
 	 * @since 2.0
 	 */
 	public <T> void requestInjection(TypeToken<T> type, T instance) {
-		config.dynamicInitializers.add(x -> x.injectMembers(type, instance));
+		config.dynamicInitializers.add(() -> injector.injectMembers(type,
+				instance));
 	}
 
 	/**
@@ -360,8 +353,7 @@ public class SaltaBinder {
 	 * @since 2.0
 	 */
 	public void requestInjection(Object instance) {
-		config.dynamicInitializers.add(injector -> injector
-				.injectMembers(instance));
+		config.dynamicInitializers.add(() -> injector.injectMembers(instance));
 	}
 
 	/**
@@ -430,7 +422,7 @@ public class SaltaBinder {
 	 *
 	 * @since 2.0
 	 */
-	public <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
+	public <T> Supplier<T> getProvider(CoreDependencyKey<T> key) {
 		return injector.getProvider(key);
 	}
 
@@ -442,7 +434,7 @@ public class SaltaBinder {
 	 *
 	 * @since 2.0
 	 */
-	public <T> Provider<T> getProvider(Class<T> type) {
+	public <T> Supplier<T> getProvider(Class<T> type) {
 		return getProvider(DependencyKey.of(type));
 	}
 
@@ -496,22 +488,6 @@ public class SaltaBinder {
 				return null;
 			}
 		});
-	}
-
-	/**
-	 * Requires that a {@literal @}{@link Inject} annotation exists on a
-	 * constructor in order for Guice to consider it an eligible injectable
-	 * class. By default, Guice will inject classes that have a no-args
-	 * constructor if no {@literal @}{@link Inject} annotation exists on any
-	 * constructor.
-	 * <p>
-	 * If the class is bound using {@link LinkedBindingBuilder#toConstructor},
-	 * Guice will still inject that constructor regardless of annotations.
-	 *
-	 * @since 4.0
-	 */
-	public void requireAtInjectOnConstructors() {
-		config.requireAtInjectOnConstructors = true;
 	}
 
 }

@@ -23,6 +23,7 @@ import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.Stage;
+import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
@@ -103,7 +104,8 @@ public class JSR330Module extends AbstractModule {
 	private void addStaticMembersDynamicInitializer(
 			StandardInjectorConfiguration config) {
 		// register initializer for requested static injections
-		config.dynamicInitializers.add(i -> new StaticMembersInjectorBase() {
+		StandardInjector injector = binder.getInjector().getDelegate();
+		config.dynamicInitializers.add(() -> new StaticMembersInjectorBase() {
 			@Override
 			protected InjectionInstruction shouldInject(Method method) {
 				return method.isAnnotationPresent(Inject.class) ? InjectionInstruction.INJECT
@@ -115,7 +117,7 @@ public class JSR330Module extends AbstractModule {
 				return field.isAnnotationPresent(Inject.class) ? InjectionInstruction.INJECT
 						: InjectionInstruction.NO_INJECT;
 			}
-		}.injectStaticMembers(config, i));
+		}.injectStaticMembers(config, injector));
 	}
 
 	private void addQualifierExtractors(StandardInjectorConfiguration config) {
