@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.guice.binder;
 
 import java.lang.annotation.Annotation;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
@@ -153,17 +154,12 @@ public class BinderImpl implements Binder {
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-		return delegate.getMembersInjector(typeLiteral.getTypeToken())::injectMembers;
-	}
-
-	@Override
-	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		com.github.ruediste.salta.standard.MembersInjector<T> membersInjector = delegate
-				.getMembersInjector(type);
+		Consumer<T> membersInjector = delegate.getMembersInjector(typeLiteral
+				.getTypeToken());
 		return new MembersInjector<T>() {
 			@Override
-			public void injectMembers(T i) {
-				membersInjector.injectMembers(i);
+			public void injectMembers(T instance) {
+				membersInjector.accept(instance);
 			}
 
 			@Override
@@ -171,6 +167,11 @@ public class BinderImpl implements Binder {
 				return membersInjector.toString();
 			}
 		};
+	}
+
+	@Override
+	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+		return getMembersInjector(TypeLiteral.get(type));
 	}
 
 	@Override

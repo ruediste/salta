@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.salta.standard;
+package com.github.ruediste.salta.jsr330;
 
 /**
  * Injects dependencies into the fields and methods on instances of type

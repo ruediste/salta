@@ -4,7 +4,10 @@ import java.util.function.Supplier;
 
 import com.github.ruediste.salta.guice.binder.BindingImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
+import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.StandardInjector;
+import com.google.common.reflect.TypeParameter;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -27,24 +30,16 @@ public class GuiceInjectorImpl implements Injector {
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-		return delegate.getMembersInjector(typeLiteral.getTypeToken())::injectMembers;
+		TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
+			private static final long serialVersionUID = 1L;
+		}.where(new TypeParameter<T>() {
+		}, typeLiteral.getTypeToken());
+		return delegate.getInstance(DependencyKey.of(injectorType));
 	}
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		com.github.ruediste.salta.standard.MembersInjector<T> membersInjector = delegate
-				.getMembersInjector(type);
-		return new MembersInjector<T>() {
-			@Override
-			public void injectMembers(T i) {
-				membersInjector.injectMembers(i);
-			}
-
-			@Override
-			public String toString() {
-				return membersInjector.toString();
-			}
-		};
+		return getMembersInjector(TypeLiteral.get(type));
 	}
 
 	@Override

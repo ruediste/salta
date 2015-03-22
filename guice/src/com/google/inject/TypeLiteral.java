@@ -172,6 +172,10 @@ public class TypeLiteral<T> {
 		return new TypeLiteral<T>(type);
 	}
 
+	public static <T> TypeLiteral<T> get(TypeToken<T> type) {
+		return new TypeLiteral<T>(type);
+	}
+
 	/** Returns an immutable list of the resolved types. */
 	private List<TypeLiteral<?>> resolveAll(Type[] types) {
 		TypeLiteral<?>[] result = new TypeLiteral<?>[types.length];

@@ -5,8 +5,8 @@ import javax.inject.Inject;
 import org.junit.Test;
 
 import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.jsr330.MembersInjector;
 import com.github.ruediste.salta.jsr330.Salta;
-import com.github.ruediste.salta.standard.MembersInjector;
 
 public class MembersInjectorCreationRuleBaseTest {
 	private static class TestB {

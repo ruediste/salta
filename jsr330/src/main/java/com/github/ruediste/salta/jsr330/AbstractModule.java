@@ -29,7 +29,6 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.jsr330.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.jsr330.binder.Binder;
-import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;

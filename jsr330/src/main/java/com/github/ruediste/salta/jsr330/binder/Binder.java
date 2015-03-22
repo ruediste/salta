@@ -20,6 +20,7 @@ package com.github.ruediste.salta.jsr330.binder;
 
 import java.lang.annotation.Annotation;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.inject.Provider;
@@ -32,11 +33,11 @@ import com.github.ruediste.salta.jsr330.ImplementedBy;
 import com.github.ruediste.salta.jsr330.Injector;
 import com.github.ruediste.salta.jsr330.InjectorImpl;
 import com.github.ruediste.salta.jsr330.JSR330InjectorConfiguration;
+import com.github.ruediste.salta.jsr330.MembersInjector;
 import com.github.ruediste.salta.jsr330.ProvidedBy;
 import com.github.ruediste.salta.jsr330.SaltaModule;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
@@ -421,7 +422,19 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-		return delegate.getMembersInjector(typeLiteral);
+		Consumer<T> inner = delegate.getMembersInjector(typeLiteral);
+		return new MembersInjector<T>() {
+
+			@Override
+			public void injectMembers(T instance) {
+				inner.accept(instance);
+			}
+
+			@Override
+			public String toString() {
+				return inner.toString();
+			}
+		};
 	}
 
 	/**

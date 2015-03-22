@@ -21,6 +21,7 @@ package com.github.ruediste.salta.standard.binder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.sf.cglib.proxy.Callback;
@@ -38,7 +39,6 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardInjector;
@@ -449,8 +449,27 @@ public class SaltaBinder {
 	 *            type to get members injector for
 	 * @since 2.0
 	 */
-	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-		return injector.getMembersInjector(typeLiteral);
+	public <T> Consumer<T> getMembersInjector(TypeToken<T> typeLiteral) {
+		return new Consumer<T>() {
+			volatile boolean injected;
+			Consumer<T> inner;
+
+			@Override
+			public void accept(T instance) {
+				if (!injected) {
+					synchronized (injector.getCoreInjector().recipeLock) {
+						inner = injector.getMembersInjector(typeLiteral);
+						injected = true;
+					}
+				}
+				inner.accept(instance);
+			}
+
+			@Override
+			public String toString() {
+				return "MembersInjector<" + typeLiteral + ">";
+			}
+		};
 	}
 
 	/**
@@ -464,7 +483,7 @@ public class SaltaBinder {
 	 *            type to get members injector for
 	 * @since 2.0
 	 */
-	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+	public <T> Consumer<T> getMembersInjector(Class<T> type) {
 		return getMembersInjector(TypeToken.of(type));
 	}
 

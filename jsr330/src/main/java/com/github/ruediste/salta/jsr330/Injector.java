@@ -22,7 +22,6 @@ import javax.naming.ConfigurationException;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.SaltaException;
-import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.google.common.reflect.TypeToken;

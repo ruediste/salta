@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.jsr330.MembersInjector;
 import com.github.ruediste.salta.jsr330.Provides;
 import com.github.ruediste.salta.jsr330.Salta;
 

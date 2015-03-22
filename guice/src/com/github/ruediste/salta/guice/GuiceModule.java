@@ -36,6 +36,7 @@ import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
+import com.github.ruediste.salta.standard.config.MembersInjectorFactory;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -187,6 +188,26 @@ public class GuiceModule implements Module {
 
 		config.constructionRules.add(new DefaultConstructionRule(config));
 		addStageCreationRule();
+		config.membersInjectorFactory = new MembersInjectorFactory() {
+
+			@Override
+			public <T> Consumer<T> createMembersInjector(TypeToken<T> type) {
+				MembersInjector<T> inner = injector
+						.getMembersInjector(TypeLiteral.get(type));
+				return new Consumer<T>() {
+
+					@Override
+					public void accept(T t) {
+						inner.injectMembers(t);
+					}
+
+					@Override
+					public String toString() {
+						return inner.toString();
+					}
+				};
+			}
+		};
 	}
 
 	private void addStageCreationRule() {
@@ -475,44 +496,6 @@ public class GuiceModule implements Module {
 			}
 		});
 
-		config.config.creationRules.add(new MembersInjectorCreationRuleBase(
-				config) {
-			@Override
-			protected TypeToken<?> getDependency(CoreDependencyKey<?> key) {
-				Class<?> rawType = key.getRawType();
-				if (com.github.ruediste.salta.standard.MembersInjector.class
-						.equals(key.getRawType())) {
-					if (key.getType().getType() instanceof Class) {
-						throw new SaltaException(
-								"Cannot inject a MembersInjector that has no type parameter");
-					}
-					TypeToken<?> dependency = key.getType().resolveType(
-							rawType.getTypeParameters()[0]);
-					return dependency;
-				} else
-					return null;
-			}
-
-			@Override
-			protected Object wrapInjector(Consumer<Object> saltaMembersInjector) {
-				return new com.github.ruediste.salta.standard.MembersInjector<Object>() {
-					@Override
-					public void injectMembers(Object x) {
-						saltaMembersInjector.accept(x);
-					}
-
-					@Override
-					public String toString() {
-						return saltaMembersInjector.toString();
-					};
-				};
-			}
-
-			@Override
-			protected Class<?> getWrappedInjectorType() {
-				return com.github.ruediste.salta.standard.MembersInjector.class;
-			}
-		});
 	}
 
 	private void addProviderCrationRules() {

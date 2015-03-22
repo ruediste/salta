@@ -5,9 +5,10 @@ import java.util.function.Supplier;
 import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.standard.MembersInjector;
+import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 public class InjectorImpl implements Injector {
@@ -23,23 +24,28 @@ public class InjectorImpl implements Injector {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void injectMembers(Object instance) {
-		delegate.injectMembers(instance);
+		injectMembers((TypeToken) TypeToken.of(instance.getClass()), instance);
 	}
 
 	@Override
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
-		delegate.injectMembers(type, instance);
-	}
-
-	@Override
-	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-		return delegate.getMembersInjector(typeLiteral);
+		getMembersInjector(type).injectMembers(instance);
 	}
 
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		return delegate.getMembersInjector(type);
+		return getMembersInjector(TypeToken.of(type));
+	}
+
+	@Override
+	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
+		TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
+			private static final long serialVersionUID = 1L;
+		}.where(new TypeParameter<T>() {
+		}, typeLiteral);
+		return getInstance(DependencyKey.of(injectorType));
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
@@ -14,7 +15,6 @@ import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjector {
@@ -157,39 +157,11 @@ public class StandardInjector {
 
 	public <T> void injectMembers(TypeToken<T> type, T instance) {
 		checkInitialized();
-		getMembersInjector(type).injectMembers(instance);
+		getMembersInjector(type).accept(instance);
 	}
 
-	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-		TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
-			private static final long serialVersionUID = 1L;
-		}.where(new TypeParameter<T>() {
-		}, typeLiteral);
-		return new MembersInjector<T>() {
-			volatile boolean injected;
-			MembersInjector<T> delegate;
-
-			@Override
-			public void injectMembers(T instance) {
-				checkInitialized();
-				if (!injected) {
-					synchronized (coreInjector.recipeLock) {
-						delegate = getInstance(DependencyKey.of(injectorType));
-						injected = true;
-					}
-				}
-				delegate.injectMembers(instance);
-			}
-
-			@Override
-			public String toString() {
-				return "MembersInjector<" + typeLiteral + ">";
-			}
-		};
-	}
-
-	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		return getMembersInjector(TypeToken.of(type));
+	public <T> Consumer<T> getMembersInjector(TypeToken<T> typeLiteral) {
+		return config.membersInjectorFactory.createMembersInjector(typeLiteral);
 	}
 
 	public <T> Supplier<T> getProvider(CoreDependencyKey<T> key) {

@@ -20,11 +20,11 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.DefaultJITBindingKeyRule;
 import com.github.ruediste.salta.standard.DefaultJITBindingRule;
 import com.github.ruediste.salta.standard.DependencyKey;
-import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
+import com.github.ruediste.salta.standard.config.MembersInjectorFactory;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
@@ -76,6 +76,27 @@ public class JSR330Module extends AbstractModule {
 		config.config.jitBindingRules.add(new DefaultJITBindingRule(config));
 
 		config.constructionRules.add(new DefaultConstructionRule(config));
+		config.membersInjectorFactory = new MembersInjectorFactory() {
+
+			Injector injector = binder().getInjector();
+
+			@Override
+			public <T> Consumer<T> createMembersInjector(TypeToken<T> type) {
+				MembersInjector<T> delegate = injector.getMembersInjector(type);
+				return new Consumer<T>() {
+
+					@Override
+					public void accept(T t) {
+						delegate.injectMembers(t);
+					}
+
+					@Override
+					public String toString() {
+						return delegate.toString();
+					}
+				};
+			}
+		};
 	}
 
 	private void addProviderMethodBinderModulePostProcessor(
