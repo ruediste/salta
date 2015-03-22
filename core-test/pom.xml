@@ -13,7 +13,7 @@
 	</properties>
 
 	<dependencies>
-		
+
 		<dependency>
 			<groupId>com.github.ruediste.salta</groupId>
 			<artifactId>salta-core</artifactId>
@@ -27,10 +27,27 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<parent>
 		<groupId>com.github.ruediste.salta</groupId>
 		<artifactId>salta-parent</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<configuration>
+							<skipStaging>true</skipStaging>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
