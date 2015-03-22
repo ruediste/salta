@@ -6,7 +6,7 @@ import java.util.Properties;
 
 import javax.inject.Named;
 
-import com.github.ruediste.salta.standard.binder.Binder;
+import com.github.ruediste.salta.jsr330.binder.Binder;
 
 /**
  * Utility methods for use with {@code @}{@link Named}.

@@ -9,8 +9,6 @@ import javax.inject.Inject;
 
 import org.junit.Test;
 
-import com.github.ruediste.salta.Salta;
-
 public class ProvidedByTest {
 
 	@ProvidedBy(AProvider.class)

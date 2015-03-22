@@ -16,17 +16,13 @@
 
 package com.google.inject;
 
-import static java.util.stream.Collectors.toCollection;
-
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.StreamSupport;
 
-import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.guice.GuiceInjectorImpl;
 import com.github.ruediste.salta.guice.GuiceModule;
-import com.github.ruediste.salta.guice.ModuleAdapter;
+import com.github.ruediste.salta.guice.binder.BinderImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
+import com.github.ruediste.salta.standard.binder.SaltaBinder;
 
 /**
  * The entry point to the Guice framework. Creates {@link Injector}s from
@@ -106,16 +102,24 @@ public final class Guice {
 			Iterable<? extends Module> modules) {
 		GuiceInjectorConfiguration config = new GuiceInjectorConfiguration(
 				stage);
-		ArrayList<com.github.ruediste.salta.standard.SaltaModule> wrappedModules = StreamSupport
-				.stream(modules.spliterator(), false)
-				.map(m -> new ModuleAdapter(m, config))
-				.collect(toCollection(ArrayList::new));
 
-		GuiceInjectorImpl injector = new GuiceInjectorImpl();
-		wrappedModules.add(new GuiceModule(config, injector));
-		Salta.createInjector(stage.getSaltaStage(), wrappedModules);
+		GuiceInjectorImpl injector = new GuiceInjectorImpl(config);
 
-		// delegate of injector was initialized by the GuiceModule
+		SaltaBinder saltaBinder = new SaltaBinder(config.config,
+				injector.getSaltaInjector());
+		BinderImpl binder = new BinderImpl(saltaBinder, config);
+
+		for (Module module : modules) {
+			binder.install(module);
+		}
+		binder.install(new GuiceModule(config, injector));
+
+		binder.close();
+
+		config.postProcessModules();
+
+		injector.initialize();
+
 		return injector;
 	}
 }

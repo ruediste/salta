@@ -1,4 +1,4 @@
-package com.github.ruediste.salta;
+package com.github.ruediste.salta.jsr330;
 
 import static me.qmx.jitescript.util.CodegenUtils.c;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 
+import com.github.ruediste.salta.jsr330.Salta;
 import com.github.ruediste.salta.standard.Injector;
 
 public class SaltaTest {

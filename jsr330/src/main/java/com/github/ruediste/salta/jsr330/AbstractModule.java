@@ -22,28 +22,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 
 import javax.inject.Provider;
 
-import net.sf.cglib.proxy.Callback;
-
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.Scope;
-import com.github.ruediste.salta.matchers.Matcher;
+import com.github.ruediste.salta.jsr330.binder.AnnotatedBindingBuilder;
+import com.github.ruediste.salta.jsr330.binder.Binder;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
-import com.github.ruediste.salta.standard.SaltaModule;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
-import com.github.ruediste.salta.standard.binder.Binder;
-import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
 /**
- * A support class for {@link SaltaModule}s which reduces repetition and results in a
- * more readable configuration. Simply extend this class, implement
+ * A support class for {@link SaltaModule}s which reduces repetition and results
+ * in a more readable configuration. Simply extend this class, implement
  * {@link #configure()}, and call the inherited methods which mirror those found
  * in {@link Binder}. For example:
  *
@@ -157,16 +151,6 @@ public abstract class AbstractModule implements SaltaModule {
 	}
 
 	/**
-	 * @see Binder#bindInterceptor(com.google.inject.matcher.Matcher,
-	 *      com.google.inject.matcher.Matcher,
-	 *      org.aopalliance.intercept.MethodInterceptor[])
-	 */
-	protected void bindInterceptor(Matcher<? super Class<?>> classMatcher,
-			Matcher<? super Method> methodMatcher, Callback... interceptors) {
-		binder().bindInterceptor(classMatcher, methodMatcher, interceptors);
-	}
-
-	/**
 	 * @see Binder#getProvider(CoreDependencyKey)
 	 * @since 2.0
 	 */
@@ -206,7 +190,7 @@ public abstract class AbstractModule implements SaltaModule {
 		return binder().getMembersInjector(type);
 	}
 
-	protected StandardInjectorConfiguration getConfiguration() {
+	protected JSR330InjectorConfiguration getConfiguration() {
 		return binder().getConfiguration();
 	}
 }

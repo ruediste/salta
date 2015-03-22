@@ -6,8 +6,6 @@ import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 
-import com.github.ruediste.salta.Salta;
-
 public class PostConstructTest {
 
 	private static class TestClass {

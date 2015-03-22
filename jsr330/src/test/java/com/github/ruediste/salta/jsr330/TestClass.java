@@ -1,4 +1,4 @@
-package com.github.ruediste.salta;
+package com.github.ruediste.salta.jsr330;
 
 public class TestClass {
 

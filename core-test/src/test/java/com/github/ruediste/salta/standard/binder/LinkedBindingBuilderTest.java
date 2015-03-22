@@ -6,19 +6,18 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import java.util.function.Supplier;
-
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.Binding.RecursiveRecipeCreationDetectedException;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Names;
+import com.github.ruediste.salta.jsr330.Salta;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
 
@@ -139,7 +138,7 @@ public class LinkedBindingBuilderTest {
 		}
 	}
 
-	private static class ProviderIA implements Supplier<TestIA> {
+	private static class ProviderIA implements Provider<TestIA> {
 
 		private TestIA instance;
 
@@ -191,7 +190,7 @@ public class LinkedBindingBuilderTest {
 		assertEquals(1, provider.injectionCount);
 	}
 
-	private static class ProviderIA1 implements Supplier<TestIA> {
+	private static class ProviderIA1 implements Provider<TestIA> {
 
 		private TestIA instance = new TestA();
 
@@ -238,7 +237,7 @@ public class LinkedBindingBuilderTest {
 				TestIA.class).withAnnotations(Names.named("x"))));
 	}
 
-	private static class ProviderIACircular implements Supplier<TestIA> {
+	private static class ProviderIACircular implements Provider<TestIA> {
 
 		@Inject
 		TestIA a;

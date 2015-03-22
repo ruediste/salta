@@ -112,6 +112,10 @@ public class StandardInjector implements Injector {
 	private CoreInjector coreInjector;
 	private final Map<Object, MembersInjectionToken<?>> memberInjectionTokens = new IdentityHashMap<>();
 
+	public StandardInjector(StandardInjectorConfiguration config) {
+		this.config = config;
+	}
+
 	private void checkInitialized() {
 		if (!initialized) {
 			throw new SaltaException(
@@ -119,8 +123,7 @@ public class StandardInjector implements Injector {
 		}
 	}
 
-	public void initialize(StandardInjectorConfiguration config) {
-		this.config = config;
+	public void initialize() {
 
 		if (!config.errorMessages.isEmpty()) {
 			throw new SaltaException("There were Errors:\n"
@@ -128,8 +131,6 @@ public class StandardInjector implements Injector {
 							.map(msg -> msg.getMessage())
 							.collect(joining("\n")));
 		}
-
-		config.postProcessModules();
 
 		coreInjector = new CoreInjector(config.config);
 		for (Consumer<Injector> initializer : config.staticInitializers) {
@@ -158,7 +159,6 @@ public class StandardInjector implements Injector {
 		getMembersInjector(type).injectMembers(instance);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
 		TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
@@ -244,6 +244,10 @@ public class StandardInjector implements Injector {
 			}
 			return token;
 		}
+	}
+
+	public StandardInjectorConfiguration getConfig() {
+		return config;
 	}
 
 }

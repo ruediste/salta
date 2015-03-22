@@ -34,9 +34,7 @@ import com.github.ruediste.salta.standard.DefaultJITBindingRule;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.ProviderMethodBinder;
-import com.github.ruediste.salta.standard.SaltaModule;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
-import com.github.ruediste.salta.standard.binder.Binder;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
@@ -51,6 +49,7 @@ import com.github.ruediste.salta.standard.util.ProviderCreationRule;
 import com.github.ruediste.salta.standard.util.StaticMembersInjectorBase;
 import com.google.common.base.Objects;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Binder;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
@@ -65,7 +64,7 @@ import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 
-public class GuiceModule implements SaltaModule {
+public class GuiceModule implements Module {
 
 	private GuiceInjectorConfiguration guiceConfig;
 	private GuiceInjectorImpl injector;
@@ -86,7 +85,7 @@ public class GuiceModule implements SaltaModule {
 	public void configure(Binder binder) {
 
 		this.binder = binder;
-		config = binder().getConfiguration();
+		config = binder().getGuiceConfiguration().config;
 		addLoggerCreationRule();
 
 		addQualifierMatchingRules();
@@ -103,16 +102,13 @@ public class GuiceModule implements SaltaModule {
 
 		addTypeLiteralCreationRule();
 
-		binder().bind(Injector.class).toInstance(injector);
+		binder().getDelegate().bind(Injector.class).toInstance(injector);
 
 		addStaticMembersInjectionDynamicInitializer();
 
 		addProviderMethodBinderModulePostProcessor();
 
 		addCheckModulePostProcessor();
-
-		// set the delegate
-		config.staticInitializers.add(injector::setDelegate);
 
 		for (TypeToken<?> type : config.typesBoundToDefaultCreationRecipe) {
 			ProvidedBy providedBy = type.getRawType().getAnnotation(
@@ -184,8 +180,10 @@ public class GuiceModule implements SaltaModule {
 		if (guiceConfig.stage == Stage.PRODUCTION)
 			addEagerInstantiationDynamicInitializer();
 
-		binder().bindScope(Singleton.class, config.singletonScope);
-		binder().bindScope(javax.inject.Singleton.class, config.singletonScope);
+		binder().getDelegate()
+				.bindScope(Singleton.class, config.singletonScope);
+		binder().getDelegate().bindScope(javax.inject.Singleton.class,
+				config.singletonScope);
 
 		config.constructionRules.add(new DefaultConstructionRule(config));
 		addStageCreationRule();
@@ -233,15 +231,9 @@ public class GuiceModule implements SaltaModule {
 	}
 
 	private void addCheckModulePostProcessor() {
-		config.modulePostProcessors.add(new Consumer<Object>() {
+		guiceConfig.modulePostProcessors.add(new Consumer<Module>() {
 			@Override
-			public void accept(Object module) {
-				if (module instanceof ModuleAdapter) {
-					check(((ModuleAdapter) module).getDelegate());
-				}
-			}
-
-			private void check(Module module) {
+			public void accept(Module module) {
 				Class<?> cls = module.getClass();
 				MethodOverrideIndex idx = new MethodOverrideIndex(cls);
 				while (!Object.class.equals(cls)) {
@@ -283,11 +275,7 @@ public class GuiceModule implements SaltaModule {
 				return true;
 			}
 		};
-		config.modulePostProcessors.add(m -> {
-			if (m instanceof ModuleAdapter) {
-				b.bindProviderMethodsOf(((ModuleAdapter) m).getDelegate());
-			}
-		});
+		guiceConfig.modulePostProcessors.add(m -> b.bindProviderMethodsOf(m));
 	}
 
 	private void addStaticMembersInjectionDynamicInitializer() {

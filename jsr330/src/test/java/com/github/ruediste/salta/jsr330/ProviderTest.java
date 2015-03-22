@@ -2,20 +2,18 @@ package com.github.ruediste.salta.jsr330;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.function.Supplier;
-
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.junit.Test;
 
-import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.standard.Injector;
 
 public class ProviderTest {
 
 	@Test
 	public void providerIsInjected() {
-		Supplier<String> provider = new Supplier<String>() {
+		Provider<String> provider = new Provider<String>() {
 
 			@Inject
 			int i;

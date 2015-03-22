@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2014 Ruedi Steinmann
+ * 
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,26 +16,48 @@
  * limitations under the License.
  */
 
-package com.google.inject;
+package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.Method;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
-import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
-import com.github.ruediste.salta.standard.binder.SaltaBinder;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import javax.xml.bind.Binder;
+
+import net.sf.cglib.proxy.Callback;
+import net.sf.cglib.proxy.Dispatcher;
+import net.sf.cglib.proxy.FixedValue;
+import net.sf.cglib.proxy.InvocationHandler;
+import net.sf.cglib.proxy.LazyLoader;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.NoOp;
+import net.sf.cglib.proxy.ProxyRefDispatcher;
+
+import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.Scope;
+import com.github.ruediste.salta.matchers.Matcher;
+import com.github.ruediste.salta.standard.DependencyKey;
+import com.github.ruediste.salta.standard.Injector;
+import com.github.ruediste.salta.standard.MembersInjector;
+import com.github.ruediste.salta.standard.Message;
+import com.github.ruediste.salta.standard.Stage;
+import com.github.ruediste.salta.standard.config.EnhancerFactory;
+import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
 import com.google.common.reflect.TypeToken;
-import com.google.inject.binder.AnnotatedBindingBuilder;
-import com.google.inject.binder.AnnotatedConstantBindingBuilder;
-import com.google.inject.binder.LinkedBindingBuilder;
-import com.google.inject.matcher.Matcher;
-import com.google.inject.spi.Message;
-import com.google.inject.spi.ProvisionListener;
 
 /**
  * Collects configuration information (primarily <i>bindings</i>) which will be
  * used to create an {@link Injector}. Guice provides this object to your
- * application's {@link Module} implementors so they may each contribute their
- * own bindings and other registrations.
+ * application's {@link SaltaModule} implementors so they may each contribute
+ * their own bindings and other registrations.
  *
  * <h3>The Guice Binding EDSL</h3>
  *
@@ -51,7 +75,7 @@ import com.google.inject.spi.ProvisionListener;
  *
  * This statement does essentially nothing; it "binds the {@code ServiceImpl}
  * class to itself" and does not change Guice's default behavior. You may still
- * want to use this if you prefer your {@link Module} class to serve as an
+ * want to use this if you prefer your {@link SaltaModule} class to serve as an
  * explicit <i>manifest</i> for the services it provides. Also, in rare cases,
  * Guice may be unable to validate a binding at injector creation time unless it
  * is given explicitly.
@@ -122,7 +146,7 @@ import com.google.inject.spi.ProvisionListener;
  * contribute their own custom scopes for use here as well.
  *
  * <pre>
- * bind(new TypeLiteral&lt;PaymentService&lt;CreditCard&gt;&gt;() {
+ * bind(new TypeToken&lt;PaymentService&lt;CreditCard&gt;&gt;() {
  * }).to(CreditCardPaymentService.class);
  * </pre>
  *
@@ -145,8 +169,9 @@ import com.google.inject.spi.ProvisionListener;
  * this single instance to fulfill all {@code Service} injection requests. When
  * the {@link Injector} is created, it will automatically perform field and
  * method injection for this instance, but any injectable constructor on
- * {@code ServiceImpl} is simply ignored. Note that using this approach results
- * in "eager loading" behavior that you can't control.
+ * {@code ServiceImpl} is simply ignored. Every object instance is injected only
+ * once, even if it is bound multiple times. Note that using this approach
+ * results in "eager loading" behavior that you can't control.
  *
  * <pre>
  * bindConstant().annotatedWith(ServerHost.class).to(args[0]);
@@ -214,32 +239,103 @@ import com.google.inject.spi.ProvisionListener;
  * @author jessewilson@google.com (Jesse Wilson)
  * @author kevinb@google.com (Kevin Bourrillion)
  */
-public interface Binder {
+public class SaltaBinder {
+
+	private StandardInjectorConfiguration config;
+	private Injector injector;
+
+	BindingBuilderImpl<?> currentBindingBuilder;
+
+	public SaltaBinder(StandardInjectorConfiguration config, Injector injector) {
+		this.config = config;
+		this.injector = injector;
+
+	}
+
+	/**
+	 * Return the configuration modified by this Binder
+	 */
+	public StandardInjectorConfiguration getConfiguration() {
+		return config;
+	}
+
+	/**
+	 * Return the injector of this Binder. The injector is not initialized
+	 * during configuration, so it can not be used to create or inject
+	 * instances. But it is possible to store a reference for later use.
+	 */
+	public Injector getInjector() {
+		return injector;
+	}
+
+	/**
+	 * Binds method interceptor[s] to methods matched by class and method
+	 * matchers. A method is eligible for interception if:
+	 *
+	 * <ul>
+	 * <li>Guice created the instance the method is on</li>
+	 * <li>Neither the enclosing type nor the method is final</li>
+	 * <li>And the method is package-private, protected, or public</li>
+	 * </ul>
+	 *
+	 * @param classMatcher
+	 *            matches classes the interceptor should apply to. For example:
+	 *            {@code only(Runnable.class)}.
+	 * @param methodMatcher
+	 *            matches methods the interceptor should apply to. For example:
+	 *            {@code annotatedWith(Transactional.class)}.
+	 * @param interceptors
+	 *            to bind. The interceptors are called in the order they are
+	 *            given. CgLib Callbacks: {@link Dispatcher}, {@link FixedValue}
+	 *            , {@link InvocationHandler}, {@link LazyLoader},
+	 *            {@link MethodInterceptor}, {@link NoOp},
+	 *            {@link ProxyRefDispatcher}
+	 */
+	public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
+			Matcher<? super Method> methodMatcher, Callback... interceptors) {
+		throw new UnsupportedOperationException();
+	}
 
 	/**
 	 * Binds a scope to an annotation.
 	 */
-	void bindScope(Class<? extends Annotation> annotationType, Scope scope);
+	public void bindScope(Class<? extends Annotation> annotationType,
+			Scope scope) {
+
+		// put the annotation to the map for further use by other binders
+		config.scopeAnnotationMap.put(annotationType, scope);
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	<T> LinkedBindingBuilder<T> bind(Key<T> typeLiteral);
+	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
+		if (currentBindingBuilder != null)
+			currentBindingBuilder.register();
+		BindingBuilderImpl<T> tmp = new BindingBuilderImpl<>(
+				CoreDependencyKey.typeMatcher(type), type, config, injector);
+		currentBindingBuilder = tmp;
+		return tmp;
+	}
+
+	public void close() {
+		if (currentBindingBuilder != null)
+			currentBindingBuilder.register();
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	<T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral);
+	public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
+		return bind(TypeToken.of(type));
+	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	<T> AnnotatedBindingBuilder<T> bind(Class<T> type);
-
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	AnnotatedConstantBindingBuilder bindConstant();
+	public AnnotatedConstantBindingBuilder bindConstant() {
+		return new AnnotatedConstantBindingBuilder(config);
+	}
 
 	/**
 	 * Upon successful creation, the {@link Injector} will inject instance
@@ -251,7 +347,9 @@ public interface Binder {
 	 *            for which members will be injected
 	 * @since 2.0
 	 */
-	<T> void requestInjection(TypeLiteral<T> type, T instance);
+	public <T> void requestInjection(TypeToken<T> type, T instance) {
+		config.dynamicInitializers.add(x -> x.injectMembers(type, instance));
+	}
 
 	/**
 	 * Upon successful creation, the {@link Injector} will inject instance
@@ -261,7 +359,10 @@ public interface Binder {
 	 *            for which members will be injected
 	 * @since 2.0
 	 */
-	void requestInjection(Object instance);
+	public void requestInjection(Object instance) {
+		config.dynamicInitializers.add(injector -> injector
+				.injectMembers(instance));
+	}
 
 	/**
 	 * Upon successful creation, the {@link Injector} will inject static fields
@@ -270,17 +371,24 @@ public interface Binder {
 	 * @param types
 	 *            for which static members will be injected
 	 */
-	void requestStaticInjection(Class<?>... types);
-
-	/**
-	 * Uses the given module to configure more bindings.
-	 */
-	void install(Module module);
+	public void requestStaticInjection(Class<?>... types) {
+		for (Class<?> type : types) {
+			if (type.isInterface()) {
+				throw new SaltaException(
+						"Requested static injection of "
+								+ type
+								+ ", but interfaces do not have static injection points.");
+			}
+			config.requestedStaticInjections.add(type);
+		}
+	}
 
 	/**
 	 * Gets the current stage.
 	 */
-	Stage currentStage();
+	public Stage currentStage() {
+		return config.stage;
+	}
 
 	/**
 	 * Records an error message which will be presented to the user at a later
@@ -289,7 +397,10 @@ public interface Binder {
 	 * {@link String#format(String, Object[])} to insert the arguments into the
 	 * message.
 	 */
-	void addError(String message, Object... arguments);
+	public void addError(String message, Object... arguments) {
+		config.errorMessages
+				.add(new Message(String.format(message, arguments)));
+	}
 
 	/**
 	 * Records an exception, the full details of which will be logged, and the
@@ -297,14 +408,19 @@ public interface Binder {
 	 * Module calls something that you worry may fail, you should catch the
 	 * exception and pass it into this.
 	 */
-	void addError(Throwable t);
+	public void addError(Throwable t) {
+		config.errorMessages.add(new Message("", t));
+	}
 
 	/**
 	 * Records an error message to be presented to the user at a later time.
 	 *
 	 * @since 2.0
 	 */
-	void addError(Message message);
+	public void addError(Message message) {
+		config.errorMessages.add(message);
+
+	}
 
 	/**
 	 * Returns the provider used to obtain instances for the given injection
@@ -314,7 +430,9 @@ public interface Binder {
 	 *
 	 * @since 2.0
 	 */
-	<T> Provider<T> getProvider(Key<T> key);
+	public <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
+		return injector.getProvider(key);
+	}
 
 	/**
 	 * Returns the provider used to obtain instances for the given injection
@@ -324,7 +442,9 @@ public interface Binder {
 	 *
 	 * @since 2.0
 	 */
-	<T> Provider<T> getProvider(Class<T> type);
+	public <T> Provider<T> getProvider(Class<T> type) {
+		return getProvider(DependencyKey.of(type));
+	}
 
 	/**
 	 * Returns the members injector used to inject dependencies into methods and
@@ -337,7 +457,9 @@ public interface Binder {
 	 *            type to get members injector for
 	 * @since 2.0
 	 */
-	<T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral);
+	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
+		return injector.getMembersInjector(typeLiteral);
+	}
 
 	/**
 	 * Returns the members injector used to inject dependencies into methods and
@@ -350,103 +472,31 @@ public interface Binder {
 	 *            type to get members injector for
 	 * @since 2.0
 	 */
-	<T> MembersInjector<T> getMembersInjector(Class<T> type);
+	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+		return getMembersInjector(TypeToken.of(type));
+	}
 
 	/**
-	 * Returns a binder that uses {@code source} as the reference location for
-	 * configuration errors. This is typically a {@link StackTraceElement} for
-	 * {@code .java} source but it could any binding source, such as the path to
-	 * a {@code .properties} file.
-	 *
-	 * @param source
-	 *            any object representing the source location and has a concise
-	 *            {@link Object#toString() toString()} value
-	 * @return a binder that shares its configuration with this binder
-	 * @since 2.0
+	 * Registers an enhancer for provisioned objects. Salta will notify the
+	 * listener whenever it instantiates an object of a matching type. The
+	 * listener receives the object and can replace it if desired.
 	 */
-	Binder withSource(Object source);
+	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
+			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
+		config.enhancerFactories.add(new EnhancerFactory() {
 
-	/**
-	 * Returns a binder that skips {@code classesToSkip} when identify the
-	 * calling code. The caller's {@link StackTraceElement} is used to locate
-	 * the source of configuration errors.
-	 *
-	 * @param classesToSkip
-	 *            library classes that create bindings on behalf of their
-	 *            clients.
-	 * @return a binder that shares its configuration with this binder.
-	 * @since 2.0
-	 */
-	Binder skipSources(Class<?>... classesToSkip);
+			@Override
+			public RecipeEnhancer getEnhancer(RecipeCreationContext ctx,
+					TypeToken<?> type) {
 
-	/**
-	 * Registers listeners for provisioned objects. Guice will notify the
-	 * listeners just before and after the object is provisioned. Provisioned
-	 * objects that are also injectable (everything except objects provided
-	 * through Providers) can also be notified through TypeListeners registered
-	 * in {@link #bindListener}.
-	 * 
-	 * @param bindingMatcher
-	 *            that matches bindings of provisioned objects the listener
-	 *            should be notified of
-	 * @param listeners
-	 *            for provisioned objects matched by bindingMatcher
-	 * @since 4.0
-	 */
-	void bindListener(Matcher<? super TypeToken<?>> bindingMatcher,
-			ProvisionListener... listeners);
-
-	/**
-	 * Instructs the Injector that bindings must be listed in a Module in order
-	 * to be injected. Classes that are not explicitly bound in a module cannot
-	 * be injected. Bindings created through a linked binding (
-	 * <code>bind(Foo.class).to(FooImpl.class)</code>) are allowed, but the
-	 * implicit binding (<code>FooImpl</code>) cannot be directly injected
-	 * unless it is also explicitly bound (<code>bind(FooImpl.class)</code>).
-	 * <p>
-	 * Tools can still retrieve bindings for implicit bindings (bindings created
-	 * through a linked binding) if explicit bindings are required, however
-	 * {@link Binding#getProvider} will fail.
-	 * <p>
-	 * By default, explicit bindings are not required.
-	 * <p>
-	 * If a parent injector requires explicit bindings, then all child injectors
-	 * (and private modules within that injector) also require explicit
-	 * bindings. If a parent does not require explicit bindings, a child
-	 * injector or private module may optionally declare itself as requiring
-	 * explicit bindings. If it does, the behavior is limited only to that child
-	 * or any grandchildren. No siblings of the child will require explicit
-	 * bindings.
-	 * <p>
-	 * In the absence of an explicit binding for the target, linked bindings in
-	 * child injectors create a binding for the target in the parent. Since this
-	 * behavior can be surprising, it causes an error instead if explicit
-	 * bindings are required. To avoid this error, add an explicit binding for
-	 * the target, either in the child or the parent.
-	 * 
-	 * @since 3.0
-	 */
-	void requireExplicitBindings();
-
-	/**
-	 * Salta has no support for circular proxies anyway!!
-	 * <p>
-	 * Prevents Guice from constructing a {@link Proxy} when a circular
-	 * dependency is found. By default, circular proxies are not disabled.
-	 * </p>
-	 * 
-	 * <p>
-	 * If a parent injector disables circular proxies, then all child injectors
-	 * (and private modules within that injector) also disable circular proxies.
-	 * If a parent does not disable circular proxies, a child injector or
-	 * private module may optionally declare itself as disabling circular
-	 * proxies. If it does, the behavior is limited only to that child or any
-	 * grandchildren. No siblings of the child will disable circular proxies.
-	 * </p>
-	 * 
-	 * @since 3.0
-	 */
-	void disableCircularProxies();
+				if (typeMatcher.matches(type)) {
+					return new RecipeEnhancerWrapperImpl(instance -> listener
+							.apply(type, instance));
+				}
+				return null;
+			}
+		});
+	}
 
 	/**
 	 * Requires that a {@literal @}{@link Inject} annotation exists on a
@@ -460,19 +510,8 @@ public interface Binder {
 	 *
 	 * @since 4.0
 	 */
-	void requireAtInjectOnConstructors();
+	public void requireAtInjectOnConstructors() {
+		config.requireAtInjectOnConstructors = true;
+	}
 
-	/**
-	 * Requires that Guice finds an exactly matching binding annotation. This
-	 * disables the error-prone feature in Guice where it can substitute a
-	 * binding for <code>{@literal @}Named Foo</code> when attempting to inject
-	 * <code>{@literal @}Named("foo") Foo</code>.
-	 *
-	 * @since 4.0
-	 */
-	void requireExactBindingAnnotations();
-
-	GuiceInjectorConfiguration getGuiceConfiguration();
-
-	SaltaBinder getDelegate();
 }

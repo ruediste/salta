@@ -48,6 +48,10 @@ public class StandardInjectorConfiguration {
 	public CoreInjectorConfiguration config;
 	public final Stage stage;
 
+	public StandardInjectorConfiguration(Stage stage) {
+		this(stage, new CoreInjectorConfiguration());
+	}
+
 	public StandardInjectorConfiguration(Stage stage,
 			CoreInjectorConfiguration config) {
 		this.stage = stage;
@@ -436,20 +440,6 @@ public class StandardInjectorConfiguration {
 		else
 			return requiredQualifier.annotationType().equals(
 					availableQualiferType);
-	}
-
-	/**
-	 * List of modules that were used to create this configuration. Used to post
-	 * process the modules after the first configuration
-	 */
-	public List<Object> modules = new ArrayList<>();
-
-	public List<Consumer<Object>> modulePostProcessors = new ArrayList<>();
-
-	public void postProcessModules() {
-		for (Object module : modules) {
-			modulePostProcessors.stream().forEach(x -> x.accept(module));
-		}
 	}
 
 	public final ArrayList<TypeToken<?>> typesBoundToDefaultCreationRecipe = new ArrayList<>();

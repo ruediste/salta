@@ -16,41 +16,31 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.salta.standard.binder;
+package com.github.ruediste.salta.jsr330.binder;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.Dispatcher;
-import net.sf.cglib.proxy.FixedValue;
-import net.sf.cglib.proxy.InvocationHandler;
-import net.sf.cglib.proxy.LazyLoader;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.NoOp;
-import net.sf.cglib.proxy.ProxyRefDispatcher;
-
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
+import com.github.ruediste.salta.jsr330.AbstractModule;
+import com.github.ruediste.salta.jsr330.ImplementedBy;
+import com.github.ruediste.salta.jsr330.JSR330InjectorConfiguration;
+import com.github.ruediste.salta.jsr330.ProvidedBy;
+import com.github.ruediste.salta.jsr330.SaltaModule;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Injector;
 import com.github.ruediste.salta.standard.MembersInjector;
 import com.github.ruediste.salta.standard.Message;
-import com.github.ruediste.salta.standard.SaltaModule;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.config.EnhancerFactory;
-import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
-import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
+import com.github.ruediste.salta.standard.StandardInjector;
+import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
+import com.github.ruediste.salta.standard.binder.SaltaBinder;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -241,21 +231,18 @@ import com.google.common.reflect.TypeToken;
  */
 public class Binder {
 
-	private StandardInjectorConfiguration config;
-	private Injector injector;
+	SaltaBinder delegate;
+	private JSR330InjectorConfiguration config;
 
-	BindingBuilderImpl<?> currentBindingBuilder;
-
-	public Binder(StandardInjectorConfiguration config, Injector injector) {
+	public Binder(JSR330InjectorConfiguration config, StandardInjector injector) {
 		this.config = config;
-		this.injector = injector;
-
+		this.delegate = new SaltaBinder(config.config, injector);
 	}
 
 	/**
 	 * Return the configuration modified by this Binder
 	 */
-	public StandardInjectorConfiguration getConfiguration() {
+	public JSR330InjectorConfiguration getConfiguration() {
 		return config;
 	}
 
@@ -265,35 +252,7 @@ public class Binder {
 	 * instances. But it is possible to store a reference for later use.
 	 */
 	public Injector getInjector() {
-		return injector;
-	}
-
-	/**
-	 * Binds method interceptor[s] to methods matched by class and method
-	 * matchers. A method is eligible for interception if:
-	 *
-	 * <ul>
-	 * <li>Guice created the instance the method is on</li>
-	 * <li>Neither the enclosing type nor the method is final</li>
-	 * <li>And the method is package-private, protected, or public</li>
-	 * </ul>
-	 *
-	 * @param classMatcher
-	 *            matches classes the interceptor should apply to. For example:
-	 *            {@code only(Runnable.class)}.
-	 * @param methodMatcher
-	 *            matches methods the interceptor should apply to. For example:
-	 *            {@code annotatedWith(Transactional.class)}.
-	 * @param interceptors
-	 *            to bind. The interceptors are called in the order they are
-	 *            given. CgLib Callbacks: {@link Dispatcher}, {@link FixedValue}
-	 *            , {@link InvocationHandler}, {@link LazyLoader},
-	 *            {@link MethodInterceptor}, {@link NoOp},
-	 *            {@link ProxyRefDispatcher}
-	 */
-	public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
-			Matcher<? super Method> methodMatcher, Callback... interceptors) {
-		throw new UnsupportedOperationException();
+		return delegate.getInjector();
 	}
 
 	/**
@@ -301,40 +260,32 @@ public class Binder {
 	 */
 	public void bindScope(Class<? extends Annotation> annotationType,
 			Scope scope) {
-
-		// put the annotation to the map for further use by other binders
-		config.scopeAnnotationMap.put(annotationType, scope);
+		delegate.bindScope(annotationType, scope);
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
-		if (currentBindingBuilder != null)
-			currentBindingBuilder.register();
-		BindingBuilderImpl<T> tmp = new BindingBuilderImpl<>(
-				CoreDependencyKey.typeMatcher(type), type, config, injector);
-		currentBindingBuilder = tmp;
-		return tmp;
+	public <T> ScopedBindingBuilder<T> bind(TypeToken<T> type) {
+		return new ScopedBindingBuilderImpl<>(delegate.bind(type));
 	}
 
 	public void close() {
-		if (currentBindingBuilder != null)
-			currentBindingBuilder.register();
+		delegate.close();
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
-		return bind(TypeToken.of(type));
+		return new AnnotatedBindingBuilderImpl<>(delegate.bind(type));
 	}
 
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	public AnnotatedConstantBindingBuilder bindConstant() {
-		return new AnnotatedConstantBindingBuilder(config);
+		return delegate.bindConstant();
 	}
 
 	/**
@@ -348,7 +299,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public <T> void requestInjection(TypeToken<T> type, T instance) {
-		config.dynamicInitializers.add(x -> x.injectMembers(type, instance));
+		delegate.requestInjection(type, instance);
 	}
 
 	/**
@@ -360,8 +311,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public void requestInjection(Object instance) {
-		config.dynamicInitializers.add(injector -> injector
-				.injectMembers(instance));
+		delegate.requestInjection(instance);
 	}
 
 	/**
@@ -372,15 +322,7 @@ public class Binder {
 	 *            for which static members will be injected
 	 */
 	public void requestStaticInjection(Class<?>... types) {
-		for (Class<?> type : types) {
-			if (type.isInterface()) {
-				throw new SaltaException(
-						"Requested static injection of "
-								+ type
-								+ ", but interfaces do not have static injection points.");
-			}
-			config.requestedStaticInjections.add(type);
-		}
+		delegate.requestStaticInjection(types);
 	}
 
 	/**
@@ -395,7 +337,7 @@ public class Binder {
 	 * Gets the current stage.
 	 */
 	public Stage currentStage() {
-		return config.stage;
+		return delegate.currentStage();
 	}
 
 	/**
@@ -406,8 +348,7 @@ public class Binder {
 	 * message.
 	 */
 	public void addError(String message, Object... arguments) {
-		config.errorMessages
-				.add(new Message(String.format(message, arguments)));
+		delegate.addError(message, arguments);
 	}
 
 	/**
@@ -417,7 +358,7 @@ public class Binder {
 	 * exception and pass it into this.
 	 */
 	public void addError(Throwable t) {
-		config.errorMessages.add(new Message("", t));
+		delegate.addError(t);
 	}
 
 	/**
@@ -426,7 +367,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public void addError(Message message) {
-		config.errorMessages.add(message);
+		delegate.addError(message);
 
 	}
 
@@ -439,7 +380,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
-		return injector.getProvider(key);
+		return delegate.getProvider(key);
 	}
 
 	/**
@@ -466,7 +407,7 @@ public class Binder {
 	 * @since 2.0
 	 */
 	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-		return injector.getMembersInjector(typeLiteral);
+		return delegate.getMembersInjector(typeLiteral);
 	}
 
 	/**
@@ -491,35 +432,7 @@ public class Binder {
 	 */
 	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
 			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
-		config.enhancerFactories.add(new EnhancerFactory() {
-
-			@Override
-			public RecipeEnhancer getEnhancer(RecipeCreationContext ctx,
-					TypeToken<?> type) {
-
-				if (typeMatcher.matches(type)) {
-					return new RecipeEnhancerWrapperImpl(instance -> listener
-							.apply(type, instance));
-				}
-				return null;
-			}
-		});
-	}
-
-	/**
-	 * Requires that a {@literal @}{@link Inject} annotation exists on a
-	 * constructor in order for Guice to consider it an eligible injectable
-	 * class. By default, Guice will inject classes that have a no-args
-	 * constructor if no {@literal @}{@link Inject} annotation exists on any
-	 * constructor.
-	 * <p>
-	 * If the class is bound using {@link LinkedBindingBuilder#toConstructor},
-	 * Guice will still inject that constructor regardless of annotations.
-	 *
-	 * @since 4.0
-	 */
-	public void requireAtInjectOnConstructors() {
-		config.requireAtInjectOnConstructors = true;
+		delegate.bindListener(typeMatcher, listener);
 	}
 
 }

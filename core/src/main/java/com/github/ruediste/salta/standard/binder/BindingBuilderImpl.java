@@ -157,6 +157,22 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
+	public <P> ScopedBindingBuilder<T> toProviderInstance(P provider,
+			Function<P, Supplier<? extends T>> providerWrapper) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		MembersInjectionToken<P> token = injector.getMembersInjectionToken(
+				provider, (TypeToken) TypeToken.of(provider.getClass()));
+
+		scopeSupplier = () -> config.defaultScope;
+		recipeFactorySupplier = () -> ctx -> {
+			Supplier<? extends T> wrappedProvider = providerWrapper.apply(token
+					.getValue());
+			return new SupplierRecipeImpl(() -> wrappedProvider.get());
+		};
+		return this;
+	}
+
+	@Override
 	public ScopedBindingBuilder<T> toProvider(
 			Class<? extends Supplier<? extends T>> providerType) {
 		return toProvider(TypeToken.of(providerType));

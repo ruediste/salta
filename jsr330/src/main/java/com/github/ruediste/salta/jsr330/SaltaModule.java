@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-package com.github.ruediste.salta.standard;
+package com.github.ruediste.salta.jsr330;
 
-import com.github.ruediste.salta.standard.binder.Binder;
+import com.github.ruediste.salta.jsr330.binder.Binder;
+import com.github.ruediste.salta.standard.Injector;
 
 /**
  * A module contributes configuration information, typically interface bindings,

@@ -9,9 +9,9 @@ import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.Salta;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.jsr330.Salta;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjectorTest {

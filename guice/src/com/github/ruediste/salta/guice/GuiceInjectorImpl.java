@@ -1,6 +1,8 @@
 package com.github.ruediste.salta.guice;
 
 import com.github.ruediste.salta.guice.binder.BindingImpl;
+import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
+import com.github.ruediste.salta.standard.StandardInjector;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -10,7 +12,11 @@ import com.google.inject.TypeLiteral;
 
 public class GuiceInjectorImpl implements Injector {
 
-	private com.github.ruediste.salta.standard.Injector delegate;
+	private StandardInjector delegate;
+
+	public GuiceInjectorImpl(GuiceInjectorConfiguration config) {
+		delegate = new StandardInjector(config.config);
+	}
 
 	@Override
 	public void injectMembers(Object instance) {
@@ -82,12 +88,6 @@ public class GuiceInjectorImpl implements Injector {
 		return delegate.getInstance(type);
 	}
 
-	public GuiceInjectorImpl setDelegate(
-			com.github.ruediste.salta.standard.Injector delegate) {
-		this.delegate = delegate;
-		return this;
-	}
-
 	@Override
 	public <T> Binding<T> getBinding(Key<T> key) {
 		return new BindingImpl<>(key, getProvider(key));
@@ -102,6 +102,10 @@ public class GuiceInjectorImpl implements Injector {
 	@Override
 	public com.github.ruediste.salta.standard.Injector getSaltaInjector() {
 		return delegate;
+	}
+
+	public void initialize() {
+		delegate.initialize();
 	}
 
 }
