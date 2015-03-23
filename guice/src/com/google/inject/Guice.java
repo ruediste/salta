@@ -22,7 +22,7 @@ import com.github.ruediste.salta.guice.GuiceInjectorImpl;
 import com.github.ruediste.salta.guice.GuiceModule;
 import com.github.ruediste.salta.guice.binder.BinderImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
-import com.github.ruediste.salta.standard.binder.SaltaBinder;
+import com.github.ruediste.salta.standard.binder.StandardBinder;
 
 /**
  * The entry point to the Guice framework. Creates {@link Injector}s from
@@ -105,7 +105,7 @@ public final class Guice {
 
 		GuiceInjectorImpl injector = new GuiceInjectorImpl(config);
 
-		SaltaBinder saltaBinder = new SaltaBinder(config.config,
+		StandardBinder saltaBinder = new StandardBinder(config.config,
 				injector.getSaltaInjector());
 		BinderImpl binder = new BinderImpl(saltaBinder, config);
 

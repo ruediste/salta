@@ -2,13 +2,13 @@ package com.github.ruediste.salta.standard;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.github.ruediste.salta.standard.binder.SaltaBinder;
+import com.github.ruediste.salta.standard.binder.StandardBinder;
 import com.google.common.base.Objects;
 
 /**
  * An error message and the context in which it occured. Messages are usually
  * created internally by Salta and its extensions. Messages can be created
- * explicitly in a module using {@link SaltaBinder#addError(Message) addError()}
+ * explicitly in a module using {@link StandardBinder#addError(Message) addError()}
  * statements:
  * 
  * <pre>

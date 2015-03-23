@@ -8,7 +8,7 @@ import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.standard.ScopeImpl;
-import com.github.ruediste.salta.standard.binder.SaltaBinder;
+import com.github.ruediste.salta.standard.binder.StandardBinder;
 import com.github.ruediste.salta.standard.config.EnhancerFactory;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
@@ -33,11 +33,11 @@ import com.google.inject.spi.ProvisionListener.ProvisionInvocation;
 
 public class BinderImpl implements Binder {
 
-	private com.github.ruediste.salta.standard.binder.SaltaBinder delegate;
+	private com.github.ruediste.salta.standard.binder.StandardBinder delegate;
 	private GuiceInjectorConfiguration config;
 
 	public BinderImpl(
-			com.github.ruediste.salta.standard.binder.SaltaBinder delegate,
+			com.github.ruediste.salta.standard.binder.StandardBinder delegate,
 			GuiceInjectorConfiguration config) {
 		this.delegate = delegate;
 		this.config = config;
@@ -287,7 +287,7 @@ public class BinderImpl implements Binder {
 	}
 
 	@Override
-	public SaltaBinder getDelegate() {
+	public StandardBinder getDelegate() {
 		return delegate;
 	}
 

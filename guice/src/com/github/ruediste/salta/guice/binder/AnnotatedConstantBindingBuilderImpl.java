@@ -8,10 +8,10 @@ import com.google.inject.binder.ConstantBindingBuilder;
 public class AnnotatedConstantBindingBuilderImpl implements
 		AnnotatedConstantBindingBuilder {
 
-	private com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder delegate;
+	private com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder delegate;
 
 	public AnnotatedConstantBindingBuilderImpl(
-			com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder delegate) {
+			com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder delegate) {
 		this.delegate = delegate;
 	}
 

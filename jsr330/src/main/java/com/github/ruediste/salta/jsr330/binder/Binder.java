@@ -41,8 +41,8 @@ import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
-import com.github.ruediste.salta.standard.binder.SaltaBinder;
+import com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder;
+import com.github.ruediste.salta.standard.binder.StandardBinder;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -224,14 +224,14 @@ import com.google.common.reflect.TypeToken;
  */
 public class Binder {
 
-	SaltaBinder delegate;
+	StandardBinder delegate;
 	private JSR330InjectorConfiguration config;
 	private InjectorImpl injector;
 
 	public Binder(JSR330InjectorConfiguration config, InjectorImpl injector) {
 		this.config = config;
 		this.injector = injector;
-		this.delegate = new SaltaBinder(config.config, injector.getDelegate());
+		this.delegate = new StandardBinder(config.config, injector.getDelegate());
 	}
 
 	/**
@@ -279,7 +279,7 @@ public class Binder {
 	/**
 	 * See the EDSL examples at {@link Binder}.
 	 */
-	public AnnotatedConstantBindingBuilder bindConstant() {
+	public StandardAnnotatedConstantBindingBuilder bindConstant() {
 		return delegate.bindConstant();
 	}
 

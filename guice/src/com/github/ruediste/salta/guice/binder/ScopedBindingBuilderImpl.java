@@ -8,10 +8,10 @@ import com.google.inject.binder.ScopedBindingBuilder;
 
 public class ScopedBindingBuilderImpl implements ScopedBindingBuilder {
 
-	private com.github.ruediste.salta.standard.binder.ScopedBindingBuilder<?> delegate;
+	private com.github.ruediste.salta.standard.binder.StandardScopedBindingBuilder<?> delegate;
 
 	public ScopedBindingBuilderImpl(
-			com.github.ruediste.salta.standard.binder.ScopedBindingBuilder<?> delegate) {
+			com.github.ruediste.salta.standard.binder.StandardScopedBindingBuilder<?> delegate) {
 		this.delegate = delegate;
 	}
 

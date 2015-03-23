@@ -5,10 +5,10 @@ import java.lang.annotation.Annotation;
 public class AnnotatedBindingBuilderImpl<T> extends LinkedBindingBuilderImpl<T>
 		implements AnnotatedBindingBuilder<T> {
 
-	private com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder<T> delegate;
+	private com.github.ruediste.salta.standard.binder.StandardAnnotatedBindingBuilder<T> delegate;
 
 	public AnnotatedBindingBuilderImpl(
-			com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder<T> delegate) {
+			com.github.ruediste.salta.standard.binder.StandardAnnotatedBindingBuilder<T> delegate) {
 		super(delegate);
 		this.delegate = delegate;
 	}

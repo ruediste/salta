@@ -4,10 +4,10 @@ import com.google.inject.binder.ConstantBindingBuilder;
 
 public class ConstantBindingBuilderImpl implements ConstantBindingBuilder {
 
-	private com.github.ruediste.salta.standard.binder.ConstantBindingBuilder delegate;
+	private com.github.ruediste.salta.standard.binder.StandardConstantBindingBuilder delegate;
 
 	public ConstantBindingBuilderImpl(
-			com.github.ruediste.salta.standard.binder.ConstantBindingBuilder delegate) {
+			com.github.ruediste.salta.standard.binder.StandardConstantBindingBuilder delegate) {
 		this.delegate = delegate;
 	}
 

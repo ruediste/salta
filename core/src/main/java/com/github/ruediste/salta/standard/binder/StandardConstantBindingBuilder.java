@@ -14,12 +14,12 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.primitives.Primitives;
 import com.google.common.reflect.TypeToken;
 
-public class ConstantBindingBuilder {
+public class StandardConstantBindingBuilder {
 
 	private StandardInjectorConfiguration config;
 	private Matcher<CoreDependencyKey<?>> annotationMatcher;
 
-	public ConstantBindingBuilder(StandardInjectorConfiguration config,
+	public StandardConstantBindingBuilder(StandardInjectorConfiguration config,
 			Matcher<CoreDependencyKey<?>> annotationMatcher) {
 		this.config = config;
 		this.annotationMatcher = annotationMatcher;

@@ -20,7 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
 
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
-import com.github.ruediste.salta.standard.binder.SaltaBinder;
+import com.github.ruediste.salta.standard.binder.StandardBinder;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
@@ -468,5 +468,5 @@ public interface Binder {
 
 	GuiceInjectorConfiguration getGuiceConfiguration();
 
-	SaltaBinder getDelegate();
+	StandardBinder getDelegate();
 }

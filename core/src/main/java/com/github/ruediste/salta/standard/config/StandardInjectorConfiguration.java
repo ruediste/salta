@@ -30,7 +30,7 @@ import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.ScopeRule;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardInjector;
-import com.github.ruediste.salta.standard.binder.AnnotatedBindingBuilder;
+import com.github.ruediste.salta.standard.binder.StandardAnnotatedBindingBuilder;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
@@ -248,7 +248,7 @@ public class StandardInjectorConfiguration {
 	 * Extractors of the required qualifier. This qualifier will be matched
 	 * against the qualifier available on types (JIT bindings, see
 	 * {@link #availableQualifierExtractors}) or the available qualifier
-	 * specified on bindings (see {@link AnnotatedBindingBuilder}). All
+	 * specified on bindings (see {@link StandardAnnotatedBindingBuilder}). All
 	 * extractors are invoked. If more than one qualifier is found, an error is
 	 * raised
 	 */

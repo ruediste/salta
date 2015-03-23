@@ -52,14 +52,14 @@ import com.google.common.reflect.TypeToken;
  * Since many API types are not present in the core, the documentation has been
  * moved to the Binder classes of the JSR330 or the Guice API.
  * */
-public class SaltaBinder {
+public class StandardBinder {
 
 	private StandardInjectorConfiguration config;
 	private StandardInjector injector;
 
-	BindingBuilderImpl<?> currentBindingBuilder;
+	StandardBindingBuilderImpl<?> currentBindingBuilder;
 
-	public SaltaBinder(StandardInjectorConfiguration config,
+	public StandardBinder(StandardInjectorConfiguration config,
 			StandardInjector injector) {
 		this.config = config;
 		this.injector = injector;
@@ -121,12 +121,12 @@ public class SaltaBinder {
 	}
 
 	/**
-	 * See the EDSL examples at {@link SaltaBinder}.
+	 * See the EDSL examples at {@link StandardBinder}.
 	 */
-	public <T> AnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
+	public <T> StandardAnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
 		if (currentBindingBuilder != null)
 			currentBindingBuilder.register();
-		BindingBuilderImpl<T> tmp = new BindingBuilderImpl<>(
+		StandardBindingBuilderImpl<T> tmp = new StandardBindingBuilderImpl<>(
 				CoreDependencyKey.typeMatcher(type), type, config, injector);
 		currentBindingBuilder = tmp;
 		return tmp;
@@ -138,17 +138,17 @@ public class SaltaBinder {
 	}
 
 	/**
-	 * See the EDSL examples at {@link SaltaBinder}.
+	 * See the EDSL examples at {@link StandardBinder}.
 	 */
-	public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
+	public <T> StandardAnnotatedBindingBuilder<T> bind(Class<T> type) {
 		return bind(TypeToken.of(type));
 	}
 
 	/**
-	 * See the EDSL examples at {@link SaltaBinder}.
+	 * See the EDSL examples at {@link StandardBinder}.
 	 */
-	public AnnotatedConstantBindingBuilder bindConstant() {
-		return new AnnotatedConstantBindingBuilder(config);
+	public StandardAnnotatedConstantBindingBuilder bindConstant() {
+		return new StandardAnnotatedConstantBindingBuilder(config);
 	}
 
 	/**

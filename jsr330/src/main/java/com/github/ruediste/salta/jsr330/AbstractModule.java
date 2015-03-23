@@ -31,7 +31,7 @@ import com.github.ruediste.salta.jsr330.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.jsr330.binder.Binder;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.binder.AnnotatedConstantBindingBuilder;
+import com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -101,7 +101,7 @@ public abstract class AbstractModule implements SaltaModule {
 	/**
 	 * @see Binder#bindConstant()
 	 */
-	protected AnnotatedConstantBindingBuilder bindConstant() {
+	protected StandardAnnotatedConstantBindingBuilder bindConstant() {
 		return binder().bindConstant();
 	}
 

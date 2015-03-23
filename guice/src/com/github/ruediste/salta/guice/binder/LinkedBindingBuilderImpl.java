@@ -17,10 +17,10 @@ import com.google.inject.binder.ScopedBindingBuilder;
 public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 		implements LinkedBindingBuilder<T> {
 
-	private com.github.ruediste.salta.standard.binder.LinkedBindingBuilder<T> delegate;
+	private com.github.ruediste.salta.standard.binder.StandardLinkedBindingBuilder<T> delegate;
 
 	public LinkedBindingBuilderImpl(
-			com.github.ruediste.salta.standard.binder.LinkedBindingBuilder<T> delegate) {
+			com.github.ruediste.salta.standard.binder.StandardLinkedBindingBuilder<T> delegate) {
 		super(delegate);
 		this.delegate = delegate;
 	}

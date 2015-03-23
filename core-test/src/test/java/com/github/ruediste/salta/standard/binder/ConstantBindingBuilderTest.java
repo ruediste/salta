@@ -47,7 +47,7 @@ public class ConstantBindingBuilderTest {
 
 	@Test
 	public void testCompilation() throws Throwable {
-		ConstantBindingBuilder builder = new ConstantBindingBuilder(null,
+		StandardConstantBindingBuilder builder = new StandardConstantBindingBuilder(null,
 				d -> true);
 		StandardStaticBinding binding = builder.createBinding(Integer.class, 3);
 		RecipeCompiler compiler = new RecipeCompiler();

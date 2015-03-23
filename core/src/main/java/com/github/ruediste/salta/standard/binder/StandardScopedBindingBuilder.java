@@ -11,7 +11,7 @@ import com.github.ruediste.salta.core.Scope;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface ScopedBindingBuilder<T> {
+public interface StandardScopedBindingBuilder<T> {
 
 	/**
 	 * See the EDSL examples at {@link Binder}.

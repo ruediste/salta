@@ -11,10 +11,10 @@ import com.google.common.reflect.TypeToken;
 public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>
 		implements LinkedBindingBuilder<T> {
 
-	private com.github.ruediste.salta.standard.binder.LinkedBindingBuilder<T> delegate;
+	private com.github.ruediste.salta.standard.binder.StandardLinkedBindingBuilder<T> delegate;
 
 	public LinkedBindingBuilderImpl(
-			com.github.ruediste.salta.standard.binder.LinkedBindingBuilder<T> delegate) {
+			com.github.ruediste.salta.standard.binder.StandardLinkedBindingBuilder<T> delegate) {
 		super(delegate);
 		this.delegate = delegate;
 	}

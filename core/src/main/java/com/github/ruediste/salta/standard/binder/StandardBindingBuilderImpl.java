@@ -31,22 +31,22 @@ import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
+public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBuilder<T> {
 	protected Matcher<CoreDependencyKey<?>> typeMatcher;
 	protected Matcher<CoreDependencyKey<?>> annotationMatcher;
 
-	private StandardInjectorConfiguration config;
-	private TypeToken<T> type;
+	protected StandardInjectorConfiguration config;
+	protected TypeToken<T> type;
 	/**
 	 * Binding which will be constructed. All instance variables will be
 	 * overwritten in {@link #register()}
 	 */
-	private StandardStaticBinding binding;
-	private Supplier<CreationRecipeFactory> recipeFactorySupplier;
-	private Supplier<Scope> scopeSupplier;
-	private StandardInjector injector;
+	protected StandardStaticBinding binding;
+	protected Supplier<CreationRecipeFactory> recipeFactorySupplier;
+	protected Supplier<Scope> scopeSupplier;
+	protected StandardInjector injector;
 
-	public BindingBuilderImpl(Matcher<CoreDependencyKey<?>> typeMatcher,
+	public StandardBindingBuilderImpl(Matcher<CoreDependencyKey<?>> typeMatcher,
 			TypeToken<T> type, StandardInjectorConfiguration config,
 			StandardInjector injector) {
 		this.injector = injector;
@@ -78,12 +78,12 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
-	public ScopedBindingBuilder<T> to(Class<? extends T> implementation) {
+	public StandardScopedBindingBuilder<T> to(Class<? extends T> implementation) {
 		return to(TypeToken.of(implementation));
 	}
 
 	@Override
-	public ScopedBindingBuilder<T> to(TypeToken<? extends T> implementation) {
+	public StandardScopedBindingBuilder<T> to(TypeToken<? extends T> implementation) {
 		recipeFactorySupplier = () -> ctx -> {
 			config.typesBoundToDefaultCreationRecipe.add(implementation);
 			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
@@ -95,7 +95,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
-	public ScopedBindingBuilder<T> to(
+	public StandardScopedBindingBuilder<T> to(
 			CoreDependencyKey<? extends T> implementation) {
 
 		recipeFactorySupplier = () -> ctx -> {
@@ -145,7 +145,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public ScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider) {
+	public StandardScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider) {
 		MembersInjectionToken<Supplier<?>> token = injector
 				.getMembersInjectionToken(provider,
 						(TypeToken<Supplier<?>>) TypeToken.of(provider
@@ -157,7 +157,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
-	public <P> ScopedBindingBuilder<T> toProviderInstance(P provider,
+	public <P> StandardScopedBindingBuilder<T> toProviderInstance(P provider,
 			Function<P, Supplier<? extends T>> providerWrapper) {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		MembersInjectionToken<P> token = injector.getMembersInjectionToken(
@@ -173,19 +173,19 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
-	public ScopedBindingBuilder<T> toProvider(
+	public StandardScopedBindingBuilder<T> toProvider(
 			Class<? extends Supplier<? extends T>> providerType) {
 		return toProvider(TypeToken.of(providerType));
 	}
 
 	@Override
-	public ScopedBindingBuilder<T> toProvider(
+	public StandardScopedBindingBuilder<T> toProvider(
 			TypeToken<? extends Supplier<? extends T>> providerType) {
 		return toProvider(DependencyKey.of(providerType));
 	}
 
 	@Override
-	public ScopedBindingBuilder<T> toProvider(
+	public StandardScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<? extends Supplier<? extends T>> providerKey) {
 		return toProvider(providerKey, x -> x);
 	}
@@ -202,7 +202,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
-	public <P> ScopedBindingBuilder<T> toProvider(
+	public <P> StandardScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
 			Function<? super P, Supplier<? extends T>> providerWrapper) {
 		scopeSupplier = () -> config.defaultScope;
@@ -241,14 +241,14 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
-	public <S extends T> ScopedBindingBuilder<T> toConstructor(
+	public <S extends T> StandardScopedBindingBuilder<T> toConstructor(
 			Constructor<S> constructor) {
 		return toConstructor(constructor,
 				TypeToken.of(constructor.getDeclaringClass()));
 	}
 
 	@Override
-	public <S extends T> ScopedBindingBuilder<T> toConstructor(
+	public <S extends T> StandardScopedBindingBuilder<T> toConstructor(
 			Constructor<S> constructor, TypeToken<? extends S> type) {
 		DefaultConstructionRule rule = new DefaultConstructionRule(config) {
 			@Override
@@ -293,7 +293,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
-	public LinkedBindingBuilder<T> annotatedWith(
+	public StandardLinkedBindingBuilder<T> annotatedWith(
 			Class<? extends Annotation> availableAnnotationType) {
 		annotationMatcher = config
 				.requredQualifierMatcher(availableAnnotationType);
@@ -301,7 +301,7 @@ public class BindingBuilderImpl<T> implements AnnotatedBindingBuilder<T> {
 	}
 
 	@Override
-	public LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
+	public StandardLinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
 		annotationMatcher = config.requredQualifierMatcher(availableAnnotation);
 		return this;
 	}
