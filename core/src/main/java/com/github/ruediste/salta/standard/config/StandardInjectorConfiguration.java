@@ -95,9 +95,9 @@ public class StandardInjectorConfiguration {
 	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
 
 	/**
-	 * Create an {@link RecipeInstantiator} using the {@link #instantiatorRules}
-	 * If no instantiator is found, an error is raised using
-	 * {@link #noInstantiatorFoundErrorProducers} or a fallback
+	 * Create an {@link RecipeInstantiator} function using the
+	 * {@link #instantiatorRules} If no instantiator is found,
+	 * {@link Optional#empty()} is returned.
 	 */
 	public Optional<Function<RecipeCreationContext, RecipeInstantiator>> createRecipeInstantiator(
 			TypeToken<?> type) {

@@ -5,7 +5,7 @@ import java.lang.annotation.Annotation;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 
 /**
- * See the EDSL examples at {@link Binder}.
+ * See the EDSL examples at {@link SaltaBinder}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
@@ -18,7 +18,7 @@ public class AnnotatedConstantBindingBuilder {
 	}
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public ConstantBindingBuilder annotatedWith(
 			Class<? extends Annotation> annotationType) {
@@ -27,7 +27,7 @@ public class AnnotatedConstantBindingBuilder {
 	}
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public ConstantBindingBuilder annotatedWith(Annotation annotation) {
 		return new ConstantBindingBuilder(config,

@@ -4,7 +4,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 /**
- * A recipe for compiling something a complete method body.
+ * A recipe for compiling a complete method body.
  */
 public abstract class MethodRecipe {
 	/**
@@ -19,9 +19,6 @@ public abstract class MethodRecipe {
 
 	/**
 	 * Emit the code for the method
-	 * 
-	 * @return type of the supplied instance
-	 * 
 	 */
 	protected abstract void compileImpl(GeneratorAdapter mv,
 			MethodCompilationContext ctx);

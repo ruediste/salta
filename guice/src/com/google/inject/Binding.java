@@ -16,7 +16,6 @@
 
 package com.google.inject;
 
-
 /**
  * A mapping from a key (type and optional annotation) to the strategy for
  * getting instances of the type. This interface is part of the introspection
@@ -74,12 +73,6 @@ public interface Binding<T> {
 	/**
 	 * Returns the scoped provider guice uses to fulfill requests for this
 	 * binding.
-	 *
-	 * @throws UnsupportedOperationException
-	 *             when invoked on a {@link Binding} created via
-	 *             {@link com.google.inject.spi.Elements#getElements}. This
-	 *             method is only supported on {@link Binding}s returned from an
-	 *             injector.
 	 */
 	Provider<T> getProvider();
 

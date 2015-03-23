@@ -15,6 +15,8 @@
  * 
  * <p>
  * There are three places which are searched in order to lookup a dependency:
+ * </p>
+ * 
  * <ol>
  * <li> <b> DependencyFactories:</b> Create a dependency based on the key. Do not take part in circular dependency detection or scoping </li>
  * <li> <b> Static Bindings: </b> When the key matches the binding, the binding creates the dependency. It is important that no information from the key is 
@@ -24,7 +26,6 @@
  * the the {@link com.github.ruediste.salta.core.JITBindingRule JITBindingRules} are evaluated and an eventually created binding is used. JITBindings take part
  * in circular dependency detection and scoping as well.</li>    
  * </ol>
- * </p>
  * 
  */
 package com.github.ruediste.salta.core;

@@ -18,10 +18,10 @@
 package com.github.ruediste.salta.jsr330;
 
 import javax.inject.Provider;
-import javax.naming.ConfigurationException;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.jsr330.binder.Binder;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.google.common.reflect.TypeToken;
@@ -71,8 +71,8 @@ public interface Injector {
 	 *
 	 * @param typeLiteral
 	 *            type to get members injector for
-	 * @see Binder#getMembersInjector(TypeLiteral) for an alternative that
-	 *      offers up front error detection
+	 * @see Binder#getMembersInjector(TypeToken) for an alternative that offers
+	 *      up front error detection
 	 * @since 2.0
 	 */
 	<T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral);
@@ -80,8 +80,8 @@ public interface Injector {
 	/**
 	 * Returns the members injector used to inject dependencies into methods and
 	 * fields on instances of the given type {@code T}. When feasible, use
-	 * {@link Binder#getMembersInjector(TypeLiteral)} instead to get increased
-	 * up front error detection.
+	 * {@link Binder#getMembersInjector(TypeToken)} instead to get increased up
+	 * front error detection.
 	 *
 	 * @param type
 	 *            type to get members injector for
@@ -96,10 +96,8 @@ public interface Injector {
 	 * key. When feasible, avoid using this method, in favor of having Salta
 	 * inject your dependencies ahead of time.
 	 *
-	 * @throws ConfigurationException
-	 *             if this injector cannot find or create the provider.
-	 * @see Binder#getProvider(Key) for an alternative that offers up front
-	 *      error detection
+	 * @see Binder#getProvider(CoreDependencyKey) for an alternative that offers
+	 *      up front error detection
 	 */
 	<T> Provider<T> getProvider(CoreDependencyKey<T> key);
 
@@ -108,8 +106,6 @@ public interface Injector {
 	 * feasible, avoid using this method, in favor of having Salta inject your
 	 * dependencies ahead of time.
 	 *
-	 * @throws ConfigurationException
-	 *             if this injector cannot find or create the provider.
 	 * @see Binder#getProvider(Class) for an alternative that offers up front
 	 *      error detection
 	 */
@@ -120,8 +116,6 @@ public interface Injector {
 	 * to {@code getProvider(key).get()}. When feasible, avoid using this
 	 * method, in favor of having Salta inject your dependencies ahead of time.
 	 *
-	 * @throws ConfigurationException
-	 *             if this injector cannot find or create the provider.
 	 * @throws SaltaException
 	 *             if there was a runtime failure while providing an instance.
 	 */
@@ -132,8 +126,6 @@ public interface Injector {
 	 * to {@code getProvider(type).get()}. When feasible, avoid using this
 	 * method, in favor of having Salta inject your dependencies ahead of time.
 	 *
-	 * @throws ConfigurationException
-	 *             if this injector cannot find or create the provider.
 	 * @throws SaltaException
 	 *             if there was a runtime failure while providing an instance.
 	 */

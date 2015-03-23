@@ -182,7 +182,7 @@ public abstract class AbstractModule implements SaltaModule {
 	}
 
 	/**
-	 * @see Binder#getMembersInjector(TypeLiteral)
+	 * @see Binder#getMembersInjector(TypeToken)
 	 * @since 2.0
 	 */
 	protected <T> MembersInjector<T> getMembersInjector(TypeToken<T> type) {

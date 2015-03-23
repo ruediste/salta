@@ -18,6 +18,7 @@ package com.google.inject.spi;
 
 import com.google.inject.Binding;
 import com.google.inject.Provider;
+import com.google.inject.Scope;
 
 /**
  * Listens for provisioning of objects. Useful for gathering timing information

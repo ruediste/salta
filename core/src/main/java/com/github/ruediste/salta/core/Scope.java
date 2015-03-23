@@ -16,9 +16,8 @@ public interface Scope {
 	 * 
 	 * @param binding
 	 *            binding which is beeing scoped
-	 * @param boundType
-	 *            type the binding was created for
-	 * @return
+	 * @param requestedType
+	 *            the type requested by the injection point
 	 */
 	SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding,
 			TypeToken<?> requestedType);
@@ -27,9 +26,6 @@ public interface Scope {
 	 * Perform an eager instantiation if applicable for this scope. Only called
 	 * if eager instantiations should actually be perfomed, so the scope does
 	 * not have to check a configuration by itself.
-	 * 
-	 * @param ctx
-	 *            TODO
 	 */
 	default void performEagerInstantiation(RecipeCreationContext ctx,
 			Binding binding) {

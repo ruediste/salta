@@ -43,8 +43,8 @@ public interface SaltaModule {
 	 *
 	 * <p>
 	 * <strong>Do not invoke this method directly</strong> to install
-	 * submodules. Instead use {@link Binder#install(Module)}, which ensures
-	 * that {@link Provides provider methods} are discovered.
+	 * submodules. Instead use {@link Binder#install(SaltaModule)}, which
+	 * ensures that {@link Provides provider methods} are discovered.
 	 */
 	void configure(Binder binder);
 }

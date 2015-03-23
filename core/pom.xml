@@ -5,7 +5,7 @@
 	<artifactId>salta-core</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Salta</name>
+	<name>Salta Core</name>
 	<url>https://github.com/ruediste/salta</url>
 
 	<properties>
@@ -37,17 +37,6 @@
 			<artifactId>javax.inject-tck</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>me.qmx.jitescript</groupId>
-			<artifactId>jitescript</artifactId>
-			<version>0.3.0</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>asm-debug-all</artifactId>
-					<groupId>org.ow2.asm</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-debug-all</artifactId>
 			<version>5.0.3</version>
@@ -59,4 +48,5 @@
 		<artifactId>salta-parent</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
+	<description>Core of the Salta Framework. Provides most of the infrastructure, but no API</description>
 </project>

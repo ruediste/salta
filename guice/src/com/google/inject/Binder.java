@@ -153,11 +153,6 @@ import com.google.inject.spi.ProvisionListener;
  * </pre>
  *
  * Sets up a constant binding. Constant injections must always be annotated.
- * When a constant binding's value is a string, it is eligile for conversion to
- * all primitive types, to {@link Enum#valueOf(Class, String) all enums}, and to
- * {@link Class#forName class literals}. Conversions for other types can be
- * configured using {@link #convertToTypes(Matcher, TypeConverter)
- * convertToTypes()}.
  *
  * <pre>
  *   {@literal @}Color("red") Color red; // A member variable (field)
@@ -204,11 +199,10 @@ import com.google.inject.spi.ProvisionListener;
  * runtime, as soon as you try to create your Injector.
  *
  * <p>
- * The other methods of Binder such as {@link #bindScope},
- * {@link #bindInterceptor}, {@link #install}, {@link #requestStaticInjection},
- * {@link #addError} and {@link #currentStage} are not part of the Binding EDSL;
- * you can learn how to use these in the usual way, from the method
- * documentation.
+ * The other methods of Binder such as {@link #bindScope}, {@link #install},
+ * {@link #requestStaticInjection(Class...)}, {@link #addError} and
+ * {@link #currentStage} are not part of the Binding EDSL; you can learn how to
+ * use these in the usual way, from the method documentation.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)

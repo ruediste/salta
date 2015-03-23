@@ -23,6 +23,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -131,10 +132,8 @@ import com.google.common.reflect.TypeToken;
  * was specified with an annotation on the {@code ServiceImpl} class.
  * 
  * <p>
- * Besides {@link Singleton}/{@link Scopes#SINGLETON}, there are
- * servlet-specific scopes available in
- * {@code com.google.inject.servlet.ServletScopes}, and your Modules can
- * contribute their own custom scopes for use here as well.
+ * Besides {@link Singleton}, your Modules can contribute their own custom
+ * scopes for use here as well.
  *
  * <pre>
  * bind(new TypeToken&lt;PaymentService&lt;CreditCard&gt;&gt;() {
@@ -169,11 +168,6 @@ import com.google.common.reflect.TypeToken;
  * </pre>
  *
  * Sets up a constant binding. Constant injections must always be annotated.
- * When a constant binding's value is a string, it is eligile for conversion to
- * all primitive types, to {@link Enum#valueOf(Class, String) all enums}, and to
- * {@link Class#forName class literals}. Conversions for other types can be
- * configured using {@link #convertToTypes(Matcher, TypeConverter)
- * convertToTypes()}.
  *
  * <pre>
  *   {@literal @}Color("red") Color red; // A member variable (field)
@@ -193,11 +187,10 @@ import com.google.common.reflect.TypeToken;
  * </pre>
  *
  * Differentiating by names is a common enough use case that we provided a
- * standard annotation, {@link com.google.inject.name.Named @Named}. Because of
- * Guice's library support, binding by name is quite easier than in the
- * arbitrary binding annotation case we just saw. However, remember that these
- * names will live in a single flat namespace with all the other names used in
- * your application.
+ * standard annotation, {@link Named @Named}. Because of Guice's library
+ * support, binding by name is quite easier than in the arbitrary binding
+ * annotation case we just saw. However, remember that these names will live in
+ * a single flat namespace with all the other names used in your application.
  *
  * <pre>
  * Constructor&lt;T&gt; loneCtor = getLoneCtorFromServiceImplViaReflection();
@@ -220,11 +213,10 @@ import com.google.common.reflect.TypeToken;
  * runtime, as soon as you try to create your Injector.
  *
  * <p>
- * The other methods of Binder such as {@link #bindScope},
- * {@link #bindInterceptor}, {@link #install}, {@link #requestStaticInjection},
- * {@link #addError} and {@link #currentStage} are not part of the Binding EDSL;
- * you can learn how to use these in the usual way, from the method
- * documentation.
+ * The other methods of Binder such as {@link #bindScope}, {@link #install},
+ * {@link #requestStaticInjection}, {@link #addError} and {@link #currentStage}
+ * are not part of the Binding EDSL; you can learn how to use these in the usual
+ * way, from the method documentation.
  *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)

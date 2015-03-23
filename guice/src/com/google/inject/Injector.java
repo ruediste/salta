@@ -40,16 +40,6 @@ package com.google.inject;
  * of already-constructed instances. This can be used to interoperate with
  * objects created by other frameworks or services.
  *
- * <p>
- * Injectors can be {@link #createChildInjector(Iterable) hierarchical}. Child
- * injectors inherit the configuration of their parent injectors, but the
- * converse does not hold.
- *
- * <p>
- * The injector's {@link #getBindings() internal bindings} are available for
- * introspection. This enables tools and extensions to operate on an injector
- * reflectively.
- *
  * @author crazybob@google.com (Bob Lee)
  * @author jessewilson@google.com (Jesse Wilson)
  */

@@ -4,71 +4,67 @@ import java.lang.reflect.Constructor;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.xml.bind.Binder;
-
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.google.common.reflect.TypeToken;
 
 /**
- * See the EDSL examples at {@link Binder}.
+ * See the EDSL examples at {@link SaltaBinder}.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public ScopedBindingBuilder<T> to(Class<? extends T> implementation);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public ScopedBindingBuilder<T> to(TypeToken<? extends T> implementation);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public ScopedBindingBuilder<T> to(
 			CoreDependencyKey<? extends T> implementation);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
-	 *
-	 * @see com.github.ruediste.salta.standard.core.inject.Injector#injectMembers
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public void toInstance(T instance);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 *
 	 */
 	public ScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public ScopedBindingBuilder<T> toProvider(
 			Class<? extends Supplier<? extends T>> providerType);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public ScopedBindingBuilder<T> toProvider(
 			TypeToken<? extends Supplier<? extends T>> providerType);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 */
 	public ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<? extends Supplier<? extends T>> providerKey);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 * 
 	 * <p>
 	 * This variant allows any provider class to be used as instance provider.
-	 * However, a wrapper to {@link InstanceProvider} has to be provided
+	 * However, a wrapper to {@link Supplier} has to be provided
 	 * </p>
 	 */
 	public <P> ScopedBindingBuilder<T> toProvider(
@@ -76,7 +72,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			Function<? super P, Supplier<? extends T>> providerWrapper);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 * 
 	 * @since 3.0
 	 */
@@ -84,7 +80,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 			Constructor<S> constructor);
 
 	/**
-	 * See the EDSL examples at {@link Binder}.
+	 * See the EDSL examples at {@link SaltaBinder}.
 	 * 
 	 * @since 3.0
 	 */

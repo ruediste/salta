@@ -16,8 +16,8 @@ public abstract class StaticBinding extends Binding {
 	 * returned set.
 	 * 
 	 * <p>
-	 * If null is returned, {@link #matches(CoreDependencyKey)} will be called
-	 * upon every lookup.
+	 * If null or an empty set is returned, the matcher retruned from
+	 * {@link #getMatcher()} will be called upon every lookup.
 	 * </p>
 	 */
 	public Set<TypeToken<?>> getPossibleTypes() {
