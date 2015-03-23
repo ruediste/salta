@@ -1,7 +1,5 @@
 package com.github.ruediste.salta.core;
 
-import java.util.function.Function;
-
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.google.common.reflect.TypeToken;
 
@@ -22,16 +20,19 @@ public interface Scope {
 	 *            type the binding was created for
 	 * @return
 	 */
-	Function<RecipeCreationContext, SupplierRecipe> createRecipe(
-			Binding binding, TypeToken<?> requestedType);
+	SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding,
+			TypeToken<?> requestedType);
 
 	/**
 	 * Perform an eager instantiation if applicable for this scope. Only called
 	 * if eager instantiations should actually be perfomed, so the scope does
 	 * not have to check a configuration by itself.
-	 * @param ctx TODO
+	 * 
+	 * @param ctx
+	 *            TODO
 	 */
-	default void performEagerInstantiation(RecipeCreationContext ctx, Binding binding) {
+	default void performEagerInstantiation(RecipeCreationContext ctx,
+			Binding binding) {
 	}
 
 }

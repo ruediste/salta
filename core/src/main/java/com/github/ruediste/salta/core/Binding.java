@@ -1,7 +1,5 @@
 package com.github.ruediste.salta.core;
 
-import java.util.function.Function;
-
 import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
@@ -24,7 +22,7 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	}
 
 	/**
-	 * Create the {@link CreationRecipe} for this binding if it does not exist
+	 * Create the {@link SupplierRecipe} for this binding if it does not exist
 	 * yet. If the binding is already created, the passed context will be
 	 * ignored. This method is always called with the
 	 * {@link CoreInjector#recipeLock} held, thus no thread synchronization is
@@ -36,8 +34,8 @@ public abstract class Binding extends AttachedPropertyBearerBase {
 	 * processed.
 	 * </p>
 	 */
-	public Function<RecipeCreationContext, SupplierRecipe> getOrCreateRecipe() {
-		return ctx -> ctx.withBinding(this, () -> {
+	public SupplierRecipe getOrCreateRecipe(RecipeCreationContext ctx) {
+		return ctx.withBinding(this, () -> {
 			if (recipe == null) {
 				if (creatingRecipe)
 					throw new RecursiveRecipeCreationDetectedException();

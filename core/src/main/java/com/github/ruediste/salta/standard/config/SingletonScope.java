@@ -1,7 +1,5 @@
 package com.github.ruediste.salta.standard.config;
 
-import java.util.function.Function;
-
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
@@ -24,28 +22,25 @@ public class SingletonScope implements Scope {
 	}
 
 	@Override
-	public Function<RecipeCreationContext, SupplierRecipe> createRecipe(
+	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
 			Binding binding, TypeToken<?> requestedType) {
-		return ctx -> {
-			// make sure to create the instance when first creating the recipe
-			instantiate(ctx, binding);
+		// make sure to create the instance when first creating the recipe
+		instantiate(ctx, binding);
 
-			return new SupplierRecipe() {
+		return new SupplierRecipe() {
 
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				@Override
-				public Class<?> compileImpl(GeneratorAdapter mv,
-						MethodCompilationContext ctx) {
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@Override
+			public Class<?> compileImpl(GeneratorAdapter mv,
+					MethodCompilationContext ctx) {
 
-					Class<?> fieldType = requestedType.getRawType();
-					if (!Accessibility.isClassPublic(fieldType)) {
-						fieldType = Object.class;
-					}
-					ctx.addFieldAndLoad((Class) fieldType,
-							instance.get(binding));
-					return fieldType;
+				Class<?> fieldType = requestedType.getRawType();
+				if (!Accessibility.isClassPublic(fieldType)) {
+					fieldType = Object.class;
 				}
-			};
+				ctx.addFieldAndLoad((Class) fieldType, instance.get(binding));
+				return fieldType;
+			}
 		};
 	}
 
@@ -60,7 +55,7 @@ public class SingletonScope implements Scope {
 	 */
 	public void instantiate(RecipeCreationContext ctx, Binding binding) {
 		if (!instance.isSet(binding)) {
-			SupplierRecipe innerRecipe = binding.getOrCreateRecipe().apply(ctx);
+			SupplierRecipe innerRecipe = binding.getOrCreateRecipe(ctx);
 			instance.set(binding, ctx.getCompiler()
 					.compileSupplier(innerRecipe).getNoThrow());
 		}
