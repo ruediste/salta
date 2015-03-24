@@ -12,7 +12,8 @@ import com.google.common.reflect.TypeToken;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface StandardLinkedBindingBuilder<T> extends StandardScopedBindingBuilder<T> {
+public interface StandardLinkedBindingBuilder<T> extends
+		StandardScopedBindingBuilder<T> {
 
 	/**
 	 * See the EDSL examples at {@link StandardBinder}.
@@ -22,7 +23,8 @@ public interface StandardLinkedBindingBuilder<T> extends StandardScopedBindingBu
 	/**
 	 * See the EDSL examples at {@link StandardBinder}.
 	 */
-	public StandardScopedBindingBuilder<T> to(TypeToken<? extends T> implementation);
+	public StandardScopedBindingBuilder<T> to(
+			TypeToken<? extends T> implementation);
 
 	/**
 	 * See the EDSL examples at {@link StandardBinder}.
@@ -39,25 +41,8 @@ public interface StandardLinkedBindingBuilder<T> extends StandardScopedBindingBu
 	 * See the EDSL examples at {@link StandardBinder}.
 	 *
 	 */
-	public StandardScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider);
-
-	/**
-	 * See the EDSL examples at {@link StandardBinder}.
-	 */
 	public StandardScopedBindingBuilder<T> toProvider(
-			Class<? extends Supplier<? extends T>> providerType);
-
-	/**
-	 * See the EDSL examples at {@link StandardBinder}.
-	 */
-	public StandardScopedBindingBuilder<T> toProvider(
-			TypeToken<? extends Supplier<? extends T>> providerType);
-
-	/**
-	 * See the EDSL examples at {@link StandardBinder}.
-	 */
-	public StandardScopedBindingBuilder<T> toProvider(
-			CoreDependencyKey<? extends Supplier<? extends T>> providerKey);
+			Supplier<? extends T> provider);
 
 	/**
 	 * See the EDSL examples at {@link StandardBinder}.
@@ -69,7 +54,7 @@ public interface StandardLinkedBindingBuilder<T> extends StandardScopedBindingBu
 	 */
 	public <P> StandardScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
-			Function<? super P, Supplier<? extends T>> providerWrapper);
+			Function<? super P, ? extends T> providerWrapper);
 
 	/**
 	 * See the EDSL examples at {@link StandardBinder}.

@@ -22,6 +22,7 @@ import com.github.ruediste.salta.guice.GuiceInjectorImpl;
 import com.github.ruediste.salta.guice.GuiceModule;
 import com.github.ruediste.salta.guice.binder.BinderImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
+import com.github.ruediste.salta.guice.binder.StandardBinderGuice;
 import com.github.ruediste.salta.standard.binder.StandardBinder;
 
 /**
@@ -105,7 +106,7 @@ public final class Guice {
 
 		GuiceInjectorImpl injector = new GuiceInjectorImpl(config);
 
-		StandardBinder saltaBinder = new StandardBinder(config.config,
+		StandardBinder saltaBinder = new StandardBinderGuice(config.config,
 				injector.getSaltaInjector());
 		BinderImpl binder = new BinderImpl(saltaBinder, config);
 

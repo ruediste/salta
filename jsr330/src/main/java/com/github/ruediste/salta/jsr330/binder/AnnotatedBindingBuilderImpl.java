@@ -2,6 +2,8 @@ package com.github.ruediste.salta.jsr330.binder;
 
 import java.lang.annotation.Annotation;
 
+import com.github.ruediste.salta.jsr330.Names;
+
 public class AnnotatedBindingBuilderImpl<T> extends LinkedBindingBuilderImpl<T>
 		implements AnnotatedBindingBuilder<T> {
 
@@ -24,6 +26,12 @@ public class AnnotatedBindingBuilderImpl<T> extends LinkedBindingBuilderImpl<T>
 	public LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
 		return new LinkedBindingBuilderImpl<>(
 				delegate.annotatedWith(availableAnnotation));
+	}
+
+	@Override
+	public LinkedBindingBuilder<T> named(String name) {
+		return new LinkedBindingBuilderImpl<>(delegate.annotatedWith(Names
+				.named(name)));
 	}
 
 }

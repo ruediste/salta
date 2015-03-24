@@ -85,28 +85,14 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 	private <P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProviderImpl(
 			TypeLiteral<P> providerType) {
 		return new ScopedBindingBuilderImpl(delegate.toProvider(
-				DependencyKey.of(providerType.getTypeToken()),
-				new java.util.function.Function<P, Supplier<? extends T>>() {
-
-					@Override
-					public Supplier<? extends T> apply(P t) {
-						return () -> t.get();
-					}
-				}));
+				DependencyKey.of(providerType.getTypeToken()), t -> t.get()));
 	}
 
 	@Override
 	public <P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProvider(
 			Key<P> providerKey) {
 		return new ScopedBindingBuilderImpl(delegate.toProvider(
-				KeyAdapter.of(providerKey),
-				new java.util.function.Function<P, Supplier<? extends T>>() {
-
-					@Override
-					public Supplier<? extends T> apply(P t) {
-						return () -> t.get();
-					}
-				}));
+				KeyAdapter.of(providerKey), t -> t.get()));
 	}
 
 	@Override

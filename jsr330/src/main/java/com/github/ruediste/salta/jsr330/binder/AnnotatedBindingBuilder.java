@@ -19,4 +19,7 @@ public interface AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 	 * See the EDSL examples at {@link Binder}.
 	 */
 	LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation);
+
+	LinkedBindingBuilder<T> named(String name);
+
 }

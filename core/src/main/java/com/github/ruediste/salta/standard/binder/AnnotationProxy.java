@@ -29,7 +29,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
+ * Generate a dynamic proxy for an arbitrary Annotation time.
  * 
+ * <p>
+ * Use {@link #newProxy(Class)} to create an instance on which you can use
+ * {@link #setProperty(String, Object)} to define the annotation properties and
+ * {@link #proxedAnnotation} to retrieve the annotated proxy
  *
  * @param <A>
  *            The annotation type has to be proxed.
@@ -37,11 +42,6 @@ import java.util.Map.Entry;
  */
 public final class AnnotationProxy<A extends Annotation> implements Annotation,
 		InvocationHandler {
-
-	/**
-	 * The multiplicator required in the hash code calculation.
-	 */
-	private static final int MEMBER_NAME_MULTIPLICATOR = 127;
 
 	/**
 	 * Creates a new annotation proxy.
@@ -277,7 +277,7 @@ public final class AnnotationProxy<A extends Annotation> implements Annotation,
 
 		for (Entry<String, AnnotationProperty> property : this.properties
 				.entrySet()) {
-			hashCode += (MEMBER_NAME_MULTIPLICATOR
+			hashCode += (127
 					* property.getKey().hashCode() ^ property.getValue()
 					.getValueHashCode());
 		}

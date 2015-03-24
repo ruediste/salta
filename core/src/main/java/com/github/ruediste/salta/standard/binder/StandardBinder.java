@@ -54,10 +54,10 @@ import com.google.common.reflect.TypeToken;
  * */
 public class StandardBinder {
 
-	private StandardInjectorConfiguration config;
-	private StandardInjector injector;
+	protected StandardInjectorConfiguration config;
+	protected StandardInjector injector;
 
-	StandardBindingBuilderImpl<?> currentBindingBuilder;
+	protected StandardBindingBuilderImpl<?> currentBindingBuilder;
 
 	public StandardBinder(StandardInjectorConfiguration config,
 			StandardInjector injector) {
@@ -126,10 +126,19 @@ public class StandardBinder {
 	public <T> StandardAnnotatedBindingBuilder<T> bind(TypeToken<T> type) {
 		if (currentBindingBuilder != null)
 			currentBindingBuilder.register();
-		StandardBindingBuilderImpl<T> tmp = new StandardBindingBuilderImpl<>(
-				CoreDependencyKey.typeMatcher(type), type, config, injector);
+		StandardBindingBuilderImpl<T> tmp = createBindingBuilder(type);
 		currentBindingBuilder = tmp;
 		return tmp;
+	}
+
+	/**
+	 * This metod is used by {@link #bind(TypeToken)} to instantiate a binding
+	 * builder and can be used to instantiate a subclass
+	 */
+	protected <T> StandardBindingBuilderImpl<T> createBindingBuilder(
+			TypeToken<T> type) {
+		return new StandardBindingBuilderImpl<>(
+				CoreDependencyKey.typeMatcher(type), type, config, injector);
 	}
 
 	public void close() {

@@ -63,7 +63,7 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>
 	public <P extends Provider<? extends T>> ScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey) {
 		return new ScopedBindingBuilderImpl<>(delegate.toProvider(providerKey,
-				p -> () -> p.get()));
+				p -> p.get()));
 	}
 
 	@Override

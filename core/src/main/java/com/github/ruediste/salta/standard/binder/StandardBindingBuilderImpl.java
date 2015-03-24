@@ -21,7 +21,6 @@ import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
-import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
@@ -31,7 +30,8 @@ import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBuilder<T> {
+public class StandardBindingBuilderImpl<T> implements
+		StandardAnnotatedBindingBuilder<T> {
 	protected Matcher<CoreDependencyKey<?>> typeMatcher;
 	protected Matcher<CoreDependencyKey<?>> annotationMatcher;
 
@@ -46,9 +46,9 @@ public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBu
 	protected Supplier<Scope> scopeSupplier;
 	protected StandardInjector injector;
 
-	public StandardBindingBuilderImpl(Matcher<CoreDependencyKey<?>> typeMatcher,
-			TypeToken<T> type, StandardInjectorConfiguration config,
-			StandardInjector injector) {
+	public StandardBindingBuilderImpl(
+			Matcher<CoreDependencyKey<?>> typeMatcher, TypeToken<T> type,
+			StandardInjectorConfiguration config, StandardInjector injector) {
 		this.injector = injector;
 		binding = new StandardStaticBinding();
 
@@ -83,7 +83,8 @@ public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBu
 	}
 
 	@Override
-	public StandardScopedBindingBuilder<T> to(TypeToken<? extends T> implementation) {
+	public StandardScopedBindingBuilder<T> to(
+			TypeToken<? extends T> implementation) {
 		recipeFactorySupplier = () -> ctx -> {
 			config.typesBoundToDefaultCreationRecipe.add(implementation);
 			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
@@ -145,7 +146,8 @@ public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBu
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public StandardScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider) {
+	public StandardScopedBindingBuilder<T> toProvider(
+			Supplier<? extends T> provider) {
 		MembersInjectionToken<Supplier<?>> token = injector
 				.getMembersInjectionToken(provider,
 						(TypeToken<Supplier<?>>) TypeToken.of(provider
@@ -172,24 +174,6 @@ public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBu
 		return this;
 	}
 
-	@Override
-	public StandardScopedBindingBuilder<T> toProvider(
-			Class<? extends Supplier<? extends T>> providerType) {
-		return toProvider(TypeToken.of(providerType));
-	}
-
-	@Override
-	public StandardScopedBindingBuilder<T> toProvider(
-			TypeToken<? extends Supplier<? extends T>> providerType) {
-		return toProvider(DependencyKey.of(providerType));
-	}
-
-	@Override
-	public StandardScopedBindingBuilder<T> toProvider(
-			CoreDependencyKey<? extends Supplier<? extends T>> providerKey) {
-		return toProvider(providerKey, x -> x);
-	}
-
 	public static class RecursiveAccessOfInstanceOfProviderClassException
 			extends SaltaException {
 		private static final long serialVersionUID = 1L;
@@ -204,12 +188,19 @@ public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBu
 	@Override
 	public <P> StandardScopedBindingBuilder<T> toProvider(
 			CoreDependencyKey<P> providerKey,
-			Function<? super P, Supplier<? extends T>> providerWrapper) {
+			Function<? super P, ? extends T> providerWrapper) {
 		scopeSupplier = () -> config.defaultScope;
-		recipeFactorySupplier = new Supplier<CreationRecipeFactory>() {
+		recipeFactorySupplier = createProviderRecipeFactorySupplier(
+				providerKey, providerWrapper);
+		return this;
+	}
+
+	protected <P> Supplier<CreationRecipeFactory> createProviderRecipeFactorySupplier(
+			CoreDependencyKey<P> providerKey,
+			Function<? super P, ? extends T> providerWrapper) {
+		return new Supplier<CreationRecipeFactory>() {
 			@Override
 			public CreationRecipeFactory get() {
-				config.implicitlyBoundKeys.add(providerKey);
 				return new CreationRecipeFactory() {
 					@Override
 					public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
@@ -227,9 +218,6 @@ public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBu
 								mv.invokeInterface(
 										Type.getType(Function.class),
 										Method.getMethod("Object apply(Object)"));
-								mv.invokeInterface(
-										Type.getType(Supplier.class),
-										Method.getMethod("Object get()"));
 								return Object.class;
 							}
 						};
@@ -237,7 +225,6 @@ public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBu
 				};
 			}
 		};
-		return this;
 	}
 
 	@Override
@@ -301,7 +288,8 @@ public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBu
 	}
 
 	@Override
-	public StandardLinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
+	public StandardLinkedBindingBuilder<T> annotatedWith(
+			Annotation availableAnnotation) {
 		annotationMatcher = config.requredQualifierMatcher(availableAnnotation);
 		return this;
 	}
