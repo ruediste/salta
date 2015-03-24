@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.github.ruediste</groupId>
 			<artifactId>attached-properties-4j</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -45,7 +45,7 @@
 	<parent>
 		<groupId>com.github.ruediste.salta</groupId>
 		<artifactId>salta-parent</artifactId>
-		<version>0.1</version>
+		<version>0.2-SNAPSHOT</version>
 	</parent>
 	<description>Core of the Salta Framework. Provides most of the infrastructure, but no API</description>
 </project>
