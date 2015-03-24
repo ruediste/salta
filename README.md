@@ -4,7 +4,6 @@
  * Fast: fast startup, fast object instantiation
  * Flexible: customize API, annotations, behaviour ...
  
-
 ** PASSES JSR330 (javax.inject) Technology Compatibility Kit (TCK) **
 
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
@@ -80,9 +79,10 @@ Salta does not support circular dependencies. There is simply no way to make the
 ### Standard Module
 The standard module contains common code to implement a guice-like dependency injection framework on top of the core module. It provides fine grained customization points and organizes the cooperation between different modules.
 
- * **Recipe Creation:** The standard module splits instance creation into the following steps: instantiation, members injection, initialization, enhancement, scoping. Each of these aspects can be configured using rules in the *StandardInjectionConfiguration**. This allows for a very fine grained customization of each of these aspects.
+ * **Instance Creation:** The standard module splits instance creation into the following steps: instantiation, members injection, initialization, enhancement, scoping. Each of these aspects can be configured using rules or factories in the *StandardInjectorConfiguration**. This allows for a very fine grained customization of each of these aspects.
   
- * **Scopes:**
+ * **Scopes:** Scopes are used to reuse a single instance multiple times, or to inject a different instance in different threads. Only instances provided by bindings can be scoped, since the binding is used to identify the instance to be injected. Scoping happens after the instance creation
+ 
  * **:**
  * **:**
 
