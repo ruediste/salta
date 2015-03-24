@@ -8,16 +8,18 @@ import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.binder.StandardBindingBuilderImpl;
-import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 
 public class StandardBindingBuilderImplGuice<T> extends
 		StandardBindingBuilderImpl<T> {
 
+	private GuiceInjectorConfiguration guiceConfig;
+
 	public StandardBindingBuilderImplGuice(
 			Matcher<CoreDependencyKey<?>> typeMatcher, TypeToken<T> type,
-			StandardInjectorConfiguration config, StandardInjector injector) {
-		super(typeMatcher, type, config, injector);
+			GuiceInjectorConfiguration guiceConfig, StandardInjector injector) {
+		super(typeMatcher, type, guiceConfig.config, injector);
+		this.guiceConfig = guiceConfig;
 	}
 
 	@Override
@@ -28,7 +30,18 @@ public class StandardBindingBuilderImplGuice<T> extends
 				.createProviderRecipeFactorySupplier(providerKey,
 						providerWrapper);
 		return () -> {
-			config.implicitlyBoundKeys.add(providerKey);
+			guiceConfig.implicitlyBoundKeys.add(providerKey);
+			return inner.get();
+		};
+	}
+
+	@Override
+	protected Supplier<CreationRecipeFactory> createDefaultCreationRecipeFactorySupplier(
+			TypeToken<? extends T> implementation) {
+		Supplier<CreationRecipeFactory> inner = super
+				.createDefaultCreationRecipeFactorySupplier(implementation);
+		return () -> {
+			guiceConfig.typesBoundToDefaultCreationRecipe.add(implementation);
 			return inner.get();
 		};
 	}

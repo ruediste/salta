@@ -438,8 +438,5 @@ public class StandardInjectorConfiguration {
 					availableQualiferType);
 	}
 
-	public final ArrayList<TypeToken<?>> typesBoundToDefaultCreationRecipe = new ArrayList<>();
-	public final ArrayList<CoreDependencyKey<?>> implicitlyBoundKeys = new ArrayList<>();
-
 	public MembersInjectorFactory membersInjectorFactory;
 }

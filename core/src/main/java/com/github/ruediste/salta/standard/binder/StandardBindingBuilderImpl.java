@@ -55,11 +55,7 @@ public class StandardBindingBuilderImpl<T> implements
 		this.typeMatcher = typeMatcher;
 		this.type = type;
 		this.config = config;
-		recipeFactorySupplier = () -> {
-			config.typesBoundToDefaultCreationRecipe.add(type);
-			return ctx -> new DefaultCreationRecipeBuilder(config, type)
-					.build(ctx);
-		};
+		recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(type);
 		scopeSupplier = () -> config.getScope(type);
 	}
 
@@ -85,14 +81,17 @@ public class StandardBindingBuilderImpl<T> implements
 	@Override
 	public StandardScopedBindingBuilder<T> to(
 			TypeToken<? extends T> implementation) {
-		recipeFactorySupplier = () -> ctx -> {
-			config.typesBoundToDefaultCreationRecipe.add(implementation);
-			DefaultCreationRecipeBuilder builder = new DefaultCreationRecipeBuilder(
-					config, implementation);
-			return builder.build(ctx);
-		};
+		recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(implementation);
 		scopeSupplier = () -> config.getScope(implementation);
 		return this;
+	}
+
+	protected Supplier<CreationRecipeFactory> createDefaultCreationRecipeFactorySupplier(
+			TypeToken<? extends T> implementation) {
+		return () -> {
+			return ctx -> new DefaultCreationRecipeBuilder(config,
+					implementation).build(ctx);
+		};
 	}
 
 	@Override

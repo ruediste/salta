@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 
@@ -35,4 +37,9 @@ public class GuiceInjectorConfiguration {
 			modulePostProcessors.stream().forEach(x -> x.accept(module));
 		}
 	}
+
+	public final ArrayList<TypeToken<?>> typesBoundToDefaultCreationRecipe = new ArrayList<>();
+
+	public final ArrayList<CoreDependencyKey<?>> implicitlyBoundKeys = new ArrayList<>();
+
 }

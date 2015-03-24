@@ -106,7 +106,7 @@ public final class Guice {
 
 		GuiceInjectorImpl injector = new GuiceInjectorImpl(config);
 
-		StandardBinder saltaBinder = new StandardBinderGuice(config.config,
+		StandardBinder saltaBinder = new StandardBinderGuice(config,
 				injector.getSaltaInjector());
 		BinderImpl binder = new BinderImpl(saltaBinder, config);
 

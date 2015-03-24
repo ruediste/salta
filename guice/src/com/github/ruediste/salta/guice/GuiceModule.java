@@ -111,29 +111,28 @@ public class GuiceModule implements Module {
 
 		addCheckModulePostProcessor();
 
-		for (TypeToken<?> type : config.typesBoundToDefaultCreationRecipe) {
-			ProvidedBy providedBy = type.getRawType().getAnnotation(
-					ProvidedBy.class);
-			if (providedBy != null) {
-				StandardStaticBinding binding = new StandardStaticBinding();
-				binding.dependencyMatcher = DependencyKey
-						.rawTypeMatcher(providedBy.value());
-				binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-						config, TypeToken.of(providedBy.value())).build(ctx);
-				binding.scopeSupplier = () -> config.getScope(providedBy
-						.value());
-				config.config.automaticStaticBindings.add(binding);
-			}
-		}
-
 		addProvidedByConstructionRule();
 
 		if (guiceConfig.requireExplicitBindings) {
-			if (guiceConfig.requireExplicitBindings)
-				config.config.jitBindingRules.clear();
+
+			for (TypeToken<?> type : guiceConfig.typesBoundToDefaultCreationRecipe) {
+				ProvidedBy providedBy = type.getRawType().getAnnotation(
+						ProvidedBy.class);
+				if (providedBy != null) {
+					StandardStaticBinding binding = new StandardStaticBinding();
+					binding.dependencyMatcher = DependencyKey
+							.rawTypeMatcher(providedBy.value());
+					binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
+							config, TypeToken.of(providedBy.value()))
+							.build(ctx);
+					binding.scopeSupplier = () -> config.getScope(providedBy
+							.value());
+					config.config.automaticStaticBindings.add(binding);
+				}
+			}
 
 			HashSet<Class<?>> rawTypes = new HashSet<Class<?>>();
-			for (TypeToken<?> type : config.typesBoundToDefaultCreationRecipe) {
+			for (TypeToken<?> type : guiceConfig.typesBoundToDefaultCreationRecipe) {
 				ImplementedBy implementedBy = type.getRawType().getAnnotation(
 						ImplementedBy.class);
 				if (implementedBy != null) {
@@ -152,7 +151,7 @@ public class GuiceModule implements Module {
 			}
 
 			HashSet<CoreDependencyKey<?>> keys = new HashSet<>();
-			for (CoreDependencyKey<?> foo : config.implicitlyBoundKeys) {
+			for (CoreDependencyKey<?> foo : guiceConfig.implicitlyBoundKeys) {
 				if (keys.add(foo)) {
 					StandardStaticBinding binding = new StandardStaticBinding();
 					binding.dependencyMatcher = DependencyKey.matcher(foo);
