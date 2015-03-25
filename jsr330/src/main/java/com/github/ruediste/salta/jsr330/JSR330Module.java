@@ -53,8 +53,9 @@ public class JSR330Module extends AbstractModule {
 				.of(type, ctx, cstr, config.config.injectionStrategy);
 
 		// stage creation rule
-		config.config.creationRules.add(new CreationRuleImpl(key -> Stage.class
-				.equals(key.getRawType()), key -> () -> config.stage));
+		config.creationPipeline.creationRules.add(new CreationRuleImpl(
+				key -> Stage.class.equals(key.getRawType()),
+				key -> () -> config.stage));
 
 		addMembersInjectorFactory(config);
 
@@ -70,12 +71,14 @@ public class JSR330Module extends AbstractModule {
 		addProviderMethodBinderModulePostProcessor(config);
 		bindScope(Singleton.class, config.singletonScope);
 
-		config.config.jitBindingKeyRules.add(new DefaultJITBindingKeyRule(
+		config.creationPipeline.jitBindingKeyRules
+				.add(new DefaultJITBindingKeyRule(config));
+
+		config.creationPipeline.jitBindingRules.add(new DefaultJITBindingRule(
 				config));
 
-		config.config.jitBindingRules.add(new DefaultJITBindingRule(config));
-
-		config.constructionRules.add(new DefaultConstructionRule(config));
+		config.defaultRecipe.constructionRules.add(new DefaultConstructionRule(
+				config));
 		config.membersInjectorFactory = new MembersInjectorFactory() {
 
 			Injector injector = binder().getInjector();
@@ -155,76 +158,80 @@ public class JSR330Module extends AbstractModule {
 	private void addMembersInjectorCreationRule(
 			StandardInjectorConfiguration config) {
 		// rule for members injectors
-		config.config.creationRules.add(new MembersInjectorCreationRuleBase(
-				config) {
-
-			@Override
-			protected Object wrapInjector(Consumer<Object> saltaMembersInjector) {
-				return new MembersInjector<Object>() {
+		config.creationPipeline.creationRules
+				.add(new MembersInjectorCreationRuleBase(config) {
 
 					@Override
-					public void injectMembers(Object instance) {
-						saltaMembersInjector.accept(instance);
+					protected Object wrapInjector(
+							Consumer<Object> saltaMembersInjector) {
+						return new MembersInjector<Object>() {
+
+							@Override
+							public void injectMembers(Object instance) {
+								saltaMembersInjector.accept(instance);
+							}
+
+							@Override
+							public String toString() {
+								return saltaMembersInjector.toString();
+							};
+						};
 					}
 
 					@Override
-					public String toString() {
-						return saltaMembersInjector.toString();
-					};
-				};
-			}
+					protected Class<?> getWrappedInjectorType() {
+						return MembersInjector.class;
+					}
 
-			@Override
-			protected Class<?> getWrappedInjectorType() {
-				return MembersInjector.class;
-			}
+					@Override
+					protected TypeToken<?> getDependency(
+							CoreDependencyKey<?> key) {
+						if (!MembersInjector.class.equals(key.getRawType()))
+							return null;
 
-			@Override
-			protected TypeToken<?> getDependency(CoreDependencyKey<?> key) {
-				if (!MembersInjector.class.equals(key.getRawType()))
-					return null;
-
-				if (key.getType().getType() instanceof Class) {
-					throw new SaltaException(
-							"Cannot inject a MembersInjector that has no type parameter");
-				}
-				TypeToken<?> dependency = key.getType().resolveType(
-						MembersInjector.class.getTypeParameters()[0]);
-				return dependency;
-			}
-		});
+						if (key.getType().getType() instanceof Class) {
+							throw new SaltaException(
+									"Cannot inject a MembersInjector that has no type parameter");
+						}
+						TypeToken<?> dependency = key.getType().resolveType(
+								MembersInjector.class.getTypeParameters()[0]);
+						return dependency;
+					}
+				});
 	}
 
 	private void addProviderCreationRule(StandardInjectorConfiguration config) {
-		config.config.creationRules.add(new ProviderCreationRule(key -> {
-			return key.getType().getRawType().equals(Provider.class);
-		}, (type, supplier) -> (Provider<?>) supplier::get, Provider.class));
+		config.creationPipeline.creationRules.add(new ProviderCreationRule(
+				key -> {
+					return key.getType().getRawType().equals(Provider.class);
+				}, (type, supplier) -> (Provider<?>) supplier::get,
+				Provider.class));
 	}
 
 	private void addPostConstructInitializerFactory(
 			StandardInjectorConfiguration config) {
-		config.initializerFactories.add(new RecipeInitializerFactoryBase(
-				config.config) {
+		config.defaultRecipe.initializerFactories
+				.add(new RecipeInitializerFactoryBase(config.config) {
 
-			@Override
-			protected boolean isInitializer(TypeToken<?> declaringType,
-					Method method, MethodOverrideIndex overrideIndex) {
+					@Override
+					protected boolean isInitializer(TypeToken<?> declaringType,
+							Method method, MethodOverrideIndex overrideIndex) {
 
-				if (method.isAnnotationPresent(PostConstruct.class)) {
-					if (method.getTypeParameters().length > 0) {
-						throw new SaltaException(
-								"@PostConstruct methods may not declare generic type parameters");
+						if (method.isAnnotationPresent(PostConstruct.class)) {
+							if (method.getTypeParameters().length > 0) {
+								throw new SaltaException(
+										"@PostConstruct methods may not declare generic type parameters");
+							}
+							return true;
+						}
+
+						return false;
 					}
-					return true;
-				}
-
-				return false;
-			}
-		});
+				});
 	}
 
 	private void addMembersInjectorFactory(StandardInjectorConfiguration config) {
-		config.defaultMembersInjectorFactories
+		config.defaultRecipe.defaultMembersInjectorFactories
 				.add(new MembersInjectorFactoryBase(config) {
 
 					@Override
@@ -268,7 +275,7 @@ public class JSR330Module extends AbstractModule {
 	private void addConstructionInstantiatorRule(
 			StandardInjectorConfiguration config) {
 		// default instantiator rule
-		config.instantiatorRules
+		config.defaultRecipe.instantiatorRules
 				.add(new ConstructorInstantiatorRuleBase(config) {
 
 					@Override
@@ -289,35 +296,37 @@ public class JSR330Module extends AbstractModule {
 
 	private void addImplementedByConstructionRule(
 			StandardInjectorConfiguration config) {
-		config.constructionRules.add(new ImplementedByConstructionRuleBase() {
-			@Override
-			protected DependencyKey<?> getImplementorKey(TypeToken<?> type) {
-				ImplementedBy implementedBy = type.getRawType().getAnnotation(
-						ImplementedBy.class);
+		config.defaultRecipe.constructionRules
+				.add(new ImplementedByConstructionRuleBase() {
+					@Override
+					protected DependencyKey<?> getImplementorKey(
+							TypeToken<?> type) {
+						ImplementedBy implementedBy = type.getRawType()
+								.getAnnotation(ImplementedBy.class);
 
-				if (implementedBy != null)
-					return DependencyKey.of(implementedBy.value());
-				else
-					return null;
-			}
+						if (implementedBy != null)
+							return DependencyKey.of(implementedBy.value());
+						else
+							return null;
+					}
 
-		});
+				});
 	}
 
 	private void addProvidedByConstructionRule(
 			StandardInjectorConfiguration config) {
-		config.constructionRules.add(new ProvidedByConstructionRuleBase(
-				Supplier.class) {
-			@Override
-			protected DependencyKey<?> getProviderKey(TypeToken<?> type) {
-				ProvidedBy providedBy = type.getRawType().getAnnotation(
-						ProvidedBy.class);
+		config.defaultRecipe.constructionRules
+				.add(new ProvidedByConstructionRuleBase(Supplier.class) {
+					@Override
+					protected DependencyKey<?> getProviderKey(TypeToken<?> type) {
+						ProvidedBy providedBy = type.getRawType()
+								.getAnnotation(ProvidedBy.class);
 
-				if (providedBy != null)
-					return DependencyKey.of(providedBy.value());
-				else
-					return null;
-			}
-		});
+						if (providedBy != null)
+							return DependencyKey.of(providedBy.value());
+						else
+							return null;
+					}
+				});
 	}
 }

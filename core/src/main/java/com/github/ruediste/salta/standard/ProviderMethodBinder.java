@@ -52,7 +52,7 @@ public abstract class ProviderMethodBinder {
 								config.requredQualifierMatcher(config
 										.getAvailableQualifier(m)));
 
-				config.config.staticBindings.add(new StaticBinding() {
+				config.creationPipeline.staticBindings.add(new StaticBinding() {
 
 					@Override
 					protected SupplierRecipe createRecipe(
@@ -90,7 +90,7 @@ public abstract class ProviderMethodBinder {
 
 					@Override
 					protected Scope getScopeImpl() {
-						return config.getScope(m);
+						return config.defaultRecipe.getScope(m);
 					}
 				});
 			}

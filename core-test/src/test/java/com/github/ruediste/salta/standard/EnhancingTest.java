@@ -6,7 +6,6 @@ import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.jsr330.AbstractModule;
-import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Salta;
 import com.github.ruediste.salta.standard.config.EnhancerFactory;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
@@ -30,7 +29,7 @@ public class EnhancingTest {
 
 			@Override
 			protected void configure() {
-				getConfiguration().config.enhancerFactories
+				getConfiguration().config.defaultRecipe.enhancerFactories
 						.add(new EnhancerFactory() {
 
 							@Override

@@ -22,21 +22,23 @@ public final class DefaultJITBindingRule implements JITBindingRule {
 	public JITBinding apply(JITBindingKey key) {
 		TypeToken<?> type = DefaultJITBindingKeyRule.jitBindingKeyType.get(key);
 		if (!config.doQualifiersMatch(
-				DefaultJITBindingKeyRule.jitBindingKeyRequiredQualifiers.get(key),
-				config.getAvailableQualifier(type.getRawType())))
+				DefaultJITBindingKeyRule.jitBindingKeyRequiredQualifiers
+						.get(key), config.getAvailableQualifier(type
+						.getRawType())))
 			return null;
 
-		Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = config
+		Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = config.defaultRecipe
 				.createConstructionRecipe(type).map(
 						seed -> ctx -> DefaultCreationRecipeBuilder
 								.applyEnhancers(seed.apply(ctx),
-										config.createEnhancers(ctx, type)));
+										config.defaultRecipe.createEnhancers(
+												ctx, type)));
 		if (!recipe.isPresent())
 			return null;
 
 		StandardJitBinding binding = new StandardJitBinding(type);
 		binding.recipeFactory = recipe.get()::apply;
-		binding.scopeSupplier = () -> config.getScope(type);
+		binding.scopeSupplier = () -> config.defaultRecipe.getScope(type);
 		return binding;
 	}
 }

@@ -2,6 +2,7 @@ package com.github.ruediste.salta.core.compile;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -14,7 +15,6 @@ import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.Injector;
-import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Salta;
 
 public class SupplierRecipeImplTest {
@@ -27,17 +27,18 @@ public class SupplierRecipeImplTest {
 
 			@Override
 			protected void configure() {
-				binder().getConfiguration().config.config.creationRules
+				binder().getConfiguration().config.creationPipeline.creationRules
 						.add(new CreationRule() {
 
 							@Override
-							public Function<RecipeCreationContext, SupplierRecipe> apply(
+							public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
 									CoreDependencyKey<?> key) {
 								if (key.getRawType().equals(int.class)) {
-									return ctx -> new SupplierRecipeImpl(
-											() -> 2);
+									return Optional
+											.of(ctx -> new SupplierRecipeImpl(
+													() -> 2));
 								}
-								return null;
+								return Optional.empty();
 							}
 
 						});

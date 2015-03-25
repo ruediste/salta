@@ -325,7 +325,7 @@ public class StandardBinder {
 	 */
 	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
 			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
-		config.enhancerFactories.add(new EnhancerFactory() {
+		config.defaultRecipe.enhancerFactories.add(new EnhancerFactory() {
 
 			@Override
 			public RecipeEnhancer getEnhancer(RecipeCreationContext ctx,

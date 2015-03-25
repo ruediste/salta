@@ -125,9 +125,10 @@ public class GuiceModule implements Module {
 					binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
 							config, TypeToken.of(providedBy.value()))
 							.build(ctx);
-					binding.scopeSupplier = () -> config.getScope(providedBy
-							.value());
-					config.config.automaticStaticBindings.add(binding);
+					binding.scopeSupplier = () -> config.defaultRecipe
+							.getScope(providedBy.value());
+					config.creationPipeline.automaticStaticBindings
+							.add(binding);
 				}
 			}
 
@@ -143,9 +144,10 @@ public class GuiceModule implements Module {
 						binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
 								config, TypeToken.of(implementedBy.value()))
 								.build(ctx);
-						binding.scopeSupplier = () -> config
+						binding.scopeSupplier = () -> config.defaultRecipe
 								.getScope(implementedBy.value());
-						config.config.automaticStaticBindings.add(binding);
+						config.creationPipeline.automaticStaticBindings
+								.add(binding);
 					}
 				}
 			}
@@ -157,16 +159,17 @@ public class GuiceModule implements Module {
 					binding.dependencyMatcher = DependencyKey.matcher(foo);
 					binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
 							config, foo.getType()).build(ctx);
-					binding.scopeSupplier = () -> config
+					binding.scopeSupplier = () -> config.defaultRecipe
 							.getScope(foo.getType());
-					config.config.automaticStaticBindings.add(binding);
+					config.creationPipeline.automaticStaticBindings
+							.add(binding);
 				}
 			}
 		} else {
-			config.config.jitBindingKeyRules.add(new DefaultJITBindingKeyRule(
-					config));
+			config.creationPipeline.jitBindingKeyRules
+					.add(new DefaultJITBindingKeyRule(config));
 
-			config.config.jitBindingRules
+			config.creationPipeline.jitBindingRules
 					.add(new DefaultJITBindingRule(config));
 		}
 
@@ -185,7 +188,8 @@ public class GuiceModule implements Module {
 		binder().getDelegate().bindScope(javax.inject.Singleton.class,
 				config.singletonScope);
 
-		config.constructionRules.add(new DefaultConstructionRule(config));
+		config.defaultRecipe.constructionRules.add(new DefaultConstructionRule(
+				config));
 		addStageCreationRule();
 		config.membersInjectorFactory = new MembersInjectorFactory() {
 
@@ -211,16 +215,16 @@ public class GuiceModule implements Module {
 
 	private void addStageCreationRule() {
 		// stage rule
-		config.config.creationRules.add(new CreationRule() {
+		config.creationPipeline.creationRules.add(new CreationRule() {
 
 			@Override
-			public Function<RecipeCreationContext, SupplierRecipe> apply(
+			public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
 					CoreDependencyKey<?> key) {
 				if (Stage.class.equals(key.getType().getType()))
-					return ctx -> new SupplierRecipeImpl(
-							() -> guiceConfig.stage);
+					return Optional.of(ctx -> new SupplierRecipeImpl(
+							() -> guiceConfig.stage));
 				else
-					return null;
+					return Optional.empty();
 			}
 
 		});
@@ -228,26 +232,28 @@ public class GuiceModule implements Module {
 
 	private void addProvidedByConstructionRule() {
 		// rule for @ProvidedBy
-		config.constructionRules.add(new ProvidedByConstructionRuleBase(
-				Provider.class) {
+		config.defaultRecipe.constructionRules
+				.add(new ProvidedByConstructionRuleBase(Provider.class) {
 
-			@Override
-			protected DependencyKey<?> getProviderKey(TypeToken<?> type) {
-				ProvidedBy providedBy = type.getRawType().getAnnotation(
-						ProvidedBy.class);
-				if (providedBy != null) {
-					if (!type.isAssignableFrom(TypeToken.of(providedBy.value())
-							.resolveType(Provider.class.getTypeParameters()[0]))) {
-						throw new SaltaException("Provider "
-								+ providedBy.value()
-								+ " specified by @ProvidedBy does not provide "
-								+ type);
+					@Override
+					protected DependencyKey<?> getProviderKey(TypeToken<?> type) {
+						ProvidedBy providedBy = type.getRawType()
+								.getAnnotation(ProvidedBy.class);
+						if (providedBy != null) {
+							if (!type.isAssignableFrom(TypeToken.of(
+									providedBy.value()).resolveType(
+									Provider.class.getTypeParameters()[0]))) {
+								throw new SaltaException(
+										"Provider "
+												+ providedBy.value()
+												+ " specified by @ProvidedBy does not provide "
+												+ type);
+							}
+							return DependencyKey.of(providedBy.value());
+						}
+						return null;
 					}
-					return DependencyKey.of(providedBy.value());
-				}
-				return null;
-			}
-		});
+				});
 	}
 
 	private void addCheckModulePostProcessor() {
@@ -329,20 +335,25 @@ public class GuiceModule implements Module {
 	}
 
 	private void addEagerInstantiationDynamicInitializer() {
-		config.dynamicInitializers.add(() -> {
-			injector.getSaltaInjector().getCoreInjector()
-					.withRecipeCreationContext(ctx -> {
-						for (Binding b : config.config.staticBindings) {
-							b.getScope().performEagerInstantiation(ctx, b);
-						}
-						return null;
-					});
-		});
+		config.dynamicInitializers
+				.add(() -> {
+					injector.getSaltaInjector()
+							.getCoreInjector()
+							.withRecipeCreationContext(
+									ctx -> {
+										for (Binding b : config.creationPipeline.staticBindings) {
+											b.getScope()
+													.performEagerInstantiation(
+															ctx, b);
+										}
+										return null;
+									});
+				});
 	}
 
 	private void addConstructorInstantiationRule() {
 		// rule for constructor instantiation
-		config.instantiatorRules
+		config.defaultRecipe.instantiatorRules
 				.add(new ConstructorInstantiatorRuleBase(config) {
 
 					@Override
@@ -384,29 +395,31 @@ public class GuiceModule implements Module {
 
 	private void addImplementedByConstructionRule() {
 		// rule for @ImplementedBy
-		config.constructionRules.add(new ImplementedByConstructionRuleBase() {
+		config.defaultRecipe.constructionRules
+				.add(new ImplementedByConstructionRuleBase() {
 
-			@Override
-			protected DependencyKey<?> getImplementorKey(TypeToken<?> type) {
-				ImplementedBy implementedBy = type.getRawType().getAnnotation(
-						ImplementedBy.class);
-				if (implementedBy != null) {
+					@Override
+					protected DependencyKey<?> getImplementorKey(
+							TypeToken<?> type) {
+						ImplementedBy implementedBy = type.getRawType()
+								.getAnnotation(ImplementedBy.class);
+						if (implementedBy != null) {
 
-					if (type.getRawType().equals(implementedBy.value())) {
-						throw new SaltaException(
-								"@ImplementedBy points to the same class it annotates. type: "
-										+ type);
+							if (type.getRawType().equals(implementedBy.value())) {
+								throw new SaltaException(
+										"@ImplementedBy points to the same class it annotates. type: "
+												+ type);
+							}
+							return DependencyKey.of(implementedBy.value());
+						}
+						return null;
 					}
-					return DependencyKey.of(implementedBy.value());
-				}
-				return null;
-			}
-		});
+				});
 	}
 
 	private void addTypeLiteralCreationRule() {
 		// Rule for type literals
-		config.config.creationRules
+		config.creationPipeline.creationRules
 				.add(new CreationRuleImpl(
 						k -> TypeLiteral.class.equals(k.getRawType()),
 						key -> {
@@ -457,60 +470,65 @@ public class GuiceModule implements Module {
 
 	private void addMembersInjectorCreationRule() {
 		// members injector creation rule
-		config.config.creationRules.add(new MembersInjectorCreationRuleBase(
-				config) {
-			@Override
-			protected TypeToken<?> getDependency(CoreDependencyKey<?> key) {
-				Class<?> rawType = key.getRawType();
-				if (MembersInjector.class.equals(key.getRawType())) {
-					if (key.getType().getType() instanceof Class) {
-						throw new SaltaException(
-								"Cannot inject a MembersInjector that has no type parameter");
-					}
-					TypeToken<?> dependency = key.getType().resolveType(
-							rawType.getTypeParameters()[0]);
-					return dependency;
-				} else
-					return null;
-			}
-
-			@Override
-			protected Object wrapInjector(Consumer<Object> saltaMembersInjector) {
-				return new MembersInjector<Object>() {
+		config.creationPipeline.creationRules
+				.add(new MembersInjectorCreationRuleBase(config) {
 					@Override
-					public void injectMembers(Object x) {
-						saltaMembersInjector.accept(x);
+					protected TypeToken<?> getDependency(
+							CoreDependencyKey<?> key) {
+						Class<?> rawType = key.getRawType();
+						if (MembersInjector.class.equals(key.getRawType())) {
+							if (key.getType().getType() instanceof Class) {
+								throw new SaltaException(
+										"Cannot inject a MembersInjector that has no type parameter");
+							}
+							TypeToken<?> dependency = key
+									.getType()
+									.resolveType(rawType.getTypeParameters()[0]);
+							return dependency;
+						} else
+							return null;
 					}
 
 					@Override
-					public String toString() {
-						return saltaMembersInjector.toString();
-					};
-				};
-			}
+					protected Object wrapInjector(
+							Consumer<Object> saltaMembersInjector) {
+						return new MembersInjector<Object>() {
+							@Override
+							public void injectMembers(Object x) {
+								saltaMembersInjector.accept(x);
+							}
 
-			@Override
-			protected Class<?> getWrappedInjectorType() {
-				return MembersInjector.class;
-			}
-		});
+							@Override
+							public String toString() {
+								return saltaMembersInjector.toString();
+							};
+						};
+					}
+
+					@Override
+					protected Class<?> getWrappedInjectorType() {
+						return MembersInjector.class;
+					}
+				});
 
 	}
 
 	private void addProviderCrationRules() {
 		// provider creation rule
-		config.config.creationRules.add(new ProviderCreationRule(key -> key
-				.getRawType().equals(Provider.class),
+		config.creationPipeline.creationRules.add(new ProviderCreationRule(
+				key -> key.getRawType().equals(Provider.class),
 				(type, supplier) -> (Provider<Object>) () -> supplier.get(),
 				Provider.class));
-		config.config.creationRules.add(new ProviderCreationRule(key -> key
-				.getRawType().equals(javax.inject.Provider.class), (type,
-				supplier) -> (javax.inject.Provider<Object>) () -> supplier
-				.get(), javax.inject.Provider.class));
+		config.creationPipeline.creationRules
+				.add(new ProviderCreationRule(
+						key -> key.getRawType().equals(
+								javax.inject.Provider.class),
+						(type, supplier) -> (javax.inject.Provider<Object>) () -> supplier
+								.get(), javax.inject.Provider.class));
 	}
 
 	private void addMembersInjectorFactory() {
-		config.defaultMembersInjectorFactories
+		config.defaultRecipe.defaultMembersInjectorFactories
 				.add(new MembersInjectorFactoryBase(config) {
 
 					@Override
@@ -604,15 +622,15 @@ public class GuiceModule implements Module {
 
 	private void addLoggerCreationRule() {
 		// rule for loggers
-		config.config.creationRules.add(new CreationRule() {
+		config.creationPipeline.creationRules.add(new CreationRule() {
 
 			@Override
-			public Function<RecipeCreationContext, SupplierRecipe> apply(
+			public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
 					CoreDependencyKey<?> key) {
 
 				Class<?> rawType = key.getRawType();
 				if (Logger.class.equals(rawType)) {
-					return ctx -> {
+					return Optional.of(ctx -> {
 						if (key instanceof InjectionPoint) {
 							Member member = ((InjectionPoint<?>) key)
 									.getMember();
@@ -623,9 +641,9 @@ public class GuiceModule implements Module {
 						}
 						return new SupplierRecipeImpl(() -> Logger
 								.getAnonymousLogger());
-					};
+					});
 				}
-				return null;
+				return Optional.empty();
 			}
 		});
 	}

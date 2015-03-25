@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.core;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -24,12 +25,13 @@ public class CreationRuleImpl implements CreationRule {
 	}
 
 	@Override
-	public Function<RecipeCreationContext, SupplierRecipe> apply(
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
 			CoreDependencyKey<?> key) {
 		if (matcher.matches(key))
-			return ctx -> new SupplierRecipeImpl(supplierFactory.apply(key));
+			return Optional.of(ctx -> new SupplierRecipeImpl(supplierFactory
+					.apply(key)));
 		else
-			return null;
+			return Optional.empty();
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.core;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -16,6 +17,7 @@ public class CoreInjector {
 	 */
 	public final Object recipeLock = new Object();
 
+	@SuppressWarnings("unused")
 	private CoreInjectorConfiguration config;
 
 	private final RecipeCompiler compiler = new RecipeCompiler();
@@ -24,20 +26,16 @@ public class CoreInjector {
 
 	private HashMap<CoreDependencyKey<?>, Optional<Function<RecipeCreationContext, SupplierRecipe>>> recipeCache = new HashMap<>();
 
-	private HashMap<JITBindingKey, JITBinding> jitBindings = new HashMap<>();
-
-	private StaticBindingSet staticBindings;
-	private StaticBindingSet automaticStaticBindings;
+	private List<CreationRule> creationRules;
 
 	/**
 	 * Create and initialize this injector
 	 */
-	public CoreInjector(CoreInjectorConfiguration config) {
+	public CoreInjector(CoreInjectorConfiguration config,
+			List<CreationRule> creationRules) {
 		this.config = config;
+		this.creationRules = creationRules;
 
-		staticBindings = new StaticBindingSet(config.staticBindings);
-		automaticStaticBindings = new StaticBindingSet(
-				config.automaticStaticBindings);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -181,65 +179,18 @@ public class CoreInjector {
 			CoreDependencyKey<?> key) {
 		try {
 			// check rules
-			for (CreationRule rule : config.creationRules) {
-				Function<RecipeCreationContext, SupplierRecipe> recipe = rule
+			for (CreationRule rule : creationRules) {
+				Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = rule
 						.apply(key);
-				if (recipe != null)
-					return Optional.of(recipe);
+				if (recipe.isPresent())
+					return recipe;
 			}
-
-			// check static bindings
-			{
-				StaticBinding binding = staticBindings.getBinding(key);
-				if (binding != null) {
-					return Optional.of(ctx -> binding.getScope().createRecipe(
-							ctx, binding, key.getType()));
-				}
-			}
-
-			// check automatic static bindings
-			{
-				StaticBinding binding = automaticStaticBindings.getBinding(key);
-				if (binding != null) {
-					return Optional.of(ctx -> binding.getScope().createRecipe(
-							ctx, binding, key.getType()));
-				}
-			}
-
-			// create JIT binding
-			{
-				// create key
-				JITBindingKey jitKey = new JITBindingKey();
-				for (JITBindingKeyRule rule : config.jitBindingKeyRules) {
-					rule.apply(key, jitKey);
-				}
-
-				// check existing bindings and create new one if necessary
-				JITBinding jitBinding;
-				jitBinding = jitBindings.get(jitKey);
-				if (jitBinding == null) {
-					for (JITBindingRule rule : config.jitBindingRules) {
-						jitBinding = rule.apply(jitKey);
-						if (jitBinding != null) {
-							jitBindings.put(jitKey, jitBinding);
-							break;
-						}
-					}
-				}
-
-				// use binding if available
-				if (jitBinding != null) {
-					JITBinding tmp = jitBinding;
-					return Optional.of(ctx -> tmp.getScope().createRecipe(ctx,
-							tmp, key.getType()));
-				}
-			}
+			return Optional.empty();
 		} catch (SaltaException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new SaltaException("Error creating recipe for " + key, e);
 		}
-		return Optional.empty();
 	}
 
 	public RecipeCompiler getCompiler() {

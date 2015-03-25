@@ -66,16 +66,16 @@ public class DefaultConstructionRule implements ConstructionRule {
 
 	protected List<RecipeInitializer> createInitializers(
 			RecipeCreationContext ctx, TypeToken<?> type) {
-		return config.createInitializers(ctx, type);
+		return config.defaultRecipe.createInitializers(ctx, type);
 	}
 
 	protected List<RecipeMembersInjector> createMembersInjectors(
 			RecipeCreationContext ctx, TypeToken<?> type) {
-		return config.createRecipeMembersInjectors(ctx, type);
+		return config.defaultRecipe.createRecipeMembersInjectors(ctx, type);
 	}
 
 	protected Optional<Function<RecipeCreationContext, RecipeInstantiator>> createInstantiationRecipe(
 			TypeToken<?> type) {
-		return config.createRecipeInstantiator(type);
+		return config.defaultRecipe.createRecipeInstantiator(type);
 	}
 }

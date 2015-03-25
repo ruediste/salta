@@ -2,6 +2,7 @@ package com.github.ruediste.salta.standard.util;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -72,10 +73,10 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 		if (recipe != null)
 			return recipe;
 
-		List<RecipeMembersInjector> injectors = config
+		List<RecipeMembersInjector> injectors = config.defaultRecipe
 				.createRecipeMembersInjectors(ctx, typeToken);
-		List<RecipeInitializer> initializers = config.createInitializers(ctx,
-				typeToken);
+		List<RecipeInitializer> initializers = config.defaultRecipe
+				.createInitializers(ctx, typeToken);
 		recipe = new FunctionRecipe() {
 
 			@Override
@@ -96,29 +97,30 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Function<RecipeCreationContext, SupplierRecipe> apply(
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
 			CoreDependencyKey<?> key) {
 		TypeToken<?> dependency = getDependency(key);
 		if (dependency == null)
-			return null;
+			return Optional.empty();
 
-		return ctx -> {
-			Consumer<?> saltaMembersInjector = getMembersInjector(dependency,
-					ctx);
-			Object wrappedInjector = wrapInjector((Consumer) saltaMembersInjector);
-			return new SupplierRecipe() {
+		return Optional
+				.of(ctx -> {
+					Consumer<?> saltaMembersInjector = getMembersInjector(
+							dependency, ctx);
+					Object wrappedInjector = wrapInjector((Consumer) saltaMembersInjector);
+					return new SupplierRecipe() {
 
-				@Override
-				protected Class<?> compileImpl(GeneratorAdapter mv,
-						MethodCompilationContext ctx) {
-					Class<?> wrappedInjectorType = getWrappedInjectorType();
-					ctx.addFieldAndLoad((Class) wrappedInjectorType,
-							wrappedInjector);
-					return wrappedInjectorType;
-				}
+						@Override
+						protected Class<?> compileImpl(GeneratorAdapter mv,
+								MethodCompilationContext ctx) {
+							Class<?> wrappedInjectorType = getWrappedInjectorType();
+							ctx.addFieldAndLoad((Class) wrappedInjectorType,
+									wrappedInjector);
+							return wrappedInjectorType;
+						}
 
-			};
-		};
+					};
+				});
 	}
 
 	protected abstract TypeToken<?> getDependency(CoreDependencyKey<?> key);

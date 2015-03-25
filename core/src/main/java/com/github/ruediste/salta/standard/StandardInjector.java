@@ -1,6 +1,7 @@
 package com.github.ruediste.salta.standard;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -129,7 +130,9 @@ public class StandardInjector {
 							.collect(joining("\n")));
 		}
 
-		coreInjector = new CoreInjector(config.config);
+		coreInjector = new CoreInjector(config.config,
+				config.creationPipeline.coreCreationRuleSuppliers.stream()
+						.map(s -> s.get()).collect(toList()));
 
 		while (!config.staticInitializers.isEmpty()) {
 			ArrayList<Runnable> tmp = new ArrayList<>(config.staticInitializers);

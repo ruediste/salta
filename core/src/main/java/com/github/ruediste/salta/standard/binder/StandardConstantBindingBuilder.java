@@ -29,9 +29,9 @@ public class StandardConstantBindingBuilder {
 		if (value == null)
 			throw new SaltaException(
 					"Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
-		config.config.staticBindings.add(createBinding(cls, value));
+		config.creationPipeline.staticBindings.add(createBinding(cls, value));
 		if (Primitives.isWrapperType(cls)) {
-			config.config.staticBindings.add(createBinding(
+			config.creationPipeline.staticBindings.add(createBinding(
 					Primitives.unwrap(cls), value));
 		}
 	}

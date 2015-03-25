@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.core;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -17,6 +18,18 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public interface CreationRule {
 
-	Function<RecipeCreationContext, SupplierRecipe> apply(
+	Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
 			CoreDependencyKey<?> key);
+
+	static CreationRule combine(Iterable<CreationRule> rules) {
+		return key -> {
+			for (CreationRule rule : rules) {
+				Optional<Function<RecipeCreationContext, SupplierRecipe>> result = rule
+						.apply(key);
+				if (result.isPresent())
+					return result;
+			}
+			return Optional.empty();
+		};
+	}
 }

@@ -26,7 +26,7 @@ public class DefaultCreationRecipeBuilder {
 			TypeToken<?> boundType) {
 
 		constructionRecipeSupplier = () -> {
-			Optional<Function<RecipeCreationContext, SupplierRecipe>> tmp = config
+			Optional<Function<RecipeCreationContext, SupplierRecipe>> tmp = config.defaultRecipe
 					.createConstructionRecipe(boundType);
 			if (!tmp.isPresent())
 				throw new SaltaException("Cannot find construction rule for "
@@ -34,7 +34,8 @@ public class DefaultCreationRecipeBuilder {
 			return tmp.get();
 		};
 
-		enhancersSupplier = ctx -> config.createEnhancers(ctx, boundType);
+		enhancersSupplier = ctx -> config.defaultRecipe.createEnhancers(ctx,
+				boundType);
 	}
 
 	/**
@@ -88,6 +89,7 @@ public class DefaultCreationRecipeBuilder {
 	public static SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
 			StandardInjectorConfiguration config, RecipeCreationContext ctx,
 			TypeToken<?> type) {
-		return applyEnhancers(seedRecipe, config.createEnhancers(ctx, type));
+		return applyEnhancers(seedRecipe,
+				config.defaultRecipe.createEnhancers(ctx, type));
 	}
 }

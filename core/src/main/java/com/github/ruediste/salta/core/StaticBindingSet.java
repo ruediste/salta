@@ -4,13 +4,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
-public class StaticBindingSet {
+/**
+ * A set of {@link StaticBinding}s, ready to be used to create instances
+ */
+public class StaticBindingSet implements CreationRule {
 	private HashMap<TypeToken<?>, List<StaticBinding>> staticBindingMap = new HashMap<>();
 	private ArrayList<StaticBinding> nonTypeSpecificStaticBindings = new ArrayList<>();
 
@@ -65,4 +71,16 @@ public class StaticBindingSet {
 
 		return binding;
 	}
+
+	@Override
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+			CoreDependencyKey<?> key) {
+		StaticBinding binding = getBinding(key);
+		if (binding != null) {
+			return Optional.of(ctx -> binding.getScope().createRecipe(ctx,
+					binding, key.getType()));
+		}
+		return Optional.empty();
+	}
+
 }

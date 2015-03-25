@@ -56,7 +56,7 @@ public class StandardBindingBuilderImpl<T> implements
 		this.type = type;
 		this.config = config;
 		recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(type);
-		scopeSupplier = () -> config.getScope(type);
+		scopeSupplier = () -> config.defaultRecipe.getScope(type);
 	}
 
 	public void register() {
@@ -70,7 +70,7 @@ public class StandardBindingBuilderImpl<T> implements
 		binding.recipeFactory = recipeFactorySupplier.get();
 		binding.scopeSupplier = scopeSupplier;
 
-		config.config.staticBindings.add(binding);
+		config.creationPipeline.staticBindings.add(binding);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class StandardBindingBuilderImpl<T> implements
 	public StandardScopedBindingBuilder<T> to(
 			TypeToken<? extends T> implementation) {
 		recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(implementation);
-		scopeSupplier = () -> config.getScope(implementation);
+		scopeSupplier = () -> config.defaultRecipe.getScope(implementation);
 		return this;
 	}
 
@@ -248,18 +248,19 @@ public class StandardBindingBuilderImpl<T> implements
 		recipeFactorySupplier = () -> creationContext -> {
 			Function<RecipeCreationContext, SupplierRecipe> seedRecipe = rule
 					.createConstructionRecipe(type);
-			List<RecipeEnhancer> enhancers = config.createEnhancers(
-					creationContext, type);
+			List<RecipeEnhancer> enhancers = config.defaultRecipe
+					.createEnhancers(creationContext, type);
 			return DefaultCreationRecipeBuilder.applyEnhancers(
 					seedRecipe.apply(creationContext), enhancers);
 		};
-		scopeSupplier = () -> config.getScope(constructor.getDeclaringClass());
+		scopeSupplier = () -> config.defaultRecipe.getScope(constructor
+				.getDeclaringClass());
 		return this;
 	}
 
 	@Override
 	public void in(Class<? extends Annotation> scopeAnnotation) {
-		scopeSupplier = () -> config.getScope(scopeAnnotation);
+		scopeSupplier = () -> config.defaultRecipe.getScope(scopeAnnotation);
 	}
 
 	@Override

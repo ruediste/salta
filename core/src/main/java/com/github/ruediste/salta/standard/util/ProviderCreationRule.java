@@ -117,7 +117,7 @@ public class ProviderCreationRule implements CreationRule {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Function<RecipeCreationContext, SupplierRecipe> apply(
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
 			CoreDependencyKey<?> key) {
 
 		if (matcher.matches(key)) {
@@ -140,38 +140,39 @@ public class ProviderCreationRule implements CreationRule {
 						key.getAnnotatedElement().getAnnotations());
 			}
 
-			return ctx -> {
-				Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = ctx
-						.tryGetRecipeFunc(dep);
-				if (!innerRecipe.isPresent())
-					return null;
+			return Optional
+					.of(ctx -> {
+						Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = ctx
+								.tryGetRecipeFunc(dep);
+						if (!innerRecipe.isPresent())
+							return null;
 
-				// create and wrap provider instance
-				ProviderImpl provider = new ProviderImpl(key);
-				Object wrappedProvider = wrapper.apply(key, provider);
+						// create and wrap provider instance
+					ProviderImpl provider = new ProviderImpl(key);
+					Object wrappedProvider = wrapper.apply(key, provider);
 
-				// create creation recipe
-				SupplierRecipe creationRecipe = new SupplierRecipe() {
+					// create creation recipe
+					SupplierRecipe creationRecipe = new SupplierRecipe() {
 
-					@Override
-					protected Class<?> compileImpl(GeneratorAdapter mv,
-							MethodCompilationContext ctx) {
-						ctx.addFieldAndLoad((Class) providerType,
-								wrappedProvider);
-						return providerType;
-					}
-				};
+						@Override
+						protected Class<?> compileImpl(GeneratorAdapter mv,
+								MethodCompilationContext ctx) {
+							ctx.addFieldAndLoad((Class) providerType,
+									wrappedProvider);
+							return providerType;
+						}
+					};
 
-				// queue creation and compilation of inner recipe
-				ctx.queueAction(() -> {
-					provider.compiledRecipe = ctx.getCompiler()
-							.compileSupplier(innerRecipe.get().apply(ctx));
+					// queue creation and compilation of inner recipe
+					ctx.queueAction(() -> {
+						provider.compiledRecipe = ctx.getCompiler()
+								.compileSupplier(innerRecipe.get().apply(ctx));
+					});
+
+					return creationRecipe;
 				});
-
-				return creationRecipe;
-			};
 		}
 
-		return null;
+		return Optional.empty();
 	}
 }

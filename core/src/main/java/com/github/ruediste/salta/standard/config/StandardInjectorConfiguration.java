@@ -15,15 +15,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.CreationRule;
+import com.github.ruediste.salta.core.JITBindingCreationRule;
+import com.github.ruediste.salta.core.JITBindingKeyRule;
+import com.github.ruediste.salta.core.JITBindingRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
+import com.github.ruediste.salta.core.StaticBinding;
+import com.github.ruediste.salta.core.StaticBindingSet;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.Message;
@@ -54,6 +61,7 @@ public class StandardInjectorConfiguration {
 			CoreInjectorConfiguration config) {
 		this.stage = stage;
 		this.config = config;
+		creationPipeline.suppliers.initialize();
 	}
 
 	public Scope singletonScope = new SingletonScope();
@@ -65,159 +73,244 @@ public class StandardInjectorConfiguration {
 	 */
 	public FixedConstructorInstantiatorFactory fixedConstructorInstantiatorFactory;
 
-	/**
-	 * Rules defining how to construct an instance of a type. This can is used
-	 * from various places like {@link Binding}s or {@link CreationRule}s.
-	 * 
-	 * <p>
-	 * Not to be confused with the
-	 * {@link CoreInjectorConfiguration#creationRules}, which determine how to
-	 * create a rule given a {@link CoreDependencyKey}
-	 * </p>
-	 */
-	public final List<ConstructionRule> constructionRules = new ArrayList<>();
-
-	public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
-			TypeToken<?> type) {
-		for (ConstructionRule rule : constructionRules) {
-			Function<RecipeCreationContext, SupplierRecipe> result = rule
-					.createConstructionRecipe(type);
-			if (result != null)
-				return Optional.of(result);
+	public class DefaultRecipe {
+		private DefaultRecipe() {
 		}
-		return Optional.empty();
-	}
 
-	/**
-	 * List of rules to create an instantiator given a type. The first matching
-	 * rule is used
-	 */
-	public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
+		/**
+		 * Rules defining how to construct an instance of a type. This can is
+		 * used from various places like {@link Binding}s or
+		 * {@link CreationRule}s.
+		 * 
+		 * <p>
+		 * Not to be confused with the
+		 * {@link CoreInjectorConfiguration#creationRules}, which determine how
+		 * to create a rule given a {@link CoreDependencyKey}
+		 * </p>
+		 */
+		public final List<ConstructionRule> constructionRules = new ArrayList<>();
 
-	/**
-	 * Create an {@link RecipeInstantiator} function using the
-	 * {@link #instantiatorRules} If no instantiator is found,
-	 * {@link Optional#empty()} is returned.
-	 */
-	public Optional<Function<RecipeCreationContext, RecipeInstantiator>> createRecipeInstantiator(
-			TypeToken<?> type) {
-		for (InstantiatorRule rule : instantiatorRules) {
-			Optional<Function<RecipeCreationContext, RecipeInstantiator>> instantiator = rule
-					.apply(type);
-			if (instantiator.isPresent()) {
-				return instantiator;
+		public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
+				TypeToken<?> type) {
+			for (ConstructionRule rule : constructionRules) {
+				Function<RecipeCreationContext, SupplierRecipe> result = rule
+						.createConstructionRecipe(type);
+				if (result != null)
+					return Optional.of(result);
 			}
-		}
-		return Optional.empty();
-	}
-
-	/**
-	 * Rules used to create {@link RecipeMembersInjector}s for a type. The
-	 * injectors of the first one returning a non-null result are used.
-	 */
-	public final List<MembersInjectorRule> membersInjectorRules = new ArrayList<>();
-
-	/**
-	 * Default list of factories used to create {@link RecipeMembersInjector}s
-	 * for a given type. These factories are used if no member of the
-	 * {@link #membersInjectorRules} matches for a type.
-	 */
-	public final List<RecipeMembersInjectorFactory> defaultMembersInjectorFactories = new ArrayList<>();
-
-	/**
-	 * Create a list of members injectors based on the
-	 * {@link #membersInjectorRules} and as fallback the
-	 * {@link #defaultMembersInjectorFactories}
-	 */
-	public List<RecipeMembersInjector> createRecipeMembersInjectors(
-			RecipeCreationContext ctx, TypeToken<?> type) {
-		// test rules
-		for (MembersInjectorRule rule : membersInjectorRules) {
-			List<RecipeMembersInjector> membersInjectors = rule
-					.getMembersInjectors(type);
-			if (membersInjectors != null)
-				return membersInjectors;
+			return Optional.empty();
 		}
 
-		// use default factories
-		ArrayList<RecipeMembersInjector> result = new ArrayList<>();
-		for (RecipeMembersInjectorFactory factory : defaultMembersInjectorFactories) {
-			result.addAll(factory.createInjectors(ctx, type));
+		/**
+		 * List of rules to create an instantiator given a type. The first
+		 * matching rule is used
+		 */
+		public final List<InstantiatorRule> instantiatorRules = new ArrayList<>();
+
+		/**
+		 * Create an {@link RecipeInstantiator} function using the
+		 * {@link #instantiatorRules} If no instantiator is found,
+		 * {@link Optional#empty()} is returned.
+		 */
+		public Optional<Function<RecipeCreationContext, RecipeInstantiator>> createRecipeInstantiator(
+				TypeToken<?> type) {
+			for (InstantiatorRule rule : instantiatorRules) {
+				Optional<Function<RecipeCreationContext, RecipeInstantiator>> instantiator = rule
+						.apply(type);
+				if (instantiator.isPresent()) {
+					return instantiator;
+				}
+			}
+			return Optional.empty();
 		}
-		return result;
+
+		/**
+		 * Rules used to create {@link RecipeMembersInjector}s for a type. The
+		 * injectors of the first one returning a non-null result are used.
+		 */
+		public final List<MembersInjectorRule> membersInjectorRules = new ArrayList<>();
+
+		/**
+		 * Default list of factories used to create
+		 * {@link RecipeMembersInjector}s for a given type. These factories are
+		 * used if no member of the {@link #membersInjectorRules} matches for a
+		 * type.
+		 */
+		public final List<RecipeMembersInjectorFactory> defaultMembersInjectorFactories = new ArrayList<>();
+
+		/**
+		 * Create a list of members injectors based on the
+		 * {@link #membersInjectorRules} and as fallback the
+		 * {@link #defaultMembersInjectorFactories}
+		 */
+		public List<RecipeMembersInjector> createRecipeMembersInjectors(
+				RecipeCreationContext ctx, TypeToken<?> type) {
+			// test rules
+			for (MembersInjectorRule rule : membersInjectorRules) {
+				List<RecipeMembersInjector> membersInjectors = rule
+						.getMembersInjectors(type);
+				if (membersInjectors != null)
+					return membersInjectors;
+			}
+
+			// use default factories
+			ArrayList<RecipeMembersInjector> result = new ArrayList<>();
+			for (RecipeMembersInjectorFactory factory : defaultMembersInjectorFactories) {
+				result.addAll(factory.createInjectors(ctx, type));
+			}
+			return result;
+		}
+
+		/**
+		 * List of rules enhance instances. The enhancers of all rules are
+		 * combined.
+		 */
+		public final List<RecipeInitializerFactory> initializerFactories = new ArrayList<>();
+
+		public List<RecipeInitializer> createInitializers(
+				RecipeCreationContext ctx, TypeToken<?> type) {
+			return initializerFactories.stream()
+					.flatMap(r -> r.getInitializers(ctx, type).stream())
+					.filter(x -> x != null).collect(toList());
+		}
+
+		/**
+		 * List of enhancer factories. The enhancers of all factories are
+		 * combined.
+		 */
+		public final List<EnhancerFactory> enhancerFactories = new ArrayList<>();
+
+		public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx,
+				TypeToken<?> type) {
+			return enhancerFactories.stream()
+					.map(r -> r.getEnhancer(ctx, type)).filter(x -> x != null)
+					.collect(toList());
+		}
+
+		/**
+		 * List of rules to determine the scope used for a type.
+		 */
+		public final List<ScopeRule> scopeRules = new ArrayList<>();
+
+		/**
+		 * Get the scope for a type based on the {@link #scopeRules} followed by
+		 * the {@link #scopeAnnotationMap}, falling back to the
+		 * {@link #defaultScope}
+		 */
+		public Scope getScope(TypeToken<?> type) {
+
+			// evaluate scope rules
+			for (ScopeRule rule : scopeRules) {
+				Scope scope = rule.getScope(type);
+				if (scope != null)
+					return scope;
+			}
+
+			return getScope(type.getRawType());
+		}
+
+		public Scope getScope(AnnotatedElement element) {
+			Scope scope = null;
+			// scan scope annotation map
+			for (Entry<Class<? extends Annotation>, Scope> entry : scopeAnnotationMap
+					.entrySet()) {
+				if (element.isAnnotationPresent(entry.getKey())) {
+					if (scope != null)
+						throw new SaltaException(
+								"Multiple scope annotations present on "
+										+ element);
+					scope = entry.getValue();
+				}
+			}
+
+			if (scope == null)
+				scope = defaultScope;
+			return scope;
+		}
+
+		public Scope getScope(Class<? extends Annotation> scopeAnnotation) {
+			Scope scope = scopeAnnotationMap.get(scopeAnnotation);
+			if (scope == null)
+				throw new SaltaException("Unknown scope annotation "
+						+ scopeAnnotation);
+			return scope;
+		}
+
 	}
 
-	/**
-	 * List of rules enhance instances. The enhancers of all rules are combined.
-	 */
-	public final List<RecipeInitializerFactory> initializerFactories = new ArrayList<>();
+	public final DefaultRecipe defaultRecipe = new DefaultRecipe();
 
-	public List<RecipeInitializer> createInitializers(
-			RecipeCreationContext ctx, TypeToken<?> type) {
-		return initializerFactories.stream()
-				.flatMap(r -> r.getInitializers(ctx, type).stream())
-				.filter(x -> x != null).collect(toList());
+	public static class CreationPipelineConfiguration {
+
+		private CreationPipelineConfiguration() {
+		}
+
+		/**
+		 * Rules to instantiate dependencies without bindings
+		 */
+		public final List<CreationRule> creationRules = new ArrayList<>();
+
+		/**
+		 * Statically defined bindings
+		 */
+		public final List<StaticBinding> staticBindings = new ArrayList<>();
+
+		/**
+		 * Automatically defined statically defined bindings. These bindings are
+		 * evaluated after the {@link #staticBindings}, but before the
+		 * {@link #jitBindingRules}
+		 */
+		public final List<StaticBinding> automaticStaticBindings = new ArrayList<>();
+
+		/**
+		 * Rules to create the key used to lookup and create JIT bindings
+		 */
+		public final List<JITBindingKeyRule> jitBindingKeyRules = new ArrayList<>();
+
+		/**
+		 * Rules to create JIT bindings. The rules are matched until the first
+		 * returns a non null result, which will be used as jit binding
+		 */
+		public final List<JITBindingRule> jitBindingRules = new ArrayList<>();
+
+		/**
+		 * The suppliers in this list will be used to create the
+		 * {@link CreationRule}s passed to the {@link CoreInjector} upon
+		 * initialization. The suppliers are initialized to supply creation
+		 * rules using the rules and bindings defined in this class. During
+		 * configuration, the list can be arbitrarily modified, using the
+		 * supplier objects referenced from {@link #suppliers} to identify the
+		 * memers of the list.
+		 */
+		public final List<Supplier<CreationRule>> coreCreationRuleSuppliers = new ArrayList<>();
+
+		public class CreationPipelineSuppliers {
+			private CreationPipelineSuppliers() {
+			}
+
+			private void initialize() {
+				coreCreationRuleSuppliers.add(creationRulesSupplier);
+				coreCreationRuleSuppliers.add(staticBindingsSupplier);
+				coreCreationRuleSuppliers.add(automaticStaticBindingsSupplier);
+				coreCreationRuleSuppliers.add(jitRulesSupplier);
+			}
+
+			Supplier<CreationRule> creationRulesSupplier = () -> CreationRule
+					.combine(creationRules);
+			Supplier<CreationRule> staticBindingsSupplier = () -> new StaticBindingSet(
+					staticBindings);
+			Supplier<CreationRule> automaticStaticBindingsSupplier = () -> new StaticBindingSet(
+					automaticStaticBindings);
+			Supplier<CreationRule> jitRulesSupplier = () -> new JITBindingCreationRule(
+					jitBindingKeyRules, jitBindingRules);
+		}
+
+		public final CreationPipelineSuppliers suppliers = new CreationPipelineSuppliers();
 	}
 
-	/**
-	 * List of enhancer factories. The enhancers of all factories are combined.
-	 */
-	public final List<EnhancerFactory> enhancerFactories = new ArrayList<>();
-
-	public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx,
-			TypeToken<?> type) {
-		return enhancerFactories.stream().map(r -> r.getEnhancer(ctx, type))
-				.filter(x -> x != null).collect(toList());
-	}
-
-	/**
-	 * List of rules to determine the scope used for a type.
-	 */
-	public final List<ScopeRule> scopeRules = new ArrayList<>();
+	public final CreationPipelineConfiguration creationPipeline = new CreationPipelineConfiguration();
 
 	public final Set<Class<?>> requestedStaticInjections = new HashSet<>();
-
-	/**
-	 * Get the scope for a type based on the {@link #scopeRules} followed by the
-	 * {@link #scopeAnnotationMap}, falling back to the {@link #defaultScope}
-	 */
-	public Scope getScope(TypeToken<?> type) {
-
-		// evaluate scope rules
-		for (ScopeRule rule : scopeRules) {
-			Scope scope = rule.getScope(type);
-			if (scope != null)
-				return scope;
-		}
-
-		return getScope(type.getRawType());
-	}
-
-	public Scope getScope(AnnotatedElement element) {
-		Scope scope = null;
-		// scan scope annotation map
-		for (Entry<Class<? extends Annotation>, Scope> entry : scopeAnnotationMap
-				.entrySet()) {
-			if (element.isAnnotationPresent(entry.getKey())) {
-				if (scope != null)
-					throw new SaltaException(
-							"Multiple scope annotations present on " + element);
-				scope = entry.getValue();
-			}
-		}
-
-		if (scope == null)
-			scope = defaultScope;
-		return scope;
-	}
-
-	public Scope getScope(Class<? extends Annotation> scopeAnnotation) {
-		Scope scope = scopeAnnotationMap.get(scopeAnnotation);
-		if (scope == null)
-			throw new SaltaException("Unknown scope annotation "
-					+ scopeAnnotation);
-		return scope;
-	}
 
 	/**
 	 * Collect error messages to be shown when attempting to create the
