@@ -77,14 +77,23 @@ Salta uses coarse grained locking to control concurrency. The recipe lock is acq
 Salta does not support circular dependencies. There is simply no way to make them work in a predictable way. Where should cycles be broken? If you encounter a circular dependency, use a provider to resolve it.
 
 ### Standard Module
-The standard module contains common code to implement a guice-like dependency injection framework on top of the core module. It provides fine grained customization points and organizes the cooperation between different modules.
+The standard module contains common code to implement a guice-like dependency injection framework on top of the core module. It provides fine grained customization points and organizes the cooperation between different modules. 
+
+Care has been taken not to include any API components typically used directly by an application. Providing the API is the responsibility of the API modules.
 
  * **Instance Creation:** The standard module splits instance creation into the following steps: instantiation, members injection, initialization, enhancement, scoping. Each of these aspects can be configured using rules or factories in the *StandardInjectorConfiguration**. This allows for a very fine grained customization of each of these aspects.
   
  * **Scopes:** Scopes are used to reuse a single instance multiple times, or to inject a different instance in different threads. Only instances provided by bindings can be scoped, since the binding is used to identify the instance to be injected. Scoping happens after the instance creation
  
- * **:**
- * **:**
+ * **Modules:** Modules group bindings and configuration options together. They are used to configure salta.
+ 
+ * **Binding DSL:** An implementation of the Guice binding DSL is provided using the standard JRE functional interfaces. This implementation is typically wrapped by the API module for easy API implementation.
+ 
+### JSR330 Module
+This module provides a bare bone API based on the JSR330 javax.inject annotations and types, combined with a Guice like binding DSL.
+
+### Guice Module
+This module serves as almost drop-in replacement for Guice.
 
 ## Speed
 Salta uses bytecode generation to speed up instantiation. Expect a 5x to 10x speedup over Guice.
