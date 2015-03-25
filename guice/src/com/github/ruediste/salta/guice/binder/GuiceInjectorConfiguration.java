@@ -3,8 +3,12 @@ package com.github.ruediste.salta.guice.binder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRule;
+import com.github.ruediste.salta.core.StaticBinding;
+import com.github.ruediste.salta.core.StaticBindingSet;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Module;
@@ -42,4 +46,13 @@ public class GuiceInjectorConfiguration {
 
 	public final ArrayList<CoreDependencyKey<?>> implicitlyBoundKeys = new ArrayList<>();
 
+	/**
+	 * Automatically defined statically defined bindings. These bindings are
+	 * evaluated after the {@link #staticBindings}, but before the
+	 * {@link #jitBindingRules}
+	 */
+	public final List<StaticBinding> automaticStaticBindings = new ArrayList<>();
+
+	public final Supplier<CreationRule> automaticStaticBindingsSupplier = () -> new StaticBindingSet(
+			automaticStaticBindings);
 }

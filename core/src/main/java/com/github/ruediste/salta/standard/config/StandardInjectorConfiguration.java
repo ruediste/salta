@@ -256,13 +256,6 @@ public class StandardInjectorConfiguration {
 		public final List<StaticBinding> staticBindings = new ArrayList<>();
 
 		/**
-		 * Automatically defined statically defined bindings. These bindings are
-		 * evaluated after the {@link #staticBindings}, but before the
-		 * {@link #jitBindingRules}
-		 */
-		public final List<StaticBinding> automaticStaticBindings = new ArrayList<>();
-
-		/**
 		 * Rules to create the key used to lookup and create JIT bindings
 		 */
 		public final List<JITBindingKeyRule> jitBindingKeyRules = new ArrayList<>();
@@ -291,17 +284,15 @@ public class StandardInjectorConfiguration {
 			private void initialize() {
 				coreCreationRuleSuppliers.add(creationRulesSupplier);
 				coreCreationRuleSuppliers.add(staticBindingsSupplier);
-				coreCreationRuleSuppliers.add(automaticStaticBindingsSupplier);
 				coreCreationRuleSuppliers.add(jitRulesSupplier);
 			}
 
-			Supplier<CreationRule> creationRulesSupplier = () -> CreationRule
+			public final Supplier<CreationRule> creationRulesSupplier = () -> CreationRule
 					.combine(creationRules);
-			Supplier<CreationRule> staticBindingsSupplier = () -> new StaticBindingSet(
+			public final Supplier<CreationRule> staticBindingsSupplier = () -> new StaticBindingSet(
 					staticBindings);
-			Supplier<CreationRule> automaticStaticBindingsSupplier = () -> new StaticBindingSet(
-					automaticStaticBindings);
-			Supplier<CreationRule> jitRulesSupplier = () -> new JITBindingCreationRule(
+
+			public final Supplier<CreationRule> jitRulesSupplier = () -> new JITBindingCreationRule(
 					jitBindingKeyRules, jitBindingRules);
 		}
 

@@ -127,8 +127,7 @@ public class GuiceModule implements Module {
 							.build(ctx);
 					binding.scopeSupplier = () -> config.defaultRecipe
 							.getScope(providedBy.value());
-					config.creationPipeline.automaticStaticBindings
-							.add(binding);
+					guiceConfig.automaticStaticBindings.add(binding);
 				}
 			}
 
@@ -146,8 +145,7 @@ public class GuiceModule implements Module {
 								.build(ctx);
 						binding.scopeSupplier = () -> config.defaultRecipe
 								.getScope(implementedBy.value());
-						config.creationPipeline.automaticStaticBindings
-								.add(binding);
+						guiceConfig.automaticStaticBindings.add(binding);
 					}
 				}
 			}
@@ -161,8 +159,7 @@ public class GuiceModule implements Module {
 							config, foo.getType()).build(ctx);
 					binding.scopeSupplier = () -> config.defaultRecipe
 							.getScope(foo.getType());
-					config.creationPipeline.automaticStaticBindings
-							.add(binding);
+					guiceConfig.automaticStaticBindings.add(binding);
 				}
 			}
 		} else {
@@ -211,6 +208,11 @@ public class GuiceModule implements Module {
 				};
 			}
 		};
+
+		config.creationPipeline.coreCreationRuleSuppliers
+				.add(config.creationPipeline.coreCreationRuleSuppliers
+						.indexOf(config.creationPipeline.suppliers.staticBindingsSupplier) + 1,
+						guiceConfig.automaticStaticBindingsSupplier);
 	}
 
 	private void addStageCreationRule() {
