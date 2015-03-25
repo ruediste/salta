@@ -9,8 +9,6 @@ import javax.inject.Named;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.jsr330.JSR330Module;
-
 public class JSR330MembersInjectorFactoryTest {
 
 	public static class TestClassA {

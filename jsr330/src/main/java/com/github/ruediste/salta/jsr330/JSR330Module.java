@@ -5,7 +5,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.annotation.PostConstruct;
@@ -15,8 +17,12 @@ import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.CreationRuleImpl;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.standard.DefaultJITBindingKeyRule;
 import com.github.ruediste.salta.standard.DefaultJITBindingRule;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -46,6 +52,8 @@ public class JSR330Module extends AbstractModule {
 
 		addProvidedByConstructionRule(config);
 		addImplementedByConstructionRule(config);
+		addTypeTokenConstructionRule(config);
+		bind(Injector.class).toInstance(binder().getInjector());
 
 		addConstructionInstantiatorRule(config);
 
@@ -100,6 +108,27 @@ public class JSR330Module extends AbstractModule {
 				};
 			}
 		};
+	}
+
+	private void addTypeTokenConstructionRule(
+			StandardInjectorConfiguration config) {
+
+		config.creationPipeline.creationRules.add(new CreationRule() {
+
+			@Override
+			public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+					CoreDependencyKey<?> key) {
+
+				if (TypeToken.class.equals(key.getRawType())) {
+					TypeToken<?> type = key.getType().resolveType(
+							TypeToken.class.getTypeParameters()[0]);
+
+					return Optional
+							.of(ctx -> new SupplierRecipeImpl(() -> type));
+				}
+				return Optional.empty();
+			}
+		});
 	}
 
 	private void addProviderMethodBinderModulePostProcessor(

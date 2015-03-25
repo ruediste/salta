@@ -44,7 +44,7 @@ public class SaltaException extends RuntimeException {
 			} else if (t instanceof SaltaException) {
 				sb.append(((SaltaException) t).message);
 			} else {
-				sb.append(msg);
+				sb.append(t.getClass().getName() + ": " + msg);
 			}
 		});
 		return sb.toString();

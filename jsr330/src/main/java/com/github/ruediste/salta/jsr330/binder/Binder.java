@@ -19,16 +19,23 @@
 package com.github.ruediste.salta.jsr330.binder;
 
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRule;
+import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.Scope;
+import com.github.ruediste.salta.core.compile.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.ImplementedBy;
 import com.github.ruediste.salta.jsr330.Injector;
@@ -39,6 +46,7 @@ import com.github.ruediste.salta.jsr330.ProvidedBy;
 import com.github.ruediste.salta.jsr330.SaltaModule;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
+import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder;
@@ -231,7 +239,8 @@ public class Binder {
 	public Binder(JSR330InjectorConfiguration config, InjectorImpl injector) {
 		this.config = config;
 		this.injector = injector;
-		this.delegate = new StandardBinder(config.config, injector.getDelegate());
+		this.delegate = new StandardBinder(config.config,
+				injector.getDelegate());
 	}
 
 	/**
@@ -452,6 +461,25 @@ public class Binder {
 	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
 			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
 		delegate.bindListener(typeMatcher, listener);
+	}
+
+	public void addLoggerConstructionRule() {
+		config.config.creationPipeline.creationRules.add(new CreationRule() {
+
+			@Override
+			public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+					CoreDependencyKey<?> key) {
+
+				if (key instanceof InjectionPoint
+						&& Logger.class.equals(key.getRawType())) {
+					Class<?> declaringClass = ((InjectionPoint<?>) key)
+							.getMember().getDeclaringClass();
+					return Optional.of(ctx -> new SupplierRecipeImpl(
+							() -> Logger.getLogger(declaringClass.getName())));
+				}
+				return Optional.empty();
+			}
+		});
 	}
 
 }

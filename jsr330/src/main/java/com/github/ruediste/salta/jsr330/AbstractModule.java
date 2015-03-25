@@ -26,6 +26,7 @@ import java.lang.annotation.Annotation;
 import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.jsr330.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.jsr330.binder.Binder;
@@ -64,6 +65,10 @@ public abstract class AbstractModule implements SaltaModule {
 		this.binder = checkNotNull(binder, "builder");
 		try {
 			configure();
+		} catch (SaltaException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new SaltaException("Exception in configure()", e);
 		} finally {
 			this.binder = null;
 		}
@@ -72,7 +77,7 @@ public abstract class AbstractModule implements SaltaModule {
 	/**
 	 * Configures a {@link Binder} via the exposed methods.
 	 */
-	protected abstract void configure();
+	protected abstract void configure() throws Exception;
 
 	/**
 	 * Gets direct access to the underlying {@code Binder}.
