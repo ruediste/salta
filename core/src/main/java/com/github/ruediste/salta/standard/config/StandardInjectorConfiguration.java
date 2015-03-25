@@ -246,14 +246,14 @@ public class StandardInjectorConfiguration {
 		}
 
 		/**
-		 * Rules to instantiate dependencies without bindings
-		 */
-		public final List<CreationRule> creationRules = new ArrayList<>();
-
-		/**
 		 * Statically defined bindings
 		 */
 		public final List<StaticBinding> staticBindings = new ArrayList<>();
+
+		/**
+		 * Rules to instantiate dependencies without bindings
+		 */
+		public final List<CreationRule> creationRules = new ArrayList<>();
 
 		/**
 		 * Rules to create the key used to lookup and create JIT bindings
@@ -282,16 +282,15 @@ public class StandardInjectorConfiguration {
 			}
 
 			private void initialize() {
-				coreCreationRuleSuppliers.add(creationRulesSupplier);
 				coreCreationRuleSuppliers.add(staticBindingsSupplier);
+				coreCreationRuleSuppliers.add(creationRulesSupplier);
 				coreCreationRuleSuppliers.add(jitRulesSupplier);
 			}
 
-			public final Supplier<CreationRule> creationRulesSupplier = () -> CreationRule
-					.combine(creationRules);
 			public final Supplier<CreationRule> staticBindingsSupplier = () -> new StaticBindingSet(
 					staticBindings);
-
+			public final Supplier<CreationRule> creationRulesSupplier = () -> CreationRule
+					.combine(creationRules);
 			public final Supplier<CreationRule> jitRulesSupplier = () -> new JITBindingCreationRule(
 					jitBindingKeyRules, jitBindingRules);
 		}
