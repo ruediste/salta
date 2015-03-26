@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.joining;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -92,7 +93,8 @@ public abstract class ConstructorInstantiatorRuleBase implements
 					+ ".\nSpecify qualifiers on parameters instead");
 		}
 		return Optional.of(ctx -> FixedConstructorRecipeInstantiator.of(
-				typeToken, ctx, constructor, config.config.injectionStrategy));
+				typeToken, ctx, constructor, config.config.injectionStrategy,
+				p -> isParameterOptional(p)));
 
 	}
 
@@ -116,4 +118,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 	 */
 	protected abstract Integer getConstructorPriority(Constructor<?> c);
 
+	protected boolean isParameterOptional(Parameter p) {
+		return false;
+	}
 }

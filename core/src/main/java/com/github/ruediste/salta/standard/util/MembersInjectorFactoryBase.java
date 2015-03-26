@@ -12,12 +12,14 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedFieldRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
+import com.google.common.base.Defaults;
 import com.google.common.reflect.TypeToken;
 
 public abstract class MembersInjectorFactoryBase implements
@@ -102,7 +104,7 @@ public abstract class MembersInjectorFactoryBase implements
 					// create dependencies
 					ArrayList<SupplierRecipe> args = new ArrayList<>();
 					Parameter[] parameters = method.getParameters();
-					for (int i = 0; i < parameters.length; i++) {
+					parameterLoop: for (int i = 0; i < parameters.length; i++) {
 						Parameter parameter = parameters[i];
 						@SuppressWarnings({ "unchecked", "rawtypes" })
 						CoreDependencyKey<Object> dependency = new InjectionPoint<>(
@@ -111,12 +113,20 @@ public abstract class MembersInjectorFactoryBase implements
 								parameter, i);
 						Optional<SupplierRecipe> recipe;
 						recipe = ctx.tryGetRecipe(dependency);
-						if (!recipe.isPresent()
-								&& injectionInstruction == InjectionInstruction.INJECT_OPTIONAL)
-							continue methodLoop;
+						if (!recipe.isPresent()) {
+							if (isParameterOptional(parameter)) {
+								args.add(new SupplierRecipeImpl(() -> Defaults
+										.defaultValue(parameter.getType())));
+								continue parameterLoop;
+							}
+							if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
+								continue methodLoop;
+							}
+						}
 
 						args.add(recipe.orElseThrow(() -> new SaltaException(
-								"Unable to get recipe for " + dependency)));
+								"Unable to get recipe for parameter of method "
+										+ method + ":\n" + parameter)));
 					}
 
 					// add injector
@@ -135,4 +145,7 @@ public abstract class MembersInjectorFactoryBase implements
 			TypeToken<?> declaringType, Method method,
 			MethodOverrideIndex overrideIndex);
 
+	protected boolean isParameterOptional(Parameter p) {
+		return false;
+	}
 }

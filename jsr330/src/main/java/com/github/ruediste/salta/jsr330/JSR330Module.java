@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -16,6 +17,7 @@ import javax.inject.Provider;
 import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
+import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.CreationRuleImpl;
@@ -57,8 +59,7 @@ public class JSR330Module extends AbstractModule {
 
 		addConstructionInstantiatorRule(config);
 
-		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
-				.of(type, ctx, cstr, config.config.injectionStrategy);
+		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator.of(type, ctx, cstr, config.config.injectionStrategy, p -> false);
 
 		// stage creation rule
 		config.creationPipeline.creationRules.add(new CreationRuleImpl(
@@ -78,6 +79,7 @@ public class JSR330Module extends AbstractModule {
 
 		addProviderMethodBinderModulePostProcessor(config);
 		bindScope(Singleton.class, config.singletonScope);
+		bindScope(DefaultScope.class, config.defaultScope);
 
 		config.creationPipeline.jitBindingKeyRules
 				.add(new DefaultJITBindingKeyRule(config));
@@ -87,6 +89,33 @@ public class JSR330Module extends AbstractModule {
 
 		config.defaultRecipe.constructionRules.add(new DefaultConstructionRule(
 				config));
+		setMembersInjectorFactory(config);
+		if (config.stage == Stage.PRODUCTION)
+			addSingletonInstantiationDynamicInitializer(config);
+
+	}
+
+	protected void addSingletonInstantiationDynamicInitializer(
+			StandardInjectorConfiguration config) {
+		Injector injector = binder().getInjector();
+		config.dynamicInitializers
+				.add(() -> {
+					injector.getDelegate()
+							.getCoreInjector()
+							.withRecipeCreationContext(
+									ctx -> {
+										for (Binding b : config.creationPipeline.staticBindings) {
+											b.getScope()
+													.performEagerInstantiation(
+															ctx, b);
+										}
+										return null;
+									});
+				});
+	}
+
+	protected void setMembersInjectorFactory(
+			StandardInjectorConfiguration config) {
 		config.membersInjectorFactory = new MembersInjectorFactory() {
 
 			Injector injector = binder().getInjector();
@@ -280,23 +309,34 @@ public class JSR330Module extends AbstractModule {
 						}
 						if (index.isOverridden(method))
 							return InjectionInstruction.NO_INJECTION;
-						return InjectionInstruction.INJECT;
+						return method
+								.isAnnotationPresent(InjectionOptional.class) ? InjectionInstruction.INJECT_OPTIONAL
+								: InjectionInstruction.INJECT;
 					}
 
 					@Override
 					protected InjectionInstruction getInjectionInstruction(
-							TypeToken<?> declaringType, Field f) {
-						boolean annotationPresent = f
+							TypeToken<?> declaringType, Field field) {
+						boolean annotationPresent = field
 								.isAnnotationPresent(Inject.class);
 						if (annotationPresent
-								&& Modifier.isFinal(f.getModifiers())) {
+								&& Modifier.isFinal(field.getModifiers())) {
 							throw new SaltaException(
 									"Final field annotated with @Inject");
 						}
-						if (Modifier.isStatic(f.getModifiers()))
+						if (Modifier.isStatic(field.getModifiers()))
 							return InjectionInstruction.NO_INJECTION;
-						return annotationPresent ? InjectionInstruction.INJECT
-								: InjectionInstruction.NO_INJECTION;
+						if (!annotationPresent)
+							return InjectionInstruction.NO_INJECTION;
+						else
+							return field
+									.isAnnotationPresent(InjectionOptional.class) ? InjectionInstruction.INJECT_OPTIONAL
+									: InjectionInstruction.INJECT;
+					}
+
+					@Override
+					protected boolean isParameterOptional(Parameter p) {
+						return p.isAnnotationPresent(InjectionOptional.class);
 					}
 				});
 	}
@@ -320,6 +360,10 @@ public class JSR330Module extends AbstractModule {
 						return null;
 					}
 
+					@Override
+					protected boolean isParameterOptional(Parameter p) {
+						return p.isAnnotationPresent(InjectionOptional.class);
+					}
 				});
 	}
 

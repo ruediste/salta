@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.jsr330;
+package com.github.ruediste.salta.jsr330.wikiChecks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,6 +13,10 @@ import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.ruediste.salta.jsr330.AbstractModule;
+import com.github.ruediste.salta.jsr330.Injector;
+import com.github.ruediste.salta.jsr330.MembersInjector;
+import com.github.ruediste.salta.jsr330.Salta;
 import com.github.ruediste.salta.standard.Stage;
 import com.google.common.reflect.TypeToken;
 

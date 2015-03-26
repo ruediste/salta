@@ -174,8 +174,7 @@ public class GuiceModule implements Module {
 
 		addConstructorInstantiationRule();
 
-		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
-				.of(type, ctx, cstr, config.config.injectionStrategy);
+		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator.of(type, ctx, cstr, config.config.injectionStrategy, p -> false);
 
 		if (guiceConfig.stage == Stage.PRODUCTION)
 			addEagerInstantiationDynamicInitializer();

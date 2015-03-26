@@ -16,6 +16,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -26,12 +28,15 @@ import org.objectweb.asm.commons.Method;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.MethodRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.util.Accessibility;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
+import com.google.common.base.Defaults;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -55,7 +60,7 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 
 	public static FixedConstructorRecipeInstantiator of(TypeToken<?> typeToken,
 			RecipeCreationContext ctx, Constructor<?> constructor,
-			InjectionStrategy strategy) {
+			InjectionStrategy strategy, Predicate<Parameter> isOptional) {
 		ArrayList<SupplierRecipe> args = new ArrayList<>();
 
 		Parameter[] parameters = constructor.getParameters();
@@ -65,7 +70,19 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 			CoreDependencyKey<Object> dependency = new InjectionPoint(
 					typeToken.resolveType(parameter.getParameterizedType()),
 					constructor, parameter, i);
-			args.add(ctx.getRecipe(dependency));
+			Optional<SupplierRecipe> argRecipe = ctx.tryGetRecipe(dependency);
+			if (argRecipe.isPresent())
+				args.add(argRecipe.get());
+			else {
+				if (isOptional.test(parameter)) {
+					args.add(new SupplierRecipeImpl(() -> Defaults
+							.defaultValue(parameter.getType())));
+				} else {
+					throw new SaltaException(
+							"Cannot resolve constructor parameter of "
+									+ constructor + ":\n" + parameter);
+				}
+			}
 		}
 		return new FixedConstructorRecipeInstantiator(constructor, args,
 				strategy);
