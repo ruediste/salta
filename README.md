@@ -8,7 +8,7 @@
 
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-[Documentation](wiki/) 
+[Documentation](https://github.com/ruediste/salta/wiki) 
 
 ## Familiar
 To make things easy for developers, the configuration API of Salta was copied from Guice (without the SPI). The concepts of modules, bindings, JIT bindings and scopes was taken over as well. Thus, if you know Guice, the learning curve is very gentle.
