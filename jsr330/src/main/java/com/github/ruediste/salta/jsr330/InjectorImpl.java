@@ -16,7 +16,7 @@ public class InjectorImpl implements Injector {
 	private StandardInjector delegate;
 
 	public InjectorImpl(JSR330InjectorConfiguration config) {
-		this.delegate = new StandardInjector(config.config);
+		this.delegate = new StandardInjector(config.standardConfig);
 	}
 
 	public void initialize() {

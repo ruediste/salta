@@ -27,7 +27,7 @@ public class SupplierRecipeImplTest {
 
 			@Override
 			protected void configure() {
-				binder().getConfiguration().config.creationPipeline.creationRules
+				binder().config().standardConfig.creationPipeline.creationRules
 						.add(new CreationRule() {
 
 							@Override

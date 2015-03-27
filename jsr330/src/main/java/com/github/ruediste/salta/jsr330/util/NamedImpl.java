@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.jsr330;
+package com.github.ruediste.salta.jsr330.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 import javax.inject.Named;
 
 @SuppressWarnings("all")
-class NamedImpl implements Named, Serializable {
+public class NamedImpl implements Named, Serializable {
 
 	private final String value;
 

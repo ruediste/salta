@@ -50,7 +50,7 @@ public class JSR330Module extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		StandardInjectorConfiguration config = binder().getConfiguration().config;
+		StandardInjectorConfiguration config = binder().config().standardConfig;
 
 		addProvidedByConstructionRule(config);
 		addImplementedByConstructionRule(config);
@@ -178,7 +178,7 @@ public class JSR330Module extends AbstractModule {
 					return true;
 				}
 			};
-			getConfiguration().modulePostProcessors
+			config().modulePostProcessors
 					.add(b::bindProviderMethodsOf);
 		}
 	}

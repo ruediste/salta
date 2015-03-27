@@ -26,6 +26,7 @@ import java.lang.annotation.Annotation;
 import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.jsr330.binder.AnnotatedBindingBuilder;
@@ -194,7 +195,11 @@ public abstract class AbstractModule implements SaltaModule {
 		return binder().getMembersInjector(type);
 	}
 
-	protected JSR330InjectorConfiguration getConfiguration() {
-		return binder().getConfiguration();
+	protected JSR330InjectorConfiguration config() {
+		return binder().config();
+	}
+
+	protected void bindCreationRule(CreationRule rule) {
+		binder.bindCreationRule(rule);
 	}
 }

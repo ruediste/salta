@@ -17,6 +17,7 @@ import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.Injector;
 import com.github.ruediste.salta.jsr330.MembersInjector;
 import com.github.ruediste.salta.jsr330.Salta;
+import com.github.ruediste.salta.jsr330.util.JreLoggerCreationRule;
 import com.github.ruediste.salta.standard.Stage;
 import com.google.common.reflect.TypeToken;
 
@@ -56,7 +57,7 @@ public class BuiltinBindingsTest {
 
 			@Override
 			protected void configure() throws Exception {
-				binder().addLoggerConstructionRule();
+				bindCreationRule(new JreLoggerCreationRule());
 			}
 		});
 

@@ -11,6 +11,8 @@ import org.atinject.tck.auto.Tire;
 import org.atinject.tck.auto.V8Engine;
 import org.atinject.tck.auto.accessories.SpareTire;
 
+import com.github.ruediste.salta.jsr330.util.Names;
+
 public class JSR330TckTest {
 
 	public static junit.framework.Test suite() {

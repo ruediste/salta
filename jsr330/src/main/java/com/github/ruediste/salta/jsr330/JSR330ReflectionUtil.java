@@ -9,6 +9,8 @@ import java.util.Objects;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 
+import com.github.ruediste.salta.jsr330.util.NamedImpl;
+
 public class JSR330ReflectionUtil {
 
 	private JSR330ReflectionUtil() {

@@ -9,14 +9,14 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 
 public class JSR330InjectorConfiguration {
 
-	public final StandardInjectorConfiguration config;
+	public final StandardInjectorConfiguration standardConfig;
 
 	public JSR330InjectorConfiguration(Stage stage) {
 		this(new StandardInjectorConfiguration(stage));
 	}
 
-	public JSR330InjectorConfiguration(StandardInjectorConfiguration config) {
-		this.config = config;
+	public JSR330InjectorConfiguration(StandardInjectorConfiguration standardConfig) {
+		this.standardConfig = standardConfig;
 	}
 
 	/**

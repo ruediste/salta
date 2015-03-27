@@ -10,6 +10,7 @@ import javax.inject.Named;
 import org.junit.Test;
 
 import com.github.ruediste.salta.core.SaltaException;
+import com.github.ruediste.salta.jsr330.util.Names;
 import com.github.ruediste.salta.standard.DependencyKey;
 
 public class ProvidesMethodTest {

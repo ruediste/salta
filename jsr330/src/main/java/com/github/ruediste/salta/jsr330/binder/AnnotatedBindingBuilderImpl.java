@@ -2,7 +2,7 @@ package com.github.ruediste.salta.jsr330.binder;
 
 import java.lang.annotation.Annotation;
 
-import com.github.ruediste.salta.jsr330.Names;
+import com.github.ruediste.salta.jsr330.util.Names;
 
 public class AnnotatedBindingBuilderImpl<T> extends LinkedBindingBuilderImpl<T>
 		implements AnnotatedBindingBuilder<T> {

@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.jsr330;
+package com.github.ruediste.salta.jsr330.util;
 
 import java.util.Enumeration;
 import java.util.Map;
