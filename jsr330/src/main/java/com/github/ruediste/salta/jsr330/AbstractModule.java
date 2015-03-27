@@ -34,6 +34,7 @@ import com.github.ruediste.salta.jsr330.binder.Binder;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder;
+import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -200,6 +201,11 @@ public abstract class AbstractModule implements SaltaModule {
 	}
 
 	protected void bindCreationRule(CreationRule rule) {
-		binder.bindCreationRule(rule);
+		binder().bindCreationRule(rule);
+	}
+
+	protected void bindMembersInjectorFactory(
+			RecipeMembersInjectorFactory factory) {
+		binder().bindMembersInjectorFactory(factory);
 	}
 }

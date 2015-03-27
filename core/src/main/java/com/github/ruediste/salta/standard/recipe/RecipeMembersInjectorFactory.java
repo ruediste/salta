@@ -11,6 +11,10 @@ import com.google.common.reflect.TypeToken;
  * injectors are used
  */
 public interface RecipeMembersInjectorFactory {
-	List<RecipeMembersInjector> createInjectors(RecipeCreationContext ctx,
-			TypeToken<?> type);
+
+	/**
+	 * Create {@link RecipeMembersInjector}s for the given type
+	 */
+	List<RecipeMembersInjector> createMembersInjectors(
+			RecipeCreationContext ctx, TypeToken<?> type);
 }

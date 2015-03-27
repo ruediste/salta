@@ -289,7 +289,7 @@ public class JSR330Module extends AbstractModule {
 	}
 
 	private void addMembersInjectorFactory(StandardInjectorConfiguration config) {
-		config.defaultRecipe.defaultMembersInjectorFactories
+		config.defaultRecipe.membersInjectorFactories
 				.add(new MembersInjectorFactoryBase(config) {
 
 					@Override

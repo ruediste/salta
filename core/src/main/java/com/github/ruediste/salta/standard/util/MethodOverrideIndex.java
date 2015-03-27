@@ -125,6 +125,11 @@ public class MethodOverrideIndex {
 		return !leaves.contains(m);
 	}
 
+	/**
+	 * Return the ancestors of the provided leaf type in reverse order of
+	 * {@link TypeToken#getTypes()}. That is, supertypes are always listed
+	 * before all their subtypes.
+	 */
 	public List<TypeToken<?>> getAncestors() {
 		return ancestors;
 	}

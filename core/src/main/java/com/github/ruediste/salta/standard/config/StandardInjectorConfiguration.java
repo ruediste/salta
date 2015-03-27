@@ -136,27 +136,27 @@ public class StandardInjectorConfiguration {
 		 * used if no member of the {@link #membersInjectorRules} matches for a
 		 * type.
 		 */
-		public final List<RecipeMembersInjectorFactory> defaultMembersInjectorFactories = new ArrayList<>();
+		public final List<RecipeMembersInjectorFactory> membersInjectorFactories = new ArrayList<>();
 
 		/**
 		 * Create a list of members injectors based on the
 		 * {@link #membersInjectorRules} and as fallback the
-		 * {@link #defaultMembersInjectorFactories}
+		 * {@link #membersInjectorFactories}
 		 */
 		public List<RecipeMembersInjector> createRecipeMembersInjectors(
 				RecipeCreationContext ctx, TypeToken<?> type) {
 			// test rules
 			for (MembersInjectorRule rule : membersInjectorRules) {
 				List<RecipeMembersInjector> membersInjectors = rule
-						.getMembersInjectors(type);
+						.getMembersInjectors(ctx, type);
 				if (membersInjectors != null)
 					return membersInjectors;
 			}
 
 			// use default factories
 			ArrayList<RecipeMembersInjector> result = new ArrayList<>();
-			for (RecipeMembersInjectorFactory factory : defaultMembersInjectorFactories) {
-				result.addAll(factory.createInjectors(ctx, type));
+			for (RecipeMembersInjectorFactory factory : membersInjectorFactories) {
+				result.addAll(factory.createMembersInjectors(ctx, type));
 			}
 			return result;
 		}

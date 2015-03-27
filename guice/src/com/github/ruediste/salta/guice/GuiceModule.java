@@ -529,7 +529,7 @@ public class GuiceModule implements Module {
 	}
 
 	private void addMembersInjectorFactory() {
-		config.defaultRecipe.defaultMembersInjectorFactories
+		config.defaultRecipe.membersInjectorFactories
 				.add(new MembersInjectorFactoryBase(config) {
 
 					@Override

@@ -44,6 +44,7 @@ import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder;
 import com.github.ruediste.salta.standard.binder.StandardBinder;
+import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -458,6 +459,11 @@ public class Binder {
 
 	public void bindCreationRule(CreationRule rule) {
 		config.standardConfig.creationPipeline.creationRules.add(rule);
+	}
+
+	public void bindMembersInjectorFactory(RecipeMembersInjectorFactory factory) {
+		config().standardConfig.defaultRecipe.membersInjectorFactories
+				.add(factory);
 	}
 
 }

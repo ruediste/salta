@@ -36,7 +36,7 @@ public abstract class MembersInjectorFactoryBase implements
 	}
 
 	@Override
-	public List<RecipeMembersInjector> createInjectors(
+	public List<RecipeMembersInjector> createMembersInjectors(
 			RecipeCreationContext ctx, TypeToken<?> typeToken) {
 		ArrayList<RecipeMembersInjector> result = new ArrayList<>();
 
