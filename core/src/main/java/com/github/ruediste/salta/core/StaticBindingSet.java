@@ -78,7 +78,7 @@ public class StaticBindingSet implements CreationRule {
 		StaticBinding binding = getBinding(key);
 		if (binding != null) {
 			return Optional.of(ctx -> binding.getScope().createRecipe(ctx,
-					binding, key.getType()));
+					binding, key));
 		}
 		return Optional.empty();
 	}

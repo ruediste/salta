@@ -3,8 +3,8 @@ package com.github.ruediste.salta.guice.binder;
 import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.Binding;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.standard.ScopeImpl.ScopeHandler;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Scope;
 
 public class GuiceScopeAdapter implements ScopeHandler {
@@ -17,14 +17,14 @@ public class GuiceScopeAdapter implements ScopeHandler {
 
 	@Override
 	public Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-			TypeToken<?> type) {
-		return doScope(supplier, binding, type);
+			CoreDependencyKey<?> requestedKey) {
+		return doScope(supplier, binding, requestedKey);
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T> Supplier<T> doScope(Supplier<Object> supplier, Binding binding,
-			TypeToken<?> type) {
-		return scope.scope(binding, (TypeToken<T>) type,
+			CoreDependencyKey<?> requestedKey) {
+		return scope.scope(binding, (CoreDependencyKey<T>) requestedKey,
 				() -> (T) supplier.get())::get;
 	}
 

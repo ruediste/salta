@@ -1,7 +1,7 @@
 package com.google.inject.internal;
 
 import com.github.ruediste.salta.core.Binding;
-import com.google.common.reflect.TypeToken;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
@@ -18,7 +18,7 @@ public class SingletonScope implements Scope {
 	}
 
 	@Override
-	public <T> Provider<T> scope(Binding binding, TypeToken<T> type,
+	public <T> Provider<T> scope(Binding binding, CoreDependencyKey<T> requestedKey,
 			Provider<T> unscoped) {
 		T instance = unscoped.get();
 		return new Provider<T>() {
@@ -30,7 +30,7 @@ public class SingletonScope implements Scope {
 
 			@Override
 			public String toString() {
-				return "SingletonProvider(" + type + ")";
+				return "SingletonProvider(" + requestedKey + ")";
 			}
 		};
 	}

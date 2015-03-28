@@ -30,8 +30,8 @@ import javax.inject.Singleton;
 
 import junit.framework.TestCase;
 
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.SaltaException;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
@@ -429,7 +429,7 @@ public class Jsr330Test extends TestCase {
 		@Override
 		public <T> com.google.inject.Provider<T> scope(
 				com.github.ruediste.salta.core.Binding binding,
-				TypeToken<T> type, com.google.inject.Provider<T> unscoped) {
+				CoreDependencyKey<T> requestedKey, com.google.inject.Provider<T> unscoped) {
 			return new com.google.inject.Provider<T>() {
 				private T value;
 				private int snapshotTime = -1;

@@ -1,7 +1,6 @@
 package com.github.ruediste.salta.core;
 
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
-import com.google.common.reflect.TypeToken;
 
 /**
  * A Scope defines a visibility for an instance. The scope can either reuse an
@@ -16,11 +15,11 @@ public interface Scope {
 	 * 
 	 * @param binding
 	 *            binding which is beeing scoped
-	 * @param requestedType
-	 *            the type requested by the injection point
+	 * @param requestedKey
+	 *            the key beeing requested
 	 */
 	SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding,
-			TypeToken<?> requestedType);
+			CoreDependencyKey<?> requestedKey);
 
 	/**
 	 * Perform an eager instantiation if applicable for this scope. Only called

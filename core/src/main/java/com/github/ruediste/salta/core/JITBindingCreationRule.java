@@ -45,8 +45,8 @@ public class JITBindingCreationRule implements CreationRule {
 		// use binding if available
 		if (jitBinding != null) {
 			JITBinding tmp = jitBinding;
-			return Optional.of(ctx -> tmp.getScope().createRecipe(ctx, tmp,
-					key.getType()));
+			return Optional.of(ctx -> tmp.getScope()
+					.createRecipe(ctx, tmp, key));
 		}
 		return Optional.empty();
 	}

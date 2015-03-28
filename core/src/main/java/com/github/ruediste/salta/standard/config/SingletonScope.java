@@ -4,12 +4,12 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.attachedProperties4J.AttachedProperty;
 import com.github.ruediste.salta.core.Binding;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.util.Accessibility;
-import com.google.common.reflect.TypeToken;
 
 public class SingletonScope implements Scope {
 
@@ -23,7 +23,7 @@ public class SingletonScope implements Scope {
 
 	@Override
 	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
-			Binding binding, TypeToken<?> requestedType) {
+			Binding binding, CoreDependencyKey<?> requestedKey) {
 		// make sure to create the instance when first creating the recipe
 		instantiate(ctx, binding);
 
@@ -34,7 +34,7 @@ public class SingletonScope implements Scope {
 			public Class<?> compileImpl(GeneratorAdapter mv,
 					MethodCompilationContext ctx) {
 
-				Class<?> fieldType = requestedType.getRawType();
+				Class<?> fieldType = requestedKey.getRawType();
 				if (!Accessibility.isClassPublic(fieldType)) {
 					fieldType = Object.class;
 				}

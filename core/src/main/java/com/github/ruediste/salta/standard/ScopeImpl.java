@@ -8,11 +8,11 @@ import org.objectweb.asm.commons.Method;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CompiledSupplier;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
-import com.google.common.reflect.TypeToken;
 
 public class ScopeImpl implements Scope {
 
@@ -25,13 +25,15 @@ public class ScopeImpl implements Scope {
 		 * @param supplier
 		 *            supplier of the unscoped instance
 		 * @param binding
-		 *            binding beeing scoped
-		 * @param requestedType
-		 *            type beeing requested by the injection point
+		 *            Binding beeing scoped. Use this as key to identify
+		 *            instances.
+		 * @param requestedKey
+		 *            Key beeing requested. Be aware that the same binding can
+		 *            be requested using different keys.
 		 * @return
 		 */
 		Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-				TypeToken<?> requestedType);
+				CoreDependencyKey<?> requestedKey);
 	}
 
 	public ScopeImpl(ScopeHandler handler) {
@@ -40,12 +42,12 @@ public class ScopeImpl implements Scope {
 
 	@Override
 	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
-			Binding binding, TypeToken<?> requestedType) {
+			Binding binding, CoreDependencyKey<?> requestedKey) {
 		CompiledSupplier compilerInnerRecipe = ctx.getCompiler()
 				.compileSupplier(binding.getOrCreateRecipe(ctx));
 
 		Supplier<Object> scoped = handler.scope(
-				compilerInnerRecipe::getNoThrow, binding, requestedType);
+				compilerInnerRecipe::getNoThrow, binding, requestedKey);
 		return new SupplierRecipe() {
 
 			@Override

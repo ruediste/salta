@@ -16,7 +16,7 @@
 
 package com.google.inject;
 
-import com.google.common.reflect.TypeToken;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.google.inject.internal.SingletonScope;
 
 /**
@@ -57,7 +57,7 @@ public class Scopes {
 		@Override
 		public <T> Provider<T> scope(
 				com.github.ruediste.salta.core.Binding binding,
-				TypeToken<T> type, Provider<T> unscoped) {
+				CoreDependencyKey<T> requestedKey, Provider<T> unscoped) {
 			return unscoped;
 		}
 	};

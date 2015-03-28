@@ -17,7 +17,7 @@
 package com.google.inject;
 
 import com.github.ruediste.salta.core.Binding;
-import com.google.common.reflect.TypeToken;
+import com.github.ruediste.salta.core.CoreDependencyKey;
 
 /**
  * A scope is a level of visibility that instances provided by Guice may have.
@@ -47,7 +47,7 @@ public interface Scope {
 	 *
 	 * @param binding
 	 *            binding beeing scoped
-	 * @param type
+	 * @param requestedKey
 	 *            type the binding was created for
 	 * @param unscoped
 	 *            locates an instance when one doesn't already exist in this
@@ -56,7 +56,7 @@ public interface Scope {
 	 *         provider when an instance of the requested object doesn't already
 	 *         exist in this scope
 	 */
-	public <T> Provider<T> scope(Binding binding, TypeToken<T> type,
+	public <T> Provider<T> scope(Binding binding, CoreDependencyKey<T> requestedKey,
 			Provider<T> unscoped);
 
 	/**
