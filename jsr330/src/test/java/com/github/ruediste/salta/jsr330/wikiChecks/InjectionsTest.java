@@ -2,11 +2,14 @@ package com.github.ruediste.salta.jsr330.wikiChecks;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import javax.inject.Inject;
 
 import org.junit.Test;
 
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.InjectionOptional;
 import com.github.ruediste.salta.jsr330.Salta;
@@ -86,5 +89,32 @@ public class InjectionsTest {
 
 		assertNotNull(a.constructorArgB);
 		assertNotNull(a.constructorArgValue);
+	}
+
+	private static class Circular1 {
+		@Inject
+		Circular2 other;
+	}
+
+	private static class Circular2 {
+		@Inject
+		Circular1 other;
+	}
+
+	@Test
+	public void circularInstances() {
+		try {
+			Salta.createInjector(new AbstractModule() {
+
+				@Override
+				protected void configure() throws Exception {
+					bind(Circular1.class).toInstance(new Circular1());
+					bind(Circular2.class).toInstance(new Circular2());
+				}
+			}).getInstance(Circular1.class);
+			fail();
+		} catch (SaltaException e) {
+			assertTrue(e.getMessage().contains("Recursive recipe creation"));
+		}
 	}
 }
