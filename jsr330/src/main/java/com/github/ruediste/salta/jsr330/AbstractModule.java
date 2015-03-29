@@ -200,6 +200,9 @@ public abstract class AbstractModule implements SaltaModule {
 		return binder().config();
 	}
 
+	/**
+	 * @see Binder#bindCreationRule(CreationRule)
+	 */
 	protected void bindCreationRule(CreationRule rule) {
 		binder().bindCreationRule(rule);
 	}

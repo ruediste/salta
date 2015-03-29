@@ -130,7 +130,7 @@ public class BindingTest extends TestCase {
 			fail();
 		} catch (SaltaException expected) {
 			if (!expected.getMessage().contains(
-					"Cannot find construction rule for java.util.List"))
+					"Cannot find construction recipe for java.util.List"))
 				throw expected;
 		}
 	}

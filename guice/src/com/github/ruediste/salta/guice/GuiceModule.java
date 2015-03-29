@@ -122,10 +122,10 @@ public class GuiceModule implements Module {
 					StandardStaticBinding binding = new StandardStaticBinding();
 					binding.dependencyMatcher = DependencyKey
 							.rawTypeMatcher(providedBy.value());
-					binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-							config, TypeToken.of(providedBy.value()))
-							.build(ctx);
-					binding.scopeSupplier = () -> config.defaultRecipe
+					binding.recipeFactory = ctx -> DefaultCreationRecipeBuilder
+							.build(config, TypeToken.of(providedBy.value()),
+									ctx);
+					binding.scopeSupplier = () -> config.scope
 							.getScope(providedBy.value());
 					guiceConfig.automaticStaticBindings.add(binding);
 				}
@@ -140,10 +140,11 @@ public class GuiceModule implements Module {
 						StandardStaticBinding binding = new StandardStaticBinding();
 						binding.dependencyMatcher = DependencyKey
 								.rawTypeMatcher(implementedBy.value());
-						binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-								config, TypeToken.of(implementedBy.value()))
-								.build(ctx);
-						binding.scopeSupplier = () -> config.defaultRecipe
+						binding.recipeFactory = ctx -> DefaultCreationRecipeBuilder
+								.build(config,
+										TypeToken.of(implementedBy.value()),
+										ctx);
+						binding.scopeSupplier = () -> config.scope
 								.getScope(implementedBy.value());
 						guiceConfig.automaticStaticBindings.add(binding);
 					}
@@ -155,10 +156,10 @@ public class GuiceModule implements Module {
 				if (keys.add(foo)) {
 					StandardStaticBinding binding = new StandardStaticBinding();
 					binding.dependencyMatcher = DependencyKey.matcher(foo);
-					binding.recipeFactory = ctx -> new DefaultCreationRecipeBuilder(
-							config, foo.getType()).build(ctx);
-					binding.scopeSupplier = () -> config.defaultRecipe
-							.getScope(foo.getType());
+					binding.recipeFactory = ctx -> DefaultCreationRecipeBuilder
+							.build(config, foo.getType(), ctx);
+					binding.scopeSupplier = () -> config.scope.getScope(foo
+							.getType());
 					guiceConfig.automaticStaticBindings.add(binding);
 				}
 			}
@@ -174,7 +175,9 @@ public class GuiceModule implements Module {
 
 		addConstructorInstantiationRule();
 
-		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator.of(type, ctx, cstr, config.config.injectionStrategy, p -> false);
+		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
+				.of(type, ctx, cstr, config.config.injectionStrategy,
+						p -> false);
 
 		if (guiceConfig.stage == Stage.PRODUCTION)
 			addEagerInstantiationDynamicInitializer();
@@ -184,7 +187,7 @@ public class GuiceModule implements Module {
 		binder().getDelegate().bindScope(javax.inject.Singleton.class,
 				config.singletonScope);
 
-		config.defaultRecipe.constructionRules.add(new DefaultConstructionRule(
+		config.construction.constructionRules.add(new DefaultConstructionRule(
 				config));
 		addStageCreationRule();
 		config.membersInjectorFactory = new MembersInjectorFactory() {
@@ -233,7 +236,7 @@ public class GuiceModule implements Module {
 
 	private void addProvidedByConstructionRule() {
 		// rule for @ProvidedBy
-		config.defaultRecipe.constructionRules
+		config.construction.constructionRules
 				.add(new ProvidedByConstructionRuleBase(Provider.class) {
 
 					@Override
@@ -354,7 +357,7 @@ public class GuiceModule implements Module {
 
 	private void addConstructorInstantiationRule() {
 		// rule for constructor instantiation
-		config.defaultRecipe.instantiatorRules
+		config.construction.instantiatorRules
 				.add(new ConstructorInstantiatorRuleBase(config) {
 
 					@Override
@@ -396,7 +399,7 @@ public class GuiceModule implements Module {
 
 	private void addImplementedByConstructionRule() {
 		// rule for @ImplementedBy
-		config.defaultRecipe.constructionRules
+		config.construction.constructionRules
 				.add(new ImplementedByConstructionRuleBase() {
 
 					@Override
@@ -529,7 +532,7 @@ public class GuiceModule implements Module {
 	}
 
 	private void addMembersInjectorFactory() {
-		config.defaultRecipe.membersInjectorFactories
+		config.construction.membersInjectorFactories
 				.add(new MembersInjectorFactoryBase(config) {
 
 					@Override

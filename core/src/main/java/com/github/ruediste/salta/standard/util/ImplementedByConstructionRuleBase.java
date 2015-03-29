@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.standard.util;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -34,7 +35,7 @@ public abstract class ImplementedByConstructionRuleBase implements
 	}
 
 	@Override
-	public Function<RecipeCreationContext, SupplierRecipe> createConstructionRecipe(
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
 			TypeToken<?> type) {
 		DependencyKey<?> implementorKey = getImplementorKey(type);
 		if (implementorKey != null) {
@@ -43,7 +44,7 @@ public abstract class ImplementedByConstructionRuleBase implements
 						+ " specified by " + getAnnotationName()
 						+ " does not implement " + type);
 			}
-			return (ctx) -> {
+			return Optional.of(ctx -> {
 				SupplierRecipe recipe = ctx.getRecipe(implementorKey);
 				return new RecipeInstantiator() {
 
@@ -53,10 +54,10 @@ public abstract class ImplementedByConstructionRuleBase implements
 						return recipe.compile(ctx);
 					}
 				};
-			};
+			});
 		}
 
-		return null;
+		return Optional.empty();
 	}
 
 }

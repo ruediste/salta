@@ -2,8 +2,6 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -23,10 +21,8 @@ import com.github.ruediste.salta.standard.CreationRecipeFactory;
 import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
-import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
@@ -56,7 +52,7 @@ public class StandardBindingBuilderImpl<T> implements
 		this.type = type;
 		this.config = config;
 		recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(type);
-		scopeSupplier = () -> config.defaultRecipe.getScope(type);
+		scopeSupplier = () -> config.scope.getScope(type);
 	}
 
 	public void register() {
@@ -82,15 +78,15 @@ public class StandardBindingBuilderImpl<T> implements
 	public StandardScopedBindingBuilder<T> to(
 			TypeToken<? extends T> implementation) {
 		recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(implementation);
-		scopeSupplier = () -> config.defaultRecipe.getScope(implementation);
+		scopeSupplier = () -> config.scope.getScope(implementation);
 		return this;
 	}
 
 	protected Supplier<CreationRecipeFactory> createDefaultCreationRecipeFactorySupplier(
 			TypeToken<? extends T> implementation) {
 		return () -> {
-			return ctx -> new DefaultCreationRecipeBuilder(config,
-					implementation).build(ctx);
+			return ctx -> DefaultCreationRecipeBuilder.build(config,
+					implementation, ctx);
 		};
 	}
 
@@ -236,31 +232,22 @@ public class StandardBindingBuilderImpl<T> implements
 	@Override
 	public <S extends T> StandardScopedBindingBuilder<T> toConstructor(
 			Constructor<S> constructor, TypeToken<? extends S> type) {
-		DefaultConstructionRule rule = new DefaultConstructionRule(config) {
-			@Override
-			protected Optional<Function<RecipeCreationContext, RecipeInstantiator>> createInstantiationRecipe(
-					TypeToken<?> type) {
-				return Optional
-						.of(ctx -> config.fixedConstructorInstantiatorFactory
-								.create(type, ctx, constructor));
-			}
+
+		recipeFactorySupplier = () -> ctx -> {
+			RecipeInstantiator instantiator = config.fixedConstructorInstantiatorFactory
+					.create(type, ctx, constructor);
+			return config.construction.createConstructionRecipe(ctx, type,
+					instantiator);
+
 		};
-		recipeFactorySupplier = () -> creationContext -> {
-			Function<RecipeCreationContext, SupplierRecipe> seedRecipe = rule
-					.createConstructionRecipe(type);
-			List<RecipeEnhancer> enhancers = config.defaultRecipe
-					.createEnhancers(creationContext, type);
-			return DefaultCreationRecipeBuilder.applyEnhancers(
-					seedRecipe.apply(creationContext), enhancers);
-		};
-		scopeSupplier = () -> config.defaultRecipe.getScope(constructor
+		scopeSupplier = () -> config.scope.getScope(constructor
 				.getDeclaringClass());
 		return this;
 	}
 
 	@Override
 	public void in(Class<? extends Annotation> scopeAnnotation) {
-		scopeSupplier = () -> config.defaultRecipe.getScope(scopeAnnotation);
+		scopeSupplier = () -> config.scope.getScope(scopeAnnotation);
 	}
 
 	@Override

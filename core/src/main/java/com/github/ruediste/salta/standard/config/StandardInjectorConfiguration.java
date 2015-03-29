@@ -18,6 +18,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.objectweb.asm.commons.GeneratorAdapter;
+
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
@@ -31,6 +33,7 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.StaticBinding;
 import com.github.ruediste.salta.core.StaticBindingSet;
+import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.Message;
@@ -73,8 +76,8 @@ public class StandardInjectorConfiguration {
 	 */
 	public FixedConstructorInstantiatorFactory fixedConstructorInstantiatorFactory;
 
-	public class DefaultRecipe {
-		private DefaultRecipe() {
+	public class ConstructionConfiguration {
+		private ConstructionConfiguration() {
 		}
 
 		/**
@@ -84,21 +87,73 @@ public class StandardInjectorConfiguration {
 		 * 
 		 * <p>
 		 * Not to be confused with the
-		 * {@link CoreInjectorConfiguration#creationRules}, which determine how
-		 * to create a rule given a {@link CoreDependencyKey}
+		 * {@link CreationPipelineConfiguration#creationRules}, which determine
+		 * how to create a rule given a {@link CoreDependencyKey}
+		 * </p>
+		 * 
+		 * <p>
+		 * Register the {@link DefaultConstructionRule} to construct instances
+		 * using the {@link #instantiatorRules}, {@link #membersInjectorRules},
+		 * {@link #membersInjectorFactories} and {@link #enhancerFactories}
 		 * </p>
 		 */
 		public final List<ConstructionRule> constructionRules = new ArrayList<>();
 
+		/**
+		 * Create a construction recipe based on the {@link #constructionRules}.
+		 * This is the preferred method if no detailed control over the
+		 * construction process is required.
+		 * 
+		 * <p>
+		 * These rules typically include the {@link DefaultConstructionRule}
+		 * which constructs instances using the {@link #instantiatorRules},
+		 * {@link #membersInjectorRules}, {@link #membersInjectorFactories} and
+		 * {@link #enhancerFactories}
+		 */
 		public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
 				TypeToken<?> type) {
 			for (ConstructionRule rule : constructionRules) {
-				Function<RecipeCreationContext, SupplierRecipe> result = rule
+				Optional<Function<RecipeCreationContext, SupplierRecipe>> result = rule
 						.createConstructionRecipe(type);
-				if (result != null)
-					return Optional.of(result);
+				if (result.isPresent())
+					return result;
 			}
 			return Optional.empty();
+		}
+
+		/**
+		 * Create a construction recipe based on a {@link RecipeInstantiator}
+		 * and the members injectors, initializers and enhancers configured here
+		 */
+		public SupplierRecipe createConstructionRecipe(
+				RecipeCreationContext ctx, TypeToken<?> type,
+				RecipeInstantiator recipeInstantiator) {
+
+			List<RecipeMembersInjector> memberInjectors = createRecipeMembersInjectors(
+					ctx, type);
+			List<RecipeInitializer> initializers = createInitializers(ctx, type);
+
+			return applyEnhancers(new SupplierRecipe() {
+
+				@Override
+				public Class<?> compileImpl(GeneratorAdapter mv,
+						MethodCompilationContext compilationContext) {
+					// compile the instantiator
+					Class<?> result = recipeInstantiator.compile(compilationContext);
+
+					// apply members injectors
+					for (RecipeMembersInjector membersInjector : memberInjectors) {
+						result = membersInjector.compile(result,
+								compilationContext);
+					}
+					// apply initializers
+					for (RecipeInitializer initializer : initializers) {
+						result = initializer
+								.compile(result, compilationContext);
+					}
+					return result;
+				}
+			}, ctx, type);
 		}
 
 		/**
@@ -187,6 +242,40 @@ public class StandardInjectorConfiguration {
 					.collect(toList());
 		}
 
+		public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
+				RecipeCreationContext ctx, TypeToken<?> type) {
+			return applyEnhancers(seedRecipe, createEnhancers(ctx, type));
+		}
+
+		public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
+				List<RecipeEnhancer> enhancers) {
+			SupplierRecipe result = seedRecipe;
+			for (RecipeEnhancer enhancer : enhancers) {
+				SupplierRecipe innerRecipe = result;
+				result = new SupplierRecipe() {
+
+					@Override
+					protected Class<?> compileImpl(GeneratorAdapter mv,
+							MethodCompilationContext ctx) {
+						return enhancer.compile(ctx, innerRecipe);
+					}
+
+				};
+			}
+			return result;
+		}
+
+	}
+
+	/**
+	 * Configuration of the construction.
+	 */
+	public final ConstructionConfiguration construction = new ConstructionConfiguration();
+
+	public class ScopeConfiguration {
+		private ScopeConfiguration() {
+		}
+
 		/**
 		 * List of rules to determine the scope used for a type.
 		 */
@@ -238,7 +327,10 @@ public class StandardInjectorConfiguration {
 
 	}
 
-	public final DefaultRecipe defaultRecipe = new DefaultRecipe();
+	/**
+	 * Contains all scope related configuration
+	 */
+	public final ScopeConfiguration scope = new ScopeConfiguration();
 
 	public static class CreationPipelineConfiguration {
 

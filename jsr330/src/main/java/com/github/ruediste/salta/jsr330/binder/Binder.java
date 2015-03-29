@@ -457,12 +457,16 @@ public class Binder {
 		delegate.bindListener(typeMatcher, listener);
 	}
 
+	/**
+	 * Bind a creation rule allowing the creation of injection point specific
+	 * instances.
+	 */
 	public void bindCreationRule(CreationRule rule) {
 		config.standardConfig.creationPipeline.creationRules.add(rule);
 	}
 
 	public void bindMembersInjectorFactory(RecipeMembersInjectorFactory factory) {
-		config().standardConfig.defaultRecipe.membersInjectorFactories
+		config().standardConfig.construction.membersInjectorFactories
 				.add(factory);
 	}
 

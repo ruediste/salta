@@ -29,7 +29,7 @@ public class EnhancingTest {
 
 			@Override
 			protected void configure() {
-				config().standardConfig.defaultRecipe.enhancerFactories
+				config().standardConfig.construction.enhancerFactories
 						.add(new EnhancerFactory() {
 
 							@Override

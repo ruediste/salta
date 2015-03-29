@@ -27,18 +27,16 @@ public final class DefaultJITBindingRule implements JITBindingRule {
 						.getRawType())))
 			return null;
 
-		Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = config.defaultRecipe
+		Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = config.construction
 				.createConstructionRecipe(type).map(
-						seed -> ctx -> DefaultCreationRecipeBuilder
-								.applyEnhancers(seed.apply(ctx),
-										config.defaultRecipe.createEnhancers(
-												ctx, type)));
+						seed -> ctx -> config.construction.applyEnhancers(
+								seed.apply(ctx), ctx, type));
 		if (!recipe.isPresent())
 			return null;
 
 		StandardJitBinding binding = new StandardJitBinding(type);
 		binding.recipeFactory = recipe.get()::apply;
-		binding.scopeSupplier = () -> config.defaultRecipe.getScope(type);
+		binding.scopeSupplier = () -> config.scope.getScope(type);
 		return binding;
 	}
 }

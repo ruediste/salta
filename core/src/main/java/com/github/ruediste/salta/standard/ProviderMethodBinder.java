@@ -90,7 +90,7 @@ public abstract class ProviderMethodBinder {
 
 					@Override
 					protected Scope getScopeImpl() {
-						return config.defaultRecipe.getScope(m);
+						return config.scope.getScope(m);
 					}
 				});
 			}

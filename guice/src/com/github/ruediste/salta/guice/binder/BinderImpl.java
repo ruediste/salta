@@ -180,7 +180,7 @@ public class BinderImpl implements Binder {
 
 		for (int i = 0; i < listeners.length; i++) {
 			ProvisionListener listener = listeners[i];
-			delegate.getConfiguration().defaultRecipe.enhancerFactories
+			delegate.getConfiguration().construction.enhancerFactories
 					.add(new EnhancerFactory() {
 
 						final class ProvisionInvocationImpl extends

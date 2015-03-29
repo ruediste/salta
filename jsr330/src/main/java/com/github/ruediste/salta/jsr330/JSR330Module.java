@@ -87,7 +87,7 @@ public class JSR330Module extends AbstractModule {
 		config.creationPipeline.jitBindingRules.add(new DefaultJITBindingRule(
 				config));
 
-		config.defaultRecipe.constructionRules.add(new DefaultConstructionRule(
+		config.construction.constructionRules.add(new DefaultConstructionRule(
 				config));
 		setMembersInjectorFactory(config);
 		if (config.stage == Stage.PRODUCTION)
@@ -268,7 +268,7 @@ public class JSR330Module extends AbstractModule {
 
 	private void addPostConstructInitializerFactory(
 			StandardInjectorConfiguration config) {
-		config.defaultRecipe.initializerFactories
+		config.construction.initializerFactories
 				.add(new RecipeInitializerFactoryBase(config.config) {
 
 					@Override
@@ -289,7 +289,7 @@ public class JSR330Module extends AbstractModule {
 	}
 
 	private void addMembersInjectorFactory(StandardInjectorConfiguration config) {
-		config.defaultRecipe.membersInjectorFactories
+		config.construction.membersInjectorFactories
 				.add(new MembersInjectorFactoryBase(config) {
 
 					@Override
@@ -344,7 +344,7 @@ public class JSR330Module extends AbstractModule {
 	private void addConstructionInstantiatorRule(
 			StandardInjectorConfiguration config) {
 		// default instantiator rule
-		config.defaultRecipe.instantiatorRules
+		config.construction.instantiatorRules
 				.add(new ConstructorInstantiatorRuleBase(config) {
 
 					@Override
@@ -369,7 +369,7 @@ public class JSR330Module extends AbstractModule {
 
 	private void addImplementedByConstructionRule(
 			StandardInjectorConfiguration config) {
-		config.defaultRecipe.constructionRules
+		config.construction.constructionRules
 				.add(new ImplementedByConstructionRuleBase() {
 					@Override
 					protected DependencyKey<?> getImplementorKey(
@@ -388,7 +388,7 @@ public class JSR330Module extends AbstractModule {
 
 	private void addProvidedByConstructionRule(
 			StandardInjectorConfiguration config) {
-		config.defaultRecipe.constructionRules
+		config.construction.constructionRules
 				.add(new ProvidedByConstructionRuleBase(Supplier.class) {
 					@Override
 					protected DependencyKey<?> getProviderKey(TypeToken<?> type) {

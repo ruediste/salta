@@ -126,7 +126,7 @@ public class ProvisionListenerTest extends TestCase {
 			if (!e.getMessage().contains("Retry, Abort, Fail"))
 				throw e;
 		}
-		assertEquals(1, listener.beforeProvision);
+		assertEquals(2, listener.beforeProvision);
 		assertEquals("Retry, Abort, Fail", listener.capture.get().getMessage());
 		assertEquals(0, listener.afterProvision);
 	}
@@ -153,7 +153,7 @@ public class ProvisionListenerTest extends TestCase {
 			if (!expected.getMessage().contains("Retry, Abort, Fail"))
 				throw expected;
 		}
-		assertEquals(1, listener.beforeProvision);
+		assertEquals(2, listener.beforeProvision);
 		assertEquals("Retry, Abort, Fail", listener.capture.get().getMessage());
 		assertEquals(0, listener.afterProvision);
 	}
@@ -185,7 +185,7 @@ public class ProvisionListenerTest extends TestCase {
 		});
 		Foo foo = injector.getInstance(Foo.class);
 		assertNotNull(foo);
-		assertEquals(1, count1.count);
+		assertEquals(2, count1.count);
 
 		// not notified the second time because nothing is provisioned
 		// (it's cached in the scope)
@@ -205,8 +205,8 @@ public class ProvisionListenerTest extends TestCase {
 			}
 		});
 		assertNotNull(injector.getInstance(Foo.class));
-		assertEquals(1, count1.count);
-		assertEquals(1, count2.count);
+		assertEquals(2, count1.count);
+		assertEquals(2, count2.count);
 	}
 
 	public void testNotifyEarlyListenersIfFailBeforeProvision() {

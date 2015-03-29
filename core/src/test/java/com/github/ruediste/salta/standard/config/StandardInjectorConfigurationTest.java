@@ -32,9 +32,7 @@ public class StandardInjectorConfigurationTest {
 		config.scopeAnnotationMap.put(Singleton.class, singleton);
 		config.defaultScope = def;
 
-		assertSame(singleton,
-				config.defaultRecipe.getScope(TypeToken.of(Base.class)));
-		assertSame(def,
-				config.defaultRecipe.getScope(TypeToken.of(Derived.class)));
+		assertSame(singleton, config.scope.getScope(TypeToken.of(Base.class)));
+		assertSame(def, config.scope.getScope(TypeToken.of(Derived.class)));
 	}
 }

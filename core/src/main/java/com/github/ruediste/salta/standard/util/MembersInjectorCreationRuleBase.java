@@ -73,9 +73,9 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 		if (recipe != null)
 			return recipe;
 
-		List<RecipeMembersInjector> injectors = config.defaultRecipe
+		List<RecipeMembersInjector> injectors = config.construction
 				.createRecipeMembersInjectors(ctx, typeToken);
-		List<RecipeInitializer> initializers = config.defaultRecipe
+		List<RecipeInitializer> initializers = config.construction
 				.createInitializers(ctx, typeToken);
 		recipe = new FunctionRecipe() {
 

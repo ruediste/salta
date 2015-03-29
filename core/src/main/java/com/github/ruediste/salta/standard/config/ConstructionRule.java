@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.standard.config;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.ruediste.salta.core.RecipeCreationContext;
@@ -13,6 +14,6 @@ import com.google.common.reflect.TypeToken;
  */
 public interface ConstructionRule {
 
-	Function<RecipeCreationContext, SupplierRecipe> createConstructionRecipe(
+	Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
 			TypeToken<?> type);
 }
