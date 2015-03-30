@@ -1,6 +1,5 @@
 package com.github.ruediste.salta.jsr330.wikiChecks;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.annotation.ElementType;
@@ -69,9 +68,7 @@ public class AopTest {
 			service.chargeOrder();
 			fail();
 		} catch (IllegalStateException e) {
-			e.printStackTrace();
-			// swallow
-			assertTrue(true);
+			// e.printStackTrace();
 		}
 
 		blocker.today = new GregorianCalendar(2015, 1, 3);

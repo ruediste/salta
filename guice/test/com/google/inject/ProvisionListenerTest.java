@@ -126,7 +126,7 @@ public class ProvisionListenerTest extends TestCase {
 			if (!e.getMessage().contains("Retry, Abort, Fail"))
 				throw e;
 		}
-		assertEquals(2, listener.beforeProvision);
+		assertEquals(1, listener.beforeProvision);
 		assertEquals("Retry, Abort, Fail", listener.capture.get().getMessage());
 		assertEquals(0, listener.afterProvision);
 	}
@@ -153,7 +153,7 @@ public class ProvisionListenerTest extends TestCase {
 			if (!expected.getMessage().contains("Retry, Abort, Fail"))
 				throw expected;
 		}
-		assertEquals(2, listener.beforeProvision);
+		assertEquals(1, listener.beforeProvision);
 		assertEquals("Retry, Abort, Fail", listener.capture.get().getMessage());
 		assertEquals(0, listener.afterProvision);
 	}
@@ -185,13 +185,13 @@ public class ProvisionListenerTest extends TestCase {
 		});
 		Foo foo = injector.getInstance(Foo.class);
 		assertNotNull(foo);
-		assertEquals(2, count1.count);
+		assertEquals(1, count1.count);
 
 		// not notified the second time because nothing is provisioned
 		// (it's cached in the scope)
 		count1.count = 0;
 		assertSame(foo, injector.getInstance(Foo.class));
-		assertEquals(0, count1.count);
+		assertEquals(1, count1.count);
 	}
 
 	public void testCombineAllBindListenerCalls() {
@@ -205,8 +205,8 @@ public class ProvisionListenerTest extends TestCase {
 			}
 		});
 		assertNotNull(injector.getInstance(Foo.class));
-		assertEquals(2, count1.count);
-		assertEquals(2, count2.count);
+		assertEquals(1, count1.count);
+		assertEquals(1, count2.count);
 	}
 
 	public void testNotifyEarlyListenersIfFailBeforeProvision() {
@@ -373,6 +373,7 @@ public class ProvisionListenerTest extends TestCase {
 	private static class FailAfterProvision implements ProvisionListener {
 		@Override
 		public <T> void onProvision(ProvisionInvocation<T> provision) {
+
 			provision.provision();
 			throw new RuntimeException("boo");
 		}
@@ -438,8 +439,14 @@ public class ProvisionListenerTest extends TestCase {
 						return null;
 					}
 				});
-				bindListener(Matchers.any(), new SpecialChecker(Foo.class,
-						notified));
+				bindListener(new AbstractMatcher<TypeToken<?>>() {
+
+					@Override
+					public boolean matches(TypeToken<?> t) {
+						return !Object.class.equals(t.getRawType())
+								&& !Injector.class.equals(t.getRawType());
+					}
+				}, new SpecialChecker(Foo.class, notified));
 			}
 		}).getInstance(Object.class);
 		assertTrue(notified.get());
@@ -472,6 +479,9 @@ public class ProvisionListenerTest extends TestCase {
 
 		@Override
 		public <T> void onProvision(ProvisionInvocation<T> provision) {
+			if (MembersInjector.class.equals(provision.getBinding().getKey()
+					.getRawType()))
+				return;
 			notified.set(true);
 			assertEquals(notifyType, provision.getBinding().getKey()
 					.getRawType());

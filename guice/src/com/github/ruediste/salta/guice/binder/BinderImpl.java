@@ -27,6 +27,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.LinkedBindingBuilder;
+import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matcher;
 import com.google.inject.spi.Message;
 import com.google.inject.spi.ProvisionListener;
@@ -179,6 +180,14 @@ public class BinderImpl implements Binder {
 	public void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
 			ProvisionListener... listeners) {
 
+		Matcher<TypeToken<?>> newMatcher = new AbstractMatcher<TypeToken<?>>() {
+
+			@Override
+			public boolean matches(TypeToken<?> t) {
+				return !MembersInjector.class.equals(t.getRawType());
+			}
+		}.and(typeMatcher);
+
 		for (int i = 0; i < listeners.length; i++) {
 			ProvisionListener listener = listeners[i];
 			delegate.getConfiguration().config.enhancerFactories
@@ -221,7 +230,7 @@ public class BinderImpl implements Binder {
 						public RecipeEnhancer getEnhancer(
 								RecipeCreationContext ctx,
 								CoreDependencyKey<?> requestedKey) {
-							if (!typeMatcher.matches(requestedKey.getType()))
+							if (!newMatcher.matches(requestedKey.getType()))
 								return null;
 							return new RecipeEnhancerWrapperImpl(
 									supplier -> {
