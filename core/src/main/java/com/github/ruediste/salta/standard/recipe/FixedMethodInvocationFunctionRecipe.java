@@ -1,16 +1,17 @@
 package com.github.ruediste.salta.standard.recipe;
 
 import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.ANEWARRAY;
-import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ATHROW;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
+import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantCallSite;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -23,7 +24,6 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
-import com.github.ruediste.salta.core.compile.MethodRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.util.Accessibility;
 
@@ -139,51 +139,29 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 					method.getParameterTypes()[i]));
 		}
 
-		String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;";
-		String bootstrapName = ctx.getClassCtx().addMethod(
-				ACC_PRIVATE + ACC_STATIC, bootstrapDesc, null,
-				new MethodRecipe() {
-
-					@Override
-					protected void compileImpl(GeneratorAdapter mv,
-							MethodCompilationContext ctx) {
-						mv.newInstance(Type.getType(ConstantCallSite.class));
-						mv.dup();
-
-						mv.loadArg(0);
-						ctx.addFieldAndLoad(Method.class, method);
-
-						mv.visitMethodInsn(
-								INVOKEVIRTUAL,
-								"java/lang/invoke/MethodHandles$Lookup",
-								"unreflect",
-								"(Ljava/lang/reflect/Method;)Ljava/lang/invoke/MethodHandle;",
-								false);
-						mv.loadArg(2);
-						mv.visitMethodInsn(
-								INVOKEVIRTUAL,
-								"java/lang/invoke/MethodHandle",
-								"asType",
-								"(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
-								false);
-						mv.visitMethodInsn(INVOKESPECIAL,
-								"java/lang/invoke/ConstantCallSite", "<init>",
-								"(Ljava/lang/invoke/MethodHandle;)V", false);
-						mv.visitInsn(ARETURN);
-					}
-				});
+		String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;";
 
 		// call
-		Handle bsm = new Handle(H_INVOKESTATIC, ctx.getClassCtx()
-				.getInternalClassName(), bootstrapName, bootstrapDesc);
+		Handle bsm = new Handle(
+				H_INVOKESTATIC,
+				Type.getInternalName(FixedMethodInvocationFunctionRecipe.class),
+				"bootstrap", bootstrapDesc);
 
 		Class<?> returnType = ctx.publicSuperType(method.getReturnType());
 
 		mv.invokeDynamic(method.getName(),
 				Type.getMethodDescriptor(Type.getType(returnType), argTypes),
-				bsm);
+				bsm, ctx.addField(Method.class, method).getName());
 
 		return returnType;
 	}
 
+	public static CallSite bootstrap(Lookup lookup, String methodName,
+			MethodType type, String methodFieldName) throws Exception {
+		Field field = lookup.lookupClass().getField(methodFieldName);
+		field.setAccessible(true);
+		Method method = (Method) field.get(null);
+		MethodHandle handle = lookup.unreflect(method);
+		return new ConstantCallSite(handle.asType(type));
+	}
 }

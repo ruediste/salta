@@ -46,9 +46,13 @@ public class MethodCompilationContext {
 	}
 
 	public <T> FieldHandle addFieldAndLoad(Class<T> fieldType, T value) {
-		FieldHandle handle = getClassCtx().addField(fieldType, value);
+		FieldHandle handle = addField(fieldType, value);
 		loadField(handle);
 		return handle;
+	}
+
+	public <T> FieldHandle addField(Class<T> fieldType, T value) {
+		return getClassCtx().addField(fieldType, value);
 	}
 
 	public void loadField(FieldHandle handle) {

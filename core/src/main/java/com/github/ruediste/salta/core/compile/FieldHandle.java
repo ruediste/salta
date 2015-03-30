@@ -9,4 +9,8 @@ public class FieldHandle {
 
 	String name;
 	public Class<?> type;
+
+	public String getName() {
+		return name;
+	}
 }
