@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 import javax.inject.Provider;
 
@@ -31,8 +32,10 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.jsr330.binder.AnnotatedBindingBuilder;
 import com.github.ruediste.salta.jsr330.binder.Binder;
+import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
+import com.github.ruediste.salta.standard.binder.SaltaMethodInterceptor;
 import com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.google.common.reflect.TypeToken;
@@ -211,4 +214,15 @@ public abstract class AbstractModule implements SaltaModule {
 			RecipeMembersInjectorFactory factory) {
 		binder().bindMembersInjectorFactory(factory);
 	}
+
+	/**
+	 * @see Binder#bindInterceptor(Matcher, Matcher, SaltaMethodInterceptor)
+	 */
+	public final void bindInterceptor(
+			Matcher<? super CoreDependencyKey<?>> keyMatcher,
+			Matcher<? super Method> methodMatcher,
+			SaltaMethodInterceptor saltaInterceptor) {
+		binder().bindInterceptor(keyMatcher, methodMatcher, saltaInterceptor);
+	}
+
 }

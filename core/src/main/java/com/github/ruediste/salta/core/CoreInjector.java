@@ -178,14 +178,17 @@ public class CoreInjector {
 	private Optional<Function<RecipeCreationContext, SupplierRecipe>> createRecipe(
 			CoreDependencyKey<?> key) {
 		try {
+			Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = Optional
+					.empty();
 			// check rules
 			for (CreationRule rule : creationRules) {
-				Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = rule
-						.apply(key);
+				recipe = rule.apply(key);
 				if (recipe.isPresent())
-					return recipe;
+					break;
 			}
-			return Optional.empty();
+
+			return recipe.map(f -> (ctx -> config.applyEnhancers(f.apply(ctx),
+					ctx, key)));
 		} catch (SaltaException e) {
 			throw e;
 		} catch (Exception e) {

@@ -29,8 +29,7 @@ public final class DefaultJITBindingRule implements JITBindingRule {
 
 		Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = config.construction
 				.createConstructionRecipe(type).map(
-						seed -> ctx -> config.construction.applyEnhancers(
-								seed.apply(ctx), ctx, type));
+						seed -> ctx -> seed.apply(ctx));
 		if (!recipe.isPresent())
 			return null;
 

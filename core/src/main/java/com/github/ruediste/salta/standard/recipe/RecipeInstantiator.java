@@ -1,7 +1,6 @@
 package com.github.ruediste.salta.standard.recipe;
 
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
-import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 
 /**
  * Instantiate an instance for a {@link DefaultCreationRecipeBuilder}. The

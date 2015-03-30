@@ -1,4 +1,4 @@
-package com.github.ruediste.salta.standard.recipe;
+package com.github.ruediste.salta.core;
 
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -12,6 +12,5 @@ public interface RecipeEnhancer {
 	 * Compile this recipe. The inner recipe will create the injected instance
 	 * as the top of the stack
 	 */
-	Class<?> compile(MethodCompilationContext compilationContext,
-			SupplierRecipe innerRecipe);
+	Class<?> compile(MethodCompilationContext ctx, SupplierRecipe innerRecipe);
 }

@@ -20,21 +20,21 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.function.BiFunction;
+import java.lang.reflect.Modifier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.Dispatcher;
-import net.sf.cglib.proxy.FixedValue;
-import net.sf.cglib.proxy.InvocationHandler;
+import net.sf.cglib.proxy.CallbackFilter;
+import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.LazyLoader;
 import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.NoOp;
-import net.sf.cglib.proxy.ProxyRefDispatcher;
+import net.sf.cglib.proxy.MethodProxy;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.EnhancerFactory;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.RecipeEnhancer;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.matchers.Matcher;
@@ -42,10 +42,8 @@ import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardInjector;
-import com.github.ruediste.salta.standard.config.EnhancerFactory;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
-import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
+import com.github.ruediste.salta.standard.recipe.RecipeEnhancerImpl;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -80,34 +78,6 @@ public class StandardBinder {
 	 */
 	public StandardInjector getInjector() {
 		return injector;
-	}
-
-	/**
-	 * Binds method interceptor[s] to methods matched by class and method
-	 * matchers. A method is eligible for interception if:
-	 *
-	 * <ul>
-	 * <li>Guice created the instance the method is on</li>
-	 * <li>Neither the enclosing type nor the method is final</li>
-	 * <li>And the method is package-private, protected, or public</li>
-	 * </ul>
-	 *
-	 * @param classMatcher
-	 *            matches classes the interceptor should apply to. For example:
-	 *            {@code only(Runnable.class)}.
-	 * @param methodMatcher
-	 *            matches methods the interceptor should apply to. For example:
-	 *            {@code annotatedWith(Transactional.class)}.
-	 * @param interceptors
-	 *            to bind. The interceptors are called in the order they are
-	 *            given. CgLib Callbacks: {@link Dispatcher}, {@link FixedValue}
-	 *            , {@link InvocationHandler}, {@link LazyLoader},
-	 *            {@link MethodInterceptor}, {@link NoOp},
-	 *            {@link ProxyRefDispatcher}
-	 */
-	public void bindInterceptor(Matcher<? super Class<?>> classMatcher,
-			Matcher<? super Method> methodMatcher, Callback... interceptors) {
-		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -319,25 +289,103 @@ public class StandardBinder {
 	}
 
 	/**
-	 * Registers an enhancer for provisioned objects. Salta will notify the
-	 * listener whenever it instantiates an object of a matching type. The
-	 * listener receives the object and can replace it if desired.
+	 * Binds method interceptor[s] to methods matched by class and method
+	 * matchers. A method is eligible for interception if:
+	 *
+	 * <ul>
+	 * <li>Salta created the instance the method is on</li>
+	 * <li>Neither the enclosing type nor the method is final</li>
+	 * <li>And the method is package-private, protected, or public</li>
+	 * </ul>
+	 *
+	 * @param keyMatcher
+	 *            matches keys the interceptor should apply to. For example:
+	 *            {@code only(Runnable.class)}.
+	 * @param methodMatcher
+	 *            matches methods the interceptor should apply to. For example:
+	 *            {@code annotatedWith(Transactional.class)}.
+	 * @param saltaInterceptor
+	 *            intercepts the method calls
 	 */
-	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
-			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
-		config.construction.enhancerFactories.add(new EnhancerFactory() {
+	public final void bindInterceptor(
+			Matcher<? super CoreDependencyKey<?>> keyMatcher,
+			Matcher<? super Method> methodMatcher,
+			SaltaMethodInterceptor saltaInterceptor) {
+
+		config.config.enhancerFactories.add(new EnhancerFactory() {
 
 			@Override
 			public RecipeEnhancer getEnhancer(RecipeCreationContext ctx,
-					TypeToken<?> type) {
+					CoreDependencyKey<?> requestedKey) {
 
-				if (typeMatcher.matches(type)) {
-					return new RecipeEnhancerWrapperImpl(instance -> listener
-							.apply(type, instance));
+				if (keyMatcher.matches(requestedKey)) {
+
+					boolean found = false;
+					typeLoop: for (TypeToken<?> t : requestedKey.getType()
+							.getTypes()) {
+						for (Method m : t.getRawType().getDeclaredMethods()) {
+							if (Modifier.isStatic(m.getModifiers()))
+								continue;
+							if (Modifier.isPrivate(m.getModifiers()))
+								continue;
+							if (methodMatcher.matches(m)) {
+								found = true;
+								break typeLoop;
+							}
+						}
+					}
+					if (!found)
+						return null;
+
+					return new RecipeEnhancerImpl(
+							inner -> {
+								if (inner == null)
+									return null;
+
+								try {
+									Enhancer e = new Enhancer();
+									LazyLoader loader = new LazyLoader() {
+
+										@Override
+										public Object loadObject()
+												throws Exception {
+											return inner;
+										}
+									};
+									MethodInterceptor interceptor = new MethodInterceptor() {
+
+										@Override
+										public Object intercept(Object obj,
+												Method method, Object[] args,
+												MethodProxy proxy)
+												throws Throwable {
+											return saltaInterceptor.intercept(
+													inner, method, args, proxy);
+										}
+									};
+									e.setSuperclass(requestedKey.getRawType());
+									e.setCallbacks(new Callback[] { loader,
+											interceptor });
+									e.setCallbackFilter(new CallbackFilter() {
+
+										@Override
+										public int accept(Method method) {
+											if (methodMatcher.matches(method))
+												return 1;
+											else
+												return 0;
+										}
+									});
+									return e.create();
+								} catch (Throwable t) {
+									throw new SaltaException(
+											"Error while creating proxy to enhance "
+													+ requestedKey, t);
+								}
+							});
 				}
 				return null;
 			}
 		});
 	}
-
 }

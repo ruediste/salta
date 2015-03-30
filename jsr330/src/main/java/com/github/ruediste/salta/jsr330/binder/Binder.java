@@ -19,7 +19,7 @@
 package com.github.ruediste.salta.jsr330.binder;
 
 import java.lang.annotation.Annotation;
-import java.util.function.BiFunction;
+import java.lang.reflect.Method;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -42,6 +42,7 @@ import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
+import com.github.ruediste.salta.standard.binder.SaltaMethodInterceptor;
 import com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder;
 import com.github.ruediste.salta.standard.binder.StandardBinder;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
@@ -448,16 +449,6 @@ public class Binder {
 	}
 
 	/**
-	 * Registers an enhancer for provisioned objects. Salta will notify the
-	 * listener whenever it instantiates an object of a matching type. The
-	 * listener receives the object and can replace it if desired.
-	 */
-	public final void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
-			BiFunction<TypeToken<?>, Supplier<Object>, Object> listener) {
-		delegate.bindListener(typeMatcher, listener);
-	}
-
-	/**
 	 * Bind a creation rule allowing the creation of injection point specific
 	 * instances.
 	 */
@@ -470,4 +461,29 @@ public class Binder {
 				.add(factory);
 	}
 
+	/**
+	 * Binds method interceptor[s] to methods matched by class and method
+	 * matchers. A method is eligible for interception if:
+	 *
+	 * <ul>
+	 * <li>Salta created the instance the method is on</li>
+	 * <li>Neither the enclosing type nor the method is final</li>
+	 * <li>And the method is package-private, protected, or public</li>
+	 * </ul>
+	 *
+	 * @param keyMatcher
+	 *            matches keys the interceptor should apply to. For example:
+	 *            {@code only(Runnable.class)}.
+	 * @param methodMatcher
+	 *            matches methods the interceptor should apply to. For example:
+	 *            {@code annotatedWith(Transactional.class)}.
+	 * @param saltaInterceptor
+	 *            intercepts the method calls
+	 */
+	public final void bindInterceptor(
+			Matcher<? super CoreDependencyKey<?>> keyMatcher,
+			Matcher<? super Method> methodMatcher,
+			SaltaMethodInterceptor saltaInterceptor) {
+		delegate.bindInterceptor(keyMatcher, methodMatcher, saltaInterceptor);
+	}
 }

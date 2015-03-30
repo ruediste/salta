@@ -41,7 +41,6 @@ import com.github.ruediste.salta.standard.ScopeRule;
 import com.github.ruediste.salta.standard.Stage;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.binder.StandardAnnotatedBindingBuilder;
-import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjector;
@@ -122,6 +121,22 @@ public class StandardInjectorConfiguration {
 		}
 
 		/**
+		 * create a concreate construction recipe based on
+		 * {@link #createConstructionRecipe(TypeToken)}
+		 */
+		public SupplierRecipe createConcreteConstructionRecipe(
+				TypeToken<?> boundType, RecipeCreationContext ctx) {
+
+			// create seed recipe
+			Optional<Function<RecipeCreationContext, SupplierRecipe>> seedRecipe = createConstructionRecipe(boundType);
+			if (!seedRecipe.isPresent())
+				throw new SaltaException("Cannot find construction recipe for "
+						+ boundType);
+
+			return seedRecipe.get().apply(ctx);
+		}
+
+		/**
 		 * Create a construction recipe based on a {@link RecipeInstantiator}
 		 * and the members injectors, initializers and enhancers configured here
 		 */
@@ -133,13 +148,14 @@ public class StandardInjectorConfiguration {
 					ctx, type);
 			List<RecipeInitializer> initializers = createInitializers(ctx, type);
 
-			return applyEnhancers(new SupplierRecipe() {
+			return new SupplierRecipe() {
 
 				@Override
 				public Class<?> compileImpl(GeneratorAdapter mv,
 						MethodCompilationContext compilationContext) {
 					// compile the instantiator
-					Class<?> result = recipeInstantiator.compile(compilationContext);
+					Class<?> result = recipeInstantiator
+							.compile(compilationContext);
 
 					// apply members injectors
 					for (RecipeMembersInjector membersInjector : memberInjectors) {
@@ -153,7 +169,7 @@ public class StandardInjectorConfiguration {
 					}
 					return result;
 				}
-			}, ctx, type);
+			};
 		}
 
 		/**
@@ -216,10 +232,6 @@ public class StandardInjectorConfiguration {
 			return result;
 		}
 
-		/**
-		 * List of rules enhance instances. The enhancers of all rules are
-		 * combined.
-		 */
 		public final List<RecipeInitializerFactory> initializerFactories = new ArrayList<>();
 
 		public List<RecipeInitializer> createInitializers(
@@ -227,42 +239,6 @@ public class StandardInjectorConfiguration {
 			return initializerFactories.stream()
 					.flatMap(r -> r.getInitializers(ctx, type).stream())
 					.filter(x -> x != null).collect(toList());
-		}
-
-		/**
-		 * List of enhancer factories. The enhancers of all factories are
-		 * combined.
-		 */
-		public final List<EnhancerFactory> enhancerFactories = new ArrayList<>();
-
-		public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx,
-				TypeToken<?> type) {
-			return enhancerFactories.stream()
-					.map(r -> r.getEnhancer(ctx, type)).filter(x -> x != null)
-					.collect(toList());
-		}
-
-		public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
-				RecipeCreationContext ctx, TypeToken<?> type) {
-			return applyEnhancers(seedRecipe, createEnhancers(ctx, type));
-		}
-
-		public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
-				List<RecipeEnhancer> enhancers) {
-			SupplierRecipe result = seedRecipe;
-			for (RecipeEnhancer enhancer : enhancers) {
-				SupplierRecipe innerRecipe = result;
-				result = new SupplierRecipe() {
-
-					@Override
-					protected Class<?> compileImpl(GeneratorAdapter mv,
-							MethodCompilationContext ctx) {
-						return enhancer.compile(ctx, innerRecipe);
-					}
-
-				};
-			}
-			return result;
 		}
 
 	}

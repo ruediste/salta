@@ -4,13 +4,14 @@ import java.lang.annotation.Annotation;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.EnhancerFactory;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.RecipeEnhancer;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.guice.KeyAdapter;
 import com.github.ruediste.salta.standard.ScopeImpl;
 import com.github.ruediste.salta.standard.binder.StandardBinder;
-import com.github.ruediste.salta.standard.config.EnhancerFactory;
-import com.github.ruediste.salta.standard.recipe.RecipeEnhancer;
 import com.github.ruediste.salta.standard.recipe.RecipeEnhancerWrapperImpl;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Binder;
@@ -180,7 +181,7 @@ public class BinderImpl implements Binder {
 
 		for (int i = 0; i < listeners.length; i++) {
 			ProvisionListener listener = listeners[i];
-			delegate.getConfiguration().construction.enhancerFactories
+			delegate.getConfiguration().config.enhancerFactories
 					.add(new EnhancerFactory() {
 
 						final class ProvisionInvocationImpl extends
@@ -218,13 +219,15 @@ public class BinderImpl implements Binder {
 
 						@Override
 						public RecipeEnhancer getEnhancer(
-								RecipeCreationContext ctx, TypeToken<?> type) {
-							if (!typeMatcher.matches(type))
+								RecipeCreationContext ctx,
+								CoreDependencyKey<?> requestedKey) {
+							if (!typeMatcher.matches(requestedKey.getType()))
 								return null;
 							return new RecipeEnhancerWrapperImpl(
 									supplier -> {
 										ProvisionInvocationImpl invocation = new ProvisionInvocationImpl(
-												type, supplier);
+												requestedKey.getType(),
+												supplier);
 										listener.onProvision(invocation);
 										if (!invocation.isProvisioned)
 											return supplier.get();

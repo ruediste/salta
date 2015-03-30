@@ -18,7 +18,6 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.CreationRecipeFactory;
-import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
@@ -85,7 +84,7 @@ public class StandardBindingBuilderImpl<T> implements
 	protected Supplier<CreationRecipeFactory> createDefaultCreationRecipeFactorySupplier(
 			TypeToken<? extends T> implementation) {
 		return () -> {
-			return ctx -> DefaultCreationRecipeBuilder.build(config,
+			return ctx -> config.construction.createConcreteConstructionRecipe(
 					implementation, ctx);
 		};
 	}

@@ -28,7 +28,6 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
-import com.github.ruediste.salta.standard.DefaultCreationRecipeBuilder;
 import com.github.ruediste.salta.standard.DefaultJITBindingKeyRule;
 import com.github.ruediste.salta.standard.DefaultJITBindingRule;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -122,9 +121,9 @@ public class GuiceModule implements Module {
 					StandardStaticBinding binding = new StandardStaticBinding();
 					binding.dependencyMatcher = DependencyKey
 							.rawTypeMatcher(providedBy.value());
-					binding.recipeFactory = ctx -> DefaultCreationRecipeBuilder
-							.build(config, TypeToken.of(providedBy.value()),
-									ctx);
+					binding.recipeFactory = ctx -> config.construction
+							.createConcreteConstructionRecipe(
+									TypeToken.of(providedBy.value()), ctx);
 					binding.scopeSupplier = () -> config.scope
 							.getScope(providedBy.value());
 					guiceConfig.automaticStaticBindings.add(binding);
@@ -140,8 +139,8 @@ public class GuiceModule implements Module {
 						StandardStaticBinding binding = new StandardStaticBinding();
 						binding.dependencyMatcher = DependencyKey
 								.rawTypeMatcher(implementedBy.value());
-						binding.recipeFactory = ctx -> DefaultCreationRecipeBuilder
-								.build(config,
+						binding.recipeFactory = ctx -> config.construction
+								.createConcreteConstructionRecipe(
 										TypeToken.of(implementedBy.value()),
 										ctx);
 						binding.scopeSupplier = () -> config.scope
@@ -156,8 +155,9 @@ public class GuiceModule implements Module {
 				if (keys.add(foo)) {
 					StandardStaticBinding binding = new StandardStaticBinding();
 					binding.dependencyMatcher = DependencyKey.matcher(foo);
-					binding.recipeFactory = ctx -> DefaultCreationRecipeBuilder
-							.build(config, foo.getType(), ctx);
+					binding.recipeFactory = ctx -> config.construction
+							.createConcreteConstructionRecipe(foo.getType(),
+									ctx);
 					binding.scopeSupplier = () -> config.scope.getScope(foo
 							.getType());
 					guiceConfig.automaticStaticBindings.add(binding);
