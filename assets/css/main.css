@@ -6,6 +6,9 @@ body {
 	line-height: 1.4;
 }
 
+div.section{
+	padding-top: 50px;
+}
 /*
  * Remove text-shadow in selection highlight: h5bp.com/i
  * These selection rule sets have to be separate.
@@ -179,6 +182,14 @@ blockquote cite:before {
 	margin-top: -65px;
 }
 /* Links */
+a.block-link {
+	color: #555;
+	display: block;
+}
+a.block-link:focus, a.block-link:hover {
+	color: #fff;
+}
+
 a {
 	color: #4abcc5;
 	word-wrap: break-word;
@@ -204,7 +215,7 @@ a:before, a:after {
    Wrap Sections
    ========================================================================== */
 
-#headerwrap {
+#home {
 	background: url(../img/header_bg.jpg) no-repeat center top;
 	margin-top: -50px;
 	padding-top: 120px;
@@ -223,21 +234,21 @@ a:before, a:after {
 	background-size: cover;
 	padding-bottom: 100px;
 }
-#headerwrap h1 {
+#home h1 {
 	color: #ffffff;
 	font-size: 50px;
 	font-weight: 400;
 	text-align: center;
 	letter-spacing: 3px;
 }
-#headerwrap p {
+#home p {
 	color: #fff;
 	font-size: 22px;
 	font-weight: 300;
 	text-align: center;
 	letter-spacing: 1px;
 }
-#headerwrap .icon {
+#home .icon {
 	color: #ffffff;
 	margin-top: 90px;
 	padding-bottom: 30px;
@@ -246,7 +257,7 @@ a:before, a:after {
 	font-weight: bold;
 	text-shadow: 0px 20px 7px #3da8ae;
 }
-#headerwrap .btn {
+#home .btn {
 	font-weight: 500;
 	font-size: 20px;
 	margin: 50px 0;
@@ -256,125 +267,17 @@ a:before, a:after {
 	box-shadow: -5px -5px 20px #3da8ae;
 	border: 0;
 }
-#headerwrap .btn:hover, #headerwrap .btn:focus {
+#home .btn:hover, #headerwrap .btn:focus {
 	background-color: #e9af03;
 	outline: 0px;
 }
-#about {
-	background: #fff;
-	padding: 60px 0;
-}
-#about img {
-	margin-top: 65px;
-}
-#services {
-	background: #f5f5f5;
-	padding: 60px 0;
-	text-align: center;
-}
-#services .fa {
-	color: #ffbf00;
-}
-#services p {
-	text-align: center;
-}
-#team {
-	background: #f5f5f5;
-	padding: 60px 0;
-}
-#team H4 {
-	padding-top: 10px;
-}
-#team p.large {
-	margin-top: 60px;
-	margin-bottom: 40px;
-}
-#team .fa {
-	width: 30px;
-	height: 30px;
-	margin: 0 3px;
-	border-radius: 100%;
-	font-size: 15px;
-	line-height: 30px;
-	outline: 0;
+
+#fast{
+	background-color: #333;
 	color: #fff;
-	background-color: #c4c4c4;
-	-webkit-transition: all .3s;
-	-moz-transition: all .3s;
-	transition: all .3s;
 }
-#team .fa:hover {
-	background-color: #ffbf00;
-}
-#portfolio {
-	background: #fff;
-	padding: 60px 0;
-}
-#portfolio .btn-default {
-	border: 0;
-}
-#contact {
-	background: #fff;
-	padding: 60px 0;
-	text-align: center;
-}
-#contact .form {
-	padding: 30px 0;
-}
-#contact .fa {
-	color: #ffbf00;
-	margin-bottom: 10px;
-}
-#contact .btn {
-	font-weight: 500;
-	font-size: 18px;
-	margin-top: 50px;
-	background-color: #ffbf00;
+#fast h2 {
 	color: #fff;
-	border: 0;
-}
-#contact .btn:hover, #contact .btn:focus {
-	background-color: #e9af03;
-	outline: 0px;
-}
-#greywrap {
-	background: #f5f5f5;
-	margin-top: 0px;
-	padding: 50px 0;
-	border-bottom: 1px solid #eee;
-	text-align: center;
-}
-#greywrap .btn {
-	font-family: "Raleway";
-	font-weight: 300;
-	font-size: 20px;
-	margin: 0 25px;
-	background-color: #fff;
-	border-color: #e2e2e2;
-	color: #888;
-	border-bottom: 0;
-	letter-spacing: 1px;
-}
-#greywrap .btn:hover, #greywrap .btn:focus {
-	margin: 0 25px;
-	background-color: #fff;
-	border-color: #a5cdd5;
-	border-bottom: 0;
-	outline: 0px;
-	color: #a5cdd5;
-}
-#greywrap h2 {
-	font-size: 30px;
-}
-#greywrap .callout {
-	margin-bottom: 20px;
-}
-#greywrap p {
-	font-size: 30px;
-}
-#greywrap .fa {
-	font-size: 18px;
-	margin-right: 4px;
 }
 #footerwrap {
 	background: #2b2b2b;
