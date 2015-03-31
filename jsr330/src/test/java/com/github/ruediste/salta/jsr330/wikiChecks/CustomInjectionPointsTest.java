@@ -63,8 +63,7 @@ public class CustomInjectionPointsTest {
 											field,
 											new SupplierRecipeImpl(
 													() -> retrieveResource(
-															fieldType, resource)),
-											config.injectionStrategy));
+															fieldType, resource))));
 								}
 							}
 						}

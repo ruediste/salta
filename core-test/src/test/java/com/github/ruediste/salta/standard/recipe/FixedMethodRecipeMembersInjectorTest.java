@@ -12,13 +12,11 @@ import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.jsr330.Injector;
-import com.github.ruediste.salta.jsr330.JSR330Module;
 import com.github.ruediste.salta.jsr330.Salta;
 import com.github.ruediste.salta.standard.Stage;
 
@@ -191,28 +189,25 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 	private static class Builder {
 		private GeneratorAdapter mv;
-		private InjectionStrategy strategy;
 		String m;
 		private MethodCompilationContext ctx;
 
 		public Builder(GeneratorAdapter mv, MethodCompilationContext ctx,
-				String m, InjectionStrategy strategy) {
+				String m) {
 			this.mv = mv;
 			this.ctx = ctx;
 			this.m = m;
-			this.strategy = strategy;
 		}
 
 		void m() throws NoSuchMethodException, SecurityException {
 			new FixedMethodRecipeMembersInjector(
-					TestC.class.getDeclaredMethod(m), Arrays.asList(), strategy);
+					TestC.class.getDeclaredMethod(m), Arrays.asList());
 		}
 
 		void m(Class<?> param, SupplierRecipe recipe)
 				throws NoSuchMethodException, SecurityException {
 			new FixedMethodRecipeMembersInjector(TestC.class.getDeclaredMethod(
-					m, param), Arrays.asList(recipe), strategy).compile(
-					TestC.class, ctx);
+					m, param), Arrays.asList(recipe)).compile(TestC.class, ctx);
 		}
 
 		SupplierRecipe toObject(SupplierRecipe arg) {
@@ -321,29 +316,26 @@ public class FixedMethodRecipeMembersInjectorTest {
 
 	@Test
 	public void testDetail() throws Throwable {
-		for (InjectionStrategy strategy : InjectionStrategy.values()) {
-			try {
-				doTestDetail("m", strategy);
-			} catch (Throwable t) {
-				throw new RuntimeException("Error in public/" + strategy, t);
-			}
-			try {
-				doTestDetail("m1", strategy);
-			} catch (Throwable t) {
-				throw new RuntimeException("Error in package/" + strategy, t);
-			}
+		try {
+			doTestDetail("m");
+		} catch (Throwable t) {
+			throw new RuntimeException("Error in public", t);
+		}
+		try {
+			doTestDetail("m1");
+		} catch (Throwable t) {
+			throw new RuntimeException("Error in package", t);
 		}
 	}
 
-	private void doTestDetail(String m, InjectionStrategy strategy)
-			throws Throwable {
+	private void doTestDetail(String m) throws Throwable {
 		SupplierRecipe recipe = new SupplierRecipe() {
 
 			@Override
 			protected Class<?> compileImpl(GeneratorAdapter mv,
 					MethodCompilationContext ctx) {
 
-				Builder b = new Builder(mv, ctx, m, strategy);
+				Builder b = new Builder(mv, ctx, m);
 
 				ctx.addFieldAndLoad(TestC.class, new TestC());
 				try {

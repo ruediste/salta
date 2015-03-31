@@ -13,9 +13,7 @@ import java.lang.reflect.Field;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
 
-import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.MethodRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -25,13 +23,10 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
 
 	private Field field;
 	private SupplierRecipe recipe;
-	private InjectionStrategy strategy;
 
-	public FixedFieldRecipeMembersInjector(Field field, SupplierRecipe recipe,
-			InjectionStrategy strategy) {
+	public FixedFieldRecipeMembersInjector(Field field, SupplierRecipe recipe) {
 		this.field = field;
 		this.recipe = recipe;
-		this.strategy = strategy;
 		field.setAccessible(true);
 
 	}
@@ -39,17 +34,10 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
 	@Override
 	public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
 			MethodCompilationContext compilationContext) {
-		if (Accessibility.isFieldPublic(field)) {
+		if (Accessibility.isFieldPublic(field))
 			return compileDirect(argType, mv, compilationContext);
-		}
-		switch (strategy) {
-		case INVOKE_DYNAMIC:
+		else
 			return compileDynamic(argType, mv, compilationContext);
-		case REFLECTION:
-			return compileReflection(argType, mv, compilationContext);
-		default:
-			throw new UnsupportedOperationException();
-		}
 	}
 
 	protected Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
@@ -64,19 +52,6 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
 		mv.putField(Type.getType(field.getDeclaringClass()), field.getName(),
 				Type.getType(field.getType()));
 
-		return argType;
-	}
-
-	protected Class<?> compileReflection(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext compilationContext) {
-		mv.dup();
-		compilationContext.addFieldAndLoad(Field.class, field);
-		mv.swap();
-		Class<?> t = recipe.compile(compilationContext);
-		if (t.isPrimitive())
-			mv.box(Type.getType(t));
-		mv.invokeVirtual(Type.getType(Field.class), new Method("set",
-				"(Ljava/lang/Object;Ljava/lang/Object;)V"));
 		return argType;
 	}
 

@@ -59,7 +59,7 @@ public abstract class MembersInjectorFactoryBase implements
 					recipe = ctx.tryGetRecipe(dependency);
 					if (recipe.isPresent()) {
 						result.add(new FixedFieldRecipeMembersInjector(f,
-								recipe.get(), config.config.injectionStrategy));
+								recipe.get()));
 					} else {
 						if (injectionInstruction != InjectionInstruction.INJECT_OPTIONAL)
 							throw new SaltaException(
@@ -131,7 +131,7 @@ public abstract class MembersInjectorFactoryBase implements
 
 					// add injector
 					result.add(new FixedMethodRecipeMembersInjector(method,
-							args, config.config.injectionStrategy));
+							args));
 				}
 			}
 		}

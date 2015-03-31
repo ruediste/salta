@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CompiledSupplier;
-import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -33,8 +32,7 @@ public class FixedMethodInvocationFunctionRecipeTest {
 	public void invokeDynamic() throws Exception {
 		RecipeCompiler compiler = new RecipeCompiler();
 		FixedMethodInvocationFunctionRecipe recipe = new FixedMethodInvocationFunctionRecipe(
-				getClass().getDeclaredMethod("a"), Collections.emptyList(),
-				InjectionStrategy.INVOKE_DYNAMIC);
+				getClass().getDeclaredMethod("a"), Collections.emptyList());
 		CompiledSupplier compiled = compiler
 				.compileSupplier(new SupplierRecipe() {
 

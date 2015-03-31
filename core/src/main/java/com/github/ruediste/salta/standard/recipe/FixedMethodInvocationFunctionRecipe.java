@@ -1,10 +1,6 @@
 package com.github.ruediste.salta.standard.recipe;
 
-import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ANEWARRAY;
-import static org.objectweb.asm.Opcodes.ATHROW;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantCallSite;
@@ -12,16 +8,13 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -31,14 +24,11 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 
 	private Method method;
 	private List<SupplierRecipe> argumentRecipes;
-	private InjectionStrategy injectionStrategy;
 
 	public FixedMethodInvocationFunctionRecipe(Method method,
-			List<SupplierRecipe> argumentRecipes,
-			InjectionStrategy injectionStrategy) {
+			List<SupplierRecipe> argumentRecipes) {
 		this.method = method;
 		this.argumentRecipes = argumentRecipes;
-		this.injectionStrategy = injectionStrategy;
 		method.setAccessible(true);
 	}
 
@@ -49,14 +39,7 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 		if (Accessibility.isMethodPublic(method))
 			return compileDirect(argType, mv, ctx);
 		else
-			switch (injectionStrategy) {
-			case INVOKE_DYNAMIC:
-				return compileDynamic(argType, mv, ctx);
-			case REFLECTION:
-				return compileReflection(argType, mv, ctx);
-			default:
-				throw new UnsupportedOperationException();
-			}
+			return compileDynamic(argType, mv, ctx);
 	}
 
 	private Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
@@ -79,50 +62,6 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 					org.objectweb.asm.commons.Method.getMethod(method));
 
 		return ctx.castToPublic(method.getReturnType(), method.getReturnType());
-	}
-
-	private Class<?> compileReflection(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext compilationContext) {
-		compilationContext.addFieldAndLoad(Method.class, method);
-		mv.swap();
-
-		// push dependencies as an array
-		mv.push(argumentRecipes.size());
-		mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
-
-		for (int i = 0; i < argumentRecipes.size(); i++) {
-			mv.dup();
-			mv.push(i);
-			SupplierRecipe dependency = argumentRecipes.get(i);
-			Class<?> t = dependency.compile(compilationContext);
-			if (t.isPrimitive())
-				mv.box(Type.getType(t));
-			mv.visitInsn(AASTORE);
-		}
-
-		Label l0 = new Label();
-		Label l1 = new Label();
-		Label l2 = new Label();
-		mv.visitTryCatchBlock(l0, l1, l1,
-				Type.getInternalName(InvocationTargetException.class));
-		mv.visitLabel(l0);
-		mv.invokeVirtual(
-				Type.getType(Method.class),
-				new org.objectweb.asm.commons.Method("invoke",
-						"(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"));
-		mv.goTo(l2);
-		mv.visitLabel(l1);
-		mv.visitMethodInsn(INVOKEVIRTUAL,
-				Type.getInternalName(InvocationTargetException.class),
-				"getCause", "()Ljava/lang/Throwable;", false);
-		mv.visitInsn(ATHROW);
-		mv.visitLabel(l2);
-
-		if (void.class.equals(method.getReturnType())) {
-			mv.pop();
-			return void.class;
-		}
-		return Object.class;
 	}
 
 	private Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,

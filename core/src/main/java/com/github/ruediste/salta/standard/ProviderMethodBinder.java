@@ -66,7 +66,7 @@ public abstract class ProviderMethodBinder {
 									p, i)));
 						}
 						FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(
-								m, args, config.config.injectionStrategy);
+								m, args);
 						return new SupplierRecipe() {
 
 							@Override

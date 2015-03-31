@@ -57,8 +57,7 @@ public abstract class RecipeInitializerFactoryBase implements
 					}
 
 					// add injector
-					result.add(new FixedMethodRecipeInitializer(method, args,
-							config.injectionStrategy));
+					result.add(new FixedMethodRecipeInitializer(method, args));
 				}
 			}
 		}

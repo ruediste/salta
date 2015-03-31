@@ -16,8 +16,6 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
 
-	public InjectionStrategy injectionStrategy = InjectionStrategy.INVOKE_DYNAMIC;
-
 	/**
 	 * List of enhancer factories. The enhancers of all factories are combined.
 	 */

@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.RecipeCompiler;
@@ -60,23 +59,21 @@ public class FixedFieldRecipeMembersInjectorTest {
 
 	private static class Builder {
 		private GeneratorAdapter mv;
-		private InjectionStrategy strategy;
 		String m;
 		private MethodCompilationContext ctx;
 
 		public Builder(GeneratorAdapter mv, MethodCompilationContext ctx,
-				String m, InjectionStrategy strategy) {
+				String m) {
 			this.mv = mv;
 			this.ctx = ctx;
 			this.m = m;
-			this.strategy = strategy;
 		}
 
 		void f(Class<?> param, SupplierRecipe recipe) throws Exception {
 			new FixedFieldRecipeMembersInjector(
 					TestMain.class.getDeclaredField(m + "_"
-							+ param.getSimpleName()), recipe, strategy)
-					.compile(TestMain.class, ctx);
+							+ param.getSimpleName()), recipe).compile(
+					TestMain.class, ctx);
 		}
 
 		SupplierRecipe toObject(SupplierRecipe arg) {
@@ -185,29 +182,26 @@ public class FixedFieldRecipeMembersInjectorTest {
 
 	@Test
 	public void testDetail() throws Throwable {
-		for (InjectionStrategy strategy : InjectionStrategy.values()) {
-			try {
-				doTestDetail("f", strategy);
-			} catch (Throwable t) {
-				throw new RuntimeException("Error in public/" + strategy, t);
-			}
-			try {
-				doTestDetail("f1", strategy);
-			} catch (Throwable t) {
-				throw new RuntimeException("Error in package/" + strategy, t);
-			}
+		try {
+			doTestDetail("f");
+		} catch (Throwable t) {
+			throw new RuntimeException("Error in public", t);
+		}
+		try {
+			doTestDetail("f1");
+		} catch (Throwable t) {
+			throw new RuntimeException("Error in package", t);
 		}
 	}
 
-	private void doTestDetail(String m, InjectionStrategy strategy)
-			throws Throwable {
+	private void doTestDetail(String m) throws Throwable {
 		SupplierRecipe recipe = new SupplierRecipe() {
 
 			@Override
 			protected Class<?> compileImpl(GeneratorAdapter mv,
 					MethodCompilationContext ctx) {
 
-				Builder b = new Builder(mv, ctx, m, strategy);
+				Builder b = new Builder(mv, ctx, m);
 
 				ctx.addFieldAndLoad(TestMain.class, new TestMain());
 				try {

@@ -59,7 +59,7 @@ public class JSR330Module extends AbstractModule {
 
 		addConstructionInstantiatorRule(config);
 
-		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator.of(type, ctx, cstr, config.config.injectionStrategy, p -> false);
+		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator.of(type, ctx, cstr, p -> false);
 
 		// stage creation rule
 		config.creationPipeline.creationRules.add(new CreationRuleImpl(

@@ -1,10 +1,6 @@
 package com.github.ruediste.salta.standard.recipe;
 
-import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ANEWARRAY;
-import static org.objectweb.asm.Opcodes.ATHROW;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantCallSite;
@@ -13,7 +9,6 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +16,11 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.InjectionStrategy;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
@@ -47,12 +40,9 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 
 	Constructor<?> constructor;
 	List<SupplierRecipe> argumentDependencies;
-	private InjectionStrategy strategy;
 
 	public FixedConstructorRecipeInstantiator(Constructor<?> constructor,
-			List<SupplierRecipe> argumentDependencies,
-			InjectionStrategy strategy) {
-		this.strategy = strategy;
+			List<SupplierRecipe> argumentDependencies) {
 		constructor.setAccessible(true);
 		this.constructor = constructor;
 		this.argumentDependencies = new ArrayList<>(argumentDependencies);
@@ -60,7 +50,7 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 
 	public static FixedConstructorRecipeInstantiator of(TypeToken<?> typeToken,
 			RecipeCreationContext ctx, Constructor<?> constructor,
-			InjectionStrategy strategy, Predicate<Parameter> isOptional) {
+			Predicate<Parameter> isOptional) {
 		ArrayList<SupplierRecipe> args = new ArrayList<>();
 
 		Parameter[] parameters = constructor.getParameters();
@@ -84,8 +74,7 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 				}
 			}
 		}
-		return new FixedConstructorRecipeInstantiator(constructor, args,
-				strategy);
+		return new FixedConstructorRecipeInstantiator(constructor, args);
 	}
 
 	@Override
@@ -94,54 +83,7 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 		if (Accessibility.isConstructorPublic(constructor))
 			return compileDirect(mv, compilationContext);
 		else
-			switch (strategy) {
-			case INVOKE_DYNAMIC:
-				return compileDynamic(mv, compilationContext);
-			case REFLECTION:
-				return compileReflection(mv, compilationContext);
-			default:
-				throw new UnsupportedOperationException();
-			}
-	}
-
-	private Class<?> compileReflection(GeneratorAdapter mv,
-			MethodCompilationContext compilationContext) {
-
-		// push constructor
-		compilationContext.addFieldAndLoad(Constructor.class, constructor);
-
-		// push dependencies as an array
-		mv.push(argumentDependencies.size());
-		mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
-
-		for (int i = 0; i < argumentDependencies.size(); i++) {
-			mv.dup();
-			mv.push(i);
-			SupplierRecipe dependency = argumentDependencies.get(i);
-			Class<?> argType = dependency.compile(compilationContext);
-			if (argType.isPrimitive())
-				mv.box(Type.getType(argType));
-			mv.visitInsn(AASTORE);
-		}
-
-		// call constructor
-		Label l0 = new Label();
-		Label l1 = new Label();
-		Label l2 = new Label();
-		mv.visitTryCatchBlock(l0, l1, l1,
-				Type.getInternalName(InvocationTargetException.class));
-		mv.visitLabel(l0);
-		mv.invokeVirtual(Type.getType(Constructor.class), new Method(
-				"newInstance", "([Ljava/lang/Object;)Ljava/lang/Object;"));
-		mv.goTo(l2);
-		mv.visitLabel(l1);
-		mv.visitMethodInsn(INVOKEVIRTUAL,
-				Type.getInternalName(InvocationTargetException.class),
-				"getCause", "()Ljava/lang/Throwable;", false);
-		mv.visitInsn(ATHROW);
-		mv.visitLabel(l2);
-
-		return Object.class;
+			return compileDynamic(mv, compilationContext);
 	}
 
 	private Class<?> compileDirect(GeneratorAdapter mv,

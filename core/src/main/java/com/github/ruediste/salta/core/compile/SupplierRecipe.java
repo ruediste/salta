@@ -14,13 +14,21 @@ import com.github.ruediste.salta.core.compile.MethodCompilationContext.CodeSizeH
  */
 public abstract class SupplierRecipe {
 
+	/**
+	 * Default size threshold. If the compiled size of a recipe is bigger than
+	 * this threshold, it will be compiled to a separate class. Values bigger
+	 * 64k will result in too big methods (JVM refuses them), too small values
+	 * result in a large number of classes.
+	 */
+	public static int DEFAULT_SIZE_THRESHOLD = 7000;// leave some extra space
+
 	private final int sizeThreshold;
 	private int codeSize = -1;
 	private boolean separateSubRecipes;
 	private Class<?> returnType;
 
 	public SupplierRecipe() {
-		this(7000); // leave some extra space
+		this(DEFAULT_SIZE_THRESHOLD);
 	}
 
 	public SupplierRecipe(int sizeThreshold) {

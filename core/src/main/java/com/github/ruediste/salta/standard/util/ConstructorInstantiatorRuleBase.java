@@ -93,8 +93,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
 					+ ".\nSpecify qualifiers on parameters instead");
 		}
 		return Optional.of(ctx -> FixedConstructorRecipeInstantiator.of(
-				typeToken, ctx, constructor, config.config.injectionStrategy,
-				p -> isParameterOptional(p)));
+				typeToken, ctx, constructor, p -> isParameterOptional(p)));
 
 	}
 
