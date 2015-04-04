@@ -1,11 +1,10 @@
-package com.github.ruediste.salta.jsr330.wikiChecks;
+package com.github.ruediste.salta.standard.util;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -17,20 +16,18 @@ import javax.inject.Scope;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.Injector;
 import com.github.ruediste.salta.jsr330.Salta;
 import com.github.ruediste.salta.standard.ScopeImpl;
-import com.github.ruediste.salta.standard.util.SimpleScopeHandler;
 
-public class CustomScopesTest {
+public class SimpleProxyScopeHandlerTest {
 
 	private Injector injector;
 
 	@Inject
-	@Named("batchScope")
-	private SimpleScopeHandler handler;
+	@Named("batch")
+	SimpleProxyScopeHandler handler;
 
 	@Target({ TYPE, METHOD })
 	@Retention(RUNTIME)
@@ -39,47 +36,60 @@ public class CustomScopesTest {
 	}
 
 	@Before
-	public void before() {
+	public void setup() {
 		injector = Salta.createInjector(new AbstractModule() {
 
 			@Override
 			protected void configure() throws Exception {
-				SimpleScopeHandler handler = new SimpleScopeHandler();
-				bind(SimpleScopeHandler.class).named("batchScope").toInstance(
-						handler);
+				SimpleProxyScopeHandler handler = new SimpleProxyScopeHandler(
+						"batch");
 				bindScope(BatchScoped.class, new ScopeImpl(handler));
+				bind(SimpleProxyScopeHandler.class).named("batch").toInstance(
+						handler);
 			}
 		});
-
 		injector.injectMembers(this);
 	}
 
-	@BatchScoped
 	private static class A {
+
+		@Inject
+		B b;
+	}
+
+	@BatchScoped
+	static class B {
+		private int value;
+
+		public int getValue() {
+			return value;
+		}
+
+		public void setValue(int value) {
+			this.value = value;
+		}
 	}
 
 	@Test
-	public void testCustomScope() {
-		handler.enter();
+	public void testSimple() {
 		A a1 = injector.getInstance(A.class);
 		A a2 = injector.getInstance(A.class);
-		assertSame(a1, a2);
+
+		handler.enter();
+		a1.b.setValue(3);
+		assertNotSame(a1, a2);
+		assertEquals(3, a2.b.getValue());
 		handler.exit();
 
 		handler.enter();
-		A a3 = injector.getInstance(A.class);
-		assertNotSame(a3, a1);
+		assertEquals(0, a2.b.getValue());
 		handler.exit();
+
 	}
 
-	@Test
-	public void accessOutsideScopeFails() {
-		try {
-			injector.getInstance(A.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("outside of a scoping block"))
-				throw e;
-		}
+	@Test(expected = RuntimeException.class)
+	public void testFailureOutOfScope() {
+		A a = injector.getInstance(A.class);
+		a.b.getValue();
 	}
 }

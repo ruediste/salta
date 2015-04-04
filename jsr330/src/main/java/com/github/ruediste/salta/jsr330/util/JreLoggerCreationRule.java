@@ -7,7 +7,7 @@ import java.util.logging.Logger;
  * they are injected into.
  */
 public class JreLoggerCreationRule extends LoggerCreationRule {
-	JreLoggerCreationRule() {
+	public JreLoggerCreationRule() {
 		super(Logger.class, declaringClass -> Logger.getLogger(declaringClass
 				.getName()));
 	}
