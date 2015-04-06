@@ -20,7 +20,7 @@ public abstract class SupplierRecipe {
 	 * 64k will result in too big methods (JVM refuses them), too small values
 	 * result in a large number of classes.
 	 */
-	public static int DEFAULT_SIZE_THRESHOLD = 7000;// leave some extra space
+	public static int DEFAULT_SIZE_THRESHOLD = 7000;
 
 	private final int sizeThreshold;
 	private int codeSize = -1;
