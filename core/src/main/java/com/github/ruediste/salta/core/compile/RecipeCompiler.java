@@ -34,6 +34,10 @@ public class RecipeCompiler {
 	private static final AtomicInteger instanceCounter = new AtomicInteger();
 
 	private static class CompilerClassLoader extends ClassLoader {
+		public CompilerClassLoader() {
+			super(Thread.currentThread().getContextClassLoader());
+		}
+
 		public Class<?> defineClass(String name, byte[] bb) {
 			return defineClass(name, bb, 0, bb.length);
 		}
