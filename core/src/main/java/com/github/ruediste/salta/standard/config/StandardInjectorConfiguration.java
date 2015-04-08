@@ -20,6 +20,8 @@ import java.util.stream.Stream;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import com.github.ruediste.attachedProperties4J.AttachedPropertyBearer;
+import com.github.ruediste.attachedProperties4J.AttachedPropertyMap;
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjector;
@@ -51,7 +53,7 @@ import com.google.common.reflect.TypeToken;
 /**
  * Configuration for the {@link StandardInjector}.
  */
-public class StandardInjectorConfiguration {
+public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 	public CoreInjectorConfiguration config;
 	public final Stage stage;
 
@@ -590,4 +592,9 @@ public class StandardInjectorConfiguration {
 	}
 
 	public MembersInjectorFactory membersInjectorFactory;
+
+	@Override
+	public AttachedPropertyMap getAttachedPropertyMap() {
+		return config.getAttachedPropertyMap();
+	}
 }
