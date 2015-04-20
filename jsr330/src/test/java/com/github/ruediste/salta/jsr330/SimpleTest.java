@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-public class SaltaTest {
+public class SimpleTest {
 
 	@Test
 	public void emptyInjector() {

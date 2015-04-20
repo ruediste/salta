@@ -321,7 +321,9 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 		public final List<StaticBinding> staticBindings = new ArrayList<>();
 
 		/**
-		 * Rules to instantiate dependencies without bindings
+		 * Rules to instantiate dependencies without bindings. These rules will
+		 * be evaluated after the {@link #staticBindings} by the
+		 * {@link CreationPipelineSuppliers#creationRulesSupplier}
 		 */
 		public final List<CreationRule> creationRules = new ArrayList<>();
 
