@@ -19,6 +19,7 @@ import com.github.ruediste.salta.core.compile.FunctionRecipe;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.standard.util.Accessibility;
+import com.google.common.base.Preconditions;
 
 public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 
@@ -27,6 +28,9 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 
 	public FixedMethodInvocationFunctionRecipe(Method method,
 			List<SupplierRecipe> argumentRecipes) {
+		Preconditions.checkArgument(
+				argumentRecipes.stream().allMatch(x -> x != null),
+				"argument recipe is null");
 		this.method = method;
 		this.argumentRecipes = argumentRecipes;
 		method.setAccessible(true);

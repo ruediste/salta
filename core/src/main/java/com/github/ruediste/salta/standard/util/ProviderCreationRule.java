@@ -141,36 +141,50 @@ public class ProviderCreationRule implements CreationRule {
 			}
 
 			return Optional
-					.of(ctx -> {
-						Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = ctx
-								.tryGetRecipeFunc(dep);
-						if (!innerRecipe.isPresent())
-							return null;
-
-						// create and wrap provider instance
-					ProviderImpl provider = new ProviderImpl(key);
-					Object wrappedProvider = wrapper.apply(key, provider);
-
-					// create creation recipe
-					SupplierRecipe creationRecipe = new SupplierRecipe() {
+					.of(new Function<RecipeCreationContext, SupplierRecipe>() {
+						@Override
+						public String toString() {
+							return "Provider[" + key + "]";
+						}
 
 						@Override
-						protected Class<?> compileImpl(GeneratorAdapter mv,
-								MethodCompilationContext ctx) {
-							ctx.addFieldAndLoad((Class) providerType,
-									wrappedProvider);
-							return providerType;
+						public SupplierRecipe apply(RecipeCreationContext ctx) {
+
+							Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = ctx
+									.tryGetRecipeFunc(dep);
+							if (!innerRecipe.isPresent())
+								// return null;
+								throw new SaltaException("No recipe found for "
+										+ dep);
+
+							// create and wrap provider instance
+							ProviderImpl provider = new ProviderImpl(key);
+							Object wrappedProvider = wrapper.apply(key,
+									provider);
+
+							// create creation recipe
+							SupplierRecipe creationRecipe = new SupplierRecipe() {
+
+								@Override
+								protected Class<?> compileImpl(
+										GeneratorAdapter mv,
+										MethodCompilationContext ctx) {
+									ctx.addFieldAndLoad((Class) providerType,
+											wrappedProvider);
+									return providerType;
+								}
+							};
+
+							// queue creation and compilation of inner recipe
+							ctx.queueAction(() -> {
+								provider.compiledRecipe = ctx.getCompiler()
+										.compileSupplier(
+												innerRecipe.get().apply(ctx));
+							});
+
+							return creationRecipe;
 						}
-					};
-
-					// queue creation and compilation of inner recipe
-					ctx.queueAction(() -> {
-						provider.compiledRecipe = ctx.getCompiler()
-								.compileSupplier(innerRecipe.get().apply(ctx));
 					});
-
-					return creationRecipe;
-				});
 		}
 
 		return Optional.empty();

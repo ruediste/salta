@@ -134,9 +134,20 @@ public class CoreInjector {
 
 	public SupplierRecipe getRecipe(CoreDependencyKey<?> key,
 			RecipeCreationContext ctx) {
-		return getFromOptional(tryGetRecipeFunc(key), key).apply(ctx);
+		Function<RecipeCreationContext, SupplierRecipe> recipeFunction = getFromOptional(
+				tryGetRecipeFunc(key), key);
+		SupplierRecipe result = recipeFunction.apply(ctx);
+		if (result == null)
+			throw new SaltaException("Error while creating recipe for " + key
+					+ ". The result of " + recipeFunction
+					+ " was null, which should not happen");
+		return result;
 	}
 
+	/**
+	 * Get the value of the optional, throwing an exception including the key if
+	 * the optional is empty
+	 */
 	private <T> T getFromOptional(Optional<T> optional, CoreDependencyKey<?> key) {
 		if (optional.isPresent())
 			return optional.get();
@@ -178,17 +189,35 @@ public class CoreInjector {
 	private Optional<Function<RecipeCreationContext, SupplierRecipe>> createRecipe(
 			CoreDependencyKey<?> key) {
 		try {
-			Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = Optional
+			Optional<Function<RecipeCreationContext, SupplierRecipe>> recipeFunction = Optional
 					.empty();
 			// check rules
 			for (CreationRule rule : creationRules) {
-				recipe = rule.apply(key);
-				if (recipe.isPresent())
+				recipeFunction = rule.apply(key);
+				if (recipeFunction.isPresent())
 					break;
 			}
 
-			return recipe.map(f -> (ctx -> config.applyEnhancers(f.apply(ctx),
-					ctx, key)));
+			return recipeFunction
+					.map(new Function<Function<RecipeCreationContext, SupplierRecipe>, Function<RecipeCreationContext, SupplierRecipe>>() {
+						@Override
+						public Function<RecipeCreationContext, SupplierRecipe> apply(
+								Function<RecipeCreationContext, SupplierRecipe> f) {
+							return new Function<RecipeCreationContext, SupplierRecipe>() {
+								@Override
+								public SupplierRecipe apply(
+										RecipeCreationContext ctx) {
+									return config.applyEnhancers(f.apply(ctx),
+											ctx, key);
+								}
+
+								@Override
+								public String toString() {
+									return "apply enhancers[" + f + "]";
+								}
+							};
+						}
+					});
 		} catch (SaltaException e) {
 			throw e;
 		} catch (Exception e) {

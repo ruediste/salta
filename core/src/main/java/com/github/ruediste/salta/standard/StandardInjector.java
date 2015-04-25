@@ -16,6 +16,7 @@ import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.config.MembersInjectionToken;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
+import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
 
 public class StandardInjector {
@@ -26,6 +27,7 @@ public class StandardInjector {
 		private Class<T> type;
 
 		ClassDependencyKey(Class<T> type) {
+			Preconditions.checkNotNull(type);
 			this.type = type;
 		}
 

@@ -53,7 +53,9 @@ public abstract class RecipeInitializerFactoryBase implements
 								(TypeToken) t.resolveType(parameter
 										.getParameterizedType()), method,
 								parameter, i);
-						args.add(ctx.getRecipe(dependency));
+						SupplierRecipe recipe = ctx.getRecipe(dependency);
+
+						args.add(recipe);
 					}
 
 					// add injector
