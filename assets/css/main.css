@@ -232,7 +232,6 @@ a:before, a:after {
 	-moz-background-size: cover;
 	-o-background-size: cover;
 	background-size: cover;
-	padding-bottom: 100px;
 }
 #home h1 {
 	color: #ffffff;
