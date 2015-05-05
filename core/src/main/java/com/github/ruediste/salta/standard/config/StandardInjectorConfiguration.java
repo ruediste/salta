@@ -363,6 +363,13 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 					staticBindings);
 			public final Supplier<CreationRule> creationRulesSupplier = () -> CreationRule
 					.combine(creationRules);
+
+			/**
+			 * Creation rules using the
+			 * {@link CreationPipelineConfiguration#jitBindingKeyRules} and the
+			 * {@link CreationPipelineConfiguration#jitBindingRules} to creat
+			 * instances.
+			 */
 			public final Supplier<CreationRule> jitRulesSupplier = () -> new JITBindingCreationRule(
 					jitBindingKeyRules, jitBindingRules);
 		}
@@ -417,6 +424,14 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 		return getRequiredQualifier(key, key.getAnnotatedElement());
 	}
 
+	/**
+	 * Get the required annotations an an element
+	 * 
+	 * @param source
+	 *            object to include in error messages
+	 * @param annotatedElement
+	 *            element to check for qualifiers
+	 */
 	public Annotation getRequiredQualifier(Object source,
 			AnnotatedElement annotatedElement) {
 		List<Annotation> qualifiers = requiredQualifierExtractors.stream()
