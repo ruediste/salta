@@ -30,7 +30,9 @@ import com.google.common.collect.Maps;
  * 
  * <pre>
  * <code>
+ * SimpleScopeHandler scopeHandler=new SimpleScopeHandler();
  * bindScope(MyCustomScopeAnnotation.class, new ScopeImpl(scopeHandler));
+ * bind(SimpleScopeHandler.class).named("myScope").toInstance(scopeHandler);
  * </code>
  * </pre>
  * 
@@ -40,7 +42,13 @@ import com.google.common.collect.Maps;
  */
 public class SimpleScopeHandler implements ScopeHandler {
 
-	private final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
+	protected final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
+
+	public void enter(Map<Binding, Object> instances) {
+		checkState(values.get() == null,
+				"A scoping block is already in progress");
+		values.set(instances);
+	}
 
 	public void enter() {
 		checkState(values.get() == null,

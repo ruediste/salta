@@ -12,7 +12,7 @@ import com.github.ruediste.salta.standard.binder.AnnotationProxy;
 import com.google.common.reflect.TypeToken;
 
 /**
- * The type and {@link InjectionPoint} to lookup an instance.
+ * The type and Qualifiers to lookup an instance.
  */
 public class DependencyKey<T> extends CoreDependencyKey<T> {
 	private final TypeToken<T> type;
@@ -75,7 +75,6 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 	}
 
 	@SafeVarargs
-	@SuppressWarnings("unchecked")
 	public final DependencyKey<T> withAnnotations(
 			Class<? extends Annotation>... cls) {
 		Annotation[] annotations = new Annotation[cls.length];

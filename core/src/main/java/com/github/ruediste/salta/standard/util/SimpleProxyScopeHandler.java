@@ -35,9 +35,9 @@ import com.google.common.collect.Maps;
  * 
  * <pre>
  * <code>
- * SimpleProxyScopeHAndler scopeHandler=new SimpleProxyScopeHandler();
+ * SimpleProxyScopeHandler scopeHandler=new SimpleProxyScopeHandler();
  * bindScope(MyCustomScopeAnnotation.class, new ScopeImpl(scopeHandler));
- * bind(SimpleProxyScopeHandler.class).named("myScope").toInstance(scopeHandler));
+ * bind(SimpleProxyScopeHandler.class).named("myScope").toInstance(scopeHandler);
  * </code>
  * </pre>
  * 
@@ -47,17 +47,32 @@ import com.google.common.collect.Maps;
  */
 public class SimpleProxyScopeHandler implements ScopeHandler {
 
-	private final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
-	private String scopeName;
+	protected final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
+	protected String scopeName;
 
 	public SimpleProxyScopeHandler(String scopeName) {
 		this.scopeName = scopeName;
+	}
+
+	public void enter(Map<Binding, Object> instances) {
+		checkState(values.get() == null, "Scope " + scopeName
+				+ "  is already in progress");
+		values.set(instances);
 	}
 
 	public void enter() {
 		checkState(values.get() == null, "Scope " + scopeName
 				+ "  is already in progress");
 		values.set(Maps.newHashMap());
+	}
+
+	public Map<Binding, Object> getValueMap() {
+		Map<Binding, Object> scopedObjects = values.get();
+		if (scopedObjects == null) {
+			throw new RuntimeException(
+					"Cannot access value map outside of scope " + scopeName);
+		}
+		return scopedObjects;
 	}
 
 	public void exit() {
@@ -85,7 +100,7 @@ public class SimpleProxyScopeHandler implements ScopeHandler {
 		return () -> proxy;
 	}
 
-	private Map<Binding, Object> getScopedObjectMap(
+	protected Map<Binding, Object> getScopedObjectMap(
 			CoreDependencyKey<?> requestedKey) {
 		Map<Binding, Object> scopedObjects = values.get();
 		if (scopedObjects == null) {
