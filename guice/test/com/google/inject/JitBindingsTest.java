@@ -261,7 +261,7 @@ public class JitBindingsTest extends TestCase {
 			}).getInstance(ProviderFooBar.class);
 			fail("should have failed");
 		} catch (SaltaException expected) {
-			if (!expected.getMessage().contains("No recipe found for field"))
+			if (!expected.getMessage().contains("No recipe found for"))
 				throw expected;
 		}
 	}
