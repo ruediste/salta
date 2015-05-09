@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.jsr330.AbstractModule;
@@ -32,7 +33,8 @@ public class SupplierRecipeImplTest {
 
 							@Override
 							public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-									CoreDependencyKey<?> key) {
+									CoreDependencyKey<?> key,
+									CoreInjector injector) {
 								if (key.getRawType().equals(int.class)) {
 									return Optional
 											.of(ctx -> new SupplierRecipeImpl(

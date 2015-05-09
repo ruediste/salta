@@ -74,7 +74,7 @@ public class StaticBindingSet implements CreationRule {
 
 	@Override
 	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key) {
+			CoreDependencyKey<?> key, CoreInjector injector) {
 		StaticBinding binding = getBinding(key);
 		if (binding != null) {
 			return Optional.of(ctx -> binding.getScope().createRecipe(ctx,

@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.RecipeCreationContext;
@@ -222,7 +223,7 @@ public class GuiceModule implements Module {
 
 			@Override
 			public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-					CoreDependencyKey<?> key) {
+					CoreDependencyKey<?> key, CoreInjector injector) {
 				if (Stage.class.equals(key.getType().getType()))
 					return Optional.of(ctx -> new SupplierRecipeImpl(
 							() -> guiceConfig.stage));
@@ -629,7 +630,7 @@ public class GuiceModule implements Module {
 
 			@Override
 			public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-					CoreDependencyKey<?> key) {
+					CoreDependencyKey<?> key, CoreInjector injector) {
 
 				Class<?> rawType = key.getRawType();
 				if (Logger.class.equals(rawType)) {

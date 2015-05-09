@@ -26,7 +26,7 @@ public class CreationRuleImpl implements CreationRule {
 
 	@Override
 	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key) {
+			CoreDependencyKey<?> key, CoreInjector injector) {
 		if (matcher.matches(key))
 			return Optional.of(ctx -> new SupplierRecipeImpl(supplierFactory
 					.apply(key)));

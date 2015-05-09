@@ -9,6 +9,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CompiledSupplier;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
@@ -118,7 +119,7 @@ public class ProviderCreationRule implements CreationRule {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key) {
+			CoreDependencyKey<?> key, CoreInjector injector) {
 
 		if (matcher.matches(key)) {
 			if (key.getType().getType() instanceof Class) {

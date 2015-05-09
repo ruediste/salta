@@ -10,6 +10,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import com.github.ruediste.salta.core.CompiledFunction;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
@@ -98,7 +99,7 @@ public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key) {
+			CoreDependencyKey<?> key, CoreInjector injector) {
 		TypeToken<?> dependency = getDependency(key);
 		if (dependency == null)
 			return Optional.empty();

@@ -22,7 +22,7 @@ public class JITBindingCreationRule implements CreationRule {
 
 	@Override
 	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key) {
+			CoreDependencyKey<?> key, CoreInjector injector) {
 		// create key
 		JITBindingKey jitKey = new JITBindingKey();
 		for (JITBindingKeyRule rule : keyRules) {

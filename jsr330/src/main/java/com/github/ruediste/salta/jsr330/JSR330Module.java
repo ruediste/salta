@@ -59,7 +59,8 @@ public class JSR330Module extends AbstractModule {
 
 		addConstructionInstantiatorRule(config);
 
-		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator.of(type, ctx, cstr, p -> false);
+		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
+				.of(type, ctx, cstr, p -> false);
 
 		// stage creation rule
 		config.creationPipeline.creationRules.add(new CreationRuleImpl(
@@ -146,7 +147,7 @@ public class JSR330Module extends AbstractModule {
 
 			@Override
 			public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-					CoreDependencyKey<?> key) {
+					CoreDependencyKey<?> key, CoreInjector injector) {
 
 				if (TypeToken.class.equals(key.getRawType())) {
 					TypeToken<?> type = key.getType().resolveType(
@@ -178,8 +179,7 @@ public class JSR330Module extends AbstractModule {
 					return true;
 				}
 			};
-			config().modulePostProcessors
-					.add(b::bindProviderMethodsOf);
+			config().modulePostProcessors.add(b::bindProviderMethodsOf);
 		}
 	}
 

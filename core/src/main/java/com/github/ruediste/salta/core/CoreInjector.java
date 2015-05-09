@@ -193,7 +193,7 @@ public class CoreInjector {
 					.empty();
 			// check rules
 			for (CreationRule rule : creationRules) {
-				recipeFunction = rule.apply(key);
+				recipeFunction = rule.apply(key, this);
 				if (recipeFunction.isPresent())
 					break;
 			}

@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -29,7 +30,7 @@ public class LoggerCreationRule implements CreationRule {
 
 	@Override
 	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key) {
+			CoreDependencyKey<?> key, CoreInjector injector) {
 
 		if (key instanceof InjectionPoint
 				&& loggerClass.equals(key.getRawType())) {
