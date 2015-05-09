@@ -261,9 +261,18 @@ public class JSR330Module extends AbstractModule {
 	private void addProviderCreationRule(StandardInjectorConfiguration config) {
 		config.creationPipeline.creationRules.add(new ProviderCreationRule(
 				key -> {
-					return key.getType().getRawType().equals(Provider.class);
-				}, (type, supplier) -> (Provider<?>) supplier::get,
-				Provider.class));
+					return key.getRawType().equals(Provider.class);
+				}, (type, supplier) -> new Provider<Object>() {
+					@Override
+					public Object get() {
+						return supplier.get();
+					}
+
+					@Override
+					public String toString() {
+						return supplier.toString();
+					}
+				}, Provider.class));
 	}
 
 	private void addPostConstructInitializerFactory(
