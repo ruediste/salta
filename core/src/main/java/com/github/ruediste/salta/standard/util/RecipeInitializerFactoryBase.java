@@ -5,15 +5,19 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.CoreInjectorConfiguration;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
+import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.config.RecipeInitializerFactory;
 import com.github.ruediste.salta.standard.recipe.FixedMethodRecipeInitializer;
 import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
+import com.google.common.base.Defaults;
 import com.google.common.reflect.TypeToken;
 
 public abstract class RecipeInitializerFactoryBase implements
@@ -53,9 +57,19 @@ public abstract class RecipeInitializerFactoryBase implements
 								(TypeToken) t.resolveType(parameter
 										.getParameterizedType()), method,
 								parameter, i);
-						SupplierRecipe recipe = ctx.getRecipe(dependency);
+						Optional<SupplierRecipe> recipe = ctx
+								.tryGetRecipe(dependency);
 
-						args.add(recipe);
+						if (recipe.isPresent())
+							args.add(recipe.get());
+						else if (isParameterOptional(parameter))
+							args.add(new SupplierRecipeImpl(() -> Defaults
+									.defaultValue(parameter.getType())));
+						else
+							throw new SaltaException(
+									"Cannot resolve initializer parameter of "
+											+ method + ":\n" + parameter);
+
 					}
 
 					// add injector
@@ -68,5 +82,9 @@ public abstract class RecipeInitializerFactoryBase implements
 
 	protected abstract boolean isInitializer(TypeToken<?> declaringType,
 			Method method, MethodOverrideIndex overrideIndex);
+
+	protected boolean isParameterOptional(Parameter p) {
+		return false;
+	}
 
 }

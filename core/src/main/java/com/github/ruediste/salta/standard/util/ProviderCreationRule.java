@@ -140,6 +140,12 @@ public class ProviderCreationRule implements CreationRule {
 				dep = DependencyKey.of(requestedType).withAnnotations(
 						key.getAnnotatedElement().getAnnotations());
 			}
+			Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = injector
+					.tryGetRecipeFunc(dep);
+
+			if (!innerRecipe.isPresent())
+				// throw new RuntimeException("foo");
+				return Optional.empty();
 
 			return Optional
 					.of(new Function<RecipeCreationContext, SupplierRecipe>() {
@@ -150,13 +156,6 @@ public class ProviderCreationRule implements CreationRule {
 
 						@Override
 						public SupplierRecipe apply(RecipeCreationContext ctx) {
-
-							Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = ctx
-									.tryGetRecipeFunc(dep);
-							if (!innerRecipe.isPresent())
-								// return null;
-								throw new SaltaException("No recipe found for "
-										+ dep);
 
 							// create and wrap provider instance
 							ProviderImpl provider = new ProviderImpl(key);

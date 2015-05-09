@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
+import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.CreationRule;
 import com.github.ruediste.salta.core.CreationRuleImpl;
 import com.github.ruediste.salta.core.RecipeCreationContext;
@@ -293,6 +294,11 @@ public class JSR330Module extends AbstractModule {
 						}
 
 						return false;
+					}
+
+					@Override
+					protected boolean isParameterOptional(Parameter p) {
+						return p.isAnnotationPresent(InjectionOptional.class);
 					}
 				});
 	}
