@@ -4,6 +4,10 @@ import static java.util.stream.Collectors.toList;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,9 +77,41 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 	public final Map<Class<? extends Annotation>, Scope> scopeAnnotationMap = new HashMap<>();
 
 	/**
-	 * Strategy to create a {@link RecipeInstantiator} given a constructor.
+	 * Rules to create a {@link RecipeInstantiator} given a constructor.
 	 */
-	public FixedConstructorInstantiatorFactory fixedConstructorInstantiatorFactory;
+	public final List<FixedConstructorInstantiationRule> fixedConstructorInstantiatorFactoryRules = new ArrayList<>();
+
+	/**
+	 * Create an instantiator for the given constructor
+	 */
+	public RecipeInstantiator createFixedConstructorInstantiator(
+			TypeToken<?> typeToken, RecipeCreationContext ctx,
+			Constructor<?> constructor) {
+		for (FixedConstructorInstantiationRule rule : fixedConstructorInstantiatorFactoryRules) {
+			Optional<RecipeInstantiator> result = rule.create(typeToken, ctx,
+					constructor);
+			if (result.isPresent())
+				return result.get();
+		}
+		throw new SaltaException("No constructor instantiator found for "
+				+ constructor + " of type " + typeToken);
+	}
+
+	/**
+	 * Rules to determine if the injection of an element ({@link Field},
+	 * {@link Method}, {@link Parameter}) is optional. If no rule matches, the
+	 * injection is mandatory.
+	 */
+	public final List<InjectionOptionalRule> injectionOptionalRules = new ArrayList<>();
+
+	public boolean isInjectionOptional(AnnotatedElement element) {
+		for (InjectionOptionalRule rule : injectionOptionalRules) {
+			Optional<Boolean> result = rule.apply(element);
+			if (result.isPresent())
+				return result.get();
+		}
+		return false;
+	}
 
 	public class ConstructionConfiguration {
 		private ConstructionConfiguration() {

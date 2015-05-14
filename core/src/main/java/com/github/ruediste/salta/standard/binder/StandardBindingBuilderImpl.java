@@ -233,8 +233,8 @@ public class StandardBindingBuilderImpl<T> implements
 			Constructor<S> constructor, TypeToken<? extends S> type) {
 
 		recipeFactorySupplier = () -> ctx -> {
-			RecipeInstantiator instantiator = config.fixedConstructorInstantiatorFactory
-					.create(type, ctx, constructor);
+			RecipeInstantiator instantiator = config
+					.createFixedConstructorInstantiator(type, ctx, constructor);
 			return config.construction.createConstructionRecipe(ctx, type,
 					instantiator);
 

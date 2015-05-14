@@ -29,6 +29,7 @@ import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
 import com.github.ruediste.salta.guice.binder.GuiceInjectorConfiguration;
+import com.github.ruediste.salta.standard.DefaultFixedConstructorInstantiationRule;
 import com.github.ruediste.salta.standard.DefaultJITBindingKeyRule;
 import com.github.ruediste.salta.standard.DefaultJITBindingRule;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -38,7 +39,6 @@ import com.github.ruediste.salta.standard.StandardStaticBinding;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.MembersInjectorFactory;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
 import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
@@ -176,8 +176,16 @@ public class GuiceModule implements Module {
 
 		addConstructorInstantiationRule();
 
-		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
-				.of(type, ctx, cstr, p -> false);
+		config.fixedConstructorInstantiatorFactoryRules
+				.add(new DefaultFixedConstructorInstantiationRule(config));
+		config.injectionOptionalRules.add(e -> {
+			Inject i = e.getAnnotation(Inject.class);
+			if (i != null && i.optional() == true)
+				return Optional.of(true);
+
+			else
+				return Optional.of(false);
+		});
 
 		if (guiceConfig.stage == Stage.PRODUCTION)
 			addEagerInstantiationDynamicInitializer();
@@ -320,7 +328,7 @@ public class GuiceModule implements Module {
 				if (guiceInject == null && inject == null) {
 					return InjectionInstruction.NO_INJECT;
 				}
-				return (guiceInject != null && guiceInject.optional()) ? InjectionInstruction.INJECT_OPTIONAL
+				return config.isInjectionOptional(method) ? InjectionInstruction.INJECT_OPTIONAL
 						: InjectionInstruction.INJECT;
 			}
 
@@ -332,7 +340,7 @@ public class GuiceModule implements Module {
 				if (guiceInject == null && inject == null) {
 					return InjectionInstruction.NO_INJECT;
 				}
-				return (guiceInject != null && guiceInject.optional()) ? InjectionInstruction.INJECT_OPTIONAL
+				return config.isInjectionOptional(field) ? InjectionInstruction.INJECT_OPTIONAL
 						: InjectionInstruction.INJECT;
 			}
 		}.injectStaticMembers(config, injector.getSaltaInjector()));
@@ -557,7 +565,7 @@ public class GuiceModule implements Module {
 						if (index.isOverridden(method))
 							return InjectionInstruction.NO_INJECTION;
 
-						return (guiceInject != null && guiceInject.optional()) ? InjectionInstruction.INJECT_OPTIONAL
+						return config.isInjectionOptional(method) ? InjectionInstruction.INJECT_OPTIONAL
 								: InjectionInstruction.INJECT;
 					}
 
@@ -578,7 +586,7 @@ public class GuiceModule implements Module {
 						if (Modifier.isStatic(field.getModifiers()))
 							return InjectionInstruction.NO_INJECTION;
 
-						return (guiceInject != null && guiceInject.optional()) ? InjectionInstruction.INJECT_OPTIONAL
+						return config.isInjectionOptional(field) ? InjectionInstruction.INJECT_OPTIONAL
 								: InjectionInstruction.INJECT;
 					}
 				});

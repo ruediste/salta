@@ -114,7 +114,7 @@ public abstract class MembersInjectorFactoryBase implements
 						Optional<SupplierRecipe> recipe;
 						recipe = ctx.tryGetRecipe(dependency);
 						if (!recipe.isPresent()) {
-							if (isParameterOptional(parameter)) {
+							if (config.isInjectionOptional(parameter)) {
 								args.add(new SupplierRecipeImpl(() -> Defaults
 										.defaultValue(parameter.getType())));
 								continue parameterLoop;
@@ -145,7 +145,4 @@ public abstract class MembersInjectorFactoryBase implements
 			TypeToken<?> declaringType, Method method,
 			MethodOverrideIndex overrideIndex);
 
-	protected boolean isParameterOptional(Parameter p) {
-		return false;
-	}
 }

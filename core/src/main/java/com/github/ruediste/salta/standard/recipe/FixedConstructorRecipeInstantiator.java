@@ -9,28 +9,18 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.core.RecipeCreationContext;
-import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
-import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
-import com.github.ruediste.salta.standard.InjectionPoint;
 import com.github.ruediste.salta.standard.util.Accessibility;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
-import com.google.common.base.Defaults;
-import com.google.common.reflect.TypeToken;
 
 /**
  * Instantiate a fixed class using a fixed constructor. Use a subclass of
@@ -46,35 +36,6 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 		constructor.setAccessible(true);
 		this.constructor = constructor;
 		this.argumentDependencies = new ArrayList<>(argumentDependencies);
-	}
-
-	public static FixedConstructorRecipeInstantiator of(TypeToken<?> typeToken,
-			RecipeCreationContext ctx, Constructor<?> constructor,
-			Predicate<Parameter> isOptional) {
-		ArrayList<SupplierRecipe> args = new ArrayList<>();
-
-		Parameter[] parameters = constructor.getParameters();
-		for (int i = 0; i < parameters.length; i++) {
-			Parameter parameter = parameters[i];
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			CoreDependencyKey<Object> dependency = new InjectionPoint(
-					typeToken.resolveType(parameter.getParameterizedType()),
-					constructor, parameter, i);
-			Optional<SupplierRecipe> argRecipe = ctx.tryGetRecipe(dependency);
-			if (argRecipe.isPresent())
-				args.add(argRecipe.get());
-			else {
-				if (isOptional.test(parameter)) {
-					args.add(new SupplierRecipeImpl(() -> Defaults
-							.defaultValue(parameter.getType())));
-				} else {
-					throw new SaltaException(
-							"Cannot resolve constructor parameter of "
-									+ constructor + ":\n" + parameter);
-				}
-			}
-		}
-		return new FixedConstructorRecipeInstantiator(constructor, args);
 	}
 
 	@Override

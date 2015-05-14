@@ -4,7 +4,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -26,6 +25,7 @@ import com.github.ruediste.salta.core.RecipeCreationContext;
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.core.compile.SupplierRecipeImpl;
+import com.github.ruediste.salta.standard.DefaultFixedConstructorInstantiationRule;
 import com.github.ruediste.salta.standard.DefaultJITBindingKeyRule;
 import com.github.ruediste.salta.standard.DefaultJITBindingRule;
 import com.github.ruediste.salta.standard.DependencyKey;
@@ -35,7 +35,6 @@ import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.config.DefaultConstructionRule;
 import com.github.ruediste.salta.standard.config.MembersInjectorFactory;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
-import com.github.ruediste.salta.standard.recipe.FixedConstructorRecipeInstantiator;
 import com.github.ruediste.salta.standard.util.ConstructorInstantiatorRuleBase;
 import com.github.ruediste.salta.standard.util.ImplementedByConstructionRuleBase;
 import com.github.ruediste.salta.standard.util.MembersInjectorCreationRuleBase;
@@ -60,13 +59,11 @@ public class JSR330Module extends AbstractModule {
 
 		addConstructionInstantiatorRule(config);
 
-		config.fixedConstructorInstantiatorFactory = (type, ctx, cstr) -> FixedConstructorRecipeInstantiator
-				.of(type, ctx, cstr, p -> false);
+		addFixedConstructorInstantiatorFactory(config);
 
-		// stage creation rule
-		config.creationPipeline.creationRules.add(new CreationRuleImpl(
-				key -> Stage.class.equals(key.getRawType()),
-				key -> () -> config.stage));
+		addInjectionOptionalRule(config);
+
+		addStageCreationRule(config);
 
 		addMembersInjectorFactory(config);
 
@@ -80,21 +77,56 @@ public class JSR330Module extends AbstractModule {
 		addStaticMembersDynamicInitializer(config);
 
 		addProviderMethodBinderModulePostProcessor(config);
-		bindScope(Singleton.class, config.singletonScope);
-		bindScope(DefaultScope.class, config.defaultScope);
+		bindScopes(config);
 
-		config.creationPipeline.jitBindingKeyRules
-				.add(new DefaultJITBindingKeyRule(config));
+		addJitBindingKeyRule(config);
 
-		config.creationPipeline.jitBindingRules.add(new DefaultJITBindingRule(
-				config));
+		addJitBindingRule(config);
 
-		config.construction.constructionRules.add(new DefaultConstructionRule(
-				config));
+		addDefaultConstructionRule(config);
 		setMembersInjectorFactory(config);
 		if (config.stage == Stage.PRODUCTION)
 			addSingletonInstantiationDynamicInitializer(config);
 
+	}
+
+	protected void addDefaultConstructionRule(
+			StandardInjectorConfiguration config) {
+		config.construction.constructionRules.add(new DefaultConstructionRule(
+				config));
+	}
+
+	protected void addJitBindingRule(StandardInjectorConfiguration config) {
+		config.creationPipeline.jitBindingRules.add(new DefaultJITBindingRule(
+				config));
+	}
+
+	protected void addJitBindingKeyRule(StandardInjectorConfiguration config) {
+		config.creationPipeline.jitBindingKeyRules
+				.add(new DefaultJITBindingKeyRule(config));
+	}
+
+	protected void bindScopes(StandardInjectorConfiguration config) {
+		bindScope(Singleton.class, config.singletonScope);
+		bindScope(DefaultScope.class, config.defaultScope);
+	}
+
+	protected void addStageCreationRule(StandardInjectorConfiguration config) {
+		// stage creation rule
+		config.creationPipeline.creationRules.add(new CreationRuleImpl(
+				key -> Stage.class.equals(key.getRawType()),
+				key -> () -> config.stage));
+	}
+
+	protected void addInjectionOptionalRule(StandardInjectorConfiguration config) {
+		config.injectionOptionalRules.add(e -> Optional.of(e
+				.isAnnotationPresent(InjectionOptional.class)));
+	}
+
+	protected void addFixedConstructorInstantiatorFactory(
+			StandardInjectorConfiguration config) {
+		config.fixedConstructorInstantiatorFactoryRules
+				.add(new DefaultFixedConstructorInstantiationRule(config));
 	}
 
 	protected void addSingletonInstantiationDynamicInitializer(
@@ -141,7 +173,7 @@ public class JSR330Module extends AbstractModule {
 		};
 	}
 
-	private void addTypeTokenConstructionRule(
+	protected void addTypeTokenConstructionRule(
 			StandardInjectorConfiguration config) {
 
 		config.creationPipeline.creationRules.add(new CreationRule() {
@@ -162,7 +194,7 @@ public class JSR330Module extends AbstractModule {
 		});
 	}
 
-	private void addProviderMethodBinderModulePostProcessor(
+	protected void addProviderMethodBinderModulePostProcessor(
 			StandardInjectorConfiguration config) {
 		// register scanner for provides methods
 		{
@@ -184,7 +216,7 @@ public class JSR330Module extends AbstractModule {
 		}
 	}
 
-	private void addStaticMembersDynamicInitializer(
+	protected void addStaticMembersDynamicInitializer(
 			StandardInjectorConfiguration config) {
 		// register initializer for requested static injections
 		StandardInjector injector = binder.getInjector().getDelegate();
@@ -203,7 +235,7 @@ public class JSR330Module extends AbstractModule {
 		}.injectStaticMembers(config, injector));
 	}
 
-	private void addQualifierExtractors(StandardInjectorConfiguration config) {
+	protected void addQualifierExtractors(StandardInjectorConfiguration config) {
 		config.requiredQualifierExtractors.add(annotatedElement -> Arrays
 				.stream(annotatedElement.getAnnotations()).filter(
 						a -> a.annotationType().isAnnotationPresent(
@@ -214,7 +246,7 @@ public class JSR330Module extends AbstractModule {
 				a -> a.annotationType().isAnnotationPresent(Qualifier.class)));
 	}
 
-	private void addMembersInjectorCreationRule(
+	protected void addMembersInjectorCreationRule(
 			StandardInjectorConfiguration config) {
 		// rule for members injectors
 		config.creationPipeline.creationRules
@@ -259,7 +291,7 @@ public class JSR330Module extends AbstractModule {
 				});
 	}
 
-	private void addProviderCreationRule(StandardInjectorConfiguration config) {
+	protected void addProviderCreationRule(StandardInjectorConfiguration config) {
 		config.creationPipeline.creationRules.add(new ProviderCreationRule(
 				key -> {
 					return key.getRawType().equals(Provider.class);
@@ -276,10 +308,10 @@ public class JSR330Module extends AbstractModule {
 				}, Provider.class));
 	}
 
-	private void addPostConstructInitializerFactory(
+	protected void addPostConstructInitializerFactory(
 			StandardInjectorConfiguration config) {
 		config.construction.initializerFactories
-				.add(new RecipeInitializerFactoryBase(config.config) {
+				.add(new RecipeInitializerFactoryBase(config) {
 
 					@Override
 					protected boolean isInitializer(TypeToken<?> declaringType,
@@ -296,14 +328,11 @@ public class JSR330Module extends AbstractModule {
 						return false;
 					}
 
-					@Override
-					protected boolean isParameterOptional(Parameter p) {
-						return p.isAnnotationPresent(InjectionOptional.class);
-					}
 				});
 	}
 
-	private void addMembersInjectorFactory(StandardInjectorConfiguration config) {
+	protected void addMembersInjectorFactory(
+			StandardInjectorConfiguration config) {
 		config.construction.membersInjectorFactories
 				.add(new MembersInjectorFactoryBase(config) {
 
@@ -324,8 +353,7 @@ public class JSR330Module extends AbstractModule {
 						}
 						if (index.isOverridden(method))
 							return InjectionInstruction.NO_INJECTION;
-						return method
-								.isAnnotationPresent(InjectionOptional.class) ? InjectionInstruction.INJECT_OPTIONAL
+						return config.isInjectionOptional(method) ? InjectionInstruction.INJECT_OPTIONAL
 								: InjectionInstruction.INJECT;
 					}
 
@@ -344,19 +372,14 @@ public class JSR330Module extends AbstractModule {
 						if (!annotationPresent)
 							return InjectionInstruction.NO_INJECTION;
 						else
-							return field
-									.isAnnotationPresent(InjectionOptional.class) ? InjectionInstruction.INJECT_OPTIONAL
+							return config.isInjectionOptional(field) ? InjectionInstruction.INJECT_OPTIONAL
 									: InjectionInstruction.INJECT;
 					}
 
-					@Override
-					protected boolean isParameterOptional(Parameter p) {
-						return p.isAnnotationPresent(InjectionOptional.class);
-					}
 				});
 	}
 
-	private void addConstructionInstantiatorRule(
+	protected void addConstructionInstantiatorRule(
 			StandardInjectorConfiguration config) {
 		// default instantiator rule
 		config.construction.instantiatorRules
@@ -375,14 +398,10 @@ public class JSR330Module extends AbstractModule {
 						return null;
 					}
 
-					@Override
-					protected boolean isParameterOptional(Parameter p) {
-						return p.isAnnotationPresent(InjectionOptional.class);
-					}
 				});
 	}
 
-	private void addImplementedByConstructionRule(
+	protected void addImplementedByConstructionRule(
 			StandardInjectorConfiguration config) {
 		config.construction.constructionRules
 				.add(new ImplementedByConstructionRuleBase() {
@@ -401,7 +420,7 @@ public class JSR330Module extends AbstractModule {
 				});
 	}
 
-	private void addProvidedByConstructionRule(
+	protected void addProvidedByConstructionRule(
 			StandardInjectorConfiguration config) {
 		config.construction.constructionRules
 				.add(new ProvidedByConstructionRuleBase(Supplier.class) {
