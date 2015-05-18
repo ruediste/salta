@@ -35,6 +35,16 @@ public class DefaultFixedConstructorInstantiationRule implements
 	public Optional<RecipeInstantiator> create(TypeToken<?> typeToken,
 			RecipeCreationContext ctx, Constructor<?> constructor) {
 
+		ArrayList<SupplierRecipe> args = resolveArguments(config, typeToken,
+				ctx, constructor);
+		return Optional.of(createRecipeInstantiator(typeToken, constructor,
+				args));
+
+	}
+
+	public static ArrayList<SupplierRecipe> resolveArguments(
+			StandardInjectorConfiguration config, TypeToken<?> typeToken,
+			RecipeCreationContext ctx, Constructor<?> constructor) {
 		ArrayList<SupplierRecipe> args = new ArrayList<>();
 
 		Parameter[] parameters = constructor.getParameters();
@@ -58,9 +68,7 @@ public class DefaultFixedConstructorInstantiationRule implements
 				}
 			}
 		}
-		return Optional.of(createRecipeInstantiator(typeToken, constructor,
-				args));
-
+		return args;
 	}
 
 	protected FixedConstructorRecipeInstantiator createRecipeInstantiator(
