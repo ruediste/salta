@@ -37,14 +37,14 @@ import com.github.ruediste.salta.jsr330.binder.Binder;
  */
 public interface SaltaModule {
 
-	/**
-	 * Contributes bindings and other configurations for this module to
-	 * {@code binder}.
-	 *
-	 * <p>
-	 * <strong>Do not invoke this method directly</strong> to install
-	 * submodules. Instead use {@link Binder#install(SaltaModule)}, which
-	 * ensures that {@link Provides provider methods} are discovered.
-	 */
-	void configure(Binder binder);
+    /**
+     * Contributes bindings and other configurations for this module to
+     * {@code binder}.
+     *
+     * <p>
+     * <strong>Do not invoke this method directly</strong> to install
+     * submodules. Instead use {@link Binder#install(SaltaModule)}, which
+     * ensures that {@link Provides provider methods} are discovered.
+     */
+    void configure(Binder binder);
 }

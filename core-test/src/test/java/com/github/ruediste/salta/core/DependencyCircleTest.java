@@ -12,61 +12,61 @@ import com.github.ruediste.salta.jsr330.Salta;
 
 public class DependencyCircleTest {
 
-	private Injector injector;
+    private Injector injector;
 
-	static class ConstructorTestClassA {
-		public ConstructorTestClassB b;
+    static class ConstructorTestClassA {
+        public ConstructorTestClassB b;
 
-		ConstructorTestClassA() {
-		}
+        ConstructorTestClassA() {
+        }
 
-		@Inject
-		ConstructorTestClassA(ConstructorTestClassB b) {
-			this.b = b;
+        @Inject
+        ConstructorTestClassA(ConstructorTestClassB b) {
+            this.b = b;
 
-		}
-	}
+        }
+    }
 
-	static class ConstructorTestClassB {
-		public ConstructorTestClassA a;
+    static class ConstructorTestClassB {
+        public ConstructorTestClassA a;
 
-		@Inject
-		ConstructorTestClassB(ConstructorTestClassA a) {
-			this.a = a;
+        @Inject
+        ConstructorTestClassB(ConstructorTestClassA a) {
+            this.a = a;
 
-		}
-	}
+        }
+    }
 
-	static class FieldTestClassA {
-		@Inject
-		public FieldTestClassB b;
+    static class FieldTestClassA {
+        @Inject
+        public FieldTestClassB b;
 
-		@Inject
-		FieldTestClassA() {
-		}
-	}
+        @Inject
+        FieldTestClassA() {
+        }
+    }
 
-	static class FieldTestClassB {
-		@Inject
-		public FieldTestClassA a;
+    static class FieldTestClassB {
+        @Inject
+        public FieldTestClassA a;
 
-		@Inject
-		FieldTestClassB() {
-		}
-	}
+        @Inject
+        FieldTestClassB() {
+        }
+    }
 
-	@Before
-	public void setup() {
-		injector = Salta.createInjector();
-	}
+    @Before
+    public void setup() {
+        injector = Salta.createInjector();
+    }
 
-	@Test(expected = SaltaException.class)
-	public void circularConstructorTest() {
-		injector.getInstance(ConstructorTestClassA.class);
-	}
+    @Test(expected = SaltaException.class)
+    public void circularConstructorTest() {
+        injector.getInstance(ConstructorTestClassA.class);
+    }
 
-	@Test(expected = SaltaException.class)
-	public void circularFieldTest() {
-		injector.getInstance(FieldTestClassA.class);
-	}
+    @Test(expected = SaltaException.class)
+    public void circularFieldTest() {
+        injector.getInstance(FieldTestClassA.class);
+    }
 }

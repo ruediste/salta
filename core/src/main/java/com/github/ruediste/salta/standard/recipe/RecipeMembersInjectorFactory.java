@@ -12,9 +12,9 @@ import com.google.common.reflect.TypeToken;
  */
 public interface RecipeMembersInjectorFactory {
 
-	/**
-	 * Create {@link RecipeMembersInjector}s for the given type
-	 */
-	List<RecipeMembersInjector> createMembersInjectors(
-			RecipeCreationContext ctx, TypeToken<?> type);
+    /**
+     * Create {@link RecipeMembersInjector}s for the given type
+     */
+    List<RecipeMembersInjector> createMembersInjectors(
+            RecipeCreationContext ctx, TypeToken<?> type);
 }

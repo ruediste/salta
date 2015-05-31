@@ -11,44 +11,44 @@ import com.github.ruediste.salta.standard.Stage;
  */
 public class Salta {
 
-	public static Injector createInjector(SaltaModule... modules) {
-		return createInjector(Stage.DEVELOPMENT, modules);
-	}
+    public static Injector createInjector(SaltaModule... modules) {
+        return createInjector(Stage.DEVELOPMENT, modules);
+    }
 
-	/**
-	 * Creates an injector for the given set of modules.
-	 */
-	public static Injector createInjector(Stage stage, SaltaModule... modules) {
-		return createInjector(stage, Arrays.asList(modules));
-	}
+    /**
+     * Creates an injector for the given set of modules.
+     */
+    public static Injector createInjector(Stage stage, SaltaModule... modules) {
+        return createInjector(stage, Arrays.asList(modules));
+    }
 
-	public static Injector createInjector(List<SaltaModule> modules) {
-		return createInjector(Stage.DEVELOPMENT, modules);
-	}
+    public static Injector createInjector(List<SaltaModule> modules) {
+        return createInjector(Stage.DEVELOPMENT, modules);
+    }
 
-	/**
-	 * Creates an injector for the given set of modules.
-	 */
-	public static Injector createInjector(Stage stage, List<SaltaModule> modules) {
-		JSR330InjectorConfiguration config = new JSR330InjectorConfiguration(
-				stage);
-		InjectorImpl injector = new InjectorImpl(config);
+    /**
+     * Creates an injector for the given set of modules.
+     */
+    public static Injector createInjector(Stage stage, List<SaltaModule> modules) {
+        JSR330InjectorConfiguration config = new JSR330InjectorConfiguration(
+                stage);
+        InjectorImpl injector = new InjectorImpl(config);
 
-		Binder binder = new Binder(config, injector);
+        Binder binder = new Binder(config, injector);
 
-		for (SaltaModule module : modules) {
-			binder.install(module);
-		}
+        for (SaltaModule module : modules) {
+            binder.install(module);
+        }
 
-		binder.install(new JSR330Module());
+        binder.install(new JSR330Module());
 
-		binder.close();
+        binder.close();
 
-		config.postProcessModules();
+        config.postProcessModules();
 
-		injector.initialize();
+        injector.initialize();
 
-		return injector;
-	}
+        return injector;
+    }
 
 }

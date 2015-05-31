@@ -9,21 +9,21 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 public interface RecipeCreationContext {
 
-	SupplierRecipe getRecipe(CoreDependencyKey<?> dependency);
+    SupplierRecipe getRecipe(CoreDependencyKey<?> dependency);
 
-	RecipeCompiler getCompiler();
+    RecipeCompiler getCompiler();
 
-	void queueAction(Runnable action);
+    void queueAction(Runnable action);
 
-	/**
-	 * get {@link CoreInjector#recipeLock}
-	 */
-	Object getRecipeLock();
+    /**
+     * get {@link CoreInjector#recipeLock}
+     */
+    Object getRecipeLock();
 
-	<T> T withBinding(Binding binding, Supplier<T> supplier);
+    <T> T withBinding(Binding binding, Supplier<T> supplier);
 
-	Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency);
+    Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency);
 
-	Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(
-			CoreDependencyKey<?> dep);
+    Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(
+            CoreDependencyKey<?> dep);
 }

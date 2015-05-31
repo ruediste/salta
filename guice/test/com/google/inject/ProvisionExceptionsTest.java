@@ -32,138 +32,138 @@ import com.google.inject.name.Names;
  */
 public class ProvisionExceptionsTest extends TestCase {
 
-	public void testConstructorRuntimeException() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bindConstant().annotatedWith(Names.named("runtime")).to(true);
-				bind(Exploder.class).to(Explosion.class);
-				bind(Tracer.class).to(TracerImpl.class);
-			}
-		});
-		try {
-			injector.getInstance(Tracer.class);
-			fail();
-		} catch (SaltaException e) {
-			// Make sure our initial error message gives the user exception.
-			Asserts.assertContains(e.getMessage(), "boom!");
-		}
-	}
+    public void testConstructorRuntimeException() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bindConstant().annotatedWith(Names.named("runtime")).to(true);
+                bind(Exploder.class).to(Explosion.class);
+                bind(Tracer.class).to(TracerImpl.class);
+            }
+        });
+        try {
+            injector.getInstance(Tracer.class);
+            fail();
+        } catch (SaltaException e) {
+            // Make sure our initial error message gives the user exception.
+            Asserts.assertContains(e.getMessage(), "boom!");
+        }
+    }
 
-	public void testConstructorCheckedException() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bindConstant().annotatedWith(Names.named("runtime")).to(false);
-				bind(Exploder.class).to(Explosion.class);
-				bind(Tracer.class).to(TracerImpl.class);
-			}
-		});
-		try {
-			injector.getInstance(Tracer.class);
-			fail();
-		} catch (SaltaException e) {
-			// Make sure our initial error message gives the user exception.
-			Asserts.assertContains(e.getMessage(), "boom!");
-		}
-	}
+    public void testConstructorCheckedException() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bindConstant().annotatedWith(Names.named("runtime")).to(false);
+                bind(Exploder.class).to(Explosion.class);
+                bind(Tracer.class).to(TracerImpl.class);
+            }
+        });
+        try {
+            injector.getInstance(Tracer.class);
+            fail();
+        } catch (SaltaException e) {
+            // Make sure our initial error message gives the user exception.
+            Asserts.assertContains(e.getMessage(), "boom!");
+        }
+    }
 
-	public void testCustomProvidersRuntimeException() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(Exploder.class).toProvider(new Provider<Exploder>() {
-					@Override
-					public Exploder get() {
-						return Explosion.createRuntime();
-					}
-				});
-				bind(Tracer.class).to(TracerImpl.class);
-			}
-		});
-		try {
-			injector.getInstance(Tracer.class);
-			fail();
-		} catch (SaltaException e) {
-			// Make sure our initial error message gives the user exception.
-			Asserts.assertContains(e.getMessage(), "boom!");
-		}
-	}
+    public void testCustomProvidersRuntimeException() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(Exploder.class).toProvider(new Provider<Exploder>() {
+                    @Override
+                    public Exploder get() {
+                        return Explosion.createRuntime();
+                    }
+                });
+                bind(Tracer.class).to(TracerImpl.class);
+            }
+        });
+        try {
+            injector.getInstance(Tracer.class);
+            fail();
+        } catch (SaltaException e) {
+            // Make sure our initial error message gives the user exception.
+            Asserts.assertContains(e.getMessage(), "boom!");
+        }
+    }
 
-	public void testProviderMethodRuntimeException() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(Tracer.class).to(TracerImpl.class);
-			}
+    public void testProviderMethodRuntimeException() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(Tracer.class).to(TracerImpl.class);
+            }
 
-			@Provides
-			Exploder exploder() {
-				return Explosion.createRuntime();
-			}
-		});
-		try {
-			injector.getInstance(Tracer.class);
-			fail();
-		} catch (SaltaException e) {
-			// Make sure our initial error message gives the user exception.
-			Asserts.assertContains(e.getMessage(), "boom!");
-		}
-	}
+            @Provides
+            Exploder exploder() {
+                return Explosion.createRuntime();
+            }
+        });
+        try {
+            injector.getInstance(Tracer.class);
+            fail();
+        } catch (SaltaException e) {
+            // Make sure our initial error message gives the user exception.
+            Asserts.assertContains(e.getMessage(), "boom!");
+        }
+    }
 
-	public void testProviderMethodCheckedException() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(Tracer.class).to(TracerImpl.class);
-			}
+    public void testProviderMethodCheckedException() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(Tracer.class).to(TracerImpl.class);
+            }
 
-			@Provides
-			Exploder exploder() throws IOException {
-				return Explosion.createChecked();
-			}
-		});
-		try {
-			injector.getInstance(Tracer.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("boom!"))
-				throw e;
-		}
-	}
+            @Provides
+            Exploder exploder() throws IOException {
+                return Explosion.createChecked();
+            }
+        });
+        try {
+            injector.getInstance(Tracer.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("boom!"))
+                throw e;
+        }
+    }
 
-	private static interface Exploder {
-	}
+    private static interface Exploder {
+    }
 
-	public static class Explosion implements Exploder {
-		@Inject
-		public Explosion(@Named("runtime") boolean runtime) throws IOException {
-			if (runtime) {
-				throw new IllegalStateException("boom!");
-			} else {
-				throw new IOException("boom!");
-			}
-		}
+    public static class Explosion implements Exploder {
+        @Inject
+        public Explosion(@Named("runtime") boolean runtime) throws IOException {
+            if (runtime) {
+                throw new IllegalStateException("boom!");
+            } else {
+                throw new IOException("boom!");
+            }
+        }
 
-		public static Explosion createRuntime() {
-			try {
-				return new Explosion(true);
-			} catch (IOException iox) {
-				throw new RuntimeException();
-			}
-		}
+        public static Explosion createRuntime() {
+            try {
+                return new Explosion(true);
+            } catch (IOException iox) {
+                throw new RuntimeException();
+            }
+        }
 
-		public static Explosion createChecked() throws IOException {
-			return new Explosion(false);
-		}
-	}
+        public static Explosion createChecked() throws IOException {
+            return new Explosion(false);
+        }
+    }
 
-	private static interface Tracer {
-	}
+    private static interface Tracer {
+    }
 
-	private static class TracerImpl implements Tracer {
-		@Inject
-		TracerImpl(Exploder explosion) {
-		}
-	}
+    private static class TracerImpl implements Tracer {
+        @Inject
+        TracerImpl(Exploder explosion) {
+        }
+    }
 }

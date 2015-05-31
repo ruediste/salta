@@ -9,27 +9,27 @@ import com.google.inject.Scope;
 
 public class GuiceScopeAdapter implements ScopeHandler {
 
-	private Scope scope;
+    private Scope scope;
 
-	public GuiceScopeAdapter(Scope scope) {
-		this.scope = scope;
-	}
+    public GuiceScopeAdapter(Scope scope) {
+        this.scope = scope;
+    }
 
-	@Override
-	public Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-			CoreDependencyKey<?> requestedKey) {
-		return doScope(supplier, binding, requestedKey);
-	}
+    @Override
+    public Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
+            CoreDependencyKey<?> requestedKey) {
+        return doScope(supplier, binding, requestedKey);
+    }
 
-	@SuppressWarnings("unchecked")
-	private <T> Supplier<T> doScope(Supplier<Object> supplier, Binding binding,
-			CoreDependencyKey<?> requestedKey) {
-		return scope.scope(binding, (CoreDependencyKey<T>) requestedKey,
-				() -> (T) supplier.get())::get;
-	}
+    @SuppressWarnings("unchecked")
+    private <T> Supplier<T> doScope(Supplier<Object> supplier, Binding binding,
+            CoreDependencyKey<?> requestedKey) {
+        return scope.scope(binding, (CoreDependencyKey<T>) requestedKey,
+                () -> (T) supplier.get())::get;
+    }
 
-	@Override
-	public String toString() {
-		return scope.toString();
-	}
+    @Override
+    public String toString() {
+        return scope.toString();
+    }
 }

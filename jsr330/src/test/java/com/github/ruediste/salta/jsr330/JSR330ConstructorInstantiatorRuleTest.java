@@ -11,59 +11,59 @@ import com.github.ruediste.salta.core.SaltaException;
 
 public class JSR330ConstructorInstantiatorRuleTest {
 
-	private Injector injector;
+    private Injector injector;
 
-	private static class NoParameter {
-		// public NoParameter() {
-		// }
-	}
+    private static class NoParameter {
+        // public NoParameter() {
+        // }
+    }
 
-	static class OneParameter {
-		private NoParameter noParameter;
+    static class OneParameter {
+        private NoParameter noParameter;
 
-		@Inject
-		public OneParameter(NoParameter noParameter) {
-			this.noParameter = noParameter;
+        @Inject
+        public OneParameter(NoParameter noParameter) {
+            this.noParameter = noParameter;
 
-		}
-	}
+        }
+    }
 
-	static class Ambigous {
-		@SuppressWarnings("unused")
-		private NoParameter noParameter;
+    static class Ambigous {
+        @SuppressWarnings("unused")
+        private NoParameter noParameter;
 
-		@Inject
-		public Ambigous() {
+        @Inject
+        public Ambigous() {
 
-		}
+        }
 
-		@Inject
-		public Ambigous(NoParameter noParameter) {
-			this.noParameter = noParameter;
+        @Inject
+        public Ambigous(NoParameter noParameter) {
+            this.noParameter = noParameter;
 
-		}
-	}
+        }
+    }
 
-	@Before
-	public void before() {
-		injector = Salta.createInjector();
-	}
+    @Before
+    public void before() {
+        injector = Salta.createInjector();
+    }
 
-	@Test
-	public void noParameter() {
-		NoParameter instance = injector.getInstance(NoParameter.class);
-		assertNotNull(instance);
-	}
+    @Test
+    public void noParameter() {
+        NoParameter instance = injector.getInstance(NoParameter.class);
+        assertNotNull(instance);
+    }
 
-	@Test
-	public void oneParameter() {
-		OneParameter instance = injector.getInstance(OneParameter.class);
-		assertNotNull(instance);
-		assertNotNull(instance.noParameter);
-	}
+    @Test
+    public void oneParameter() {
+        OneParameter instance = injector.getInstance(OneParameter.class);
+        assertNotNull(instance);
+        assertNotNull(instance.noParameter);
+    }
 
-	@Test(expected = SaltaException.class)
-	public void ambigous() {
-		injector.getInstance(Ambigous.class);
-	}
+    @Test(expected = SaltaException.class)
+    public void ambigous() {
+        injector.getInstance(Ambigous.class);
+    }
 }

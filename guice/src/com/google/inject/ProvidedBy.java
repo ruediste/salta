@@ -31,8 +31,8 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 public @interface ProvidedBy {
 
-  /**
-   * The implementation type.
-   */
-  Class<? extends Provider<?>> value();
+    /**
+     * The implementation type.
+     */
+    Class<? extends Provider<?>> value();
 }

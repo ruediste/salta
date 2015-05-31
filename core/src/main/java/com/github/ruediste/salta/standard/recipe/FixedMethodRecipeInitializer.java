@@ -9,20 +9,20 @@ import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 public class FixedMethodRecipeInitializer extends
-		FixedMethodInvocationFunctionRecipe implements RecipeInitializer {
+        FixedMethodInvocationFunctionRecipe implements RecipeInitializer {
 
-	public FixedMethodRecipeInitializer(Method method,
-			List<SupplierRecipe> argumentRecipes) {
-		super(method, argumentRecipes);
-	}
+    public FixedMethodRecipeInitializer(Method method,
+            List<SupplierRecipe> argumentRecipes) {
+        super(method, argumentRecipes);
+    }
 
-	@Override
-	public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext compilationContext) {
-		mv.dup();
-		Class<?> returnType = super
-				.compileImpl(argType, mv, compilationContext);
-		compilationContext.pop(returnType);
-		return argType;
-	}
+    @Override
+    public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
+            MethodCompilationContext compilationContext) {
+        mv.dup();
+        Class<?> returnType = super
+                .compileImpl(argType, mv, compilationContext);
+        compilationContext.pop(returnType);
+        return argType;
+    }
 }

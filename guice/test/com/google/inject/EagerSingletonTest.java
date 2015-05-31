@@ -23,42 +23,42 @@ import junit.framework.TestCase;
  */
 public class EagerSingletonTest extends TestCase {
 
-	@Override
-	public void setUp() {
-		A.instanceCount = 0;
-		B.instanceCount = 0;
-		C.instanceCount = 0;
-	}
+    @Override
+    public void setUp() {
+        A.instanceCount = 0;
+        B.instanceCount = 0;
+        C.instanceCount = 0;
+    }
 
-	public void testJustInTimeSingletonsAreNotEager() {
-		Injector injector = Guice.createInjector(Stage.PRODUCTION);
-		injector.getProvider(B.class);
-		assertEquals(0, B.instanceCount);
-	}
+    public void testJustInTimeSingletonsAreNotEager() {
+        Injector injector = Guice.createInjector(Stage.PRODUCTION);
+        injector.getProvider(B.class);
+        assertEquals(0, B.instanceCount);
+    }
 
-	@Singleton
-	static class A {
-		static int instanceCount = 0;
-		int instanceId = instanceCount++;
+    @Singleton
+    static class A {
+        static int instanceCount = 0;
+        int instanceId = instanceCount++;
 
-		@Inject
-		A(Injector injector) {
-			injector.getProvider(B.class);
-		}
-	}
+        @Inject
+        A(Injector injector) {
+            injector.getProvider(B.class);
+        }
+    }
 
-	@Singleton
-	static class B {
-		static int instanceCount = 0;
-		int instanceId = instanceCount++;
-	}
+    @Singleton
+    static class B {
+        static int instanceCount = 0;
+        int instanceId = instanceCount++;
+    }
 
-	@Singleton
-	static class C implements D {
-		static int instanceCount = 0;
-		int instanceId = instanceCount++;
-	}
+    @Singleton
+    static class C implements D {
+        static int instanceCount = 0;
+        int instanceId = instanceCount++;
+    }
 
-	private static interface D {
-	}
+    private static interface D {
+    }
 }

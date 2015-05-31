@@ -16,48 +16,48 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 public class ScopeImpl implements Scope {
 
-	private ScopeHandler handler;
+    private ScopeHandler handler;
 
-	public interface ScopeHandler {
-		/**
-		 * Scope the given binding
-		 * 
-		 * @param supplier
-		 *            supplier of the unscoped instance
-		 * @param binding
-		 *            Binding beeing scoped. Use this as key to identify
-		 *            instances.
-		 * @param requestedKey
-		 *            Key beeing requested. Be aware that the same binding can
-		 *            be requested using different keys.
-		 * @return
-		 */
-		Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-				CoreDependencyKey<?> requestedKey);
-	}
+    public interface ScopeHandler {
+        /**
+         * Scope the given binding
+         * 
+         * @param supplier
+         *            supplier of the unscoped instance
+         * @param binding
+         *            Binding beeing scoped. Use this as key to identify
+         *            instances.
+         * @param requestedKey
+         *            Key beeing requested. Be aware that the same binding can
+         *            be requested using different keys.
+         * @return
+         */
+        Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
+                CoreDependencyKey<?> requestedKey);
+    }
 
-	public ScopeImpl(ScopeHandler handler) {
-		this.handler = handler;
-	}
+    public ScopeImpl(ScopeHandler handler) {
+        this.handler = handler;
+    }
 
-	@Override
-	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
-			Binding binding, CoreDependencyKey<?> requestedKey) {
-		CompiledSupplier compilerInnerRecipe = ctx.getCompiler()
-				.compileSupplier(binding.getOrCreateRecipe(ctx));
+    @Override
+    public SupplierRecipe createRecipe(RecipeCreationContext ctx,
+            Binding binding, CoreDependencyKey<?> requestedKey) {
+        CompiledSupplier compilerInnerRecipe = ctx.getCompiler()
+                .compileSupplier(binding.getOrCreateRecipe(ctx));
 
-		Supplier<Object> scoped = handler.scope(
-				compilerInnerRecipe::getNoThrow, binding, requestedKey);
-		return new SupplierRecipe() {
+        Supplier<Object> scoped = handler.scope(
+                compilerInnerRecipe::getNoThrow, binding, requestedKey);
+        return new SupplierRecipe() {
 
-			@Override
-			protected Class<?> compileImpl(GeneratorAdapter mv,
-					MethodCompilationContext ctx) {
-				ctx.addFieldAndLoad(Supplier.class, scoped);
-				mv.invokeInterface(Type.getType(Supplier.class),
-						Method.getMethod("Object get()"));
-				return Object.class;
-			}
-		};
-	}
+            @Override
+            protected Class<?> compileImpl(GeneratorAdapter mv,
+                    MethodCompilationContext ctx) {
+                ctx.addFieldAndLoad(Supplier.class, scoped);
+                mv.invokeInterface(Type.getType(Supplier.class),
+                        Method.getMethod("Object get()"));
+                return Object.class;
+            }
+        };
+    }
 }

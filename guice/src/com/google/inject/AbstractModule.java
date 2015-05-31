@@ -37,12 +37,12 @@ import com.google.inject.spi.ProvisionListener;
  *
  * <pre>
  * public class MyModule extends AbstractModule {
- * 	protected void configure() {
- * 		bind(Service.class).to(ServiceImpl.class).in(Singleton.class);
- * 		bind(CreditCardPaymentService.class);
- * 		bind(PaymentService.class).to(CreditCardPaymentService.class);
- * 		bindConstant().annotatedWith(Names.named(&quot;port&quot;)).to(8080);
- * 	}
+ *     protected void configure() {
+ *         bind(Service.class).to(ServiceImpl.class).in(Singleton.class);
+ *         bind(CreditCardPaymentService.class);
+ *         bind(PaymentService.class).to(CreditCardPaymentService.class);
+ *         bindConstant().annotatedWith(Names.named(&quot;port&quot;)).to(8080);
+ *     }
  * }
  * </pre>
  *
@@ -50,184 +50,184 @@ import com.google.inject.spi.ProvisionListener;
  */
 public abstract class AbstractModule implements Module {
 
-	Binder binder;
+    Binder binder;
 
-	@Override
-	public final synchronized void configure(Binder binder) {
-		checkState(this.binder == null, "Re-entry is not allowed.");
+    @Override
+    public final synchronized void configure(Binder binder) {
+        checkState(this.binder == null, "Re-entry is not allowed.");
 
-		this.binder = checkNotNull(binder, "binder");
-		try {
-			configure();
-		} finally {
-			this.binder = null;
-		}
-	}
+        this.binder = checkNotNull(binder, "binder");
+        try {
+            configure();
+        } finally {
+            this.binder = null;
+        }
+    }
 
-	/**
-	 * Configures a {@link Binder} via the exposed methods.
-	 */
-	protected abstract void configure();
+    /**
+     * Configures a {@link Binder} via the exposed methods.
+     */
+    protected abstract void configure();
 
-	/**
-	 * Gets direct access to the underlying {@code Binder}.
-	 */
-	protected Binder binder() {
-		checkState(binder != null,
-				"The binder can only be used inside configure()");
-		return binder;
-	}
+    /**
+     * Gets direct access to the underlying {@code Binder}.
+     */
+    protected Binder binder() {
+        checkState(binder != null,
+                "The binder can only be used inside configure()");
+        return binder;
+    }
 
-	/**
-	 * @see Binder#bindScope(Class, Scope)
-	 */
-	protected void bindScope(Class<? extends Annotation> scopeAnnotation,
-			Scope scope) {
-		binder().bindScope(scopeAnnotation, scope);
-	}
+    /**
+     * @see Binder#bindScope(Class, Scope)
+     */
+    protected void bindScope(Class<? extends Annotation> scopeAnnotation,
+            Scope scope) {
+        binder().bindScope(scopeAnnotation, scope);
+    }
 
-	/**
-	 * @see Binder#bind(Key)
-	 */
-	protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
-		return binder().bind(key);
-	}
+    /**
+     * @see Binder#bind(Key)
+     */
+    protected <T> LinkedBindingBuilder<T> bind(Key<T> key) {
+        return binder().bind(key);
+    }
 
-	/**
-	 * @see Binder#bind(TypeLiteral)
-	 */
-	protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
-		return binder().bind(typeLiteral);
-	}
+    /**
+     * @see Binder#bind(TypeLiteral)
+     */
+    protected <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
+        return binder().bind(typeLiteral);
+    }
 
-	/**
-	 * @see Binder#bind(Class)
-	 */
-	protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-		return binder().bind(clazz);
-	}
+    /**
+     * @see Binder#bind(Class)
+     */
+    protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
+        return binder().bind(clazz);
+    }
 
-	/**
-	 * @see Binder#bindConstant()
-	 */
-	protected AnnotatedConstantBindingBuilder bindConstant() {
-		return binder().bindConstant();
-	}
+    /**
+     * @see Binder#bindConstant()
+     */
+    protected AnnotatedConstantBindingBuilder bindConstant() {
+        return binder().bindConstant();
+    }
 
-	/**
-	 * @see Binder#install(Module)
-	 */
-	protected void install(Module module) {
-		binder().install(module);
-	}
+    /**
+     * @see Binder#install(Module)
+     */
+    protected void install(Module module) {
+        binder().install(module);
+    }
 
-	/**
-	 * @see Binder#addError(String, Object[])
-	 */
-	protected void addError(String message, Object... arguments) {
-		binder().addError(message, arguments);
-	}
+    /**
+     * @see Binder#addError(String, Object[])
+     */
+    protected void addError(String message, Object... arguments) {
+        binder().addError(message, arguments);
+    }
 
-	/**
-	 * @see Binder#addError(Throwable)
-	 */
-	protected void addError(Throwable t) {
-		binder().addError(t);
-	}
+    /**
+     * @see Binder#addError(Throwable)
+     */
+    protected void addError(Throwable t) {
+        binder().addError(t);
+    }
 
-	/**
-	 * @see Binder#addError(Message)
-	 * @since 2.0
-	 */
-	protected void addError(Message message) {
-		binder().addError(message);
-	}
+    /**
+     * @see Binder#addError(Message)
+     * @since 2.0
+     */
+    protected void addError(Message message) {
+        binder().addError(message);
+    }
 
-	/**
-	 * @see Binder#requestInjection(Object)
-	 * @since 2.0
-	 */
-	protected void requestInjection(Object instance) {
-		binder().requestInjection(instance);
-	}
+    /**
+     * @see Binder#requestInjection(Object)
+     * @since 2.0
+     */
+    protected void requestInjection(Object instance) {
+        binder().requestInjection(instance);
+    }
 
-	/**
-	 * @see Binder#requestStaticInjection(Class[])
-	 */
-	protected void requestStaticInjection(Class<?>... types) {
-		binder().requestStaticInjection(types);
-	}
+    /**
+     * @see Binder#requestStaticInjection(Class[])
+     */
+    protected void requestStaticInjection(Class<?>... types) {
+        binder().requestStaticInjection(types);
+    }
 
-	/**
-	 * Adds a dependency from this module to {@code key}. When the injector is
-	 * created, Guice will report an error if {@code key} cannot be injected.
-	 * Note that this requirement may be satisfied by implicit binding, such as
-	 * a public no-arguments constructor.
-	 *
-	 * @since 2.0
-	 */
-	protected void requireBinding(Key<?> key) {
-		binder().getProvider(key);
-	}
+    /**
+     * Adds a dependency from this module to {@code key}. When the injector is
+     * created, Guice will report an error if {@code key} cannot be injected.
+     * Note that this requirement may be satisfied by implicit binding, such as
+     * a public no-arguments constructor.
+     *
+     * @since 2.0
+     */
+    protected void requireBinding(Key<?> key) {
+        binder().getProvider(key);
+    }
 
-	/**
-	 * Adds a dependency from this module to {@code type}. When the injector is
-	 * created, Guice will report an error if {@code type} cannot be injected.
-	 * Note that this requirement may be satisfied by implicit binding, such as
-	 * a public no-arguments constructor.
-	 *
-	 * @since 2.0
-	 */
-	protected void requireBinding(Class<?> type) {
-		binder().getProvider(type);
-	}
+    /**
+     * Adds a dependency from this module to {@code type}. When the injector is
+     * created, Guice will report an error if {@code type} cannot be injected.
+     * Note that this requirement may be satisfied by implicit binding, such as
+     * a public no-arguments constructor.
+     *
+     * @since 2.0
+     */
+    protected void requireBinding(Class<?> type) {
+        binder().getProvider(type);
+    }
 
-	/**
-	 * @see Binder#getProvider(Key)
-	 * @since 2.0
-	 */
-	protected <T> Provider<T> getProvider(Key<T> key) {
-		return binder().getProvider(key);
-	}
+    /**
+     * @see Binder#getProvider(Key)
+     * @since 2.0
+     */
+    protected <T> Provider<T> getProvider(Key<T> key) {
+        return binder().getProvider(key);
+    }
 
-	/**
-	 * @see Binder#getProvider(Class)
-	 * @since 2.0
-	 */
-	protected <T> Provider<T> getProvider(Class<T> type) {
-		return binder().getProvider(type);
-	}
+    /**
+     * @see Binder#getProvider(Class)
+     * @since 2.0
+     */
+    protected <T> Provider<T> getProvider(Class<T> type) {
+        return binder().getProvider(type);
+    }
 
-	/**
-	 * @see Binder#currentStage()
-	 * @since 2.0
-	 */
-	protected Stage currentStage() {
-		return binder().currentStage();
-	}
+    /**
+     * @see Binder#currentStage()
+     * @since 2.0
+     */
+    protected Stage currentStage() {
+        return binder().currentStage();
+    }
 
-	/**
-	 * @see Binder#getMembersInjector(Class)
-	 * @since 2.0
-	 */
-	protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		return binder().getMembersInjector(type);
-	}
+    /**
+     * @see Binder#getMembersInjector(Class)
+     * @since 2.0
+     */
+    protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+        return binder().getMembersInjector(type);
+    }
 
-	/**
-	 * @see Binder#getMembersInjector(TypeLiteral)
-	 * @since 2.0
-	 */
-	protected <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
-		return binder().getMembersInjector(type);
-	}
+    /**
+     * @see Binder#getMembersInjector(TypeLiteral)
+     * @since 2.0
+     */
+    protected <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> type) {
+        return binder().getMembersInjector(type);
+    }
 
-	/**
-	 * @see Binder#bindListener(Matcher, ProvisionListener...)
-	 * @since 4.0
-	 */
-	protected void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
-			ProvisionListener... listener) {
-		binder().bindListener(typeMatcher, listener);
-	}
+    /**
+     * @see Binder#bindListener(Matcher, ProvisionListener...)
+     * @since 4.0
+     */
+    protected void bindListener(Matcher<? super TypeToken<?>> typeMatcher,
+            ProvisionListener... listener) {
+        binder().bindListener(typeMatcher, listener);
+    }
 }

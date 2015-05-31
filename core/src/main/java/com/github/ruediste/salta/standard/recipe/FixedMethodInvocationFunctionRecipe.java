@@ -23,88 +23,88 @@ import com.google.common.base.Preconditions;
 
 public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
 
-	private Method method;
-	private List<SupplierRecipe> argumentRecipes;
+    private Method method;
+    private List<SupplierRecipe> argumentRecipes;
 
-	public FixedMethodInvocationFunctionRecipe(Method method,
-			List<SupplierRecipe> argumentRecipes) {
-		Preconditions.checkArgument(
-				argumentRecipes.stream().allMatch(x -> x != null),
-				"argument recipe is null");
-		this.method = method;
-		this.argumentRecipes = argumentRecipes;
-		method.setAccessible(true);
-	}
+    public FixedMethodInvocationFunctionRecipe(Method method,
+            List<SupplierRecipe> argumentRecipes) {
+        Preconditions.checkArgument(
+                argumentRecipes.stream().allMatch(x -> x != null),
+                "argument recipe is null");
+        this.method = method;
+        this.argumentRecipes = argumentRecipes;
+        method.setAccessible(true);
+    }
 
-	@Override
-	public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext ctx) {
+    @Override
+    public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
+            MethodCompilationContext ctx) {
 
-		if (Accessibility.isMethodPublic(method))
-			return compileDirect(argType, mv, ctx);
-		else
-			return compileDynamic(argType, mv, ctx);
-	}
+        if (Accessibility.isMethodPublic(method))
+            return compileDirect(argType, mv, ctx);
+        else
+            return compileDynamic(argType, mv, ctx);
+    }
 
-	private Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext ctx) {
+    private Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
+            MethodCompilationContext ctx) {
 
-		// cast receiver
-		argType = ctx.castToPublic(argType, method.getDeclaringClass());
+        // cast receiver
+        argType = ctx.castToPublic(argType, method.getDeclaringClass());
 
-		// push dependencies as an array
-		for (int i = 0; i < argumentRecipes.size(); i++) {
-			Class<?> t = argumentRecipes.get(i).compile(ctx);
-			ctx.castToPublic(t, method.getParameterTypes()[i]);
-		}
+        // push dependencies as an array
+        for (int i = 0; i < argumentRecipes.size(); i++) {
+            Class<?> t = argumentRecipes.get(i).compile(ctx);
+            ctx.castToPublic(t, method.getParameterTypes()[i]);
+        }
 
-		if (method.getDeclaringClass().isInterface())
-			mv.invokeInterface(Type.getType(method.getDeclaringClass()),
-					org.objectweb.asm.commons.Method.getMethod(method));
-		else
-			mv.invokeVirtual(Type.getType(method.getDeclaringClass()),
-					org.objectweb.asm.commons.Method.getMethod(method));
+        if (method.getDeclaringClass().isInterface())
+            mv.invokeInterface(Type.getType(method.getDeclaringClass()),
+                    org.objectweb.asm.commons.Method.getMethod(method));
+        else
+            mv.invokeVirtual(Type.getType(method.getDeclaringClass()),
+                    org.objectweb.asm.commons.Method.getMethod(method));
 
-		return ctx.castToPublic(method.getReturnType(), method.getReturnType());
-	}
+        return ctx.castToPublic(method.getReturnType(), method.getReturnType());
+    }
 
-	private Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext ctx) {
-		// cast receiver
-		Type[] argTypes = new Type[argumentRecipes.size() + 1];
-		argType = ctx.castToPublic(argType, method.getDeclaringClass());
-		argTypes[0] = Type.getType(argType);
+    private Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
+            MethodCompilationContext ctx) {
+        // cast receiver
+        Type[] argTypes = new Type[argumentRecipes.size() + 1];
+        argType = ctx.castToPublic(argType, method.getDeclaringClass());
+        argTypes[0] = Type.getType(argType);
 
-		// push arguments
-		for (int i = 0; i < argumentRecipes.size(); i++) {
-			Class<?> t = argumentRecipes.get(i).compile(ctx);
-			argTypes[i + 1] = Type.getType(ctx.castToPublic(t,
-					method.getParameterTypes()[i]));
-		}
+        // push arguments
+        for (int i = 0; i < argumentRecipes.size(); i++) {
+            Class<?> t = argumentRecipes.get(i).compile(ctx);
+            argTypes[i + 1] = Type.getType(ctx.castToPublic(t,
+                    method.getParameterTypes()[i]));
+        }
 
-		String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;";
+        String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;";
 
-		// call
-		Handle bsm = new Handle(
-				H_INVOKESTATIC,
-				Type.getInternalName(FixedMethodInvocationFunctionRecipe.class),
-				"bootstrap", bootstrapDesc);
+        // call
+        Handle bsm = new Handle(
+                H_INVOKESTATIC,
+                Type.getInternalName(FixedMethodInvocationFunctionRecipe.class),
+                "bootstrap", bootstrapDesc);
 
-		Class<?> returnType = ctx.publicSuperType(method.getReturnType());
+        Class<?> returnType = ctx.publicSuperType(method.getReturnType());
 
-		mv.invokeDynamic(method.getName(),
-				Type.getMethodDescriptor(Type.getType(returnType), argTypes),
-				bsm, ctx.addField(Method.class, method).getName());
+        mv.invokeDynamic(method.getName(),
+                Type.getMethodDescriptor(Type.getType(returnType), argTypes),
+                bsm, ctx.addField(Method.class, method).getName());
 
-		return returnType;
-	}
+        return returnType;
+    }
 
-	public static CallSite bootstrap(Lookup lookup, String methodName,
-			MethodType type, String methodFieldName) throws Exception {
-		Field field = lookup.lookupClass().getField(methodFieldName);
-		field.setAccessible(true);
-		Method method = (Method) field.get(null);
-		MethodHandle handle = lookup.unreflect(method);
-		return new ConstantCallSite(handle.asType(type));
-	}
+    public static CallSite bootstrap(Lookup lookup, String methodName,
+            MethodType type, String methodFieldName) throws Exception {
+        Field field = lookup.lookupClass().getField(methodFieldName);
+        field.setAccessible(true);
+        Method method = (Method) field.get(null);
+        MethodHandle handle = lookup.unreflect(method);
+        return new ConstantCallSite(handle.asType(type));
+    }
 }

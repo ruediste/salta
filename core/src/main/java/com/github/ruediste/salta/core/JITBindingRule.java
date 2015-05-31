@@ -8,5 +8,5 @@ import com.github.ruediste.salta.standard.StandardInjector;
  */
 public interface JITBindingRule {
 
-	JITBinding apply(JITBindingKey key);
+    JITBinding apply(JITBindingKey key);
 }

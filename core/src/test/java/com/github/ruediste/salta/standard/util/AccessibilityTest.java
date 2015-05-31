@@ -6,8 +6,8 @@ import org.junit.Test;
 
 public class AccessibilityTest {
 
-	@Test
-	public void primitivesArePublic() {
-		assertEquals(true, Accessibility.isClassPublic(int.class));
-	}
+    @Test
+    public void primitivesArePublic() {
+        assertEquals(true, Accessibility.isClassPublic(int.class));
+    }
 }

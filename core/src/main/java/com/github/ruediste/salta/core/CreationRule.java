@@ -18,18 +18,18 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public interface CreationRule {
 
-	Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key, CoreInjector injector);
+    Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+            CoreDependencyKey<?> key, CoreInjector injector);
 
-	static CreationRule combine(Iterable<CreationRule> rules) {
-		return (key, injector) -> {
-			for (CreationRule rule : rules) {
-				Optional<Function<RecipeCreationContext, SupplierRecipe>> result = rule
-						.apply(key, injector);
-				if (result.isPresent())
-					return result;
-			}
-			return Optional.empty();
-		};
-	}
+    static CreationRule combine(Iterable<CreationRule> rules) {
+        return (key, injector) -> {
+            for (CreationRule rule : rules) {
+                Optional<Function<RecipeCreationContext, SupplierRecipe>> result = rule
+                        .apply(key, injector);
+                if (result.isPresent())
+                    return result;
+            }
+            return Optional.empty();
+        };
+    }
 }

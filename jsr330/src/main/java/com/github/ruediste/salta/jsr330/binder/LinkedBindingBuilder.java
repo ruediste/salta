@@ -14,64 +14,64 @@ import com.google.common.reflect.TypeToken;
  */
 public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	public ScopedBindingBuilder<T> to(Class<? extends T> implementation);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    public ScopedBindingBuilder<T> to(Class<? extends T> implementation);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	public ScopedBindingBuilder<T> to(TypeToken<? extends T> implementation);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    public ScopedBindingBuilder<T> to(TypeToken<? extends T> implementation);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	public ScopedBindingBuilder<T> to(
-			CoreDependencyKey<? extends T> implementation);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    public ScopedBindingBuilder<T> to(
+            CoreDependencyKey<? extends T> implementation);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	public void toInstance(T instance);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    public void toInstance(T instance);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 *
-	 */
-	public ScopedBindingBuilder<T> toProvider(Provider<? extends T> provider);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     *
+     */
+    public ScopedBindingBuilder<T> toProvider(Provider<? extends T> provider);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	public ScopedBindingBuilder<T> toProvider(
-			Class<? extends Provider<? extends T>> providerType);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    public ScopedBindingBuilder<T> toProvider(
+            Class<? extends Provider<? extends T>> providerType);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	public ScopedBindingBuilder<T> toProvider(
-			TypeToken<? extends Provider<? extends T>> providerType);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    public ScopedBindingBuilder<T> toProvider(
+            TypeToken<? extends Provider<? extends T>> providerType);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	public <P extends Provider<? extends T>> ScopedBindingBuilder<T> toProvider(
-			CoreDependencyKey<P> providerKey);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    public <P extends Provider<? extends T>> ScopedBindingBuilder<T> toProvider(
+            CoreDependencyKey<P> providerKey);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 * 
-	 * @since 3.0
-	 */
-	public <S extends T> ScopedBindingBuilder<T> toConstructor(
-			Constructor<S> constructor);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     * 
+     * @since 3.0
+     */
+    public <S extends T> ScopedBindingBuilder<T> toConstructor(
+            Constructor<S> constructor);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 * 
-	 * @since 3.0
-	 */
-	public <S extends T> ScopedBindingBuilder<T> toConstructor(
-			Constructor<S> constructor, TypeToken<? extends S> type);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     * 
+     * @since 3.0
+     */
+    public <S extends T> ScopedBindingBuilder<T> toConstructor(
+            Constructor<S> constructor, TypeToken<? extends S> type);
 }

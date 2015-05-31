@@ -8,14 +8,14 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 final class DefaultScope implements Scope {
 
-	@Override
-	public String toString() {
-		return "Default";
-	}
+    @Override
+    public String toString() {
+        return "Default";
+    }
 
-	@Override
-	public SupplierRecipe createRecipe(RecipeCreationContext ctx,
-			Binding binding, CoreDependencyKey<?> requestedKey) {
-		return binding.getOrCreateRecipe(ctx);
-	}
+    @Override
+    public SupplierRecipe createRecipe(RecipeCreationContext ctx,
+            Binding binding, CoreDependencyKey<?> requestedKey) {
+        return binding.getOrCreateRecipe(ctx);
+    }
 }

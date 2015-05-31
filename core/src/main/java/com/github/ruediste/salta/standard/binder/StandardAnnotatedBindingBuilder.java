@@ -7,16 +7,17 @@ import java.lang.annotation.Annotation;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface StandardAnnotatedBindingBuilder<T> extends StandardLinkedBindingBuilder<T> {
+public interface StandardAnnotatedBindingBuilder<T> extends
+        StandardLinkedBindingBuilder<T> {
 
-	/**
-	 * See the EDSL examples at {@link StandardBinder}.
-	 */
-	StandardLinkedBindingBuilder<T> annotatedWith(
-			Class<? extends Annotation> availableAnnotationType);
+    /**
+     * See the EDSL examples at {@link StandardBinder}.
+     */
+    StandardLinkedBindingBuilder<T> annotatedWith(
+            Class<? extends Annotation> availableAnnotationType);
 
-	/**
-	 * See the EDSL examples at {@link StandardBinder}.
-	 */
-	StandardLinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation);
+    /**
+     * See the EDSL examples at {@link StandardBinder}.
+     */
+    StandardLinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation);
 }

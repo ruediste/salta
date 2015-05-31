@@ -13,20 +13,20 @@ import com.github.ruediste.salta.core.Scope;
  */
 public interface StandardScopedBindingBuilder<T> {
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	void in(Class<? extends Annotation> scopeAnnotation);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    void in(Class<? extends Annotation> scopeAnnotation);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	void in(Scope scope);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    void in(Scope scope);
 
-	/**
-	 * Instructs the injector to eagerly initialize this singleton-scoped
-	 * binding upon creation. Useful for application initialization logic. See
-	 * the EDSL examples at {@link Binder}.
-	 */
-	void asEagerSingleton();
+    /**
+     * Instructs the injector to eagerly initialize this singleton-scoped
+     * binding upon creation. Useful for application initialization logic. See
+     * the EDSL examples at {@link Binder}.
+     */
+    void asEagerSingleton();
 }

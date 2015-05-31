@@ -29,72 +29,72 @@ import com.google.inject.TypeLiteral;
  */
 public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder {
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 */
-	ScopedBindingBuilder to(Class<? extends T> implementation);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    ScopedBindingBuilder to(Class<? extends T> implementation);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 */
-	ScopedBindingBuilder to(TypeLiteral<? extends T> implementation);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    ScopedBindingBuilder to(TypeLiteral<? extends T> implementation);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 */
-	ScopedBindingBuilder to(Key<? extends T> targetKey);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    ScopedBindingBuilder to(Key<? extends T> targetKey);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 *
-	 * @see com.google.inject.Injector#injectMembers
-	 */
-	void toInstance(T instance);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     *
+     * @see com.google.inject.Injector#injectMembers
+     */
+    void toInstance(T instance);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 *
-	 * @see com.google.inject.Injector#injectMembers
-	 */
-	ScopedBindingBuilder toProvider(Provider<? extends T> provider);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     *
+     * @see com.google.inject.Injector#injectMembers
+     */
+    ScopedBindingBuilder toProvider(Provider<? extends T> provider);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 *
-	 * @see com.google.inject.Injector#injectMembers
-	 */
-	ScopedBindingBuilder toProvider(javax.inject.Provider<? extends T> provider);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     *
+     * @see com.google.inject.Injector#injectMembers
+     */
+    ScopedBindingBuilder toProvider(javax.inject.Provider<? extends T> provider);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 */
-	ScopedBindingBuilder toProvider(
-			Class<? extends javax.inject.Provider<? extends T>> providerType);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    ScopedBindingBuilder toProvider(
+            Class<? extends javax.inject.Provider<? extends T>> providerType);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 */
-	ScopedBindingBuilder toProvider(
-			TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    ScopedBindingBuilder toProvider(
+            TypeLiteral<? extends javax.inject.Provider<? extends T>> providerType);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 */
-	<P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProvider(
-			Key<P> providerKey);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    <P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProvider(
+            Key<P> providerKey);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 * 
-	 * @since 3.0
-	 */
-	<S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     * 
+     * @since 3.0
+     */
+    <S extends T> ScopedBindingBuilder toConstructor(Constructor<S> constructor);
 
-	/**
-	 * See the EDSL examples at {@link com.google.inject.Binder}.
-	 * 
-	 * @since 3.0
-	 */
-	<S extends T> ScopedBindingBuilder toConstructor(
-			Constructor<S> constructor, TypeLiteral<? extends S> type);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     * 
+     * @since 3.0
+     */
+    <S extends T> ScopedBindingBuilder toConstructor(
+            Constructor<S> constructor, TypeLiteral<? extends S> type);
 }

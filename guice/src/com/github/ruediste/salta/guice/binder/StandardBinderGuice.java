@@ -8,19 +8,19 @@ import com.google.common.reflect.TypeToken;
 
 public class StandardBinderGuice extends StandardBinder {
 
-	private GuiceInjectorConfiguration guiceConfig;
+    private GuiceInjectorConfiguration guiceConfig;
 
-	public StandardBinderGuice(GuiceInjectorConfiguration guiceConfig,
-			StandardInjector injector) {
-		super(guiceConfig.config, injector);
-		this.guiceConfig = guiceConfig;
-	}
+    public StandardBinderGuice(GuiceInjectorConfiguration guiceConfig,
+            StandardInjector injector) {
+        super(guiceConfig.config, injector);
+        this.guiceConfig = guiceConfig;
+    }
 
-	@Override
-	protected <T> StandardBindingBuilderImpl<T> createBindingBuilder(
-			TypeToken<T> type) {
-		return new StandardBindingBuilderImplGuice<>(
-				CoreDependencyKey.typeMatcher(type), type, guiceConfig,
-				injector);
-	}
+    @Override
+    protected <T> StandardBindingBuilderImpl<T> createBindingBuilder(
+            TypeToken<T> type) {
+        return new StandardBindingBuilderImplGuice<>(
+                CoreDependencyKey.typeMatcher(type), type, guiceConfig,
+                injector);
+    }
 }

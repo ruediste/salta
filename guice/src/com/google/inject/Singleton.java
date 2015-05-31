@@ -23,12 +23,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Apply this to implementation classes when you want only one instance
- * (per {@link Injector}) to be reused for all injections for that binding.
+ * Apply this to implementation classes when you want only one instance (per
+ * {@link Injector}) to be reused for all injections for that binding.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RUNTIME)
 @ScopeAnnotation
-public @interface Singleton {}
+public @interface Singleton {
+}

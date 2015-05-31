@@ -6,30 +6,30 @@ import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 
 public class AnnotatedConstantBindingBuilderImpl implements
-		AnnotatedConstantBindingBuilder {
+        AnnotatedConstantBindingBuilder {
 
-	private com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder delegate;
+    private com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder delegate;
 
-	public AnnotatedConstantBindingBuilderImpl(
-			com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder delegate) {
-		this.delegate = delegate;
-	}
+    public AnnotatedConstantBindingBuilderImpl(
+            com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder delegate) {
+        this.delegate = delegate;
+    }
 
-	@Override
-	public ConstantBindingBuilder annotatedWith(
-			Class<? extends Annotation> annotationType) {
-		return new ConstantBindingBuilderImpl(
-				delegate.annotatedWith(annotationType));
-	}
+    @Override
+    public ConstantBindingBuilder annotatedWith(
+            Class<? extends Annotation> annotationType) {
+        return new ConstantBindingBuilderImpl(
+                delegate.annotatedWith(annotationType));
+    }
 
-	@Override
-	public ConstantBindingBuilder annotatedWith(Annotation annotation) {
-		return new ConstantBindingBuilderImpl(
-				delegate.annotatedWith(annotation));
-	}
+    @Override
+    public ConstantBindingBuilder annotatedWith(Annotation annotation) {
+        return new ConstantBindingBuilderImpl(
+                delegate.annotatedWith(annotation));
+    }
 
-	@Override
-	public String toString() {
-		return delegate.toString();
-	}
+    @Override
+    public String toString() {
+        return delegate.toString();
+    }
 }

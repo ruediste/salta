@@ -8,11 +8,11 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  * {@link StandardStaticBinding}s and {@link StandardJitBinding}s
  */
 public interface CreationRecipeFactory {
-	/**
-	 * Create a recipe for this binding. The result will typically be cached.
-	 * Any expensive operations to create the recipe should be done in this
-	 * method
-	 */
-	public SupplierRecipe createRecipe(RecipeCreationContext ctx);
+    /**
+     * Create a recipe for this binding. The result will typically be cached.
+     * Any expensive operations to create the recipe should be done in this
+     * method
+     */
+    public SupplierRecipe createRecipe(RecipeCreationContext ctx);
 
 }

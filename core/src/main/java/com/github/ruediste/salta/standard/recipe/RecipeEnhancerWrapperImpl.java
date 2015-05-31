@@ -17,22 +17,22 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public class RecipeEnhancerWrapperImpl implements RecipeEnhancer {
 
-	private Function<Supplier<Object>, Object> wrapperEnhancer;
+    private Function<Supplier<Object>, Object> wrapperEnhancer;
 
-	public RecipeEnhancerWrapperImpl(
-			Function<Supplier<Object>, Object> wrapperListener) {
-		this.wrapperEnhancer = wrapperListener;
-	}
+    public RecipeEnhancerWrapperImpl(
+            Function<Supplier<Object>, Object> wrapperListener) {
+        this.wrapperEnhancer = wrapperListener;
+    }
 
-	@Override
-	public Class<?> compile(MethodCompilationContext ctx,
-			SupplierRecipe innerRecipe) {
-		GeneratorAdapter mv = ctx.getMv();
-		ctx.addFieldAndLoad(Function.class, wrapperEnhancer);
-		ctx.compileToSupplier(innerRecipe);
-		mv.invokeInterface(Type.getType(Function.class),
-				Method.getMethod("Object apply(Object)"));
-		return Object.class;
-	}
+    @Override
+    public Class<?> compile(MethodCompilationContext ctx,
+            SupplierRecipe innerRecipe) {
+        GeneratorAdapter mv = ctx.getMv();
+        ctx.addFieldAndLoad(Function.class, wrapperEnhancer);
+        ctx.compileToSupplier(innerRecipe);
+        mv.invokeInterface(Type.getType(Function.class),
+                Method.getMethod("Object apply(Object)"));
+        return Object.class;
+    }
 
 }

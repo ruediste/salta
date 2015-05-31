@@ -21,111 +21,111 @@ import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
 
-	private Field field;
-	private SupplierRecipe recipe;
+    private Field field;
+    private SupplierRecipe recipe;
 
-	public FixedFieldRecipeMembersInjector(Field field, SupplierRecipe recipe) {
-		this.field = field;
-		this.recipe = recipe;
-		field.setAccessible(true);
+    public FixedFieldRecipeMembersInjector(Field field, SupplierRecipe recipe) {
+        this.field = field;
+        this.recipe = recipe;
+        field.setAccessible(true);
 
-	}
+    }
 
-	@Override
-	public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext compilationContext) {
-		if (Accessibility.isFieldPublic(field))
-			return compileDirect(argType, mv, compilationContext);
-		else
-			return compileDynamic(argType, mv, compilationContext);
-	}
+    @Override
+    public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
+            MethodCompilationContext compilationContext) {
+        if (Accessibility.isFieldPublic(field))
+            return compileDirect(argType, mv, compilationContext);
+        else
+            return compileDynamic(argType, mv, compilationContext);
+    }
 
-	protected Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext ctx) {
-		argType = ctx.castToPublic(argType, field.getDeclaringClass());
-		mv.dup();
-		{
-			Class<?> t = recipe.compile(ctx);
-			ctx.castToPublic(t, field.getType());
-		}
+    protected Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
+            MethodCompilationContext ctx) {
+        argType = ctx.castToPublic(argType, field.getDeclaringClass());
+        mv.dup();
+        {
+            Class<?> t = recipe.compile(ctx);
+            ctx.castToPublic(t, field.getType());
+        }
 
-		mv.putField(Type.getType(field.getDeclaringClass()), field.getName(),
-				Type.getType(field.getType()));
+        mv.putField(Type.getType(field.getDeclaringClass()), field.getName(),
+                Type.getType(field.getType()));
 
-		return argType;
-	}
+        return argType;
+    }
 
-	protected Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
-			MethodCompilationContext ctx) {
+    protected Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
+            MethodCompilationContext ctx) {
 
-		// cast receiver
-		argType = ctx.castToPublic(argType, field.getDeclaringClass());
-		mv.dup();
+        // cast receiver
+        argType = ctx.castToPublic(argType, field.getDeclaringClass());
+        mv.dup();
 
-		// push value
-		Type valueType;
-		{
-			Class<?> t = recipe.compile(ctx);
-			valueType = Type.getType(ctx.castToPublic(t, field.getType()));
-		}
+        // push value
+        Type valueType;
+        {
+            Class<?> t = recipe.compile(ctx);
+            valueType = Type.getType(ctx.castToPublic(t, field.getType()));
+        }
 
-		String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;";
-		String bootstrapName = ctx.getClassCtx().addMethod(
-				ACC_PRIVATE + ACC_STATIC, bootstrapDesc, null,
-				new MethodRecipe() {
+        String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;";
+        String bootstrapName = ctx.getClassCtx().addMethod(
+                ACC_PRIVATE + ACC_STATIC, bootstrapDesc, null,
+                new MethodRecipe() {
 
-					@Override
-					protected void compileImpl(GeneratorAdapter mv,
-							MethodCompilationContext ctx) {
-						// start constructing the constant CallSite to be
-						// returned
-						mv.newInstance(Type.getType(ConstantCallSite.class));
-						mv.dup();
+                    @Override
+                    protected void compileImpl(GeneratorAdapter mv,
+                            MethodCompilationContext ctx) {
+                        // start constructing the constant CallSite to be
+                        // returned
+                        mv.newInstance(Type.getType(ConstantCallSite.class));
+                        mv.dup();
 
-						// load the lookup
-						mv.loadArg(0);
+                        // load the lookup
+                        mv.loadArg(0);
 
-						// load the field
-						ctx.addFieldAndLoad(Field.class, field);
+                        // load the field
+                        ctx.addFieldAndLoad(Field.class, field);
 
-						// unreflect
-						mv.visitMethodInsn(
-								INVOKEVIRTUAL,
-								"java/lang/invoke/MethodHandles$Lookup",
-								"unreflectSetter",
-								"(Ljava/lang/reflect/Field;)Ljava/lang/invoke/MethodHandle;",
-								false);
+                        // unreflect
+                        mv.visitMethodInsn(
+                                INVOKEVIRTUAL,
+                                "java/lang/invoke/MethodHandles$Lookup",
+                                "unreflectSetter",
+                                "(Ljava/lang/reflect/Field;)Ljava/lang/invoke/MethodHandle;",
+                                false);
 
-						// load the target method type
-						mv.loadArg(2);
+                        // load the target method type
+                        mv.loadArg(2);
 
-						// asType
-						mv.visitMethodInsn(
-								INVOKEVIRTUAL,
-								"java/lang/invoke/MethodHandle",
-								"asType",
-								"(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
-								false);
+                        // asType
+                        mv.visitMethodInsn(
+                                INVOKEVIRTUAL,
+                                "java/lang/invoke/MethodHandle",
+                                "asType",
+                                "(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
+                                false);
 
-						// invoke the constructor of the callsite
-						mv.visitMethodInsn(INVOKESPECIAL,
-								"java/lang/invoke/ConstantCallSite", "<init>",
-								"(Ljava/lang/invoke/MethodHandle;)V", false);
+                        // invoke the constructor of the callsite
+                        mv.visitMethodInsn(INVOKESPECIAL,
+                                "java/lang/invoke/ConstantCallSite", "<init>",
+                                "(Ljava/lang/invoke/MethodHandle;)V", false);
 
-						// return
-						mv.visitInsn(ARETURN);
-					}
-				});
+                        // return
+                        mv.visitInsn(ARETURN);
+                    }
+                });
 
-		// set field
-		Handle bsm = new Handle(H_INVOKESTATIC, ctx.getClassCtx()
-				.getInternalClassName(), bootstrapName, bootstrapDesc);
+        // set field
+        Handle bsm = new Handle(H_INVOKESTATIC, ctx.getClassCtx()
+                .getInternalClassName(), bootstrapName, bootstrapDesc);
 
-		mv.invokeDynamic(
-				"field",
-				Type.getMethodDescriptor(Type.getType(void.class),
-						Type.getType(argType), valueType), bsm);
-		return argType;
-	}
+        mv.invokeDynamic(
+                "field",
+                Type.getMethodDescriptor(Type.getType(void.class),
+                        Type.getType(argType), valueType), bsm);
+        return argType;
+    }
 
 }

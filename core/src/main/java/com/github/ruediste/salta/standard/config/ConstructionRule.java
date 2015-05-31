@@ -14,6 +14,6 @@ import com.google.common.reflect.TypeToken;
  */
 public interface ConstructionRule {
 
-	Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
-			TypeToken<?> type);
+    Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
+            TypeToken<?> type);
 }

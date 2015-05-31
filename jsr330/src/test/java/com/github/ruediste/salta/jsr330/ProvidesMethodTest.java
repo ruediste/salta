@@ -15,62 +15,62 @@ import com.github.ruediste.salta.standard.DependencyKey;
 
 public class ProvidesMethodTest {
 
-	private static class A {
-		@Inject
-		@Named("fails")
-		String other;
-	}
+    private static class A {
+        @Inject
+        @Named("fails")
+        String other;
+    }
 
-	@Test
-	public void exceptionIsWrapped() {
-		Injector injector = Salta.createInjector(new AbstractModule() {
+    @Test
+    public void exceptionIsWrapped() {
+        Injector injector = Salta.createInjector(new AbstractModule() {
 
-			@Override
-			protected void configure() {
+            @Override
+            protected void configure() {
 
-			}
+            }
 
-			@Provides
-			@Named("fails")
-			String create() {
-				throw new RuntimeException("boo");
-			}
+            @Provides
+            @Named("fails")
+            String create() {
+                throw new RuntimeException("boo");
+            }
 
-			@Provides
-			@Named("failsChecked")
-			String createFailChecked() throws Exception {
-				throw new Exception("booChecked");
-			}
+            @Provides
+            @Named("failsChecked")
+            String createFailChecked() throws Exception {
+                throw new Exception("booChecked");
+            }
 
-			@Provides
-			@Named("works")
-			String createWorks() {
-				return "Hello World";
-			}
+            @Provides
+            @Named("works")
+            String createWorks() {
+                return "Hello World";
+            }
 
-		});
-		assertEquals("Hello World", injector.getInstance(DependencyKey.of(
-				String.class).withAnnotations(Names.named("works"))));
+        });
+        assertEquals("Hello World", injector.getInstance(DependencyKey.of(
+                String.class).withAnnotations(Names.named("works"))));
 
-		try {
-			injector.getInstance(DependencyKey.of(String.class)
-					.withAnnotations(Names.named("fails")));
-			fail();
-		} catch (SaltaException e) {
-			assertTrue(e.getMessage().contains("boo"));
-		}
-		try {
-			injector.getInstance(DependencyKey.of(String.class)
-					.withAnnotations(Names.named("failsChecked")));
-			fail();
-		} catch (SaltaException e) {
-			assertTrue(e.getMessage().contains("booChecked"));
-		}
-		try {
-			injector.getInstance(A.class);
-			fail();
-		} catch (SaltaException e) {
-			assertTrue(e.getMessage().contains("boo"));
-		}
-	}
+        try {
+            injector.getInstance(DependencyKey.of(String.class)
+                    .withAnnotations(Names.named("fails")));
+            fail();
+        } catch (SaltaException e) {
+            assertTrue(e.getMessage().contains("boo"));
+        }
+        try {
+            injector.getInstance(DependencyKey.of(String.class)
+                    .withAnnotations(Names.named("failsChecked")));
+            fail();
+        } catch (SaltaException e) {
+            assertTrue(e.getMessage().contains("booChecked"));
+        }
+        try {
+            injector.getInstance(A.class);
+            fail();
+        } catch (SaltaException e) {
+            assertTrue(e.getMessage().contains("boo"));
+        }
+    }
 }

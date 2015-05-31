@@ -25,30 +25,34 @@ import com.google.inject.spi.Message;
 import java.util.Collection;
 
 /**
- * Thrown when errors occur while creating a {@link Injector}. Includes a list of encountered
- * errors. Clients should catch this exception, log it, and stop execution.
+ * Thrown when errors occur while creating a {@link Injector}. Includes a list
+ * of encountered errors. Clients should catch this exception, log it, and stop
+ * execution.
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public class CreationException extends RuntimeException {
 
-  private final ImmutableSet<Message> messages;
+    private final ImmutableSet<Message> messages;
 
-  /** Creates a CreationException containing {@code messages}. */
-  public CreationException(Collection<Message> messages) {
-    this.messages = ImmutableSet.copyOf(messages);
-    checkArgument(!this.messages.isEmpty());
-    initCause(Errors.getOnlyCause(this.messages));
-  }
+    /** Creates a CreationException containing {@code messages}. */
+    public CreationException(Collection<Message> messages) {
+        this.messages = ImmutableSet.copyOf(messages);
+        checkArgument(!this.messages.isEmpty());
+        initCause(Errors.getOnlyCause(this.messages));
+    }
 
-  /** Returns messages for the errors that caused this exception. */
-  public Collection<Message> getErrorMessages() {
-    return messages;
-  }
+    /** Returns messages for the errors that caused this exception. */
+    public Collection<Message> getErrorMessages() {
+        return messages;
+    }
 
-  @Override public String getMessage() {
-    return Errors.format("Unable to create injector, see the following errors", messages);
-  }
+    @Override
+    public String getMessage() {
+        return Errors
+                .format("Unable to create injector, see the following errors",
+                        messages);
+    }
 
-  private static final long serialVersionUID = 0;
+    private static final long serialVersionUID = 0;
 }

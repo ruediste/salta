@@ -9,29 +9,29 @@ import org.junit.Test;
 
 public class ProviderTest {
 
-	@Test
-	public void providerIsInjected() {
-		Provider<String> provider = new Provider<String>() {
+    @Test
+    public void providerIsInjected() {
+        Provider<String> provider = new Provider<String>() {
 
-			@Inject
-			int i;
+            @Inject
+            int i;
 
-			@Override
-			public String get() {
-				return "s" + i;
-			}
-		};
+            @Override
+            public String get() {
+                return "s" + i;
+            }
+        };
 
-		Injector injector = Salta.createInjector(new AbstractModule() {
+        Injector injector = Salta.createInjector(new AbstractModule() {
 
-			@Override
-			protected void configure() {
+            @Override
+            protected void configure() {
 
-				bind(int.class).toInstance(2);
-				bind(String.class).toProvider(provider);
-			}
-		});
+                bind(int.class).toInstance(2);
+                bind(String.class).toProvider(provider);
+            }
+        });
 
-		assertEquals("s2", injector.getInstance(String.class));
-	}
+        assertEquals("s2", injector.getInstance(String.class));
+    }
 }

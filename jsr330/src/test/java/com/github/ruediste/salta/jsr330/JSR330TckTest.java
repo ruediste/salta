@@ -15,22 +15,22 @@ import com.github.ruediste.salta.jsr330.util.Names;
 
 public class JSR330TckTest {
 
-	public static junit.framework.Test suite() {
-		Car car = Salta.createInjector(new AbstractModule() {
+    public static junit.framework.Test suite() {
+        Car car = Salta.createInjector(new AbstractModule() {
 
-			@Override
-			protected void configure() {
-				bind(Car.class).to(Convertible.class);
-				bind(Seat.class).annotatedWith(Drivers.class).to(
-						DriversSeat.class);
-				bind(Engine.class).to(V8Engine.class);
-				bind(Tire.class).annotatedWith(Names.named("spare")).to(
-						SpareTire.class);
-				requestStaticInjection(Convertible.class);
-				requestStaticInjection(Tire.class);
-				requestStaticInjection(SpareTire.class);
-			}
-		}).getInstance(Car.class);
-		return Tck.testsFor(car, true, true);
-	}
+            @Override
+            protected void configure() {
+                bind(Car.class).to(Convertible.class);
+                bind(Seat.class).annotatedWith(Drivers.class).to(
+                        DriversSeat.class);
+                bind(Engine.class).to(V8Engine.class);
+                bind(Tire.class).annotatedWith(Names.named("spare")).to(
+                        SpareTire.class);
+                requestStaticInjection(Convertible.class);
+                requestStaticInjection(Tire.class);
+                requestStaticInjection(SpareTire.class);
+            }
+        }).getInstance(Car.class);
+        return Tck.testsFor(car, true, true);
+    }
 }

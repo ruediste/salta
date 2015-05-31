@@ -39,7 +39,7 @@ import com.github.ruediste.salta.standard.binder.StandardBinder;
  * 
  * <pre>
  * public class FooApplication {
- * 	public static void main(String[] args) {
+ *     public static void main(String[] args) {
  *         Injector injector = Guice.createInjector(
  *             new ModuleA(),
  *             new ModuleB(),
@@ -56,71 +56,71 @@ import com.github.ruediste.salta.standard.binder.StandardBinder;
  */
 public final class Guice {
 
-	private Guice() {
-	}
+    private Guice() {
+    }
 
-	/**
-	 * Creates an injector for the given set of modules. This is equivalent to
-	 * calling {@link #createInjector(Stage, Module...)} with Stage.DEVELOPMENT.
-	 *
-	 * @throws CreationException
-	 *             if one or more errors occur during injector construction
-	 */
-	public static Injector createInjector(Module... modules) {
-		return createInjector(Arrays.asList(modules));
-	}
+    /**
+     * Creates an injector for the given set of modules. This is equivalent to
+     * calling {@link #createInjector(Stage, Module...)} with Stage.DEVELOPMENT.
+     *
+     * @throws CreationException
+     *             if one or more errors occur during injector construction
+     */
+    public static Injector createInjector(Module... modules) {
+        return createInjector(Arrays.asList(modules));
+    }
 
-	/**
-	 * Creates an injector for the given set of modules. This is equivalent to
-	 * calling {@link #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT.
-	 *
-	 * @throws CreationException
-	 *             if one or more errors occur during injector creation
-	 */
-	public static Injector createInjector(Iterable<? extends Module> modules) {
-		return createInjector(Stage.DEVELOPMENT, modules);
-	}
+    /**
+     * Creates an injector for the given set of modules. This is equivalent to
+     * calling {@link #createInjector(Stage, Iterable)} with Stage.DEVELOPMENT.
+     *
+     * @throws CreationException
+     *             if one or more errors occur during injector creation
+     */
+    public static Injector createInjector(Iterable<? extends Module> modules) {
+        return createInjector(Stage.DEVELOPMENT, modules);
+    }
 
-	/**
-	 * Creates an injector for the given set of modules, in a given development
-	 * stage.
-	 *
-	 * @throws CreationException
-	 *             if one or more errors occur during injector creation.
-	 */
-	public static Injector createInjector(Stage stage, Module... modules) {
-		return createInjector(stage, Arrays.asList(modules));
-	}
+    /**
+     * Creates an injector for the given set of modules, in a given development
+     * stage.
+     *
+     * @throws CreationException
+     *             if one or more errors occur during injector creation.
+     */
+    public static Injector createInjector(Stage stage, Module... modules) {
+        return createInjector(stage, Arrays.asList(modules));
+    }
 
-	/**
-	 * Creates an injector for the given set of modules, in a given development
-	 * stage.
-	 *
-	 * @throws CreationException
-	 *             if one or more errors occur during injector construction
-	 */
-	public static Injector createInjector(Stage stage,
-			Iterable<? extends Module> modules) {
-		GuiceInjectorConfiguration config = new GuiceInjectorConfiguration(
-				stage);
+    /**
+     * Creates an injector for the given set of modules, in a given development
+     * stage.
+     *
+     * @throws CreationException
+     *             if one or more errors occur during injector construction
+     */
+    public static Injector createInjector(Stage stage,
+            Iterable<? extends Module> modules) {
+        GuiceInjectorConfiguration config = new GuiceInjectorConfiguration(
+                stage);
 
-		GuiceInjectorImpl injector = new GuiceInjectorImpl(config);
+        GuiceInjectorImpl injector = new GuiceInjectorImpl(config);
 
-		StandardBinder saltaBinder = new StandardBinderGuice(config,
-				injector.getSaltaInjector());
-		BinderImpl binder = new BinderImpl(saltaBinder, config);
+        StandardBinder saltaBinder = new StandardBinderGuice(config,
+                injector.getSaltaInjector());
+        BinderImpl binder = new BinderImpl(saltaBinder, config);
 
-		for (Module module : modules) {
-			binder.install(module);
-		}
-		binder.install(new GuiceModule(config, injector));
+        for (Module module : modules) {
+            binder.install(module);
+        }
+        binder.install(new GuiceModule(config, injector));
 
-		binder.close();
+        binder.close();
 
-		config.postProcessModules();
+        config.postProcessModules();
 
-		injector.initialize();
+        injector.initialize();
 
-		return injector;
-	}
+        return injector;
+    }
 }

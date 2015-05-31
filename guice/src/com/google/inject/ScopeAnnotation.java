@@ -38,4 +38,5 @@ import java.lang.annotation.Target;
  */
 @Target(ANNOTATION_TYPE)
 @Retention(RUNTIME)
-public @interface ScopeAnnotation {}
+public @interface ScopeAnnotation {
+}

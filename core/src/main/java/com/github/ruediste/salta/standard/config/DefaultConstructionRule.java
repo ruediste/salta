@@ -18,20 +18,20 @@ import com.google.common.reflect.TypeToken;
  */
 public class DefaultConstructionRule implements ConstructionRule {
 
-	private StandardInjectorConfiguration config;
+    private StandardInjectorConfiguration config;
 
-	public DefaultConstructionRule(StandardInjectorConfiguration config) {
-		this.config = config;
-	}
+    public DefaultConstructionRule(StandardInjectorConfiguration config) {
+        this.config = config;
+    }
 
-	@Override
-	public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
-			TypeToken<?> type) {
-		// create seed recipe
-		return config.construction.createRecipeInstantiator(type).map(
-				instantiator -> ctx -> config.construction
-						.createConstructionRecipe(ctx, type,
-								instantiator.apply(ctx)));
+    @Override
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
+            TypeToken<?> type) {
+        // create seed recipe
+        return config.construction.createRecipeInstantiator(type).map(
+                instantiator -> ctx -> config.construction
+                        .createConstructionRecipe(ctx, type,
+                                instantiator.apply(ctx)));
 
-	}
+    }
 }

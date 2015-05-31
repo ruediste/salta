@@ -15,48 +15,48 @@ import com.github.ruediste.salta.standard.recipe.RecipeEnhancerBeforeAfterImpl.B
 
 public class RecipeEnhancerBeforeAfterImplTest {
 
-	boolean beforeSeen;
-	Object afterSeen;
+    boolean beforeSeen;
+    Object afterSeen;
 
-	@Test
-	public void test() throws Throwable {
+    @Test
+    public void test() throws Throwable {
 
-		RecipeCompiler compiler = new RecipeCompiler();
-		Object result = compiler.compileSupplier(new SupplierRecipe() {
+        RecipeCompiler compiler = new RecipeCompiler();
+        Object result = compiler.compileSupplier(new SupplierRecipe() {
 
-			@Override
-			protected Class<?> compileImpl(GeneratorAdapter mv,
-					MethodCompilationContext ctx) {
-				return new RecipeEnhancerBeforeAfterImpl(
-						new BeforeAfterEnhancer() {
+            @Override
+            protected Class<?> compileImpl(GeneratorAdapter mv,
+                    MethodCompilationContext ctx) {
+                return new RecipeEnhancerBeforeAfterImpl(
+                        new BeforeAfterEnhancer() {
 
-							@Override
-							public void before() {
-								assertFalse(beforeSeen);
-								beforeSeen = true;
-							}
+                            @Override
+                            public void before() {
+                                assertFalse(beforeSeen);
+                                beforeSeen = true;
+                            }
 
-							@Override
-							public Object after(Object instance) {
-								assertTrue(beforeSeen);
-								assertNull(afterSeen);
-								afterSeen = instance;
-								return "Hello";
-							}
-						}).compile(ctx, new SupplierRecipe() {
+                            @Override
+                            public Object after(Object instance) {
+                                assertTrue(beforeSeen);
+                                assertNull(afterSeen);
+                                afterSeen = instance;
+                                return "Hello";
+                            }
+                        }).compile(ctx, new SupplierRecipe() {
 
-					@Override
-					protected Class<?> compileImpl(GeneratorAdapter mv,
-							MethodCompilationContext ctx) {
-						mv.push(1);
-						return int.class;
-					}
-				});
-			}
-		}).get();
+                    @Override
+                    protected Class<?> compileImpl(GeneratorAdapter mv,
+                            MethodCompilationContext ctx) {
+                        mv.push(1);
+                        return int.class;
+                    }
+                });
+            }
+        }).get();
 
-		assertEquals("Hello", result);
-		assertTrue(beforeSeen);
-		assertEquals(1, afterSeen);
-	}
+        assertEquals("Hello", result);
+        assertTrue(beforeSeen);
+        assertEquals(1, afterSeen);
+    }
 }

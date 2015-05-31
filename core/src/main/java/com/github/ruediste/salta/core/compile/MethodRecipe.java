@@ -7,19 +7,19 @@ import org.objectweb.asm.commons.GeneratorAdapter;
  * A recipe for compiling a complete method body.
  */
 public abstract class MethodRecipe {
-	/**
-	 * Emit the code for the method. The method already has
-	 * {@link MethodVisitor#visitCode()} called, and
-	 * {@link MethodVisitor#visitMaxs(int, int)} and
-	 * {@link MethodVisitor#visitEnd()} will be called afterwards
-	 */
-	public final void compile(MethodCompilationContext ctx) {
-		compileImpl(ctx.getMv(), ctx);
-	}
+    /**
+     * Emit the code for the method. The method already has
+     * {@link MethodVisitor#visitCode()} called, and
+     * {@link MethodVisitor#visitMaxs(int, int)} and
+     * {@link MethodVisitor#visitEnd()} will be called afterwards
+     */
+    public final void compile(MethodCompilationContext ctx) {
+        compileImpl(ctx.getMv(), ctx);
+    }
 
-	/**
-	 * Emit the code for the method
-	 */
-	protected abstract void compileImpl(GeneratorAdapter mv,
-			MethodCompilationContext ctx);
+    /**
+     * Emit the code for the method
+     */
+    protected abstract void compileImpl(GeneratorAdapter mv,
+            MethodCompilationContext ctx);
 }

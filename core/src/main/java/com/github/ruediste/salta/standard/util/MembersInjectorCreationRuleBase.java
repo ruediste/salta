@@ -24,110 +24,110 @@ import com.google.common.reflect.TypeToken;
 
 public abstract class MembersInjectorCreationRuleBase implements CreationRule {
 
-	private HashMap<TypeToken<?>, Consumer<?>> membersInjectorCache = new HashMap<>();
-	private HashMap<TypeToken<?>, FunctionRecipe> membersInjectionRecipeCache = new HashMap<>();
-	private StandardInjectorConfiguration config;
+    private HashMap<TypeToken<?>, Consumer<?>> membersInjectorCache = new HashMap<>();
+    private HashMap<TypeToken<?>, FunctionRecipe> membersInjectionRecipeCache = new HashMap<>();
+    private StandardInjectorConfiguration config;
 
-	public MembersInjectorCreationRuleBase(StandardInjectorConfiguration config) {
-		this.config = config;
-	}
+    public MembersInjectorCreationRuleBase(StandardInjectorConfiguration config) {
+        this.config = config;
+    }
 
-	@SuppressWarnings("unchecked")
-	private <T> Consumer<T> getMembersInjector(TypeToken<T> typeLiteral,
-			RecipeCreationContext ctx) {
+    @SuppressWarnings("unchecked")
+    private <T> Consumer<T> getMembersInjector(TypeToken<T> typeLiteral,
+            RecipeCreationContext ctx) {
 
-		Consumer<?> result = membersInjectorCache.get(typeLiteral);
-		if (result == null) {
-			result = getMembersInjectorNoCache(typeLiteral, ctx);
-			membersInjectorCache.put(typeLiteral, result);
-		}
-		return (Consumer<T>) result;
-	}
+        Consumer<?> result = membersInjectorCache.get(typeLiteral);
+        if (result == null) {
+            result = getMembersInjectorNoCache(typeLiteral, ctx);
+            membersInjectorCache.put(typeLiteral, result);
+        }
+        return (Consumer<T>) result;
+    }
 
-	private <T> Consumer<T> getMembersInjectorNoCache(TypeToken<T> type,
-			RecipeCreationContext ctx) {
-		CompiledFunction function = ctx.getCompiler().compileFunction(
-				getMembersInjectionRecipe(type, ctx));
-		return new Consumer<T>() {
+    private <T> Consumer<T> getMembersInjectorNoCache(TypeToken<T> type,
+            RecipeCreationContext ctx) {
+        CompiledFunction function = ctx.getCompiler().compileFunction(
+                getMembersInjectionRecipe(type, ctx));
+        return new Consumer<T>() {
 
-			@Override
-			public void accept(T t) {
-				try {
-					function.get(t);
-				} catch (Throwable e) {
-					throw new SaltaException(
-							"Error while injecting members of instance of "
-									+ type, e);
-				}
-			}
+            @Override
+            public void accept(T t) {
+                try {
+                    function.get(t);
+                } catch (Throwable e) {
+                    throw new SaltaException(
+                            "Error while injecting members of instance of "
+                                    + type, e);
+                }
+            }
 
-			@Override
-			public String toString() {
-				return "MembersInjector<" + type + ">";
-			}
-		};
-	}
+            @Override
+            public String toString() {
+                return "MembersInjector<" + type + ">";
+            }
+        };
+    }
 
-	private FunctionRecipe getMembersInjectionRecipe(TypeToken<?> typeToken,
-			RecipeCreationContext ctx) {
-		FunctionRecipe recipe = membersInjectionRecipeCache.get(typeToken);
-		if (recipe != null)
-			return recipe;
+    private FunctionRecipe getMembersInjectionRecipe(TypeToken<?> typeToken,
+            RecipeCreationContext ctx) {
+        FunctionRecipe recipe = membersInjectionRecipeCache.get(typeToken);
+        if (recipe != null)
+            return recipe;
 
-		List<RecipeMembersInjector> injectors = config.construction
-				.createRecipeMembersInjectors(ctx, typeToken);
-		List<RecipeInitializer> initializers = config.construction
-				.createInitializers(ctx, typeToken);
-		recipe = new FunctionRecipe() {
+        List<RecipeMembersInjector> injectors = config.construction
+                .createRecipeMembersInjectors(ctx, typeToken);
+        List<RecipeInitializer> initializers = config.construction
+                .createInitializers(ctx, typeToken);
+        recipe = new FunctionRecipe() {
 
-			@Override
-			public Class<?> compileImpl(Class<?> argumentType,
-					GeneratorAdapter mv, MethodCompilationContext ctx) {
-				for (RecipeMembersInjector rmi : injectors) {
-					argumentType = rmi.compile(argumentType, ctx);
-				}
-				for (RecipeInitializer initializer : initializers)
-					argumentType = initializer.compile(argumentType, ctx);
-				return argumentType;
-			}
-		};
+            @Override
+            public Class<?> compileImpl(Class<?> argumentType,
+                    GeneratorAdapter mv, MethodCompilationContext ctx) {
+                for (RecipeMembersInjector rmi : injectors) {
+                    argumentType = rmi.compile(argumentType, ctx);
+                }
+                for (RecipeInitializer initializer : initializers)
+                    argumentType = initializer.compile(argumentType, ctx);
+                return argumentType;
+            }
+        };
 
-		membersInjectionRecipeCache.put(typeToken, recipe);
-		return recipe;
-	}
+        membersInjectionRecipeCache.put(typeToken, recipe);
+        return recipe;
+    }
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
-	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key, CoreInjector injector) {
-		TypeToken<?> dependency = getDependency(key);
-		if (dependency == null)
-			return Optional.empty();
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+            CoreDependencyKey<?> key, CoreInjector injector) {
+        TypeToken<?> dependency = getDependency(key);
+        if (dependency == null)
+            return Optional.empty();
 
-		return Optional
-				.of(ctx -> {
-					Consumer<?> saltaMembersInjector = getMembersInjector(
-							dependency, ctx);
-					Object wrappedInjector = wrapInjector((Consumer) saltaMembersInjector);
-					return new SupplierRecipe() {
+        return Optional
+                .of(ctx -> {
+                    Consumer<?> saltaMembersInjector = getMembersInjector(
+                            dependency, ctx);
+                    Object wrappedInjector = wrapInjector((Consumer) saltaMembersInjector);
+                    return new SupplierRecipe() {
 
-						@Override
-						protected Class<?> compileImpl(GeneratorAdapter mv,
-								MethodCompilationContext ctx) {
-							Class<?> wrappedInjectorType = getWrappedInjectorType();
-							ctx.addFieldAndLoad((Class) wrappedInjectorType,
-									wrappedInjector);
-							return wrappedInjectorType;
-						}
+                        @Override
+                        protected Class<?> compileImpl(GeneratorAdapter mv,
+                                MethodCompilationContext ctx) {
+                            Class<?> wrappedInjectorType = getWrappedInjectorType();
+                            ctx.addFieldAndLoad((Class) wrappedInjectorType,
+                                    wrappedInjector);
+                            return wrappedInjectorType;
+                        }
 
-					};
-				});
-	}
+                    };
+                });
+    }
 
-	protected abstract TypeToken<?> getDependency(CoreDependencyKey<?> key);
+    protected abstract TypeToken<?> getDependency(CoreDependencyKey<?> key);
 
-	protected abstract Object wrapInjector(Consumer<Object> saltaMembersInjector);
+    protected abstract Object wrapInjector(Consumer<Object> saltaMembersInjector);
 
-	protected abstract Class<?> getWrappedInjectorType();
+    protected abstract Class<?> getWrappedInjectorType();
 
 }

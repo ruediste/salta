@@ -16,72 +16,72 @@ import com.github.ruediste.salta.jsr330.Salta;
 
 public class SingletonScopeTest {
 
-	private Injector injector;
+    private Injector injector;
 
-	@Singleton
-	private static class TestClass {
-		private int value;
+    @Singleton
+    private static class TestClass {
+        private int value;
 
-		public int getValue() {
-			return value;
-		}
+        public int getValue() {
+            return value;
+        }
 
-		public void setValue(int value) {
-			this.value = value;
-		}
+        public void setValue(int value) {
+            this.value = value;
+        }
 
-	}
+    }
 
-	private static class TestClassB {
-		@Inject
-		TestClass a;
+    private static class TestClassB {
+        @Inject
+        TestClass a;
 
-		@Inject
-		TestClass b;
+        @Inject
+        TestClass b;
 
-		int compare() {
-			assertEquals(a.getValue(), b.getValue());
-			return a.getValue();
-		}
-	}
+        int compare() {
+            assertEquals(a.getValue(), b.getValue());
+            return a.getValue();
+        }
+    }
 
-	@Singleton
-	private static class CircularA {
-		@Inject
-		Provider<CircularB> b;
+    @Singleton
+    private static class CircularA {
+        @Inject
+        Provider<CircularB> b;
 
-		public CircularA() {
+        public CircularA() {
 
-		}
-	}
+        }
+    }
 
-	private static class CircularB {
-		@Inject
-		CircularA a;
-	}
+    private static class CircularB {
+        @Inject
+        CircularA a;
+    }
 
-	@Before
-	public void setup() {
-		injector = Salta.createInjector();
-	}
+    @Before
+    public void setup() {
+        injector = Salta.createInjector();
+    }
 
-	@Test
-	public void testGetInstance() {
-		assertEquals(0, injector.getInstance(TestClass.class).getValue());
-		injector.getInstance(TestClass.class).setValue(5);
-		assertEquals(5, injector.getInstance(TestClass.class).getValue());
-	}
+    @Test
+    public void testGetInstance() {
+        assertEquals(0, injector.getInstance(TestClass.class).getValue());
+        injector.getInstance(TestClass.class).setValue(5);
+        assertEquals(5, injector.getInstance(TestClass.class).getValue());
+    }
 
-	@Test
-	public void testInjection() {
-		assertEquals(0, injector.getInstance(TestClassB.class).compare());
-		injector.getInstance(TestClass.class).setValue(5);
-		assertEquals(5, injector.getInstance(TestClassB.class).compare());
-	}
+    @Test
+    public void testInjection() {
+        assertEquals(0, injector.getInstance(TestClassB.class).compare());
+        injector.getInstance(TestClass.class).setValue(5);
+        assertEquals(5, injector.getInstance(TestClassB.class).compare());
+    }
 
-	@Test
-	public void testCircularWithProvider() {
-		CircularA a = injector.getInstance(CircularA.class);
-		assertSame(a, a.b.get().a);
-	}
+    @Test
+    public void testCircularWithProvider() {
+        CircularA a = injector.getInstance(CircularA.class);
+        assertSame(a, a.b.get().a);
+    }
 }

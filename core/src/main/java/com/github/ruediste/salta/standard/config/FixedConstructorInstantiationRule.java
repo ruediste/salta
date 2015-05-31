@@ -11,10 +11,10 @@ import com.google.common.reflect.TypeToken;
  * Factory for a {@link RecipeInstantiator} given a constructor
  */
 public interface FixedConstructorInstantiationRule {
-	/**
-	 * Create the {@link RecipeInstantiator} for the given constructor in type
-	 * typeToken
-	 */
-	Optional<RecipeInstantiator> create(TypeToken<?> typeToken,
-			RecipeCreationContext ctx, Constructor<?> constructor);
+    /**
+     * Create the {@link RecipeInstantiator} for the given constructor in type
+     * typeToken
+     */
+    Optional<RecipeInstantiator> create(TypeToken<?> typeToken,
+            RecipeCreationContext ctx, Constructor<?> constructor);
 }

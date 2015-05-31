@@ -30,61 +30,61 @@ import com.google.inject.Scopes;
  */
 public class ClientServiceWithGuice {
 
-// 48 lines
+    // 48 lines
 
-public interface Service {
-  void go();
-}
+    public interface Service {
+        void go();
+    }
 
-public static class ServiceImpl implements Service {
-  public void go() {
-    // ...
-  }
-}
+    public static class ServiceImpl implements Service {
+        public void go() {
+            // ...
+        }
+    }
 
-public static class MyModule extends AbstractModule {
-  protected void configure() {
-    bind(Service.class).to(ServiceImpl.class).in(Scopes.SINGLETON);
-  }
-}
+    public static class MyModule extends AbstractModule {
+        protected void configure() {
+            bind(Service.class).to(ServiceImpl.class).in(Scopes.SINGLETON);
+        }
+    }
 
-public static class Client {
+    public static class Client {
 
-  private final Service service;
+        private final Service service;
 
-  @Inject
-  public Client(Service service) {
-    this.service = service;
-  }
+        @Inject
+        public Client(Service service) {
+            this.service = service;
+        }
 
-  public void go() {
-    service.go();
-  }
-}
+        public void go() {
+            service.go();
+        }
+    }
 
-public void testClient() {
-  MockService mock = new MockService();
-  Client client = new Client(mock);
-  client.go();
-  assertTrue(mock.isGone());
-}
+    public void testClient() {
+        MockService mock = new MockService();
+        Client client = new Client(mock);
+        client.go();
+        assertTrue(mock.isGone());
+    }
 
-public static class MockService implements Service {
+    public static class MockService implements Service {
 
-  private boolean gone = false;
+        private boolean gone = false;
 
-  public void go() {
-    gone = true;
-  }
+        public void go() {
+            gone = true;
+        }
 
-  public boolean isGone() {
-    return gone;
-  }
-}
+        public boolean isGone() {
+            return gone;
+        }
+    }
 
-public static void main(String[] args) throws CreationException {
-  new ClientServiceWithGuice().testClient();
-  Injector injector = Guice.createInjector(new MyModule());
-  Client client = injector.getInstance(Client.class);
-}
+    public static void main(String[] args) throws CreationException {
+        new ClientServiceWithGuice().testClient();
+        Injector injector = Guice.createInjector(new MyModule());
+        Client client = injector.getInstance(Client.class);
+    }
 }

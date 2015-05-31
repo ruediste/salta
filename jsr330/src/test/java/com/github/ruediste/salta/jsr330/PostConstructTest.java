@@ -8,20 +8,18 @@ import org.junit.Test;
 
 public class PostConstructTest {
 
-	private static class TestClass {
-		boolean initialized;
+    private static class TestClass {
+        boolean initialized;
 
-		@PostConstruct
-		private void init() {
-			initialized = true;
-		}
-	}
+        @PostConstruct
+        private void init() {
+            initialized = true;
+        }
+    }
 
-	@Test
-	public void testPostConstructCalled() {
-		assertTrue(
-				"expected initialized",
-				Salta.createInjector().getInstance(
-						TestClass.class).initialized);
-	}
+    @Test
+    public void testPostConstructCalled() {
+        assertTrue("expected initialized",
+                Salta.createInjector().getInstance(TestClass.class).initialized);
+    }
 }

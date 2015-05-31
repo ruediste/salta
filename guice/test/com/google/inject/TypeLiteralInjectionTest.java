@@ -30,78 +30,78 @@ import junit.framework.TestCase;
  */
 public class TypeLiteralInjectionTest extends TestCase {
 
-	public void testBindingToRawTypeLiteralIsNotAllowed() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(TypeLiteral.class).toInstance(
-							TypeLiteral.get(String.class));
-				}
-			});
-			fail();
-		} catch (com.github.ruediste.salta.core.SaltaException expected) {
-			assertContains(expected.getMessage(),
-					"Binding to core guice framework type is not allowed: TypeLiteral");
-		}
-	}
+    public void testBindingToRawTypeLiteralIsNotAllowed() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(TypeLiteral.class).toInstance(
+                            TypeLiteral.get(String.class));
+                }
+            });
+            fail();
+        } catch (com.github.ruediste.salta.core.SaltaException expected) {
+            assertContains(expected.getMessage(),
+                    "Binding to core guice framework type is not allowed: TypeLiteral");
+        }
+    }
 
-	public void testInjectTypeLiteralWithRawTypes() {
-		C c = Guice.createInjector().getInstance(C.class);
-		assertEquals(TypeLiteral.get(String.class), c.string);
-		assertEquals(TypeLiteral.get(A.class), c.a);
+    public void testInjectTypeLiteralWithRawTypes() {
+        C c = Guice.createInjector().getInstance(C.class);
+        assertEquals(TypeLiteral.get(String.class), c.string);
+        assertEquals(TypeLiteral.get(A.class), c.a);
 
-		try {
-			Guice.createInjector().getInstance(B.class);
-			fail();
-		} catch (com.github.ruediste.salta.core.SaltaException expected) {
-			assertContains(expected.getMessage(),
-					"TypeLiteral<T> cannot be used as a key; It is not fully specified.");
-		}
-	}
+        try {
+            Guice.createInjector().getInstance(B.class);
+            fail();
+        } catch (com.github.ruediste.salta.core.SaltaException expected) {
+            assertContains(expected.getMessage(),
+                    "TypeLiteral<T> cannot be used as a key; It is not fully specified.");
+        }
+    }
 
-	public void testInjectTypeLiteralWithClassTypes() {
-		B<Integer> b = Guice.createInjector().getInstance(
-				new Key<B<Integer>>() {
-				});
-		assertEquals(TypeLiteral.get(String.class), b.string);
-		assertEquals(TypeLiteral.get(Integer.class), b.t);
-		assertEquals(TypeLiteral.get(listOf(Integer.class)), b.listOfT);
+    public void testInjectTypeLiteralWithClassTypes() {
+        B<Integer> b = Guice.createInjector().getInstance(
+                new Key<B<Integer>>() {
+                });
+        assertEquals(TypeLiteral.get(String.class), b.string);
+        assertEquals(TypeLiteral.get(Integer.class), b.t);
+        assertEquals(TypeLiteral.get(listOf(Integer.class)), b.listOfT);
 
-		// does not match
-		// assertEquals(TypeLiteral.get(listOf(Types.subtypeOf(Integer.class))),
-		// b.listOfWildcardT);
-	}
+        // does not match
+        // assertEquals(TypeLiteral.get(listOf(Types.subtypeOf(Integer.class))),
+        // b.listOfWildcardT);
+    }
 
-	public void testInjectRawTypeLiteral() {
-		try {
-			Guice.createInjector().getInstance(TypeLiteral.class);
-			fail();
-		} catch (com.github.ruediste.salta.core.SaltaException expected) {
-			assertContains(expected.getMessage(),
-					"Cannot inject a TypeLiteral that has no type parameter");
-		}
-	}
+    public void testInjectRawTypeLiteral() {
+        try {
+            Guice.createInjector().getInstance(TypeLiteral.class);
+            fail();
+        } catch (com.github.ruediste.salta.core.SaltaException expected) {
+            assertContains(expected.getMessage(),
+                    "Cannot inject a TypeLiteral that has no type parameter");
+        }
+    }
 
-	static class A<T> {
-		@Inject
-		TypeLiteral<String> string;
-		@Inject
-		TypeLiteral<List<T>> listOfT;
-		@Inject
-		TypeLiteral<List<? extends T>> listOfWildcardT;
-	}
+    static class A<T> {
+        @Inject
+        TypeLiteral<String> string;
+        @Inject
+        TypeLiteral<List<T>> listOfT;
+        @Inject
+        TypeLiteral<List<? extends T>> listOfWildcardT;
+    }
 
-	static class B<T> extends A<T> {
-		@Inject
-		TypeLiteral<T> t;
-	}
+    static class B<T> extends A<T> {
+        @Inject
+        TypeLiteral<T> t;
+    }
 
-	static class C<T> {
-		@Inject
-		TypeLiteral<String> string;
-		@Inject
-		TypeLiteral<A> a;
-		T t;
-	}
+    static class C<T> {
+        @Inject
+        TypeLiteral<String> string;
+        @Inject
+        TypeLiteral<A> a;
+        T t;
+    }
 }

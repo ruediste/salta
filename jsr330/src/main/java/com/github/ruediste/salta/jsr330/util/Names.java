@@ -15,44 +15,44 @@ import com.github.ruediste.salta.jsr330.binder.Binder;
  */
 public class Names {
 
-	private Names() {
-	}
+    private Names() {
+    }
 
-	/**
-	 * Creates a {@link Named} annotation with {@code name} as the value.
-	 */
-	public static Named named(String name) {
-		return new NamedImpl(name);
-	}
+    /**
+     * Creates a {@link Named} annotation with {@code name} as the value.
+     */
+    public static Named named(String name) {
+        return new NamedImpl(name);
+    }
 
-	/**
-	 * Creates a constant binding to {@code @Named(key)} for each entry in
-	 * {@code properties}.
-	 */
-	public static void bindProperties(Binder binder,
-			Map<String, String> properties) {
-		for (Map.Entry<String, String> entry : properties.entrySet()) {
-			String key = entry.getKey();
-			String value = entry.getValue();
-			binder.bind(String.class).annotatedWith(new NamedImpl(key))
-					.toInstance(value);
-		}
-	}
+    /**
+     * Creates a constant binding to {@code @Named(key)} for each entry in
+     * {@code properties}.
+     */
+    public static void bindProperties(Binder binder,
+            Map<String, String> properties) {
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            binder.bind(String.class).annotatedWith(new NamedImpl(key))
+                    .toInstance(value);
+        }
+    }
 
-	/**
-	 * Creates a constant binding to {@code @Named(key)} for each property. This
-	 * method binds all properties including those inherited from
-	 * {@link Properties#defaults defaults}.
-	 */
-	public static void bindProperties(Binder binder, Properties properties) {
+    /**
+     * Creates a constant binding to {@code @Named(key)} for each property. This
+     * method binds all properties including those inherited from
+     * {@link Properties#defaults defaults}.
+     */
+    public static void bindProperties(Binder binder, Properties properties) {
 
-		// use enumeration to include the default properties
-		for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
-			String propertyName = (String) e.nextElement();
-			String value = properties.getProperty(propertyName);
-			binder.bind(String.class)
-					.annotatedWith(new NamedImpl(propertyName))
-					.toInstance(value);
-		}
-	}
+        // use enumeration to include the default properties
+        for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
+            String propertyName = (String) e.nextElement();
+            String value = properties.getProperty(propertyName);
+            binder.bind(String.class)
+                    .annotatedWith(new NamedImpl(propertyName))
+                    .toInstance(value);
+        }
+    }
 }

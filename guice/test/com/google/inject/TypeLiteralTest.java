@@ -34,146 +34,146 @@ import com.google.inject.util.Types;
  */
 public class TypeLiteralTest extends TestCase {
 
-	public void testWithParameterizedType() {
-		TypeLiteral<List<String>> a = new TypeLiteral<List<String>>() {
-		};
-		TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(
-				Types.listOf(String.class)) {
-		};
-		assertEqualsBothWays(a, b);
-	}
+    public void testWithParameterizedType() {
+        TypeLiteral<List<String>> a = new TypeLiteral<List<String>>() {
+        };
+        TypeLiteral<List<String>> b = new TypeLiteral<List<String>>(
+                Types.listOf(String.class)) {
+        };
+        assertEqualsBothWays(a, b);
+    }
 
-	public void testEquality() {
-		TypeLiteral<List<String>> t1 = new TypeLiteral<List<String>>() {
-		};
-		TypeLiteral<List<String>> t2 = new TypeLiteral<List<String>>() {
-		};
-		TypeLiteral<List<Integer>> t3 = new TypeLiteral<List<Integer>>() {
-		};
-		TypeLiteral<String> t4 = new TypeLiteral<String>() {
-		};
+    public void testEquality() {
+        TypeLiteral<List<String>> t1 = new TypeLiteral<List<String>>() {
+        };
+        TypeLiteral<List<String>> t2 = new TypeLiteral<List<String>>() {
+        };
+        TypeLiteral<List<Integer>> t3 = new TypeLiteral<List<Integer>>() {
+        };
+        TypeLiteral<String> t4 = new TypeLiteral<String>() {
+        };
 
-		assertEqualsBothWays(t1, t2);
+        assertEqualsBothWays(t1, t2);
 
-		assertFalse(t2.equals(t3));
-		assertFalse(t3.equals(t2));
+        assertFalse(t2.equals(t3));
+        assertFalse(t3.equals(t2));
 
-		assertFalse(t2.equals(t4));
-		assertFalse(t4.equals(t2));
+        assertFalse(t2.equals(t4));
+        assertFalse(t4.equals(t2));
 
-		TypeLiteral<String> t5 = TypeLiteral.get(String.class);
-		assertEqualsBothWays(t4, t5);
-	}
+        TypeLiteral<String> t5 = TypeLiteral.get(String.class);
+        assertEqualsBothWays(t4, t5);
+    }
 
-	public List<? extends CharSequence> wildcardExtends;
+    public List<? extends CharSequence> wildcardExtends;
 
-	public void testWithWildcardType() throws NoSuchFieldException, IOException {
-		TypeLiteral<?> a = TypeLiteral.get(getClass().getField(
-				"wildcardExtends").getGenericType());
-		TypeLiteral<?> b = TypeLiteral.get(Types.listOf(Types
-				.subtypeOf(CharSequence.class)));
-		TypeLiteral<?> c = new TypeLiteral<List<? extends CharSequence>>() {
-		};
-		assertEqualsBothWays(a, b);
-		assertEqualsBothWays(b, c);
-		assertEquals("java.util.List<? extends java.lang.CharSequence>",
-				a.toString());
-		assertEquals("java.util.List<? extends java.lang.CharSequence>",
-				b.toString());
-		assertEquals("java.util.List<? extends java.lang.CharSequence>",
-				c.toString());
-		assertNotSerializable(a);
-		assertNotSerializable(b);
-		assertNotSerializable(c);
-	}
+    public void testWithWildcardType() throws NoSuchFieldException, IOException {
+        TypeLiteral<?> a = TypeLiteral.get(getClass().getField(
+                "wildcardExtends").getGenericType());
+        TypeLiteral<?> b = TypeLiteral.get(Types.listOf(Types
+                .subtypeOf(CharSequence.class)));
+        TypeLiteral<?> c = new TypeLiteral<List<? extends CharSequence>>() {
+        };
+        assertEqualsBothWays(a, b);
+        assertEqualsBothWays(b, c);
+        assertEquals("java.util.List<? extends java.lang.CharSequence>",
+                a.toString());
+        assertEquals("java.util.List<? extends java.lang.CharSequence>",
+                b.toString());
+        assertEquals("java.util.List<? extends java.lang.CharSequence>",
+                c.toString());
+        assertNotSerializable(a);
+        assertNotSerializable(b);
+        assertNotSerializable(c);
+    }
 
-	public void testMissingTypeParameter() {
-		try {
-			new TypeLiteral() {
-			};
-			fail();
-		} catch (RuntimeException e) { /* expected */
-		}
-	}
+    public void testMissingTypeParameter() {
+        try {
+            new TypeLiteral() {
+            };
+            fail();
+        } catch (RuntimeException e) { /* expected */
+        }
+    }
 
-	public void testTypesInvolvingArraysForEquality() {
-		TypeLiteral<String[]> stringArray = new TypeLiteral<String[]>() {
-		};
-		assertEquals(stringArray, new TypeLiteral<String[]>() {
-		});
+    public void testTypesInvolvingArraysForEquality() {
+        TypeLiteral<String[]> stringArray = new TypeLiteral<String[]>() {
+        };
+        assertEquals(stringArray, new TypeLiteral<String[]>() {
+        });
 
-		TypeLiteral<List<String[]>> listOfStringArray = new TypeLiteral<List<String[]>>() {
-		};
-		assertEquals(listOfStringArray, new TypeLiteral<List<String[]>>() {
-		});
-	}
+        TypeLiteral<List<String[]>> listOfStringArray = new TypeLiteral<List<String[]>>() {
+        };
+        assertEquals(listOfStringArray, new TypeLiteral<List<String[]>>() {
+        });
+    }
 
-	public void testEqualityOfGenericArrayAndClassArray() {
-		TypeLiteral<String[]> arrayAsClass = TypeLiteral.get(String[].class);
-		TypeLiteral<String[]> arrayAsType = new TypeLiteral<String[]>() {
-		};
-		assertEquals(arrayAsClass, arrayAsType);
-	}
+    public void testEqualityOfGenericArrayAndClassArray() {
+        TypeLiteral<String[]> arrayAsClass = TypeLiteral.get(String[].class);
+        TypeLiteral<String[]> arrayAsType = new TypeLiteral<String[]>() {
+        };
+        assertEquals(arrayAsClass, arrayAsType);
+    }
 
-	public void testEqualityOfMultidimensionalGenericArrayAndClassArray() {
-		TypeLiteral<String[][][]> arrayAsClass = TypeLiteral
-				.get(String[][][].class);
-		TypeLiteral<String[][][]> arrayAsType = new TypeLiteral<String[][][]>() {
-		};
-		assertEquals(arrayAsClass, arrayAsType);
-	}
+    public void testEqualityOfMultidimensionalGenericArrayAndClassArray() {
+        TypeLiteral<String[][][]> arrayAsClass = TypeLiteral
+                .get(String[][][].class);
+        TypeLiteral<String[][][]> arrayAsType = new TypeLiteral<String[][][]>() {
+        };
+        assertEquals(arrayAsClass, arrayAsType);
+    }
 
-	/**
-	 * Unlike Key, TypeLiteral retains full type information and differentiates
-	 * between {@code int.class} and {@code Integer.class}.
-	 */
-	public void testDifferentiationBetweenWrappersAndPrimitives() {
-		Class[] primitives = new Class[] { boolean.class, byte.class,
-				short.class, int.class, long.class, float.class, double.class,
-				char.class, void.class };
-		Class[] wrappers = new Class[] { Boolean.class, Byte.class,
-				Short.class, Integer.class, Long.class, Float.class,
-				Double.class, Character.class, Void.class };
+    /**
+     * Unlike Key, TypeLiteral retains full type information and differentiates
+     * between {@code int.class} and {@code Integer.class}.
+     */
+    public void testDifferentiationBetweenWrappersAndPrimitives() {
+        Class[] primitives = new Class[] { boolean.class, byte.class,
+                short.class, int.class, long.class, float.class, double.class,
+                char.class, void.class };
+        Class[] wrappers = new Class[] { Boolean.class, Byte.class,
+                Short.class, Integer.class, Long.class, Float.class,
+                Double.class, Character.class, Void.class };
 
-		for (int t = 0; t < primitives.length; t++) {
-			@SuppressWarnings("unchecked")
-			TypeLiteral primitiveTl = TypeLiteral.get(primitives[t]);
-			@SuppressWarnings("unchecked")
-			TypeLiteral wrapperTl = TypeLiteral.get(wrappers[t]);
+        for (int t = 0; t < primitives.length; t++) {
+            @SuppressWarnings("unchecked")
+            TypeLiteral primitiveTl = TypeLiteral.get(primitives[t]);
+            @SuppressWarnings("unchecked")
+            TypeLiteral wrapperTl = TypeLiteral.get(wrappers[t]);
 
-			assertFalse(primitiveTl.equals(wrapperTl));
-			assertEquals(primitives[t], primitiveTl.getType());
-			assertEquals(wrappers[t], wrapperTl.getType());
-			assertEquals(primitives[t], primitiveTl.getRawType());
-			assertEquals(wrappers[t], wrapperTl.getRawType());
-		}
-	}
+            assertFalse(primitiveTl.equals(wrapperTl));
+            assertEquals(primitives[t], primitiveTl.getType());
+            assertEquals(wrappers[t], wrapperTl.getType());
+            assertEquals(primitives[t], primitiveTl.getRawType());
+            assertEquals(wrappers[t], wrapperTl.getRawType());
+        }
+    }
 
-	public void testSerialization() throws IOException {
-		assertNotSerializable(new TypeLiteral<List<String>>() {
-		});
-	}
+    public void testSerialization() throws IOException {
+        assertNotSerializable(new TypeLiteral<List<String>>() {
+        });
+    }
 
-	public void testTypeVariableWithNoBound() {
-		TypeVariable<Class<HasTypeParameters>>[] typeVariables = HasTypeParameters.class
-				.getTypeParameters();
+    public void testTypeVariableWithNoBound() {
+        TypeVariable<Class<HasTypeParameters>>[] typeVariables = HasTypeParameters.class
+                .getTypeParameters();
 
-		TypeLiteral<?> aTl = TypeLiteral.get(typeVariables[0]);
-		assertEquals(Object.class, aTl.getRawType());
-		assertEquals("A", aTl.toString());
-		TypeVariable<?> aTv = (TypeVariable) aTl.getType();
-		assertEquals(HasTypeParameters.class, aTv.getGenericDeclaration());
-		assertEquals("A", aTv.getName());
-		assertEquals(ImmutableList.<Type> of(Object.class),
-				ImmutableList.copyOf(aTv.getBounds()));
-		assertEquals("A", aTv.toString());
-		assertEqualsBothWays(aTl,
-				TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[0]));
-	}
+        TypeLiteral<?> aTl = TypeLiteral.get(typeVariables[0]);
+        assertEquals(Object.class, aTl.getRawType());
+        assertEquals("A", aTl.toString());
+        TypeVariable<?> aTv = (TypeVariable) aTl.getType();
+        assertEquals(HasTypeParameters.class, aTv.getGenericDeclaration());
+        assertEquals("A", aTv.getName());
+        assertEquals(ImmutableList.<Type> of(Object.class),
+                ImmutableList.copyOf(aTv.getBounds()));
+        assertEquals("A", aTv.toString());
+        assertEqualsBothWays(aTl,
+                TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[0]));
+    }
 
-	class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
-		A a;
-		B b;
-		C c;
-	}
+    class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {
+        A a;
+        B b;
+        C c;
+    }
 }

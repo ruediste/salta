@@ -33,5 +33,5 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
 @BindingAnnotation
 public @interface Named {
-  String value();
+    String value();
 }

@@ -32,8 +32,8 @@ import java.util.function.Supplier;
 @Target(TYPE)
 public @interface ProvidedBy {
 
-	/**
-	 * The implementation type.
-	 */
-	Class<? extends Supplier<?>> value();
+    /**
+     * The implementation type.
+     */
+    Class<? extends Supplier<?>> value();
 }

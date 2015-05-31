@@ -23,26 +23,26 @@ package com.google.inject;
  */
 public enum Stage {
 
-	/**
-	 * We want fast startup times at the expense of runtime performance and some
-	 * up front error checking.
-	 */
-	DEVELOPMENT(com.github.ruediste.salta.standard.Stage.DEVELOPMENT),
+    /**
+     * We want fast startup times at the expense of runtime performance and some
+     * up front error checking.
+     */
+    DEVELOPMENT(com.github.ruediste.salta.standard.Stage.DEVELOPMENT),
 
-	/**
-	 * We want to catch errors as early as possible and take performance hits up
-	 * front.
-	 */
-	PRODUCTION(com.github.ruediste.salta.standard.Stage.PRODUCTION);
+    /**
+     * We want to catch errors as early as possible and take performance hits up
+     * front.
+     */
+    PRODUCTION(com.github.ruediste.salta.standard.Stage.PRODUCTION);
 
-	private final com.github.ruediste.salta.standard.Stage saltaStage;
+    private final com.github.ruediste.salta.standard.Stage saltaStage;
 
-	private Stage(com.github.ruediste.salta.standard.Stage saltaStage) {
-		this.saltaStage = saltaStage;
+    private Stage(com.github.ruediste.salta.standard.Stage saltaStage) {
+        this.saltaStage = saltaStage;
 
-	}
+    }
 
-	public com.github.ruediste.salta.standard.Stage getSaltaStage() {
-		return saltaStage;
-	}
+    public com.github.ruediste.salta.standard.Stage getSaltaStage() {
+        return saltaStage;
+    }
 }

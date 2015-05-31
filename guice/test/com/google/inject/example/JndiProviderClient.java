@@ -29,16 +29,16 @@ import javax.sql.DataSource;
 
 class JndiProviderClient {
 
-  public static void main(String[] args) throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-// Bind Context to the default InitialContext.
-bind(Context.class).to(InitialContext.class);
+    public static void main(String[] args) throws CreationException {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            protected void configure() {
+                // Bind Context to the default InitialContext.
+                bind(Context.class).to(InitialContext.class);
 
-// Bind to DataSource from JNDI.
-bind(DataSource.class)
-    .toProvider(fromJndi(DataSource.class, "..."));
-      }
-    });
-  }
+                // Bind to DataSource from JNDI.
+                bind(DataSource.class).toProvider(
+                        fromJndi(DataSource.class, "..."));
+            }
+        });
+    }
 }

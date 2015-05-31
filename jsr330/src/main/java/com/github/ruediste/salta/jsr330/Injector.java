@@ -28,108 +28,108 @@ import com.google.common.reflect.TypeToken;
 
 public interface Injector {
 
-	/**
-	 * Injects dependencies into the fields and methods of {@code instance}.
-	 * Ignores the presence or absence of an injectable constructor.
-	 *
-	 * <p>
-	 * Whenever Salta creates an instance, it performs this injection
-	 * automatically (after first performing constructor injection), so if
-	 * you're able to let Salta create all your objects for you, you'll never
-	 * need to use this method.
-	 *
-	 * @param instance
-	 *            to inject members on
-	 *
-	 * @see Binder#getMembersInjector(Class) for a preferred alternative that
-	 *      supports checks before run time
-	 */
-	void injectMembers(Object instance);
+    /**
+     * Injects dependencies into the fields and methods of {@code instance}.
+     * Ignores the presence or absence of an injectable constructor.
+     *
+     * <p>
+     * Whenever Salta creates an instance, it performs this injection
+     * automatically (after first performing constructor injection), so if
+     * you're able to let Salta create all your objects for you, you'll never
+     * need to use this method.
+     *
+     * @param instance
+     *            to inject members on
+     *
+     * @see Binder#getMembersInjector(Class) for a preferred alternative that
+     *      supports checks before run time
+     */
+    void injectMembers(Object instance);
 
-	<T> void injectMembers(TypeToken<T> type, T instance);
+    <T> void injectMembers(TypeToken<T> type, T instance);
 
-	/**
-	 * Create a token to access the value which makes sure that the members of
-	 * the value are injected when {@link MembersInjectionToken#getValue()}
-	 * returns. Only a single token for a single value (compared by identity) is
-	 * ever created.
-	 */
-	<T> MembersInjectionToken<T> getMembersInjectionToken(T value);
+    /**
+     * Create a token to access the value which makes sure that the members of
+     * the value are injected when {@link MembersInjectionToken#getValue()}
+     * returns. Only a single token for a single value (compared by identity) is
+     * ever created.
+     */
+    <T> MembersInjectionToken<T> getMembersInjectionToken(T value);
 
-	/**
-	 * Create a token to access the value which makes sure that the members of
-	 * the value are injected when {@link MembersInjectionToken#getValue()}
-	 * returns. Only a single token for a single value (compared by identity) is
-	 * ever created.
-	 */
-	<T> MembersInjectionToken<T> getMembersInjectionToken(T value,
-			TypeToken<T> type);
+    /**
+     * Create a token to access the value which makes sure that the members of
+     * the value are injected when {@link MembersInjectionToken#getValue()}
+     * returns. Only a single token for a single value (compared by identity) is
+     * ever created.
+     */
+    <T> MembersInjectionToken<T> getMembersInjectionToken(T value,
+            TypeToken<T> type);
 
-	/**
-	 * Returns the members injector used to inject dependencies into methods and
-	 * fields on instances of the given type {@code T}.
-	 *
-	 * @param typeLiteral
-	 *            type to get members injector for
-	 * @see Binder#getMembersInjector(TypeToken) for an alternative that offers
-	 *      up front error detection
-	 * @since 2.0
-	 */
-	<T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral);
+    /**
+     * Returns the members injector used to inject dependencies into methods and
+     * fields on instances of the given type {@code T}.
+     *
+     * @param typeLiteral
+     *            type to get members injector for
+     * @see Binder#getMembersInjector(TypeToken) for an alternative that offers
+     *      up front error detection
+     * @since 2.0
+     */
+    <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral);
 
-	/**
-	 * Returns the members injector used to inject dependencies into methods and
-	 * fields on instances of the given type {@code T}. When feasible, use
-	 * {@link Binder#getMembersInjector(TypeToken)} instead to get increased up
-	 * front error detection.
-	 *
-	 * @param type
-	 *            type to get members injector for
-	 * @see Binder#getMembersInjector(Class) for an alternative that offers up
-	 *      front error detection
-	 * @since 2.0
-	 */
-	<T> MembersInjector<T> getMembersInjector(Class<T> type);
+    /**
+     * Returns the members injector used to inject dependencies into methods and
+     * fields on instances of the given type {@code T}. When feasible, use
+     * {@link Binder#getMembersInjector(TypeToken)} instead to get increased up
+     * front error detection.
+     *
+     * @param type
+     *            type to get members injector for
+     * @see Binder#getMembersInjector(Class) for an alternative that offers up
+     *      front error detection
+     * @since 2.0
+     */
+    <T> MembersInjector<T> getMembersInjector(Class<T> type);
 
-	/**
-	 * Returns the provider used to obtain instances for the given injection
-	 * key. When feasible, avoid using this method, in favor of having Salta
-	 * inject your dependencies ahead of time.
-	 *
-	 * @see Binder#getProvider(CoreDependencyKey) for an alternative that offers
-	 *      up front error detection
-	 */
-	<T> Provider<T> getProvider(CoreDependencyKey<T> key);
+    /**
+     * Returns the provider used to obtain instances for the given injection
+     * key. When feasible, avoid using this method, in favor of having Salta
+     * inject your dependencies ahead of time.
+     *
+     * @see Binder#getProvider(CoreDependencyKey) for an alternative that offers
+     *      up front error detection
+     */
+    <T> Provider<T> getProvider(CoreDependencyKey<T> key);
 
-	/**
-	 * Returns the provider used to obtain instances for the given type. When
-	 * feasible, avoid using this method, in favor of having Salta inject your
-	 * dependencies ahead of time.
-	 *
-	 * @see Binder#getProvider(Class) for an alternative that offers up front
-	 *      error detection
-	 */
-	<T> Provider<T> getProvider(Class<T> type);
+    /**
+     * Returns the provider used to obtain instances for the given type. When
+     * feasible, avoid using this method, in favor of having Salta inject your
+     * dependencies ahead of time.
+     *
+     * @see Binder#getProvider(Class) for an alternative that offers up front
+     *      error detection
+     */
+    <T> Provider<T> getProvider(Class<T> type);
 
-	/**
-	 * Returns the appropriate instance for the given injection key; equivalent
-	 * to {@code getProvider(key).get()}. When feasible, avoid using this
-	 * method, in favor of having Salta inject your dependencies ahead of time.
-	 *
-	 * @throws SaltaException
-	 *             if there was a runtime failure while providing an instance.
-	 */
-	<T> T getInstance(CoreDependencyKey<T> key);
+    /**
+     * Returns the appropriate instance for the given injection key; equivalent
+     * to {@code getProvider(key).get()}. When feasible, avoid using this
+     * method, in favor of having Salta inject your dependencies ahead of time.
+     *
+     * @throws SaltaException
+     *             if there was a runtime failure while providing an instance.
+     */
+    <T> T getInstance(CoreDependencyKey<T> key);
 
-	/**
-	 * Returns the appropriate instance for the given injection type; equivalent
-	 * to {@code getProvider(type).get()}. When feasible, avoid using this
-	 * method, in favor of having Salta inject your dependencies ahead of time.
-	 *
-	 * @throws SaltaException
-	 *             if there was a runtime failure while providing an instance.
-	 */
-	<T> T getInstance(Class<T> type);
+    /**
+     * Returns the appropriate instance for the given injection type; equivalent
+     * to {@code getProvider(type).get()}. When feasible, avoid using this
+     * method, in favor of having Salta inject your dependencies ahead of time.
+     *
+     * @throws SaltaException
+     *             if there was a runtime failure while providing an instance.
+     */
+    <T> T getInstance(Class<T> type);
 
-	StandardInjector getDelegate();
+    StandardInjector getDelegate();
 }

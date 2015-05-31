@@ -1,13 +1,13 @@
 package com.github.ruediste.simpledi.standard.util.testPackageA;
 
 public abstract class TestClassA {
-	abstract void a();
+    abstract void a();
 
-	void ab() {
-	}
+    void ab() {
+    }
 
-	abstract void ac();
+    abstract void ac();
 
-	abstract void ad();
+    abstract void ad();
 
 }

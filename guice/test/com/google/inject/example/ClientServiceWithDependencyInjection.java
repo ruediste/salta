@@ -23,73 +23,76 @@ import static junit.framework.Assert.assertTrue;
  */
 public class ClientServiceWithDependencyInjection {
 
-// 62 lines
+    // 62 lines
 
-public interface Service {
-  void go();
-}
+    public interface Service {
+        void go();
+    }
 
-public static class ServiceImpl implements ClientServiceWithDependencyInjection.Service {
-  public void go() {
-    // ...
-  }
-}
+    public static class ServiceImpl implements
+            ClientServiceWithDependencyInjection.Service {
+        public void go() {
+            // ...
+        }
+    }
 
-public static class ServiceFactory {
+    public static class ServiceFactory {
 
-  private ServiceFactory() {}
+        private ServiceFactory() {
+        }
 
-  private static final Service service = new ServiceImpl();
+        private static final Service service = new ServiceImpl();
 
-  public static Service getInstance() {
-    return service;
-  }
-}
+        public static Service getInstance() {
+            return service;
+        }
+    }
 
-public static class Client {
+    public static class Client {
 
-  private final Service service;
+        private final Service service;
 
-  public Client(Service service) {
-    this.service = service;
-  }
+        public Client(Service service) {
+            this.service = service;
+        }
 
-  public void go() {
-    service.go();
-  }
-}
+        public void go() {
+            service.go();
+        }
+    }
 
-public static class ClientFactory {
+    public static class ClientFactory {
 
-  private ClientFactory() {}
+        private ClientFactory() {
+        }
 
-  public static Client getInstance() {
-    Service service = ServiceFactory.getInstance();
-    return new Client(service);
-  }
-}
+        public static Client getInstance() {
+            Service service = ServiceFactory.getInstance();
+            return new Client(service);
+        }
+    }
 
-public void testClient() {
-  MockService mock = new MockService();
-  Client client = new Client(mock);
-  client.go();
-  assertTrue(mock.isGone());
-}
+    public void testClient() {
+        MockService mock = new MockService();
+        Client client = new Client(mock);
+        client.go();
+        assertTrue(mock.isGone());
+    }
 
-public static class MockService implements Service {
+    public static class MockService implements Service {
 
-  private boolean gone = false;
+        private boolean gone = false;
 
-  public void go() {
-    gone = true;
-  }
+        public void go() {
+            gone = true;
+        }
 
-  public boolean isGone() {
-    return gone;
-  }
-}
+        public boolean isGone() {
+            return gone;
+        }
+    }
 
-  public static void main(String[] args) {
-    new ClientServiceWithDependencyInjection().testClient();
-  }
+    public static void main(String[] args) {
+        new ClientServiceWithDependencyInjection().testClient();
+    }
 }

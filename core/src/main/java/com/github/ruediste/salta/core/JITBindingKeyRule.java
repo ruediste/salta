@@ -6,5 +6,5 @@ package com.github.ruediste.salta.core;
  * object in order.
  */
 public interface JITBindingKeyRule {
-	void apply(CoreDependencyKey<?> dependency, JITBindingKey key);
+    void apply(CoreDependencyKey<?> dependency, JITBindingKey key);
 }

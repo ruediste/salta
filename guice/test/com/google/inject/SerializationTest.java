@@ -32,40 +32,40 @@ import com.github.ruediste.salta.core.SaltaException;
  */
 public class SerializationTest extends TestCase {
 
-	public void testAbstractModuleIsSerializable() throws IOException {
-		Asserts.reserialize(new MyAbstractModule());
-	}
+    public void testAbstractModuleIsSerializable() throws IOException {
+        Asserts.reserialize(new MyAbstractModule());
+    }
 
-	static class MyAbstractModule extends AbstractModule implements
-			Serializable {
-		@Override
-		protected void configure() {
-		}
-	}
+    static class MyAbstractModule extends AbstractModule implements
+            Serializable {
+        @Override
+        protected void configure() {
+        }
+    }
 
-	public void testCreationExceptionIsSerializable() throws IOException {
-		assertSimilarWhenReserialized(createCreationException());
-	}
+    public void testCreationExceptionIsSerializable() throws IOException {
+        assertSimilarWhenReserialized(createCreationException());
+    }
 
-	private SaltaException createCreationException() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(List.class);
-				}
-			}).getInstance(List.class);
-			throw new AssertionFailedError();
-		} catch (SaltaException e) {
-			return e;
-		}
-	}
+    private SaltaException createCreationException() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(List.class);
+                }
+            }).getInstance(List.class);
+            throw new AssertionFailedError();
+        } catch (SaltaException e) {
+            return e;
+        }
+    }
 
-	static class A {
-		@Inject
-		B b;
-	}
+    static class A {
+        @Inject
+        B b;
+    }
 
-	static class B {
-	}
+    static class B {
+    }
 }

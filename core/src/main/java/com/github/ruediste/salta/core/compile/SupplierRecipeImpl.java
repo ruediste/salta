@@ -12,20 +12,20 @@ import org.objectweb.asm.commons.Method;
  */
 public class SupplierRecipeImpl extends SupplierRecipe {
 
-	private Supplier<Object> supplier;
+    private Supplier<Object> supplier;
 
-	public SupplierRecipeImpl(Supplier<Object> supplier) {
-		this.supplier = supplier;
-	}
+    public SupplierRecipeImpl(Supplier<Object> supplier) {
+        this.supplier = supplier;
+    }
 
-	@Override
-	protected Class<?> compileImpl(GeneratorAdapter mv,
-			MethodCompilationContext ctx) {
-		ctx.addFieldAndLoad(Supplier.class, supplier);
-		mv.invokeInterface(Type.getType(Supplier.class),
-				Method.getMethod("Object get()"));
+    @Override
+    protected Class<?> compileImpl(GeneratorAdapter mv,
+            MethodCompilationContext ctx) {
+        ctx.addFieldAndLoad(Supplier.class, supplier);
+        mv.invokeInterface(Type.getType(Supplier.class),
+                Method.getMethod("Object get()"));
 
-		return Object.class;
-	}
+        return Object.class;
+    }
 
 }

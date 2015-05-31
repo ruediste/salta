@@ -35,104 +35,104 @@ import com.google.inject.internal.Errors;
  * 
  * <pre>
  * try {
- * 	bindPropertiesFromFile();
+ *     bindPropertiesFromFile();
  * } catch (IOException e) {
- * 	addError(e);
+ *     addError(e);
  * }
  * </pre>
  *
  * @author crazybob@google.com (Bob Lee)
  */
 public final class Message implements Serializable {
-	private final String message;
-	private final Throwable cause;
-	private final List<Object> sources;
+    private final String message;
+    private final Throwable cause;
+    private final List<Object> sources;
 
-	/**
-	 * @since 2.0
-	 */
-	public Message(List<Object> sources, String message, Throwable cause) {
-		this.sources = ImmutableList.copyOf(sources);
-		this.message = checkNotNull(message, "message");
-		this.cause = cause;
-	}
+    /**
+     * @since 2.0
+     */
+    public Message(List<Object> sources, String message, Throwable cause) {
+        this.sources = ImmutableList.copyOf(sources);
+        this.message = checkNotNull(message, "message");
+        this.cause = cause;
+    }
 
-	/**
-	 * @since 4.0
-	 */
-	public Message(String message, Throwable cause) {
-		this(ImmutableList.of(), message, cause);
-	}
+    /**
+     * @since 4.0
+     */
+    public Message(String message, Throwable cause) {
+        this(ImmutableList.of(), message, cause);
+    }
 
-	public Message(Object source, String message) {
-		this(ImmutableList.of(source), message, null);
-	}
+    public Message(Object source, String message) {
+        this(ImmutableList.of(source), message, null);
+    }
 
-	public Message(String message) {
-		this(ImmutableList.of(), message, null);
-	}
+    public Message(String message) {
+        this(ImmutableList.of(), message, null);
+    }
 
-	/** @since 2.0 */
-	public List<Object> getSources() {
-		return sources;
-	}
+    /** @since 2.0 */
+    public List<Object> getSources() {
+        return sources;
+    }
 
-	/**
-	 * Gets the error message text.
-	 */
-	public String getMessage() {
-		return message;
-	}
+    /**
+     * Gets the error message text.
+     */
+    public String getMessage() {
+        return message;
+    }
 
-	/**
-	 * Returns the throwable that caused this message, or {@code null} if this
-	 * message was not caused by a throwable.
-	 *
-	 * @since 2.0
-	 */
-	public Throwable getCause() {
-		return cause;
-	}
+    /**
+     * Returns the throwable that caused this message, or {@code null} if this
+     * message was not caused by a throwable.
+     *
+     * @since 2.0
+     */
+    public Throwable getCause() {
+        return cause;
+    }
 
-	@Override
-	public String toString() {
-		return message;
-	}
+    @Override
+    public String toString() {
+        return message;
+    }
 
-	@Override
-	public int hashCode() {
-		return message.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return message.hashCode();
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof Message)) {
-			return false;
-		}
-		Message e = (Message) o;
-		return message.equals(e.message) && Objects.equal(cause, e.cause)
-				&& sources.equals(e.sources);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Message)) {
+            return false;
+        }
+        Message e = (Message) o;
+        return message.equals(e.message) && Objects.equal(cause, e.cause)
+                && sources.equals(e.sources);
+    }
 
-	/** @since 2.0 */
-	public void applyTo(Binder binder) {
-		binder.addError(this);
-	}
+    /** @since 2.0 */
+    public void applyTo(Binder binder) {
+        binder.addError(this);
+    }
 
-	/**
-	 * When serialized, we eagerly convert sources to strings. This hurts our
-	 * formatting, but it guarantees that the receiving end will be able to read
-	 * the message.
-	 */
-	private Object writeReplace() throws ObjectStreamException {
-		Object[] sourcesAsStrings = sources.toArray();
-		for (int i = 0; i < sourcesAsStrings.length; i++) {
-			sourcesAsStrings[i] = Errors.convert(sourcesAsStrings[i])
-					.toString();
-		}
-		return new Message(ImmutableList.copyOf(sourcesAsStrings), message,
-				cause);
-	}
+    /**
+     * When serialized, we eagerly convert sources to strings. This hurts our
+     * formatting, but it guarantees that the receiving end will be able to read
+     * the message.
+     */
+    private Object writeReplace() throws ObjectStreamException {
+        Object[] sourcesAsStrings = sources.toArray();
+        for (int i = 0; i < sourcesAsStrings.length; i++) {
+            sourcesAsStrings[i] = Errors.convert(sourcesAsStrings[i])
+                    .toString();
+        }
+        return new Message(ImmutableList.copyOf(sourcesAsStrings), message,
+                cause);
+    }
 
-	private static final long serialVersionUID = 0;
+    private static final long serialVersionUID = 0;
 }

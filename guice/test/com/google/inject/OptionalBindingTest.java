@@ -33,306 +33,306 @@ import com.google.inject.name.Names;
  */
 public class OptionalBindingTest extends TestCase {
 
-	private static final A injectA = new A() {
-	};
-	private static final B injectB = new B() {
-	};
-	private static final C injectC = new C() {
-	};
-	private static final D injectD = new D() {
-	};
-	private static final E injectE = new E() {
-	};
-	private static final F injectF = new F() {
-	};
-	private static final G injectG = new G() {
-	};
+    private static final A injectA = new A() {
+    };
+    private static final B injectB = new B() {
+    };
+    private static final C injectC = new C() {
+    };
+    private static final D injectD = new D() {
+    };
+    private static final E injectE = new E() {
+    };
+    private static final F injectF = new F() {
+    };
+    private static final G injectG = new G() {
+    };
 
-	private Module everythingModule = new AbstractModule() {
-		@Override
-		protected void configure() {
-			bind(A.class).toInstance(injectA);
-			bind(B.class).toInstance(injectB);
-			bind(C.class).toInstance(injectC);
-			bind(D.class).toInstance(injectD);
-			bind(E.class).annotatedWith(Names.named("e")).toInstance(injectE);
-			bind(F.class).toInstance(injectF);
-			bind(G.class).toInstance(injectG);
-		}
-	};
+    private Module everythingModule = new AbstractModule() {
+        @Override
+        protected void configure() {
+            bind(A.class).toInstance(injectA);
+            bind(B.class).toInstance(injectB);
+            bind(C.class).toInstance(injectC);
+            bind(D.class).toInstance(injectD);
+            bind(E.class).annotatedWith(Names.named("e")).toInstance(injectE);
+            bind(F.class).toInstance(injectF);
+            bind(G.class).toInstance(injectG);
+        }
+    };
 
-	private Module partialModule = new AbstractModule() {
-		@Override
-		protected void configure() {
-			bind(C.class).toInstance(new C() {
-			});
-		}
-	};
+    private Module partialModule = new AbstractModule() {
+        @Override
+        protected void configure() {
+            bind(C.class).toInstance(new C() {
+            });
+        }
+    };
 
-	private Module toInstanceModule = new AbstractModule() {
-		@Override
-		protected void configure() {
-			bind(HasOptionalInjections.class).toInstance(
-					new HasOptionalInjections());
-		}
-	};
+    private Module toInstanceModule = new AbstractModule() {
+        @Override
+        protected void configure() {
+            bind(HasOptionalInjections.class).toInstance(
+                    new HasOptionalInjections());
+        }
+    };
 
-	private Module toProviderInstanceModule = new AbstractModule() {
-		@Override
-		protected void configure() {
-			bind(HasOptionalInjections.class).toProvider(
-					new HasOptionalInjectionsProvider());
-		}
-	};
+    private Module toProviderInstanceModule = new AbstractModule() {
+        @Override
+        protected void configure() {
+            bind(HasOptionalInjections.class).toProvider(
+                    new HasOptionalInjectionsProvider());
+        }
+    };
 
-	private Module toProviderModule = new AbstractModule() {
-		@Override
-		protected void configure() {
-			bind(HasOptionalInjections.class).toProvider(
-					HasOptionalInjectionsProvider.class);
-		}
-	};
+    private Module toProviderModule = new AbstractModule() {
+        @Override
+        protected void configure() {
+            bind(HasOptionalInjections.class).toProvider(
+                    HasOptionalInjectionsProvider.class);
+        }
+    };
 
-	public void testEverythingInjectorGetInstance() {
-		Guice.createInjector(everythingModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertEverythingInjected();
-	}
+    public void testEverythingInjectorGetInstance() {
+        Guice.createInjector(everythingModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertEverythingInjected();
+    }
 
-	public void testPartialInjectorGetInstance() {
-		Guice.createInjector(partialModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertNothingInjected();
-	}
+    public void testPartialInjectorGetInstance() {
+        Guice.createInjector(partialModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertNothingInjected();
+    }
 
-	public void testNothingInjectorGetInstance() {
-		Guice.createInjector().getInstance(HasOptionalInjections.class)
-				.assertNothingInjected();
-	}
+    public void testNothingInjectorGetInstance() {
+        Guice.createInjector().getInstance(HasOptionalInjections.class)
+                .assertNothingInjected();
+    }
 
-	public void testEverythingInjectorInjectMembers() {
-		HasOptionalInjections instance = new HasOptionalInjections();
-		Guice.createInjector(everythingModule).injectMembers(instance);
-		instance.assertEverythingInjected();
-	}
+    public void testEverythingInjectorInjectMembers() {
+        HasOptionalInjections instance = new HasOptionalInjections();
+        Guice.createInjector(everythingModule).injectMembers(instance);
+        instance.assertEverythingInjected();
+    }
 
-	public void testPartialInjectorInjectMembers() {
-		HasOptionalInjections instance = new HasOptionalInjections();
-		Guice.createInjector(partialModule).injectMembers(instance);
-		instance.assertNothingInjected();
-	}
+    public void testPartialInjectorInjectMembers() {
+        HasOptionalInjections instance = new HasOptionalInjections();
+        Guice.createInjector(partialModule).injectMembers(instance);
+        instance.assertNothingInjected();
+    }
 
-	public void testNothingInjectorInjectMembers() {
-		HasOptionalInjections instance = new HasOptionalInjections();
-		Guice.createInjector().injectMembers(instance);
-		instance.assertNothingInjected();
-	}
+    public void testNothingInjectorInjectMembers() {
+        HasOptionalInjections instance = new HasOptionalInjections();
+        Guice.createInjector().injectMembers(instance);
+        instance.assertNothingInjected();
+    }
 
-	public void testEverythingInjectorToInstance() {
-		Guice.createInjector(everythingModule, toInstanceModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertEverythingInjected();
-	}
+    public void testEverythingInjectorToInstance() {
+        Guice.createInjector(everythingModule, toInstanceModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertEverythingInjected();
+    }
 
-	public void testPartialInjectorToInstance() {
-		Guice.createInjector(partialModule, toInstanceModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertNothingInjected();
-	}
+    public void testPartialInjectorToInstance() {
+        Guice.createInjector(partialModule, toInstanceModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertNothingInjected();
+    }
 
-	public void testNothingInjectorToInstance() {
-		Guice.createInjector(toInstanceModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertNothingInjected();
-	}
+    public void testNothingInjectorToInstance() {
+        Guice.createInjector(toInstanceModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertNothingInjected();
+    }
 
-	public void testEverythingInjectorToProviderInstance() {
-		Guice.createInjector(everythingModule, toProviderInstanceModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertEverythingInjected();
-	}
+    public void testEverythingInjectorToProviderInstance() {
+        Guice.createInjector(everythingModule, toProviderInstanceModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertEverythingInjected();
+    }
 
-	public void testPartialInjectorToProviderInstance() {
-		Guice.createInjector(partialModule, toProviderInstanceModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertNothingInjected();
-	}
+    public void testPartialInjectorToProviderInstance() {
+        Guice.createInjector(partialModule, toProviderInstanceModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertNothingInjected();
+    }
 
-	public void testNothingInjectorToProviderInstance() {
-		Guice.createInjector(toProviderInstanceModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertNothingInjected();
-	}
+    public void testNothingInjectorToProviderInstance() {
+        Guice.createInjector(toProviderInstanceModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertNothingInjected();
+    }
 
-	public void testEverythingInjectorToProvider() {
-		Guice.createInjector(everythingModule, toProviderModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertEverythingInjected();
-	}
+    public void testEverythingInjectorToProvider() {
+        Guice.createInjector(everythingModule, toProviderModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertEverythingInjected();
+    }
 
-	public void testPartialInjectorToProvider() {
-		Guice.createInjector(partialModule, toProviderModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertNothingInjected();
-	}
+    public void testPartialInjectorToProvider() {
+        Guice.createInjector(partialModule, toProviderModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertNothingInjected();
+    }
 
-	public void testNothingInjectorToProvider() {
-		Guice.createInjector(toProviderModule)
-				.getInstance(HasOptionalInjections.class)
-				.assertNothingInjected();
-	}
+    public void testNothingInjectorToProvider() {
+        Guice.createInjector(toProviderModule)
+                .getInstance(HasOptionalInjections.class)
+                .assertNothingInjected();
+    }
 
-	static class HasOptionalInjections {
-		A originalA = new A() {
-		};
-		@Inject(optional = true)
-		A a = originalA; // field injection
-		B b; // method injection with one argument
-		C c; // method injection with two arguments
-		D d; // method injection with two arguments
-		E e; // annotated injection
-		@Inject(optional = true)
-		Provider<F> fProvider; // provider
-		Provider<G> gProvider; // method injection of provider
-		boolean invoked0, invoked1, invoked2, invokedAnnotated, invokeProvider;
+    static class HasOptionalInjections {
+        A originalA = new A() {
+        };
+        @Inject(optional = true)
+        A a = originalA; // field injection
+        B b; // method injection with one argument
+        C c; // method injection with two arguments
+        D d; // method injection with two arguments
+        E e; // annotated injection
+        @Inject(optional = true)
+        Provider<F> fProvider; // provider
+        Provider<G> gProvider; // method injection of provider
+        boolean invoked0, invoked1, invoked2, invokedAnnotated, invokeProvider;
 
-		@Inject(optional = true)
-		void methodInjectZeroArguments() {
-			invoked0 = true;
-		}
+        @Inject(optional = true)
+        void methodInjectZeroArguments() {
+            invoked0 = true;
+        }
 
-		@Inject(optional = true)
-		void methodInjectOneArgument(B b) {
-			this.b = b;
-			invoked1 = true;
-		}
+        @Inject(optional = true)
+        void methodInjectOneArgument(B b) {
+            this.b = b;
+            invoked1 = true;
+        }
 
-		@Inject(optional = true)
-		void methodInjectTwoArguments(C c, D d) {
-			this.c = c;
-			this.d = d;
-			invoked2 = true;
-		}
+        @Inject(optional = true)
+        void methodInjectTwoArguments(C c, D d) {
+            this.c = c;
+            this.d = d;
+            invoked2 = true;
+        }
 
-		@Inject(optional = true)
-		void methodInjectAnnotated(@Named("e") E e) {
-			this.e = e;
-			invokedAnnotated = true;
-		}
+        @Inject(optional = true)
+        void methodInjectAnnotated(@Named("e") E e) {
+            this.e = e;
+            invokedAnnotated = true;
+        }
 
-		@Inject(optional = true)
-		void methodInjectProvider(Provider<G> gProvider) {
-			this.gProvider = gProvider;
-			invokeProvider = true;
-		}
+        @Inject(optional = true)
+        void methodInjectProvider(Provider<G> gProvider) {
+            this.gProvider = gProvider;
+            invokeProvider = true;
+        }
 
-		void assertNothingInjected() {
-			assertSame(originalA, a);
-			assertNull(b);
-			assertNull(c);
-			assertNull(d);
-			assertNull(e);
-			assertNull(fProvider);
-			assertNull(gProvider);
-			assertTrue(invoked0);
-			assertFalse(invoked1);
-			assertFalse(invoked2);
-			assertFalse(invokedAnnotated);
-		}
+        void assertNothingInjected() {
+            assertSame(originalA, a);
+            assertNull(b);
+            assertNull(c);
+            assertNull(d);
+            assertNull(e);
+            assertNull(fProvider);
+            assertNull(gProvider);
+            assertTrue(invoked0);
+            assertFalse(invoked1);
+            assertFalse(invoked2);
+            assertFalse(invokedAnnotated);
+        }
 
-		public void assertEverythingInjected() {
-			assertNotSame(injectA, originalA);
-			assertSame(injectA, a);
-			assertSame(injectB, b);
-			assertSame(injectC, c);
-			assertSame(injectD, d);
-			assertSame(injectE, e);
-			assertSame(injectF, fProvider.get());
-			assertSame(injectG, gProvider.get());
-			assertTrue(invoked0);
-			assertTrue(invoked1);
-			assertTrue(invoked2);
-			assertTrue(invokedAnnotated);
-		}
-	}
+        public void assertEverythingInjected() {
+            assertNotSame(injectA, originalA);
+            assertSame(injectA, a);
+            assertSame(injectB, b);
+            assertSame(injectC, c);
+            assertSame(injectD, d);
+            assertSame(injectE, e);
+            assertSame(injectF, fProvider.get());
+            assertSame(injectG, gProvider.get());
+            assertTrue(invoked0);
+            assertTrue(invoked1);
+            assertTrue(invoked2);
+            assertTrue(invokedAnnotated);
+        }
+    }
 
-	static class HasOptionalInjectionsProvider extends HasOptionalInjections
-			implements Provider<HasOptionalInjections> {
-		@Override
-		public HasOptionalInjections get() {
-			return this;
-		}
-	}
+    static class HasOptionalInjectionsProvider extends HasOptionalInjections
+            implements Provider<HasOptionalInjections> {
+        @Override
+        public HasOptionalInjections get() {
+            return this;
+        }
+    }
 
-	public void testOptionalConstructorBlowsUp() {
-		try {
-			Guice.createInjector().getInstance(HasOptionalConstructor.class);
-			fail();
-		} catch (SaltaException expected) {
-			assertContains(
-					expected.getMessage(),
-					"OptionalBindingTest$HasOptionalConstructor() "
-							+ "is annotated @Inject(optional=true), but constructors cannot be optional");
-		}
-	}
+    public void testOptionalConstructorBlowsUp() {
+        try {
+            Guice.createInjector().getInstance(HasOptionalConstructor.class);
+            fail();
+        } catch (SaltaException expected) {
+            assertContains(
+                    expected.getMessage(),
+                    "OptionalBindingTest$HasOptionalConstructor() "
+                            + "is annotated @Inject(optional=true), but constructors cannot be optional");
+        }
+    }
 
-	static class HasOptionalConstructor {
-		// Suppress compiler errors by the error-prone checker
-		// InjectedConstructorAnnotations,
-		// which catches optional injected constructors.
-		@SuppressWarnings("InjectedConstructorAnnotations")
-		@Inject(optional = true)
-		HasOptionalConstructor() {
-		}
-	}
+    static class HasOptionalConstructor {
+        // Suppress compiler errors by the error-prone checker
+        // InjectedConstructorAnnotations,
+        // which catches optional injected constructors.
+        @SuppressWarnings("InjectedConstructorAnnotations")
+        @Inject(optional = true)
+        HasOptionalConstructor() {
+        }
+    }
 
-	@Inject(optional = true)
-	static A staticInjectA;
+    @Inject(optional = true)
+    static A staticInjectA;
 
-	public void testStaticInjection() {
-		staticInjectA = injectA;
-		Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				requestStaticInjection(OptionalBindingTest.class);
-			}
-		});
-		assertSame(staticInjectA, injectA);
-	}
+    public void testStaticInjection() {
+        staticInjectA = injectA;
+        Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                requestStaticInjection(OptionalBindingTest.class);
+            }
+        });
+        assertSame(staticInjectA, injectA);
+    }
 
-	/**
-	 * Test for bug 107, where we weren't doing optional injection properly for
-	 * indirect injections.
-	 */
-	public void testIndirectOptionalInjection() {
-		Indirect indirect = Guice.createInjector().getInstance(Indirect.class);
-		assertNotNull(indirect.hasOptionalInjections);
-		indirect.hasOptionalInjections.assertNothingInjected();
-	}
+    /**
+     * Test for bug 107, where we weren't doing optional injection properly for
+     * indirect injections.
+     */
+    public void testIndirectOptionalInjection() {
+        Indirect indirect = Guice.createInjector().getInstance(Indirect.class);
+        assertNotNull(indirect.hasOptionalInjections);
+        indirect.hasOptionalInjections.assertNothingInjected();
+    }
 
-	static class Indirect {
-		@Inject
-		HasOptionalInjections hasOptionalInjections;
-	}
+    static class Indirect {
+        @Inject
+        HasOptionalInjections hasOptionalInjections;
+    }
 
-	interface A {
-	}
+    interface A {
+    }
 
-	interface B {
-	}
+    interface B {
+    }
 
-	interface C {
-	}
+    interface C {
+    }
 
-	interface D {
-	}
+    interface D {
+    }
 
-	interface E {
-	}
+    interface E {
+    }
 
-	interface F {
-	}
+    interface F {
+    }
 
-	interface G {
-	}
+    interface G {
+    }
 }

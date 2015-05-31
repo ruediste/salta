@@ -30,45 +30,45 @@ import com.google.inject.Module;
  * @since 2.0
  */
 public final class Modules {
-	private Modules() {
-	}
+    private Modules() {
+    }
 
-	public static final Module EMPTY_MODULE = new EmptyModule();
+    public static final Module EMPTY_MODULE = new EmptyModule();
 
-	private static class EmptyModule implements Module {
-		@Override
-		public void configure(Binder binder) {
-		}
-	}
+    private static class EmptyModule implements Module {
+        @Override
+        public void configure(Binder binder) {
+        }
+    }
 
-	/**
-	 * Returns a new module that installs all of {@code modules}.
-	 */
-	public static Module combine(Module... modules) {
-		return combine(ImmutableSet.copyOf(modules));
-	}
+    /**
+     * Returns a new module that installs all of {@code modules}.
+     */
+    public static Module combine(Module... modules) {
+        return combine(ImmutableSet.copyOf(modules));
+    }
 
-	/**
-	 * Returns a new module that installs all of {@code modules}.
-	 */
-	public static Module combine(Iterable<? extends Module> modules) {
-		return new CombinedModule(modules);
-	}
+    /**
+     * Returns a new module that installs all of {@code modules}.
+     */
+    public static Module combine(Iterable<? extends Module> modules) {
+        return new CombinedModule(modules);
+    }
 
-	private static class CombinedModule implements Module {
-		final Set<Module> modulesSet;
+    private static class CombinedModule implements Module {
+        final Set<Module> modulesSet;
 
-		CombinedModule(Iterable<? extends Module> modules) {
-			this.modulesSet = ImmutableSet.copyOf(modules);
-		}
+        CombinedModule(Iterable<? extends Module> modules) {
+            this.modulesSet = ImmutableSet.copyOf(modules);
+        }
 
-		@Override
-		public void configure(Binder binder) {
-			binder = binder.skipSources(getClass());
-			for (Module module : modulesSet) {
-				binder.install(module);
-			}
-		}
-	}
+        @Override
+        public void configure(Binder binder) {
+            binder = binder.skipSources(getClass());
+            for (Module module : modulesSet) {
+                binder.install(module);
+            }
+        }
+    }
 
 }

@@ -21,55 +21,55 @@ import com.github.ruediste.salta.standard.StandardStaticBinding;
 
 public class ConstantBindingBuilderTest {
 
-	private Injector injector;
+    private Injector injector;
 
-	@Before
-	public void before() {
-		injector = Salta.createInjector(new AbstractModule() {
+    @Before
+    public void before() {
+        injector = Salta.createInjector(new AbstractModule() {
 
-			@Override
-			protected void configure() {
-				bindConstant().annotatedWith(Names.named("foo")).to("bar");
-				bindConstant().annotatedWith(Names.named("foo")).to(3);
-			}
-		});
-	}
+            @Override
+            protected void configure() {
+                bindConstant().annotatedWith(Names.named("foo")).to("bar");
+                bindConstant().annotatedWith(Names.named("foo")).to(3);
+            }
+        });
+    }
 
-	public static class TestClass {
-		@Inject
-		@Named("foo")
-		String c;
+    public static class TestClass {
+        @Inject
+        @Named("foo")
+        String c;
 
-		@Inject
-		@Named("foo")
-		int i;
-	}
+        @Inject
+        @Named("foo")
+        int i;
+    }
 
-	@Test
-	public void testCompilation() throws Throwable {
-		StandardConstantBindingBuilder builder = new StandardConstantBindingBuilder(null,
-				d -> true);
-		StandardStaticBinding binding = builder.createBinding(Integer.class, 3);
-		RecipeCompiler compiler = new RecipeCompiler();
-		assertEquals(
-				3,
-				compiler.compileSupplier(
-						binding.createRecipe(new RecipeCreationContextImpl(null)))
-						.get());
-	}
+    @Test
+    public void testCompilation() throws Throwable {
+        StandardConstantBindingBuilder builder = new StandardConstantBindingBuilder(
+                null, d -> true);
+        StandardStaticBinding binding = builder.createBinding(Integer.class, 3);
+        RecipeCompiler compiler = new RecipeCompiler();
+        assertEquals(
+                3,
+                compiler.compileSupplier(
+                        binding.createRecipe(new RecipeCreationContextImpl(null)))
+                        .get());
+    }
 
-	@Test
-	public void testDirect() {
-		CoreDependencyKey<String> key = DependencyKey.of(String.class)
-				.withAnnotations(Names.named("foo"));
-		assertEquals("bar", injector.getInstance(key));
-	}
+    @Test
+    public void testDirect() {
+        CoreDependencyKey<String> key = DependencyKey.of(String.class)
+                .withAnnotations(Names.named("foo"));
+        assertEquals("bar", injector.getInstance(key));
+    }
 
-	@Test
-	public void testFieldInject() {
-		TestClass a = injector.getInstance(TestClass.class);
-		assertEquals("bar", a.c);
-		assertEquals(3, a.i);
-	}
+    @Test
+    public void testFieldInject() {
+        TestClass a = injector.getInstance(TestClass.class);
+        assertEquals("bar", a.c);
+        assertEquals(3, a.i);
+    }
 
 }

@@ -14,20 +14,20 @@ import com.github.ruediste.salta.core.compile.MethodCompilationContext;
  */
 public class RecipeInstantiatorImpl extends RecipeInstantiator {
 
-	private Supplier<Object> supplier;
+    private Supplier<Object> supplier;
 
-	public RecipeInstantiatorImpl(Supplier<Object> supplier) {
-		this.supplier = supplier;
-	}
+    public RecipeInstantiatorImpl(Supplier<Object> supplier) {
+        this.supplier = supplier;
+    }
 
-	@Override
-	protected Class<?> compileImpl(GeneratorAdapter mv,
-			MethodCompilationContext ctx) {
-		ctx.addFieldAndLoad(Supplier.class, supplier);
-		mv.invokeInterface(Type.getType(Supplier.class),
-				Method.getMethod("Object get()"));
+    @Override
+    protected Class<?> compileImpl(GeneratorAdapter mv,
+            MethodCompilationContext ctx) {
+        ctx.addFieldAndLoad(Supplier.class, supplier);
+        mv.invokeInterface(Type.getType(Supplier.class),
+                Method.getMethod("Object get()"));
 
-		return Object.class;
-	}
+        return Object.class;
+    }
 
 }

@@ -22,58 +22,58 @@ import com.google.common.reflect.TypeToken;
  * {@link StandardInjectorConfiguration#isInjectionOptional(java.lang.reflect.AnnotatedElement)}
  */
 public class DefaultFixedConstructorInstantiationRule implements
-		FixedConstructorInstantiationRule {
+        FixedConstructorInstantiationRule {
 
-	private StandardInjectorConfiguration config;
+    private StandardInjectorConfiguration config;
 
-	public DefaultFixedConstructorInstantiationRule(
-			StandardInjectorConfiguration config) {
-		this.config = config;
-	}
+    public DefaultFixedConstructorInstantiationRule(
+            StandardInjectorConfiguration config) {
+        this.config = config;
+    }
 
-	@Override
-	public Optional<RecipeInstantiator> create(TypeToken<?> typeToken,
-			RecipeCreationContext ctx, Constructor<?> constructor) {
+    @Override
+    public Optional<RecipeInstantiator> create(TypeToken<?> typeToken,
+            RecipeCreationContext ctx, Constructor<?> constructor) {
 
-		ArrayList<SupplierRecipe> args = resolveArguments(config, typeToken,
-				ctx, constructor);
-		return Optional.of(createRecipeInstantiator(typeToken, constructor,
-				args));
+        ArrayList<SupplierRecipe> args = resolveArguments(config, typeToken,
+                ctx, constructor);
+        return Optional.of(createRecipeInstantiator(typeToken, constructor,
+                args));
 
-	}
+    }
 
-	public static ArrayList<SupplierRecipe> resolveArguments(
-			StandardInjectorConfiguration config, TypeToken<?> typeToken,
-			RecipeCreationContext ctx, Constructor<?> constructor) {
-		ArrayList<SupplierRecipe> args = new ArrayList<>();
+    public static ArrayList<SupplierRecipe> resolveArguments(
+            StandardInjectorConfiguration config, TypeToken<?> typeToken,
+            RecipeCreationContext ctx, Constructor<?> constructor) {
+        ArrayList<SupplierRecipe> args = new ArrayList<>();
 
-		Parameter[] parameters = constructor.getParameters();
-		for (int i = 0; i < parameters.length; i++) {
-			Parameter parameter = parameters[i];
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			CoreDependencyKey<Object> dependency = new InjectionPoint(
-					typeToken.resolveType(parameter.getParameterizedType()),
-					constructor, parameter, i);
-			Optional<SupplierRecipe> argRecipe = ctx.tryGetRecipe(dependency);
-			if (argRecipe.isPresent())
-				args.add(argRecipe.get());
-			else {
-				if (config.isInjectionOptional(parameter)) {
-					args.add(new SupplierRecipeImpl(() -> Defaults
-							.defaultValue(parameter.getType())));
-				} else {
-					throw new SaltaException(
-							"Cannot resolve constructor parameter of "
-									+ constructor + ":\n" + parameter);
-				}
-			}
-		}
-		return args;
-	}
+        Parameter[] parameters = constructor.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            CoreDependencyKey<Object> dependency = new InjectionPoint(
+                    typeToken.resolveType(parameter.getParameterizedType()),
+                    constructor, parameter, i);
+            Optional<SupplierRecipe> argRecipe = ctx.tryGetRecipe(dependency);
+            if (argRecipe.isPresent())
+                args.add(argRecipe.get());
+            else {
+                if (config.isInjectionOptional(parameter)) {
+                    args.add(new SupplierRecipeImpl(() -> Defaults
+                            .defaultValue(parameter.getType())));
+                } else {
+                    throw new SaltaException(
+                            "Cannot resolve constructor parameter of "
+                                    + constructor + ":\n" + parameter);
+                }
+            }
+        }
+        return args;
+    }
 
-	protected FixedConstructorRecipeInstantiator createRecipeInstantiator(
-			TypeToken<?> typeToken, Constructor<?> constructor,
-			ArrayList<SupplierRecipe> args) {
-		return new FixedConstructorRecipeInstantiator(constructor, args);
-	}
+    protected FixedConstructorRecipeInstantiator createRecipeInstantiator(
+            TypeToken<?> typeToken, Constructor<?> constructor,
+            ArrayList<SupplierRecipe> args) {
+        return new FixedConstructorRecipeInstantiator(constructor, args);
+    }
 }

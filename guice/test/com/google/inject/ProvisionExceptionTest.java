@@ -39,335 +39,335 @@ import com.github.ruediste.salta.core.SaltaException;
 @SuppressWarnings("UnusedDeclaration")
 public class ProvisionExceptionTest extends TestCase {
 
-	public void testExceptionsCollapsed() {
-		try {
-			Guice.createInjector().getInstance(A.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("UnsupportedOperationException"))
-				throw e;
-		}
-	}
+    public void testExceptionsCollapsed() {
+        try {
+            Guice.createInjector().getInstance(A.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("UnsupportedOperationException"))
+                throw e;
+        }
+    }
 
-	/**
-	 * There's a pass-through of user code in the scope. We want exceptions
-	 * thrown by Guice to be limited to a single exception, even if it passes
-	 * through user code.
-	 */
-	public void testExceptionsCollapsedWithScopes() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(B.class).in(Scopes.SINGLETON);
-				}
-			}).getInstance(A.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains(
-					UnsupportedOperationException.class.getName()))
-				throw e;
-		}
-	}
+    /**
+     * There's a pass-through of user code in the scope. We want exceptions
+     * thrown by Guice to be limited to a single exception, even if it passes
+     * through user code.
+     */
+    public void testExceptionsCollapsedWithScopes() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(B.class).in(Scopes.SINGLETON);
+                }
+            }).getInstance(A.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains(
+                    UnsupportedOperationException.class.getName()))
+                throw e;
+        }
+    }
 
-	public void testMethodInjectionExceptions() {
-		try {
-			Guice.createInjector().getInstance(E.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("UnsupportedOperationException"))
-				throw e;
-		}
-	}
+    public void testMethodInjectionExceptions() {
+        try {
+            Guice.createInjector().getInstance(E.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("UnsupportedOperationException"))
+                throw e;
+        }
+    }
 
-	public void testBindToProviderInstanceExceptions() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(D.class).toProvider(new DProvider());
-				}
-			}).getInstance(D.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("UnsupportedOperationException"))
-				throw e;
-		}
-	}
+    public void testBindToProviderInstanceExceptions() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(D.class).toProvider(new DProvider());
+                }
+            }).getInstance(D.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("UnsupportedOperationException"))
+                throw e;
+        }
+    }
 
-	/**
-	 * This test demonstrates that if the user throws a ProvisionException, we
-	 * wrap it to add context.
-	 */
-	public void testProvisionExceptionsAreWrappedForBindToType() {
-		if (true)
-			return;
-		try {
-			Guice.createInjector().getInstance(F.class);
-			fail();
-		} catch (ProvisionException e) {
-			assertContains(e.getMessage(), "1) User Exception",
-					"at " + F.class.getName()
-							+ ".<init>(ProvisionExceptionTest.java:");
-		}
-	}
+    /**
+     * This test demonstrates that if the user throws a ProvisionException, we
+     * wrap it to add context.
+     */
+    public void testProvisionExceptionsAreWrappedForBindToType() {
+        if (true)
+            return;
+        try {
+            Guice.createInjector().getInstance(F.class);
+            fail();
+        } catch (ProvisionException e) {
+            assertContains(e.getMessage(), "1) User Exception",
+                    "at " + F.class.getName()
+                            + ".<init>(ProvisionExceptionTest.java:");
+        }
+    }
 
-	public void testProvisionExceptionsAreWrappedForBindToProviderType() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(F.class).toProvider(FProvider.class);
-				}
-			}).getInstance(F.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("User Exception"))
-				throw e;
-		}
-	}
+    public void testProvisionExceptionsAreWrappedForBindToProviderType() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(F.class).toProvider(FProvider.class);
+                }
+            }).getInstance(F.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("User Exception"))
+                throw e;
+        }
+    }
 
-	public void testProvisionExceptionsAreWrappedForBindToProviderInstance() {
-		if (true)
-			return;
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(F.class).toProvider(new FProvider());
-				}
-			}).getInstance(F.class);
-			fail();
-		} catch (ProvisionException e) {
-			assertContains(e.getMessage(), "1) User Exception", "at "
-					+ ProvisionExceptionTest.class.getName(),
-					getDeclaringSourcePart(getClass()));
-		}
-	}
+    public void testProvisionExceptionsAreWrappedForBindToProviderInstance() {
+        if (true)
+            return;
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(F.class).toProvider(new FProvider());
+                }
+            }).getInstance(F.class);
+            fail();
+        } catch (ProvisionException e) {
+            assertContains(e.getMessage(), "1) User Exception", "at "
+                    + ProvisionExceptionTest.class.getName(),
+                    getDeclaringSourcePart(getClass()));
+        }
+    }
 
-	public void testProvisionExceptionIsSerializable() throws IOException {
-		try {
-			Guice.createInjector().getInstance(A.class);
-			fail();
-		} catch (SaltaException expected) {
-			SaltaException reserialized = reserialize(expected);
-			assertEquals(expected.getMessage(), reserialized.getMessage());
-		}
-	}
+    public void testProvisionExceptionIsSerializable() throws IOException {
+        try {
+            Guice.createInjector().getInstance(A.class);
+            fail();
+        } catch (SaltaException expected) {
+            SaltaException reserialized = reserialize(expected);
+            assertEquals(expected.getMessage(), reserialized.getMessage());
+        }
+    }
 
-	public void testMultipleCauses() {
-		try {
-			Guice.createInjector().getInstance(G.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("Unsupported")
-					&& !e.getMessage().contains("either"))
-				throw e;
-		}
-	}
+    public void testMultipleCauses() {
+        try {
+            Guice.createInjector().getInstance(G.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("Unsupported")
+                    && !e.getMessage().contains("either"))
+                throw e;
+        }
+    }
 
-	public void testInjectInnerClass() throws Exception {
-		Injector injector = Guice.createInjector();
-		try {
-			injector.getInstance(InnerClass.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("inner class"))
-				throw e;
-		}
-	}
+    public void testInjectInnerClass() throws Exception {
+        Injector injector = Guice.createInjector();
+        try {
+            injector.getInstance(InnerClass.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("inner class"))
+                throw e;
+        }
+    }
 
-	public void testInjectLocalClass() throws Exception {
-		class LocalClass {
-		}
+    public void testInjectLocalClass() throws Exception {
+        class LocalClass {
+        }
 
-		Injector injector = Guice.createInjector();
-		try {
-			injector.getInstance(LocalClass.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("inner class"))
-				throw e;
-		}
-	}
+        Injector injector = Guice.createInjector();
+        try {
+            injector.getInstance(LocalClass.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("inner class"))
+                throw e;
+        }
+    }
 
-	public void testBindingAnnotationsOnMethodsAndConstructors() {
-		try {
-			Injector injector = Guice.createInjector();
-			injector.getInstance(MethodWithBindingAnnotation.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("on parameters instead"))
-				throw e;
-		}
+    public void testBindingAnnotationsOnMethodsAndConstructors() {
+        try {
+            Injector injector = Guice.createInjector();
+            injector.getInstance(MethodWithBindingAnnotation.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("on parameters instead"))
+                throw e;
+        }
 
-		try {
-			Guice.createInjector().getInstance(
-					ConstructorWithBindingAnnotation.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("on parameters instead"))
-				throw e;
-		}
-	}
+        try {
+            Guice.createInjector().getInstance(
+                    ConstructorWithBindingAnnotation.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("on parameters instead"))
+                throw e;
+        }
+    }
 
-	public void testBindingAnnotationWarningForScala() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(String.class).annotatedWith(Green.class).toInstance(
-						"lime!");
-			}
-		});
-		injector.getInstance(LikeScala.class);
-	}
+    public void testBindingAnnotationWarningForScala() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(String.class).annotatedWith(Green.class).toInstance(
+                        "lime!");
+            }
+        });
+        injector.getInstance(LikeScala.class);
+    }
 
-	public void testLinkedBindings() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(D.class).to(RealD.class);
-			}
-		});
+    public void testLinkedBindings() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(D.class).to(RealD.class);
+            }
+        });
 
-		try {
-			injector.getInstance(D.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains(
-					UnsupportedOperationException.class.getName()))
-				throw e;
-		}
-	}
+        try {
+            injector.getInstance(D.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains(
+                    UnsupportedOperationException.class.getName()))
+                throw e;
+        }
+    }
 
-	public void testProviderKeyBindings() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(D.class).toProvider(DProvider.class);
-			}
-		});
+    public void testProviderKeyBindings() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(D.class).toProvider(DProvider.class);
+            }
+        });
 
-		try {
-			injector.getInstance(D.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains(
-					UnsupportedOperationException.class.getName()))
-				throw e;
-		}
-	}
+        try {
+            injector.getInstance(D.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains(
+                    UnsupportedOperationException.class.getName()))
+                throw e;
+        }
+    }
 
-	private class InnerClass {
-	}
+    private class InnerClass {
+    }
 
-	static class A {
-		@Inject
-		A(B b) {
-		}
-	}
+    static class A {
+        @Inject
+        A(B b) {
+        }
+    }
 
-	static class B {
-		@Inject
-		C c;
-	}
+    static class B {
+        @Inject
+        C c;
+    }
 
-	static class C {
-		@Inject
-		void setD(RealD d) {
-		}
-	}
+    static class C {
+        @Inject
+        void setD(RealD d) {
+        }
+    }
 
-	static class E {
-		@Inject
-		void setObject(Object o) {
-			throw new UnsupportedOperationException();
-		}
-	}
+    static class E {
+        @Inject
+        void setObject(Object o) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-	static class MethodWithBindingAnnotation {
-		@Inject
-		@Green
-		void injectMe(String greenString) {
-		}
-	}
+    static class MethodWithBindingAnnotation {
+        @Inject
+        @Green
+        void injectMe(String greenString) {
+        }
+    }
 
-	static class ConstructorWithBindingAnnotation {
-		// Suppress compiler errors by the error-prone checker
-		// InjectedConstructorAnnotations,
-		// which catches injected constructors with binding annotations.
-		@SuppressWarnings("InjectedConstructorAnnotations")
-		@Inject
-		@Green
-		ConstructorWithBindingAnnotation(String greenString) {
-		}
-	}
+    static class ConstructorWithBindingAnnotation {
+        // Suppress compiler errors by the error-prone checker
+        // InjectedConstructorAnnotations,
+        // which catches injected constructors with binding annotations.
+        @SuppressWarnings("InjectedConstructorAnnotations")
+        @Inject
+        @Green
+        ConstructorWithBindingAnnotation(String greenString) {
+        }
+    }
 
-	/**
-	 * In Scala, fields automatically get accessor methods with the same name.
-	 * So we don't do misplaced-binding annotation detection if the offending
-	 * method has a matching field.
-	 */
-	static class LikeScala {
-		@Inject
-		@Green
-		String green;
+    /**
+     * In Scala, fields automatically get accessor methods with the same name.
+     * So we don't do misplaced-binding annotation detection if the offending
+     * method has a matching field.
+     */
+    static class LikeScala {
+        @Inject
+        @Green
+        String green;
 
-		@Inject
-		@Green
-		String green() {
-			return green;
-		}
-	}
+        @Inject
+        @Green
+        String green() {
+            return green;
+        }
+    }
 
-	@Retention(RUNTIME)
-	@Target({ FIELD, PARAMETER, CONSTRUCTOR, METHOD })
-	@BindingAnnotation
-	@interface Green {
-	}
+    @Retention(RUNTIME)
+    @Target({ FIELD, PARAMETER, CONSTRUCTOR, METHOD })
+    @BindingAnnotation
+    @interface Green {
+    }
 
-	interface D {
-	}
+    interface D {
+    }
 
-	static class RealD implements D {
-		@Inject
-		RealD() {
-			throw new UnsupportedOperationException();
-		}
-	}
+    static class RealD implements D {
+        @Inject
+        RealD() {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-	static class DProvider implements Provider<D> {
-		@Override
-		public D get() {
-			throw new UnsupportedOperationException();
-		}
-	}
+    static class DProvider implements Provider<D> {
+        @Override
+        public D get() {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-	static class F {
-		@Inject
-		public F() {
-			throw new ProvisionException("User Exception",
-					new RuntimeException());
-		}
-	}
+    static class F {
+        @Inject
+        public F() {
+            throw new ProvisionException("User Exception",
+                    new RuntimeException());
+        }
+    }
 
-	static class FProvider implements Provider<F> {
-		@Override
-		public F get() {
-			return new F();
-		}
-	}
+    static class FProvider implements Provider<F> {
+        @Override
+        public F get() {
+            return new F();
+        }
+    }
 
-	static class G {
-		@Inject
-		void injectFirst() {
-			throw new IllegalArgumentException(
-					new UnsupportedOperationException("Unsupported"));
-		}
+    static class G {
+        @Inject
+        void injectFirst() {
+            throw new IllegalArgumentException(
+                    new UnsupportedOperationException("Unsupported"));
+        }
 
-		@Inject
-		void injectSecond() {
-			throw new NullPointerException("can't inject second either");
-		}
-	}
+        @Inject
+        void injectSecond() {
+            throw new NullPointerException("can't inject second either");
+        }
+    }
 }

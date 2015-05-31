@@ -39,59 +39,59 @@ import com.google.inject.name.Named;
 /** Tests for {@link ModuleAnnotatedMethodScanner} usage. */
 public class ModuleAnnotatedMethodScannerTest extends TestCase {
 
-	public void testScanning() throws Exception {
-		Module module = new AbstractModule() {
-			@Override
-			protected void configure() {
-			}
+    public void testScanning() throws Exception {
+        Module module = new AbstractModule() {
+            @Override
+            protected void configure() {
+            }
 
-			@Provides
-			@Named("foo")
-			String foo() {
-				return "foo";
-			}
+            @Provides
+            @Named("foo")
+            String foo() {
+                return "foo";
+            }
 
-			@Provides
-			@Named("foo2")
-			String foo2() {
-				return "foo2";
-			}
-		};
-		Injector injector = Guice.createInjector(module);
+            @Provides
+            @Named("foo2")
+            String foo2() {
+                return "foo2";
+            }
+        };
+        Injector injector = Guice.createInjector(module);
 
-		// assert no bindings named "foo" or "foo2" exist -- they were munged.
+        // assert no bindings named "foo" or "foo2" exist -- they were munged.
 
-		Binding<String> fooBinding = injector.getBinding(Key.get(String.class,
-				named("foo")));
-		Binding<String> foo2Binding = injector.getBinding(Key.get(String.class,
-				named("foo2")));
-		assertEquals("foo", fooBinding.getProvider().get());
-		assertEquals("foo2", foo2Binding.getProvider().get());
+        Binding<String> fooBinding = injector.getBinding(Key.get(String.class,
+                named("foo")));
+        Binding<String> foo2Binding = injector.getBinding(Key.get(String.class,
+                named("foo2")));
+        assertEquals("foo", fooBinding.getProvider().get());
+        assertEquals("foo2", foo2Binding.getProvider().get());
 
-		// Validate the provider has a sane toString
-		assertEquals(
-				"Provider<Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=foo)]>",
-				fooBinding.getProvider().toString());
-		assertEquals(
-				"Provider<Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=foo2)]>",
-				foo2Binding.getProvider().toString());
-	}
+        // Validate the provider has a sane toString
+        assertEquals(
+                "Provider<Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=foo)]>",
+                fooBinding.getProvider().toString());
+        assertEquals(
+                "Provider<Key[type=java.lang.String, annotation=@com.google.inject.name.Named(value=foo2)]>",
+                foo2Binding.getProvider().toString());
+    }
 
-	private String methodName(Class<? extends Annotation> annotation,
-			String method, Object container) throws Exception {
-		return "@" + annotation.getName();
-	}
+    private String methodName(Class<? extends Annotation> annotation,
+            String method, Object container) throws Exception {
+        return "@" + annotation.getName();
+    }
 
-	@Documented
-	@Target(METHOD)
-	@Retention(RUNTIME)
-	private @interface TestProvides {
-	}
+    @Documented
+    @Target(METHOD)
+    @Retention(RUNTIME)
+    private @interface TestProvides {
+    }
 
-	@Documented
-	@Target(METHOD)
-	@Retention(RUNTIME)
-	private @interface TestProvides2 {
-	}
+    @Documented
+    @Target(METHOD)
+    @Retention(RUNTIME)
+    private @interface TestProvides2 {
+    }
 
 }

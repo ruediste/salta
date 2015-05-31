@@ -17,91 +17,91 @@ import com.google.inject.TypeLiteral;
 
 public class GuiceInjectorImpl implements Injector {
 
-	private StandardInjector delegate;
+    private StandardInjector delegate;
 
-	public GuiceInjectorImpl(GuiceInjectorConfiguration config) {
-		delegate = new StandardInjector(config.config);
-	}
+    public GuiceInjectorImpl(GuiceInjectorConfiguration config) {
+        delegate = new StandardInjector(config.config);
+    }
 
-	@Override
-	public void injectMembers(Object instance) {
-		delegate.injectMembers(instance);
-	}
+    @Override
+    public void injectMembers(Object instance) {
+        delegate.injectMembers(instance);
+    }
 
-	@Override
-	public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-		TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
-			private static final long serialVersionUID = 1L;
-		}.where(new TypeParameter<T>() {
-		}, typeLiteral.getTypeToken());
-		return delegate.getInstance(DependencyKey.of(injectorType));
-	}
+    @Override
+    public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
+        TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
+            private static final long serialVersionUID = 1L;
+        }.where(new TypeParameter<T>() {
+        }, typeLiteral.getTypeToken());
+        return delegate.getInstance(DependencyKey.of(injectorType));
+    }
 
-	@Override
-	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		return getMembersInjector(TypeLiteral.get(type));
-	}
+    @Override
+    public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+        return getMembersInjector(TypeLiteral.get(type));
+    }
 
-	@Override
-	public <T> Provider<T> getProvider(Key<T> key) {
-		Supplier<T> provider = delegate.getProvider(new KeyAdapter<>(key));
-		return new Provider<T>() {
-			@Override
-			public T get() {
-				return provider.get();
-			}
+    @Override
+    public <T> Provider<T> getProvider(Key<T> key) {
+        Supplier<T> provider = delegate.getProvider(new KeyAdapter<>(key));
+        return new Provider<T>() {
+            @Override
+            public T get() {
+                return provider.get();
+            }
 
-			@Override
-			public String toString() {
-				return provider.toString();
-			}
-		};
-	}
+            @Override
+            public String toString() {
+                return provider.toString();
+            }
+        };
+    }
 
-	@Override
-	public <T> Provider<T> getProvider(Class<T> type) {
-		Supplier<T> provider = delegate.getProvider(type);
-		return new Provider<T>() {
-			@Override
-			public T get() {
-				return provider.get();
-			}
+    @Override
+    public <T> Provider<T> getProvider(Class<T> type) {
+        Supplier<T> provider = delegate.getProvider(type);
+        return new Provider<T>() {
+            @Override
+            public T get() {
+                return provider.get();
+            }
 
-			@Override
-			public String toString() {
-				return provider.toString();
-			}
-		};
-	}
+            @Override
+            public String toString() {
+                return provider.toString();
+            }
+        };
+    }
 
-	@Override
-	public <T> T getInstance(Key<T> key) {
-		return delegate.getInstance(new KeyAdapter<>(key));
-	}
+    @Override
+    public <T> T getInstance(Key<T> key) {
+        return delegate.getInstance(new KeyAdapter<>(key));
+    }
 
-	@Override
-	public <T> T getInstance(Class<T> type) {
-		return delegate.getInstance(type);
-	}
+    @Override
+    public <T> T getInstance(Class<T> type) {
+        return delegate.getInstance(type);
+    }
 
-	@Override
-	public <T> Binding<T> getBinding(Key<T> key) {
-		return new BindingImpl<>(key, getProvider(key));
-	}
+    @Override
+    public <T> Binding<T> getBinding(Key<T> key) {
+        return new BindingImpl<>(key, getProvider(key));
+    }
 
-	@Override
-	public <T> Binding<T> getBinding(Class<T> type) {
+    @Override
+    public <T> Binding<T> getBinding(Class<T> type) {
 
-		return new BindingImpl<>(Key.get(type), getProvider(type));
-	}
+        return new BindingImpl<>(Key.get(type), getProvider(type));
+    }
 
-	@Override
-	public StandardInjector getSaltaInjector() {
-		return delegate;
-	}
+    @Override
+    public StandardInjector getSaltaInjector() {
+        return delegate;
+    }
 
-	public void initialize() {
-		delegate.initialize();
-	}
+    public void initialize() {
+        delegate.initialize();
+    }
 
 }

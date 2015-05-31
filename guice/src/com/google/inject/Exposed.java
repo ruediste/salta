@@ -24,11 +24,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Acccompanies a {@literal @}{@link com.google.inject.Provides Provides} method annotation in a
- * private module to indicate that the provided binding is exposed.
+ * Acccompanies a {@literal @}{@link com.google.inject.Provides Provides} method
+ * annotation in a private module to indicate that the provided binding is
+ * exposed.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
-@Target(ElementType.METHOD) @Retention(RUNTIME) @Documented
-public @interface Exposed {}
+@Target(ElementType.METHOD)
+@Retention(RUNTIME)
+@Documented
+public @interface Exposed {
+}

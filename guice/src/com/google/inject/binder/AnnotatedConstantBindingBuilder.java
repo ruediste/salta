@@ -25,14 +25,14 @@ import java.lang.annotation.Annotation;
  */
 public interface AnnotatedConstantBindingBuilder {
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
-  ConstantBindingBuilder annotatedWith(
-      Class<? extends Annotation> annotationType);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    ConstantBindingBuilder annotatedWith(
+            Class<? extends Annotation> annotationType);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
-  ConstantBindingBuilder annotatedWith(Annotation annotation);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    ConstantBindingBuilder annotatedWith(Annotation annotation);
 }

@@ -19,85 +19,85 @@ import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class FixedConstructorRecipeInstantiatorTest {
 
-	@Before
-	public void setup() {
-		injector = Salta.createInjector();
-		injector.injectMembers(this);
-	}
+    @Before
+    public void setup() {
+        injector = Salta.createInjector();
+        injector.injectMembers(this);
+    }
 
-	private static class TestException extends Error {
-		private static final long serialVersionUID = 1L;
+    private static class TestException extends Error {
+        private static final long serialVersionUID = 1L;
 
-	}
+    }
 
-	private static class TestClassThrow {
-		@SuppressWarnings("unused")
-		public TestClassThrow() {
-			throw new TestException();
-		}
-	}
+    private static class TestClassThrow {
+        @SuppressWarnings("unused")
+        public TestClassThrow() {
+            throw new TestException();
+        }
+    }
 
-	private static class PrivateTestClassPublicConstructor {
-		@SuppressWarnings("unused")
-		public PrivateTestClassPublicConstructor() {
-		}
-	}
+    private static class PrivateTestClassPublicConstructor {
+        @SuppressWarnings("unused")
+        public PrivateTestClassPublicConstructor() {
+        }
+    }
 
-	public static class PublicTestClassPublicConstructor {
-		@SuppressWarnings("unused")
-		public PublicTestClassPublicConstructor() {
-		}
-	}
+    public static class PublicTestClassPublicConstructor {
+        @SuppressWarnings("unused")
+        public PublicTestClassPublicConstructor() {
+        }
+    }
 
-	private static class TestClassPrivateConstructor {
-		private TestClassPrivateConstructor() {
-		}
-	}
+    private static class TestClassPrivateConstructor {
+        private TestClassPrivateConstructor() {
+        }
+    }
 
-	@Inject
-	Provider<TestClassThrow> pThrow;
-	private Injector injector;
+    @Inject
+    Provider<TestClassThrow> pThrow;
+    private Injector injector;
 
-	@Test
-	public void testCatch() {
-		try {
-			pThrow.get();
-		} catch (SaltaException e) {
-			if (!(e.getCause() instanceof TestException)) {
-				throw e;
-			}
-		}
-	}
+    @Test
+    public void testCatch() {
+        try {
+            pThrow.get();
+        } catch (SaltaException e) {
+            if (!(e.getCause() instanceof TestException)) {
+                throw e;
+            }
+        }
+    }
 
-	@Test
-	public void testPublicConstructorInnerClass() {
-		assertNotNull(injector
-				.getInstance(PrivateTestClassPublicConstructor.class));
-	}
+    @Test
+    public void testPublicConstructorInnerClass() {
+        assertNotNull(injector
+                .getInstance(PrivateTestClassPublicConstructor.class));
+    }
 
-	@Test
-	public void testPublicConstructorOuterClass() {
-		assertNotNull(injector.getInstance(ArrayList.class));
-	}
+    @Test
+    public void testPublicConstructorOuterClass() {
+        assertNotNull(injector.getInstance(ArrayList.class));
+    }
 
-	@Test
-	public void testPrivateConstructor() {
-		assertNotNull(injector.getInstance(TestClassPrivateConstructor.class));
-	}
+    @Test
+    public void testPrivateConstructor() {
+        assertNotNull(injector.getInstance(TestClassPrivateConstructor.class));
+    }
 
-	@Test
-	public void testIsConstructorAccessible() throws Exception {
-		checkIsConstructorAccessible(false,
-				PrivateTestClassPublicConstructor.class);
-		checkIsConstructorAccessible(true,
-				PublicTestClassPublicConstructor.class);
-		checkIsConstructorAccessible(false, TestClassPrivateConstructor.class);
+    @Test
+    public void testIsConstructorAccessible() throws Exception {
+        checkIsConstructorAccessible(false,
+                PrivateTestClassPublicConstructor.class);
+        checkIsConstructorAccessible(true,
+                PublicTestClassPublicConstructor.class);
+        checkIsConstructorAccessible(false, TestClassPrivateConstructor.class);
 
-	}
+    }
 
-	private void checkIsConstructorAccessible(boolean expected, Class<?> clazz)
-			throws NoSuchMethodException {
-		assertEquals(expected, Accessibility.isConstructorPublic(clazz
-				.getDeclaredConstructor()));
-	}
+    private void checkIsConstructorAccessible(boolean expected, Class<?> clazz)
+            throws NoSuchMethodException {
+        assertEquals(expected, Accessibility.isConstructorPublic(clazz
+                .getDeclaredConstructor()));
+    }
 }

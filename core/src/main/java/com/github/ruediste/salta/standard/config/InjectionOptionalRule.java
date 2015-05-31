@@ -12,6 +12,6 @@ import java.util.function.Function;
  * {@link Parameter} is optional or mandatory
  */
 public interface InjectionOptionalRule extends
-		Function<AnnotatedElement, Optional<Boolean>> {
+        Function<AnnotatedElement, Optional<Boolean>> {
 
 }

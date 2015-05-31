@@ -7,21 +7,21 @@ import java.lang.reflect.Proxy;
 
 public class ReflectionUtil {
 
-	private ReflectionUtil() {
-	}
+    private ReflectionUtil() {
+    }
 
-	public static Annotation createAnnotation(Class<?> annotationClass) {
-		return (Annotation) Proxy.newProxyInstance(
-				annotationClass.getClassLoader(),
-				new Class[] { Annotation.class }, new InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method,
-							Object[] args) {
-						return annotationClass; // only getClass() or
-												// annotationType()
-						// should be called.
-					}
-				});
-	}
+    public static Annotation createAnnotation(Class<?> annotationClass) {
+        return (Annotation) Proxy.newProxyInstance(
+                annotationClass.getClassLoader(),
+                new Class[] { Annotation.class }, new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method,
+                            Object[] args) {
+                        return annotationClass; // only getClass() or
+                                                // annotationType()
+                        // should be called.
+                    }
+                });
+    }
 
 }

@@ -65,15 +65,15 @@ package com.google.inject;
  */
 public interface Binding<T> {
 
-	/**
-	 * Returns the key for this binding.
-	 */
-	Key<T> getKey();
+    /**
+     * Returns the key for this binding.
+     */
+    Key<T> getKey();
 
-	/**
-	 * Returns the scoped provider guice uses to fulfill requests for this
-	 * binding.
-	 */
-	Provider<T> getProvider();
+    /**
+     * Returns the scoped provider guice uses to fulfill requests for this
+     * binding.
+     */
+    Provider<T> getProvider();
 
 }

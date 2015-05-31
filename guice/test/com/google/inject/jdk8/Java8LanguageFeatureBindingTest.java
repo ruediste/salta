@@ -41,138 +41,138 @@ import com.google.inject.TypeLiteral;
  */
 public class Java8LanguageFeatureBindingTest extends TestCase {
 
-	// Some of these tests are kind of weird.
-	// See https://github.com/google/guice/issues/757 for more on why they
-	// exist.
+    // Some of these tests are kind of weird.
+    // See https://github.com/google/guice/issues/757 for more on why they
+    // exist.
 
-	public void testBinding_lambdaToInterface() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(new TypeLiteral<Predicate<Object>>() {
-				}).toInstance(o -> o != null);
-			}
-		});
+    public void testBinding_lambdaToInterface() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(new TypeLiteral<Predicate<Object>>() {
+                }).toInstance(o -> o != null);
+            }
+        });
 
-		Predicate<Object> predicate = injector
-				.getInstance(new Key<Predicate<Object>>() {
-				});
-		assertTrue(predicate.test(new Object()));
-		assertFalse(predicate.test(null));
-	}
+        Predicate<Object> predicate = injector
+                .getInstance(new Key<Predicate<Object>>() {
+                });
+        assertTrue(predicate.test(new Object()));
+        assertFalse(predicate.test(null));
+    }
 
-	public void testProviderMethod_returningLambda() throws Exception {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-			}
+    public void testProviderMethod_returningLambda() throws Exception {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+            }
 
-			@Provides
-			public Callable<String> provideCallable() {
-				return () -> "foo";
-			}
-		});
+            @Provides
+            public Callable<String> provideCallable() {
+                return () -> "foo";
+            }
+        });
 
-		Callable<String> callable = injector
-				.getInstance(new Key<Callable<String>>() {
-				});
-		assertEquals("foo", callable.call());
-	}
+        Callable<String> callable = injector
+                .getInstance(new Key<Callable<String>>() {
+                });
+        assertEquals("foo", callable.call());
+    }
 
-	public void testProviderMethod_containingLambda_throwingException()
-			throws Exception {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-			}
+    public void testProviderMethod_containingLambda_throwingException()
+            throws Exception {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+            }
 
-			@Provides
-			public Callable<String> provideCallable() {
-				if (Boolean.parseBoolean("false")) { // avoid dead code warnings
-					return () -> "foo";
-				} else {
-					throw new RuntimeException("foo");
-				}
-			}
-		});
+            @Provides
+            public Callable<String> provideCallable() {
+                if (Boolean.parseBoolean("false")) { // avoid dead code warnings
+                    return () -> "foo";
+                } else {
+                    throw new RuntimeException("foo");
+                }
+            }
+        });
 
-		try {
-			injector.getInstance(new Key<Callable<String>>() {
-			});
-		} catch (SaltaException expected) {
-			assertTrue(expected.getCause() instanceof RuntimeException);
-			assertTrue(expected.getCause().getMessage().contains("foo"));
-		}
-	}
+        try {
+            injector.getInstance(new Key<Callable<String>>() {
+            });
+        } catch (SaltaException expected) {
+            assertTrue(expected.getCause() instanceof RuntimeException);
+            assertTrue(expected.getCause().getMessage().contains("foo"));
+        }
+    }
 
-	public void testProvider_usingJdk8Features() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(String.class).toProvider(StringProvider.class);
-				}
-			}).getInstance(String.class);
+    public void testProvider_usingJdk8Features() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(String.class).toProvider(StringProvider.class);
+                }
+            }).getInstance(String.class);
 
-			fail();
-		} catch (SaltaException expected) {
-		}
+            fail();
+        } catch (SaltaException expected) {
+        }
 
-		UUID uuid = UUID.randomUUID();
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(UUID.class).toInstance(uuid);
-				bind(String.class).toProvider(StringProvider.class);
-			}
-		});
+        UUID uuid = UUID.randomUUID();
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(UUID.class).toInstance(uuid);
+                bind(String.class).toProvider(StringProvider.class);
+            }
+        });
 
-		assertEquals(uuid.toString(), injector.getInstance(String.class));
-	}
+        assertEquals(uuid.toString(), injector.getInstance(String.class));
+    }
 
-	private static final class StringProvider implements Provider<String> {
-		private final UUID uuid;
+    private static final class StringProvider implements Provider<String> {
+        private final UUID uuid;
 
-		@Inject
-		StringProvider(UUID uuid) {
-			this.uuid = uuid;
-		}
+        @Inject
+        StringProvider(UUID uuid) {
+            this.uuid = uuid;
+        }
 
-		@Override
-		public String get() {
-			return Collections.singleton(uuid).stream().map(UUID::toString)
-					.findFirst().get();
-		}
-	}
+        @Override
+        public String get() {
+            return Collections.singleton(uuid).stream().map(UUID::toString)
+                    .findFirst().get();
+        }
+    }
 
-	public void testBinding_toProvider_lambda() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				AtomicInteger i = new AtomicInteger();
-				bind(String.class).toProvider(
-						() -> "Hello" + i.incrementAndGet());
-			}
-		});
+    public void testBinding_toProvider_lambda() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                AtomicInteger i = new AtomicInteger();
+                bind(String.class).toProvider(
+                        () -> "Hello" + i.incrementAndGet());
+            }
+        });
 
-		assertEquals("Hello1", injector.getInstance(String.class));
-		assertEquals("Hello2", injector.getInstance(String.class));
-	}
+        assertEquals("Hello1", injector.getInstance(String.class));
+        assertEquals("Hello2", injector.getInstance(String.class));
+    }
 
-	public void testBinding_toProvider_methodReference() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(String.class).toProvider(
-						Java8LanguageFeatureBindingTest.this::provideString);
-			}
-		});
+    public void testBinding_toProvider_methodReference() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(String.class).toProvider(
+                        Java8LanguageFeatureBindingTest.this::provideString);
+            }
+        });
 
-		Provider<String> provider = injector.getProvider(String.class);
-		assertEquals("Hello", provider.get());
-	}
+        Provider<String> provider = injector.getProvider(String.class);
+        assertEquals("Hello", provider.get());
+    }
 
-	private String provideString() {
-		return "Hello";
-	}
+    private String provideString() {
+        return "Hello";
+    }
 }

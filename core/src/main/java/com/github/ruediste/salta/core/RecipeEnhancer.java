@@ -8,9 +8,9 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public interface RecipeEnhancer {
 
-	/**
-	 * Compile this recipe. The inner recipe will create the injected instance
-	 * as the top of the stack
-	 */
-	Class<?> compile(MethodCompilationContext ctx, SupplierRecipe innerRecipe);
+    /**
+     * Compile this recipe. The inner recipe will create the injected instance
+     * as the top of the stack
+     */
+    Class<?> compile(MethodCompilationContext ctx, SupplierRecipe innerRecipe);
 }

@@ -12,10 +12,10 @@ import com.google.common.reflect.TypeToken;
  */
 public interface InstantiatorRule {
 
-	/**
-	 * Return a function creating a {@link RecipeInstantiator}, or
-	 * {@link Optional#empty()} if the next rule should be tried
-	 */
-	Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(
-			TypeToken<?> type);
+    /**
+     * Return a function creating a {@link RecipeInstantiator}, or
+     * {@link Optional#empty()} if the next rule should be tried
+     */
+    Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(
+            TypeToken<?> type);
 }

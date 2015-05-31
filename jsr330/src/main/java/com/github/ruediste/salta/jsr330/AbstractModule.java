@@ -48,12 +48,12 @@ import com.google.common.reflect.TypeToken;
  *
  * <pre>
  * public class MyModule extends AbstractModule {
- * 	protected void configure() {
- * 		bind(Service.class).to(ServiceImpl.class).in(Singleton.class);
- * 		bind(CreditCardPaymentService.class);
- * 		bind(PaymentService.class).to(CreditCardPaymentService.class);
- * 		bindConstant().annotatedWith(Names.named(&quot;port&quot;)).to(8080);
- * 	}
+ *     protected void configure() {
+ *         bind(Service.class).to(ServiceImpl.class).in(Singleton.class);
+ *         bind(CreditCardPaymentService.class);
+ *         bind(PaymentService.class).to(CreditCardPaymentService.class);
+ *         bindConstant().annotatedWith(Names.named(&quot;port&quot;)).to(8080);
+ *     }
  * }
  * </pre>
  *
@@ -61,168 +61,168 @@ import com.google.common.reflect.TypeToken;
  */
 public abstract class AbstractModule implements SaltaModule {
 
-	Binder binder;
+    Binder binder;
 
-	@Override
-	public final synchronized void configure(Binder binder) {
-		checkState(this.binder == null, "Re-entry is not allowed.");
+    @Override
+    public final synchronized void configure(Binder binder) {
+        checkState(this.binder == null, "Re-entry is not allowed.");
 
-		this.binder = checkNotNull(binder, "builder");
-		try {
-			configure();
-		} catch (SaltaException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new SaltaException("Exception in configure()", e);
-		} finally {
-			this.binder = null;
-		}
-	}
+        this.binder = checkNotNull(binder, "builder");
+        try {
+            configure();
+        } catch (SaltaException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SaltaException("Exception in configure()", e);
+        } finally {
+            this.binder = null;
+        }
+    }
 
-	/**
-	 * Configures a {@link Binder} via the exposed methods.
-	 */
-	protected abstract void configure() throws Exception;
+    /**
+     * Configures a {@link Binder} via the exposed methods.
+     */
+    protected abstract void configure() throws Exception;
 
-	/**
-	 * Gets direct access to the underlying {@code Binder}.
-	 */
-	protected Binder binder() {
-		checkState(binder != null,
-				"The binder can only be used inside configure()");
-		return binder;
-	}
+    /**
+     * Gets direct access to the underlying {@code Binder}.
+     */
+    protected Binder binder() {
+        checkState(binder != null,
+                "The binder can only be used inside configure()");
+        return binder;
+    }
 
-	/**
-	 * @see Binder#bindScope(Class, Scope)
-	 */
-	protected void bindScope(Class<? extends Annotation> scopeAnnotation,
-			Scope scope) {
-		binder().bindScope(scopeAnnotation, scope);
-	}
+    /**
+     * @see Binder#bindScope(Class, Scope)
+     */
+    protected void bindScope(Class<? extends Annotation> scopeAnnotation,
+            Scope scope) {
+        binder().bindScope(scopeAnnotation, scope);
+    }
 
-	/**
-	 * @see Binder#bind(Class)
-	 */
-	protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
-		return binder().bind(clazz);
-	}
+    /**
+     * @see Binder#bind(Class)
+     */
+    protected <T> AnnotatedBindingBuilder<T> bind(Class<T> clazz) {
+        return binder().bind(clazz);
+    }
 
-	/**
-	 * @see Binder#bindConstant()
-	 */
-	protected StandardAnnotatedConstantBindingBuilder bindConstant() {
-		return binder().bindConstant();
-	}
+    /**
+     * @see Binder#bindConstant()
+     */
+    protected StandardAnnotatedConstantBindingBuilder bindConstant() {
+        return binder().bindConstant();
+    }
 
-	/**
-	 * @see Binder#install(SaltaModule)
-	 */
-	protected void install(SaltaModule module) {
-		binder().install(module);
-	}
+    /**
+     * @see Binder#install(SaltaModule)
+     */
+    protected void install(SaltaModule module) {
+        binder().install(module);
+    }
 
-	/**
-	 * @see Binder#addError(String, Object[])
-	 */
-	protected void addError(String message, Object... arguments) {
-		binder().addError(message, arguments);
-	}
+    /**
+     * @see Binder#addError(String, Object[])
+     */
+    protected void addError(String message, Object... arguments) {
+        binder().addError(message, arguments);
+    }
 
-	/**
-	 * @see Binder#addError(Throwable)
-	 */
-	protected void addError(Throwable t) {
-		binder().addError(t);
-	}
+    /**
+     * @see Binder#addError(Throwable)
+     */
+    protected void addError(Throwable t) {
+        binder().addError(t);
+    }
 
-	/**
-	 * @see Binder#addError(Message)
-	 * @since 2.0
-	 */
-	protected void addError(Message message) {
-		binder().addError(message);
-	}
+    /**
+     * @see Binder#addError(Message)
+     * @since 2.0
+     */
+    protected void addError(Message message) {
+        binder().addError(message);
+    }
 
-	/**
-	 * @see Binder#requestInjection(Object)
-	 * @since 2.0
-	 */
-	protected void requestInjection(Object instance) {
-		binder().requestInjection(instance);
-	}
+    /**
+     * @see Binder#requestInjection(Object)
+     * @since 2.0
+     */
+    protected void requestInjection(Object instance) {
+        binder().requestInjection(instance);
+    }
 
-	/**
-	 * @see Binder#requestStaticInjection(Class[])
-	 */
-	protected void requestStaticInjection(Class<?>... types) {
-		binder().requestStaticInjection(types);
-	}
+    /**
+     * @see Binder#requestStaticInjection(Class[])
+     */
+    protected void requestStaticInjection(Class<?>... types) {
+        binder().requestStaticInjection(types);
+    }
 
-	/**
-	 * @see Binder#getProvider(CoreDependencyKey)
-	 * @since 2.0
-	 */
-	protected <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
-		return binder().getProvider(key);
-	}
+    /**
+     * @see Binder#getProvider(CoreDependencyKey)
+     * @since 2.0
+     */
+    protected <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
+        return binder().getProvider(key);
+    }
 
-	/**
-	 * @see Binder#getProvider(Class)
-	 * @since 2.0
-	 */
-	protected <T> Provider<T> getProvider(Class<T> type) {
-		return binder().getProvider(type);
-	}
+    /**
+     * @see Binder#getProvider(Class)
+     * @since 2.0
+     */
+    protected <T> Provider<T> getProvider(Class<T> type) {
+        return binder().getProvider(type);
+    }
 
-	/**
-	 * @see Binder#currentStage()
-	 * @since 2.0
-	 */
-	protected Stage currentStage() {
-		return binder().currentStage();
-	}
+    /**
+     * @see Binder#currentStage()
+     * @since 2.0
+     */
+    protected Stage currentStage() {
+        return binder().currentStage();
+    }
 
-	/**
-	 * @see Binder#getMembersInjector(Class)
-	 * @since 2.0
-	 */
-	protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-		return binder().getMembersInjector(type);
-	}
+    /**
+     * @see Binder#getMembersInjector(Class)
+     * @since 2.0
+     */
+    protected <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+        return binder().getMembersInjector(type);
+    }
 
-	/**
-	 * @see Binder#getMembersInjector(TypeToken)
-	 * @since 2.0
-	 */
-	protected <T> MembersInjector<T> getMembersInjector(TypeToken<T> type) {
-		return binder().getMembersInjector(type);
-	}
+    /**
+     * @see Binder#getMembersInjector(TypeToken)
+     * @since 2.0
+     */
+    protected <T> MembersInjector<T> getMembersInjector(TypeToken<T> type) {
+        return binder().getMembersInjector(type);
+    }
 
-	protected JSR330InjectorConfiguration config() {
-		return binder().config();
-	}
+    protected JSR330InjectorConfiguration config() {
+        return binder().config();
+    }
 
-	/**
-	 * @see Binder#bindCreationRule(CreationRule)
-	 */
-	protected void bindCreationRule(CreationRule rule) {
-		binder().bindCreationRule(rule);
-	}
+    /**
+     * @see Binder#bindCreationRule(CreationRule)
+     */
+    protected void bindCreationRule(CreationRule rule) {
+        binder().bindCreationRule(rule);
+    }
 
-	protected void bindMembersInjectorFactory(
-			RecipeMembersInjectorFactory factory) {
-		binder().bindMembersInjectorFactory(factory);
-	}
+    protected void bindMembersInjectorFactory(
+            RecipeMembersInjectorFactory factory) {
+        binder().bindMembersInjectorFactory(factory);
+    }
 
-	/**
-	 * @see Binder#bindInterceptor(Matcher, Matcher, SaltaMethodInterceptor)
-	 */
-	public final void bindInterceptor(
-			Matcher<? super CoreDependencyKey<?>> keyMatcher,
-			Matcher<? super Method> methodMatcher,
-			SaltaMethodInterceptor saltaInterceptor) {
-		binder().bindInterceptor(keyMatcher, methodMatcher, saltaInterceptor);
-	}
+    /**
+     * @see Binder#bindInterceptor(Matcher, Matcher, SaltaMethodInterceptor)
+     */
+    public final void bindInterceptor(
+            Matcher<? super CoreDependencyKey<?>> keyMatcher,
+            Matcher<? super Method> methodMatcher,
+            SaltaMethodInterceptor saltaInterceptor) {
+        binder().bindInterceptor(keyMatcher, methodMatcher, saltaInterceptor);
+    }
 
 }

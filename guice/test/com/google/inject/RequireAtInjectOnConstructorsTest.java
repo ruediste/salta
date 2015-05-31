@@ -27,127 +27,127 @@ import com.github.ruediste.salta.core.SaltaException;
  */
 public class RequireAtInjectOnConstructorsTest extends TestCase {
 
-	public void testNoCxtors_explicitBinding() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(NoCxtors.class);
-					binder().requireAtInjectOnConstructors();
-				}
-			}).getInstance(NoCxtors.class);
-			fail();
-		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("Cannot find construction recipe"))
-				throw ce;
-		}
-	}
+    public void testNoCxtors_explicitBinding() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(NoCxtors.class);
+                    binder().requireAtInjectOnConstructors();
+                }
+            }).getInstance(NoCxtors.class);
+            fail();
+        } catch (SaltaException ce) {
+            if (!ce.getMessage().contains("Cannot find construction recipe"))
+                throw ce;
+        }
+    }
 
-	public void testNoCxtors_jitBinding() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				binder().requireAtInjectOnConstructors();
-			}
-		});
-		try {
-			injector.getInstance(NoCxtors.class);
-			fail();
-		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("inner class"))
-				throw ce;
-		}
-	}
+    public void testNoCxtors_jitBinding() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                binder().requireAtInjectOnConstructors();
+            }
+        });
+        try {
+            injector.getInstance(NoCxtors.class);
+            fail();
+        } catch (SaltaException ce) {
+            if (!ce.getMessage().contains("inner class"))
+                throw ce;
+        }
+    }
 
-	public void testNoCxtors_implicitBinding() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(Interface.class).to(NoCxtors.class);
-					binder().requireAtInjectOnConstructors();
-				}
-			}).getInstance(Interface.class);
-			fail();
-		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("Cannot find construction recipe"))
-				throw ce;
-		}
-	}
+    public void testNoCxtors_implicitBinding() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(Interface.class).to(NoCxtors.class);
+                    binder().requireAtInjectOnConstructors();
+                }
+            }).getInstance(Interface.class);
+            fail();
+        } catch (SaltaException ce) {
+            if (!ce.getMessage().contains("Cannot find construction recipe"))
+                throw ce;
+        }
+    }
 
-	public void testNoCxtors_inheritedByPrivateModules() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					binder().requireAtInjectOnConstructors();
-					install(new AbstractModule() {
-						@Override
-						protected void configure() {
-							bind(NoCxtors.class);
-						}
-					});
-				}
-			}).getInstance(NoCxtors.class);
-			fail();
-		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("Cannot find construction recipe"))
-				throw ce;
-		}
-	}
+    public void testNoCxtors_inheritedByPrivateModules() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    binder().requireAtInjectOnConstructors();
+                    install(new AbstractModule() {
+                        @Override
+                        protected void configure() {
+                            bind(NoCxtors.class);
+                        }
+                    });
+                }
+            }).getInstance(NoCxtors.class);
+            fail();
+        } catch (SaltaException ce) {
+            if (!ce.getMessage().contains("Cannot find construction recipe"))
+                throw ce;
+        }
+    }
 
-	public void testManyConstructorsButNoneWithAtInject() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(ManyConstructors.class);
-					binder().requireAtInjectOnConstructors();
-				}
-			}).getInstance(ManyConstructors.class);
-			fail();
-		} catch (SaltaException ce) {
-			if (!ce.getMessage().contains("Cannot find construction recipe"))
-				throw ce;
-		}
-	}
+    public void testManyConstructorsButNoneWithAtInject() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(ManyConstructors.class);
+                    binder().requireAtInjectOnConstructors();
+                }
+            }).getInstance(ManyConstructors.class);
+            fail();
+        } catch (SaltaException ce) {
+            if (!ce.getMessage().contains("Cannot find construction recipe"))
+                throw ce;
+        }
+    }
 
-	public void testRequireAtInjectStillAllowsToConstructorBindings() {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				try {
-					bind(ManyConstructors.class).toConstructor(
-							ManyConstructors.class.getDeclaredConstructor());
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-				binder().requireAtInjectOnConstructors();
-			}
-		});
-		injector.getInstance(ManyConstructors.class);
-	}
+    public void testRequireAtInjectStillAllowsToConstructorBindings() {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                try {
+                    bind(ManyConstructors.class).toConstructor(
+                            ManyConstructors.class.getDeclaredConstructor());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                binder().requireAtInjectOnConstructors();
+            }
+        });
+        injector.getInstance(ManyConstructors.class);
+    }
 
-	private static interface Interface {
-	}
+    private static interface Interface {
+    }
 
-	private static class NoCxtors implements Interface {
-	}
+    private static class NoCxtors implements Interface {
+    }
 
-	private static class AnotherNoCxtors {
-	}
+    private static class AnotherNoCxtors {
+    }
 
-	private static class ManyConstructors {
-		@SuppressWarnings("unused")
-		ManyConstructors() {
-		}
+    private static class ManyConstructors {
+        @SuppressWarnings("unused")
+        ManyConstructors() {
+        }
 
-		@SuppressWarnings("unused")
-		ManyConstructors(String a) {
-		}
+        @SuppressWarnings("unused")
+        ManyConstructors(String a) {
+        }
 
-		@SuppressWarnings("unused")
-		ManyConstructors(int a) {
-		}
-	}
+        @SuppressWarnings("unused")
+        ManyConstructors(int a) {
+        }
+    }
 }

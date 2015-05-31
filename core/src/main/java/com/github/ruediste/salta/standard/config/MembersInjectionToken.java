@@ -8,26 +8,26 @@ import com.google.common.reflect.TypeToken;
  * before the value is returned.
  */
 public class MembersInjectionToken<T> {
-	private StandardInjector injector;
-	private T value;
-	private volatile boolean injected;
-	private TypeToken<T> type;
+    private StandardInjector injector;
+    private T value;
+    private volatile boolean injected;
+    private TypeToken<T> type;
 
-	public MembersInjectionToken(StandardInjector injector, T value,
-			TypeToken<T> type) {
-		this.injector = injector;
-		this.value = value;
-		this.type = type;
-	}
+    public MembersInjectionToken(StandardInjector injector, T value,
+            TypeToken<T> type) {
+        this.injector = injector;
+        this.value = value;
+        this.type = type;
+    }
 
-	public T getValue() {
-		if (!injected)
-			synchronized (injector.getCoreInjector().recipeLock) {
-				if (!injected) {
-					injector.injectMembers(type, value);
-					injected = true;
-				}
-			}
-		return value;
-	}
+    public T getValue() {
+        if (!injected)
+            synchronized (injector.getCoreInjector().recipeLock) {
+                if (!injected) {
+                    injector.injectMembers(type, value);
+                    injected = true;
+                }
+            }
+        return value;
+    }
 }

@@ -23,80 +23,81 @@ import junit.framework.TestCase;
  */
 public class BoundProviderTest extends TestCase {
 
-  public void testFooProvider() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).toProvider(FooProvider.class);
-      }
-    });
+    public void testFooProvider() throws CreationException {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            protected void configure() {
+                bind(Foo.class).toProvider(FooProvider.class);
+            }
+        });
 
-    Foo a = injector.getInstance(Foo.class);
-    Foo b = injector.getInstance(Foo.class);
+        Foo a = injector.getInstance(Foo.class);
+        Foo b = injector.getInstance(Foo.class);
 
-    assertEquals(0, a.i);
-    assertEquals(0, b.i);
-    assertNotNull(a.bar);
-    assertNotNull(b.bar);
-    assertNotSame(a.bar, b.bar);
-  }
-
-  public void testSingletonFooProvider() throws CreationException {
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Foo.class).toProvider(SingletonFooProvider.class);
-      }
-    });
-
-    Foo a = injector.getInstance(Foo.class);
-    Foo b = injector.getInstance(Foo.class);
-
-    assertEquals(0, a.i);
-    assertEquals(1, b.i);
-    assertNotNull(a.bar);
-    assertNotNull(b.bar);
-    assertSame(a.bar, b.bar);
-  }
-
-  static class Bar {}
-
-  static class Foo {
-    final Bar bar;
-    final int i;
-
-    Foo(Bar bar, int i) {
-      this.bar = bar;
-      this.i = i;
-    }
-  }
-
-  static class FooProvider implements Provider<Foo> {
-
-    final Bar bar;
-    int count = 0;
-
-    @Inject
-    public FooProvider(Bar bar) {
-      this.bar = bar;
+        assertEquals(0, a.i);
+        assertEquals(0, b.i);
+        assertNotNull(a.bar);
+        assertNotNull(b.bar);
+        assertNotSame(a.bar, b.bar);
     }
 
-    public Foo get() {
-      return new Foo(this.bar, count++);
+    public void testSingletonFooProvider() throws CreationException {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            protected void configure() {
+                bind(Foo.class).toProvider(SingletonFooProvider.class);
+            }
+        });
+
+        Foo a = injector.getInstance(Foo.class);
+        Foo b = injector.getInstance(Foo.class);
+
+        assertEquals(0, a.i);
+        assertEquals(1, b.i);
+        assertNotNull(a.bar);
+        assertNotNull(b.bar);
+        assertSame(a.bar, b.bar);
     }
-  }
 
-  @Singleton
-  static class SingletonFooProvider implements Provider<Foo> {
-
-    final Bar bar;
-    int count = 0;
-
-    @Inject
-    public SingletonFooProvider(Bar bar) {
-      this.bar = bar;
+    static class Bar {
     }
 
-    public Foo get() {
-      return new Foo(this.bar, count++);
+    static class Foo {
+        final Bar bar;
+        final int i;
+
+        Foo(Bar bar, int i) {
+            this.bar = bar;
+            this.i = i;
+        }
     }
-  }
+
+    static class FooProvider implements Provider<Foo> {
+
+        final Bar bar;
+        int count = 0;
+
+        @Inject
+        public FooProvider(Bar bar) {
+            this.bar = bar;
+        }
+
+        public Foo get() {
+            return new Foo(this.bar, count++);
+        }
+    }
+
+    @Singleton
+    static class SingletonFooProvider implements Provider<Foo> {
+
+        final Bar bar;
+        int count = 0;
+
+        @Inject
+        public SingletonFooProvider(Bar bar) {
+            this.bar = bar;
+        }
+
+        public Foo get() {
+            return new Foo(this.bar, count++);
+        }
+    }
 }

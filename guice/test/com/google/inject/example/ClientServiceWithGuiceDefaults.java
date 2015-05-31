@@ -30,57 +30,58 @@ import junit.framework.Assert;
  */
 public class ClientServiceWithGuiceDefaults {
 
-// 44 lines
+    // 44 lines
 
-@ImplementedBy(ServiceImpl.class)
-public interface Service {
-  void go();
-}
+    @ImplementedBy(ServiceImpl.class)
+    public interface Service {
+        void go();
+    }
 
-@Singleton
-public static class ServiceImpl implements ClientServiceWithGuiceDefaults.Service {
-  public void go() {
-    // ...
-  }
-}
+    @Singleton
+    public static class ServiceImpl implements
+            ClientServiceWithGuiceDefaults.Service {
+        public void go() {
+            // ...
+        }
+    }
 
-public static class Client {
+    public static class Client {
 
-  private final Service service;
+        private final Service service;
 
-  @Inject
-  public Client(Service service) {
-    this.service = service;
-  }
+        @Inject
+        public Client(Service service) {
+            this.service = service;
+        }
 
-  public void go() {
-    service.go();
-  }
-}
+        public void go() {
+            service.go();
+        }
+    }
 
-public void testClient() {
-  MockService mock = new MockService();
-  Client client = new Client(mock);
-  client.go();
-  Assert.assertTrue(mock.isGone());
-}
+    public void testClient() {
+        MockService mock = new MockService();
+        Client client = new Client(mock);
+        client.go();
+        Assert.assertTrue(mock.isGone());
+    }
 
-public static class MockService implements Service {
+    public static class MockService implements Service {
 
-  private boolean gone = false;
+        private boolean gone = false;
 
-  public void go() {
-    gone = true;
-  }
+        public void go() {
+            gone = true;
+        }
 
-  public boolean isGone() {
-    return gone;
-  }
-}
+        public boolean isGone() {
+            return gone;
+        }
+    }
 
-public static void main(String[] args) throws CreationException {
-  new ClientServiceWithGuiceDefaults().testClient();
-  Injector injector = Guice.createInjector();
-  Client client = injector.getProvider(Client.class).get();
-}
+    public static void main(String[] args) throws CreationException {
+        new ClientServiceWithGuiceDefaults().testClient();
+        Injector injector = Guice.createInjector();
+        Client client = injector.getProvider(Client.class).get();
+    }
 }

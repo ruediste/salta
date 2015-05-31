@@ -9,28 +9,28 @@ import com.google.inject.Provider;
  */
 public class BindingImpl<T> implements Binding<T> {
 
-	private Key<?> key;
-	private Provider<?> provider;
+    private Key<?> key;
+    private Provider<?> provider;
 
-	public BindingImpl(Key<?> key, Provider<?> provider) {
-		this.key = key;
-		this.provider = provider;
-	}
+    public BindingImpl(Key<?> key, Provider<?> provider) {
+        this.key = key;
+        this.provider = provider;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Key<T> getKey() {
-		return (Key<T>) key;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Key<T> getKey() {
+        return (Key<T>) key;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Provider<T> getProvider() {
-		return (Provider<T>) provider;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Provider<T> getProvider() {
+        return (Provider<T>) provider;
+    }
 
-	@Override
-	public String toString() {
-		return "Binding<" + key + ">";
-	}
+    @Override
+    public String toString() {
+        return "Binding<" + key + ">";
+    }
 }

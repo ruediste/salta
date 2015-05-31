@@ -38,130 +38,130 @@ import com.google.common.collect.Iterables;
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class Asserts {
-	private Asserts() {
-	}
+    private Asserts() {
+    }
 
-	/**
-	 * Returns the String that would appear in an error message for this chain
-	 * of classes as modules.
-	 */
-	public static String asModuleChain(Class... classes) {
-		return Joiner
-				.on(" -> ")
-				.appendTo(
-						new StringBuilder(" (via modules: "),
-						Iterables.transform(ImmutableList.copyOf(classes),
-								new Function<Class, String>() {
-									@Override
-									public String apply(Class input) {
-										return input.getName();
-									}
-								})).append(")").toString();
-	}
+    /**
+     * Returns the String that would appear in an error message for this chain
+     * of classes as modules.
+     */
+    public static String asModuleChain(Class... classes) {
+        return Joiner
+                .on(" -> ")
+                .appendTo(
+                        new StringBuilder(" (via modules: "),
+                        Iterables.transform(ImmutableList.copyOf(classes),
+                                new Function<Class, String>() {
+                                    @Override
+                                    public String apply(Class input) {
+                                        return input.getName();
+                                    }
+                                })).append(")").toString();
+    }
 
-	/**
-	 * Returns the source file appears in error messages based on
-	 * {@link #getIncludeStackTraceOption()} value.
-	 */
-	public static String getDeclaringSourcePart(Class clazz) {
-		return ".configure(" + clazz.getSimpleName() + ".java:";
-	}
+    /**
+     * Returns the source file appears in error messages based on
+     * {@link #getIncludeStackTraceOption()} value.
+     */
+    public static String getDeclaringSourcePart(Class clazz) {
+        return ".configure(" + clazz.getSimpleName() + ".java:";
+    }
 
-	/**
-	 * Returns true if {@link #getIncludeStackTraceOption()} returns
-	 * {@link IncludeStackTraceOption#OFF}.
-	 */
-	public static boolean isIncludeStackTraceOff() {
-		return false;
-	}
+    /**
+     * Returns true if {@link #getIncludeStackTraceOption()} returns
+     * {@link IncludeStackTraceOption#OFF}.
+     */
+    public static boolean isIncludeStackTraceOff() {
+        return false;
+    }
 
-	/**
-	 * Returns true if {@link #getIncludeStackTraceOption()} returns
-	 * {@link IncludeStackTraceOption#COMPLETE}.
-	 */
-	public static boolean isIncludeStackTraceComplete() {
-		return true;
-	}
+    /**
+     * Returns true if {@link #getIncludeStackTraceOption()} returns
+     * {@link IncludeStackTraceOption#COMPLETE}.
+     */
+    public static boolean isIncludeStackTraceComplete() {
+        return true;
+    }
 
-	/**
-	 * Fails unless {@code expected.equals(actual)},
-	 * {@code actual.equals(expected)} and their hash codes are equal. This is
-	 * useful for testing the equals method itself.
-	 */
-	public static void assertEqualsBothWays(Object expected, Object actual) {
-		assertNotNull(expected);
-		assertNotNull(actual);
-		assertEquals("expected.equals(actual)", actual, expected);
-		assertEquals("actual.equals(expected)", expected, actual);
-		assertEquals("hashCode", expected.hashCode(), actual.hashCode());
-	}
+    /**
+     * Fails unless {@code expected.equals(actual)},
+     * {@code actual.equals(expected)} and their hash codes are equal. This is
+     * useful for testing the equals method itself.
+     */
+    public static void assertEqualsBothWays(Object expected, Object actual) {
+        assertNotNull(expected);
+        assertNotNull(actual);
+        assertEquals("expected.equals(actual)", actual, expected);
+        assertEquals("actual.equals(expected)", expected, actual);
+        assertEquals("hashCode", expected.hashCode(), actual.hashCode());
+    }
 
-	/**
-	 * Fails unless {@code text} includes all {@code substrings}, in order.
-	 */
-	public static void assertContains(String text, String... substrings) {
-		/*
-		 * if[NO_AOP] // when we strip out bytecode manipulation, we lose the
-		 * ability to generate some source lines. if
-		 * (text.contains("(Unknown Source)")) { return; } end[NO_AOP]
-		 */
+    /**
+     * Fails unless {@code text} includes all {@code substrings}, in order.
+     */
+    public static void assertContains(String text, String... substrings) {
+        /*
+         * if[NO_AOP] // when we strip out bytecode manipulation, we lose the
+         * ability to generate some source lines. if
+         * (text.contains("(Unknown Source)")) { return; } end[NO_AOP]
+         */
 
-		int startingFrom = 0;
-		for (String substring : substrings) {
-			int index = text.indexOf(substring, startingFrom);
-			assertTrue(String.format(
-					"Expected \"%s\" to contain substring \"%s\"", text,
-					substring), index >= startingFrom);
-			startingFrom = index + substring.length();
-		}
+        int startingFrom = 0;
+        for (String substring : substrings) {
+            int index = text.indexOf(substring, startingFrom);
+            assertTrue(String.format(
+                    "Expected \"%s\" to contain substring \"%s\"", text,
+                    substring), index >= startingFrom);
+            startingFrom = index + substring.length();
+        }
 
-		String lastSubstring = substrings[substrings.length - 1];
-		assertTrue(String.format(
-				"Expected \"%s\" to contain substring \"%s\" only once),",
-				text, lastSubstring),
-				text.indexOf(lastSubstring, startingFrom) == -1);
-	}
+        String lastSubstring = substrings[substrings.length - 1];
+        assertTrue(String.format(
+                "Expected \"%s\" to contain substring \"%s\" only once),",
+                text, lastSubstring),
+                text.indexOf(lastSubstring, startingFrom) == -1);
+    }
 
-	/**
-	 * Fails unless {@code object} doesn't equal itself when reserialized.
-	 */
-	public static void assertEqualWhenReserialized(Object object)
-			throws IOException {
-		Object reserialized = reserialize(object);
-		assertEquals(object, reserialized);
-		assertEquals(object.hashCode(), reserialized.hashCode());
-	}
+    /**
+     * Fails unless {@code object} doesn't equal itself when reserialized.
+     */
+    public static void assertEqualWhenReserialized(Object object)
+            throws IOException {
+        Object reserialized = reserialize(object);
+        assertEquals(object, reserialized);
+        assertEquals(object.hashCode(), reserialized.hashCode());
+    }
 
-	/**
-	 * Fails unless {@code object} has the same toString value when
-	 * reserialized.
-	 */
-	public static void assertSimilarWhenReserialized(Object object)
-			throws IOException {
-		Object reserialized = reserialize(object);
-		assertEquals(object.toString(), reserialized.toString());
-	}
+    /**
+     * Fails unless {@code object} has the same toString value when
+     * reserialized.
+     */
+    public static void assertSimilarWhenReserialized(Object object)
+            throws IOException {
+        Object reserialized = reserialize(object);
+        assertEquals(object.toString(), reserialized.toString());
+    }
 
-	public static <E> E reserialize(E original) throws IOException {
-		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			new ObjectOutputStream(out).writeObject(original);
-			ByteArrayInputStream in = new ByteArrayInputStream(
-					out.toByteArray());
-			@SuppressWarnings("unchecked")
-			// the reserialized type is assignable
-			E reserialized = (E) new ObjectInputStream(in).readObject();
-			return reserialized;
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public static <E> E reserialize(E original) throws IOException {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            new ObjectOutputStream(out).writeObject(original);
+            ByteArrayInputStream in = new ByteArrayInputStream(
+                    out.toByteArray());
+            @SuppressWarnings("unchecked")
+            // the reserialized type is assignable
+            E reserialized = (E) new ObjectInputStream(in).readObject();
+            return reserialized;
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public static void assertNotSerializable(Object object) throws IOException {
-		try {
-			reserialize(object);
-			Assert.fail();
-		} catch (NotSerializableException expected) {
-		}
-	}
+    public static void assertNotSerializable(Object object) throws IOException {
+        try {
+            reserialize(object);
+            Assert.fail();
+        } catch (NotSerializableException expected) {
+        }
+    }
 }

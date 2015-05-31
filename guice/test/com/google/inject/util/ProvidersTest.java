@@ -31,80 +31,82 @@ import javax.inject.Inject;
  */
 public class ProvidersTest extends TestCase {
 
-  public void testOfInstance() {
-    String foo = "foo";
-    Provider<String> p = Providers.of(foo);
-    assertSame(foo, p.get());
-    assertSame(foo, p.get());
-  }
-
-  public void testOfNull() {
-    Provider<String> p = Providers.of(null);
-    assertNull(p.get());
-  }
-  
-  public void testOfEquality() {
-    new EqualsTester()
-        .addEqualityGroup(
-            Providers.of(null),
-            Providers.of(null))
-        .addEqualityGroup(
-            Providers.of("Hello"),
-            Providers.of("Hello"))
-        .testEquals();
-  }
-  
-  public void testGuicifyEquality() {
-    new EqualsTester()
-        .addEqualityGroup(
-            Providers.guicify(new JavaxProvider(10)),
-            Providers.guicify(new JavaxProvider(10)))
-        .addEqualityGroup(
-            Providers.guicify(new JavaxProvider(11)),
-            Providers.guicify(new JavaxProvider(11)))
-        .addEqualityGroup(
-            Providers.guicify(new JavaxProviderWithDependencies()),
-            Providers.guicify(new JavaxProviderWithDependencies()))
-        .testEquals();
-  }
-  
-  private static class JavaxProvider implements javax.inject.Provider<Integer> {
-    private final int value;
-
-    public JavaxProvider(int value) {
-      this.value = value;
-    }
-    
-    public Integer get() {
-      return value;
+    public void testOfInstance() {
+        String foo = "foo";
+        Provider<String> p = Providers.of(foo);
+        assertSame(foo, p.get());
+        assertSame(foo, p.get());
     }
 
-    @Override public int hashCode() {
-      return Objects.hashCode(value);
+    public void testOfNull() {
+        Provider<String> p = Providers.of(null);
+        assertNull(p.get());
     }
 
-    @Override public boolean equals(Object obj) {
-      return (obj instanceof JavaxProvider) && (value == ((JavaxProvider) obj).value);
-    }
-  }
-  
-  private static class JavaxProviderWithDependencies implements javax.inject.Provider<Integer> {
-    private int value;
-    
-    @Inject void setValue(int value) {
-      this.value = value;
-    }
-    
-    public Integer get() {
-      return value;
+    public void testOfEquality() {
+        new EqualsTester()
+                .addEqualityGroup(Providers.of(null), Providers.of(null))
+                .addEqualityGroup(Providers.of("Hello"), Providers.of("Hello"))
+                .testEquals();
     }
 
-    @Override public int hashCode() {
-      return 42;
+    public void testGuicifyEquality() {
+        new EqualsTester()
+                .addEqualityGroup(Providers.guicify(new JavaxProvider(10)),
+                        Providers.guicify(new JavaxProvider(10)))
+                .addEqualityGroup(Providers.guicify(new JavaxProvider(11)),
+                        Providers.guicify(new JavaxProvider(11)))
+                .addEqualityGroup(
+                        Providers.guicify(new JavaxProviderWithDependencies()),
+                        Providers.guicify(new JavaxProviderWithDependencies()))
+                .testEquals();
     }
 
-    @Override public boolean equals(Object obj) {
-      return (obj instanceof JavaxProviderWithDependencies);
+    private static class JavaxProvider implements
+            javax.inject.Provider<Integer> {
+        private final int value;
+
+        public JavaxProvider(int value) {
+            this.value = value;
+        }
+
+        public Integer get() {
+            return value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(value);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return (obj instanceof JavaxProvider)
+                    && (value == ((JavaxProvider) obj).value);
+        }
     }
-  }
+
+    private static class JavaxProviderWithDependencies implements
+            javax.inject.Provider<Integer> {
+        private int value;
+
+        @Inject
+        void setValue(int value) {
+            this.value = value;
+        }
+
+        public Integer get() {
+            return value;
+        }
+
+        @Override
+        public int hashCode() {
+            return 42;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return (obj instanceof JavaxProviderWithDependencies);
+        }
+    }
 }

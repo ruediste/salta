@@ -34,103 +34,103 @@ import com.google.inject.name.Named;
  */
 public class BoundInstanceInjectionTest extends TestCase {
 
-	public void testInstancesAreInjected() throws CreationException {
-		final O o = new O();
+    public void testInstancesAreInjected() throws CreationException {
+        final O o = new O();
 
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(O.class).toInstance(o);
-				bind(int.class).toInstance(5);
-			}
-		});
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(O.class).toInstance(o);
+                bind(int.class).toInstance(5);
+            }
+        });
 
-		assertEquals(5, o.fromMethod);
-	}
+        assertEquals(5, o.fromMethod);
+    }
 
-	static class O {
-		int fromMethod;
+    static class O {
+        int fromMethod;
 
-		@Inject
-		void setInt(int i) {
-			this.fromMethod = i;
-		}
-	}
+        @Inject
+        void setInt(int i) {
+            this.fromMethod = i;
+        }
+    }
 
-	public void testProvidersAreInjected() throws CreationException {
-		Injector injector = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bind(O.class).toProvider(new Provider<O>() {
-					@Inject
-					int i;
+    public void testProvidersAreInjected() throws CreationException {
+        Injector injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(O.class).toProvider(new Provider<O>() {
+                    @Inject
+                    int i;
 
-					@Override
-					public O get() {
-						O o = new O();
-						o.setInt(i);
-						return o;
-					}
-				});
-				bind(int.class).toInstance(5);
-			}
-		});
+                    @Override
+                    public O get() {
+                        O o = new O();
+                        o.setInt(i);
+                        return o;
+                    }
+                });
+                bind(int.class).toInstance(5);
+            }
+        });
 
-		assertEquals(5, injector.getInstance(O.class).fromMethod);
-	}
+        assertEquals(5, injector.getInstance(O.class).fromMethod);
+    }
 
-	public void testMalformedInstance() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(Object.class).toInstance(new MalformedInjectable());
-				}
-			}).getInstance(Object.class);
-			fail();
-		} catch (SaltaException expected) {
-			if (!expected.getMessage().contains(
-					"Multiple required qualifiers found"))
-				throw expected;
-		}
-	}
+    public void testMalformedInstance() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(Object.class).toInstance(new MalformedInjectable());
+                }
+            }).getInstance(Object.class);
+            fail();
+        } catch (SaltaException expected) {
+            if (!expected.getMessage().contains(
+                    "Multiple required qualifiers found"))
+                throw expected;
+        }
+    }
 
-	public void testMalformedProvider() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(String.class).toProvider(new MalformedProvider());
-				}
-			}).getInstance(String.class);
-			fail();
-		} catch (SaltaException expected) {
-			if (!expected.getMessage().contains(
-					"Multiple required qualifiers found"))
-				throw expected;
-		}
-	}
+    public void testMalformedProvider() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(String.class).toProvider(new MalformedProvider());
+                }
+            }).getInstance(String.class);
+            fail();
+        } catch (SaltaException expected) {
+            if (!expected.getMessage().contains(
+                    "Multiple required qualifiers found"))
+                throw expected;
+        }
+    }
 
-	static class MalformedInjectable {
-		@Inject
-		void doublyAnnotated(@Named("a") @Another String unused) {
-		}
-	}
+    static class MalformedInjectable {
+        @Inject
+        void doublyAnnotated(@Named("a") @Another String unused) {
+        }
+    }
 
-	static class MalformedProvider implements Provider<String> {
-		@Inject
-		void doublyAnnotated(@Named("a") @Another String s) {
-		}
+    static class MalformedProvider implements Provider<String> {
+        @Inject
+        void doublyAnnotated(@Named("a") @Another String s) {
+        }
 
-		@Override
-		public String get() {
-			return "a";
-		}
-	}
+        @Override
+        public String get() {
+            return "a";
+        }
+    }
 
-	@BindingAnnotation
-	@Target({ FIELD, PARAMETER, METHOD })
-	@Retention(RUNTIME)
-	public @interface Another {
-	}
+    @BindingAnnotation
+    @Target({ FIELD, PARAMETER, METHOD })
+    @Retention(RUNTIME)
+    public @interface Another {
+    }
 }

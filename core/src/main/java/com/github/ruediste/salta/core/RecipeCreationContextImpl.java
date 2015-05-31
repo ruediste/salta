@@ -17,95 +17,95 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public class RecipeCreationContextImpl implements RecipeCreationContext {
 
-	private CoreInjector coreInjector;
+    private CoreInjector coreInjector;
 
-	public RecipeCreationContextImpl(CoreInjector coreInjector) {
-		this.coreInjector = coreInjector;
-	}
+    public RecipeCreationContextImpl(CoreInjector coreInjector) {
+        this.coreInjector = coreInjector;
+    }
 
-	private LinkedHashSet<Binding> currentBindings = new LinkedHashSet<>();
+    private LinkedHashSet<Binding> currentBindings = new LinkedHashSet<>();
 
-	private ArrayList<Runnable> queuedActions = new ArrayList<>();
-	private boolean closed;
+    private ArrayList<Runnable> queuedActions = new ArrayList<>();
+    private boolean closed;
 
-	private void removeBinding(Binding b) {
-		currentBindings.remove(b);
-	}
+    private void removeBinding(Binding b) {
+        currentBindings.remove(b);
+    }
 
-	private void addBinding(Binding binding) {
-		if (!currentBindings.add(binding)) {
-			boolean found = false;
-			ArrayList<String> msg = new ArrayList<String>();
-			for (Binding b : currentBindings) {
-				if (b.equals(binding)) {
-					found = true;
-				}
-				if (found)
-					msg.add(b.toString());
-			}
-			msg.add(binding.toString());
-			throw new SaltaException("Detected Dependency Circle: "
-					+ msg.stream().collect(joining("\n", "\n", "\n")));
-		}
-	}
+    private void addBinding(Binding binding) {
+        if (!currentBindings.add(binding)) {
+            boolean found = false;
+            ArrayList<String> msg = new ArrayList<String>();
+            for (Binding b : currentBindings) {
+                if (b.equals(binding)) {
+                    found = true;
+                }
+                if (found)
+                    msg.add(b.toString());
+            }
+            msg.add(binding.toString());
+            throw new SaltaException("Detected Dependency Circle: "
+                    + msg.stream().collect(joining("\n", "\n", "\n")));
+        }
+    }
 
-	@Override
-	public <T> T withBinding(Binding binding, Supplier<T> supplier) {
-		addBinding(binding);
-		try {
-			return supplier.get();
-		} finally {
-			removeBinding(binding);
-		}
-	}
+    @Override
+    public <T> T withBinding(Binding binding, Supplier<T> supplier) {
+        addBinding(binding);
+        try {
+            return supplier.get();
+        } finally {
+            removeBinding(binding);
+        }
+    }
 
-	@Override
-	public SupplierRecipe getRecipe(CoreDependencyKey<?> dependency) {
-		return coreInjector.getRecipe(dependency, this);
-	}
+    @Override
+    public SupplierRecipe getRecipe(CoreDependencyKey<?> dependency) {
+        return coreInjector.getRecipe(dependency, this);
+    }
 
-	private void requireNotClosed() {
-		if (closed)
-			throw new SaltaException("RecipeCreationContext already closed");
-	}
+    private void requireNotClosed() {
+        if (closed)
+            throw new SaltaException("RecipeCreationContext already closed");
+    }
 
-	public void processQueuedActions() {
-		requireNotClosed();
-		while (!queuedActions.isEmpty()) {
-			ArrayList<Runnable> tmp = new ArrayList<Runnable>(queuedActions);
-			queuedActions.clear();
-			for (Runnable r : tmp)
-				r.run();
-		}
-		closed = true;
-	}
+    public void processQueuedActions() {
+        requireNotClosed();
+        while (!queuedActions.isEmpty()) {
+            ArrayList<Runnable> tmp = new ArrayList<Runnable>(queuedActions);
+            queuedActions.clear();
+            for (Runnable r : tmp)
+                r.run();
+        }
+        closed = true;
+    }
 
-	@Override
-	public void queueAction(Runnable action) {
-		requireNotClosed();
-		queuedActions.add(action);
-	}
+    @Override
+    public void queueAction(Runnable action) {
+        requireNotClosed();
+        queuedActions.add(action);
+    }
 
-	@Override
-	public RecipeCompiler getCompiler() {
-		return coreInjector.getCompiler();
-	}
+    @Override
+    public RecipeCompiler getCompiler() {
+        return coreInjector.getCompiler();
+    }
 
-	@Override
-	public Object getRecipeLock() {
-		return coreInjector.recipeLock;
-	}
+    @Override
+    public Object getRecipeLock() {
+        return coreInjector.recipeLock;
+    }
 
-	@Override
-	public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency) {
-		return coreInjector.tryGetRecipeFunc(dependency)
-				.map(f -> f.apply(this));
-	}
+    @Override
+    public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency) {
+        return coreInjector.tryGetRecipeFunc(dependency)
+                .map(f -> f.apply(this));
+    }
 
-	@Override
-	public Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(
-			CoreDependencyKey<?> dependency) {
-		return coreInjector.tryGetRecipeFunc(dependency);
-	}
+    @Override
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(
+            CoreDependencyKey<?> dependency) {
+        return coreInjector.tryGetRecipeFunc(dependency);
+    }
 
 }

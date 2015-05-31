@@ -18,27 +18,27 @@ import com.github.ruediste.salta.standard.InjectionPoint;
  */
 public class LoggerCreationRule implements CreationRule {
 
-	private Class<?> loggerClass;
-	private Function<Class<?>, Object> loggerFactory;
+    private Class<?> loggerClass;
+    private Function<Class<?>, Object> loggerFactory;
 
-	public LoggerCreationRule(Class<?> loggerClass,
-			Function<Class<?>, Object> loggerFactory) {
-		this.loggerClass = loggerClass;
-		this.loggerFactory = loggerFactory;
+    public LoggerCreationRule(Class<?> loggerClass,
+            Function<Class<?>, Object> loggerFactory) {
+        this.loggerClass = loggerClass;
+        this.loggerFactory = loggerFactory;
 
-	}
+    }
 
-	@Override
-	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key, CoreInjector injector) {
+    @Override
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+            CoreDependencyKey<?> key, CoreInjector injector) {
 
-		if (key instanceof InjectionPoint
-				&& loggerClass.equals(key.getRawType())) {
-			Class<?> declaringClass = ((InjectionPoint<?>) key).getMember()
-					.getDeclaringClass();
-			return Optional.of(ctx -> new SupplierRecipeImpl(
-					() -> loggerFactory.apply(declaringClass)));
-		}
-		return Optional.empty();
-	}
+        if (key instanceof InjectionPoint
+                && loggerClass.equals(key.getRawType())) {
+            Class<?> declaringClass = ((InjectionPoint<?>) key).getMember()
+                    .getDeclaringClass();
+            return Optional.of(ctx -> new SupplierRecipeImpl(
+                    () -> loggerFactory.apply(declaringClass)));
+        }
+        return Optional.empty();
+    }
 }

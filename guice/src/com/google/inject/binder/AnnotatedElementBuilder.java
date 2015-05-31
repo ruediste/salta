@@ -26,13 +26,13 @@ import java.lang.annotation.Annotation;
  */
 public interface AnnotatedElementBuilder {
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
-  void annotatedWith(Class<? extends Annotation> annotationType);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    void annotatedWith(Class<? extends Annotation> annotationType);
 
-  /**
-   * See the EDSL examples at {@link com.google.inject.Binder}.
-   */
-  void annotatedWith(Annotation annotation);
+    /**
+     * See the EDSL examples at {@link com.google.inject.Binder}.
+     */
+    void annotatedWith(Annotation annotation);
 }

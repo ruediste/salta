@@ -16,34 +16,34 @@ import com.google.common.reflect.TypeToken;
  * Statically defined Binding.
  */
 public class StandardStaticBinding extends StaticBinding {
-	public Matcher<CoreDependencyKey<?>> dependencyMatcher;
-	public final Set<TypeToken<?>> possibleTypes = new HashSet<>();
-	public CreationRecipeFactory recipeFactory;
-	public Supplier<Scope> scopeSupplier;
+    public Matcher<CoreDependencyKey<?>> dependencyMatcher;
+    public final Set<TypeToken<?>> possibleTypes = new HashSet<>();
+    public CreationRecipeFactory recipeFactory;
+    public Supplier<Scope> scopeSupplier;
 
-	@Override
-	public Set<TypeToken<?>> getPossibleTypes() {
-		return possibleTypes;
-	}
+    @Override
+    public Set<TypeToken<?>> getPossibleTypes() {
+        return possibleTypes;
+    }
 
-	@Override
-	public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
-		return recipeFactory.createRecipe(ctx);
-	}
+    @Override
+    public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
+        return recipeFactory.createRecipe(ctx);
+    }
 
-	@Override
-	public String toString() {
-		return "StandardStaticBinding(" + dependencyMatcher + ")";
-	}
+    @Override
+    public String toString() {
+        return "StandardStaticBinding(" + dependencyMatcher + ")";
+    }
 
-	@Override
-	public Matcher<CoreDependencyKey<?>> getMatcher() {
-		return dependencyMatcher;
-	}
+    @Override
+    public Matcher<CoreDependencyKey<?>> getMatcher() {
+        return dependencyMatcher;
+    }
 
-	@Override
-	protected Scope getScopeImpl() {
-		return scopeSupplier.get();
-	}
+    @Override
+    protected Scope getScopeImpl() {
+        return scopeSupplier.get();
+    }
 
 }

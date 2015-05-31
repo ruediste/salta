@@ -31,109 +31,109 @@ import com.google.inject.Provider;
  */
 public final class Providers {
 
-	private Providers() {
-	}
+    private Providers() {
+    }
 
-	/**
-	 * Returns a provider which always provides {@code instance}. This should
-	 * not be necessary to use in your application, but is helpful for several
-	 * types of unit tests.
-	 *
-	 * @param instance
-	 *            the instance that should always be provided. This is also
-	 *            permitted to be null, to enable aggressive testing, although
-	 *            in real life a Guice-supplied Provider will never return null.
-	 */
-	public static <T> Provider<T> of(final T instance) {
-		return new ConstantProvider<T>(instance);
-	}
+    /**
+     * Returns a provider which always provides {@code instance}. This should
+     * not be necessary to use in your application, but is helpful for several
+     * types of unit tests.
+     *
+     * @param instance
+     *            the instance that should always be provided. This is also
+     *            permitted to be null, to enable aggressive testing, although
+     *            in real life a Guice-supplied Provider will never return null.
+     */
+    public static <T> Provider<T> of(final T instance) {
+        return new ConstantProvider<T>(instance);
+    }
 
-	private static final class GuicifiedProvider<T> implements Provider<T> {
-		private javax.inject.Provider<T> delegate;
+    private static final class GuicifiedProvider<T> implements Provider<T> {
+        private javax.inject.Provider<T> delegate;
 
-		public GuicifiedProvider(javax.inject.Provider<T> delegate) {
-			this.delegate = delegate;
-		}
+        public GuicifiedProvider(javax.inject.Provider<T> delegate) {
+            this.delegate = delegate;
+        }
 
-		@Override
-		public T get() {
-			return delegate.get();
-		}
+        @Override
+        public T get() {
+            return delegate.get();
+        }
 
-		@Override
-		public int hashCode() {
-			return Objects.hashCode(delegate);
-		}
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(delegate);
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			GuicifiedProvider<?> other = (GuicifiedProvider<?>) obj;
-			return Objects.equal(delegate, other.delegate);
-		}
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            GuicifiedProvider<?> other = (GuicifiedProvider<?>) obj;
+            return Objects.equal(delegate, other.delegate);
+        }
 
-		@Override
-		public String toString() {
-			return "guicified(jsr330Provider)";
-		}
+        @Override
+        public String toString() {
+            return "guicified(jsr330Provider)";
+        }
 
-		@Inject
-		public void initialize(Injector injector) {
-			injector.injectMembers(delegate);
-			// token = MemberInjectionToken.getMemberInjectionToken(
-			// injector.getSaltaInjector(), delegate);
-		}
-	}
+        @Inject
+        public void initialize(Injector injector) {
+            injector.injectMembers(delegate);
+            // token = MemberInjectionToken.getMemberInjectionToken(
+            // injector.getSaltaInjector(), delegate);
+        }
+    }
 
-	private static final class ConstantProvider<T> implements Provider<T> {
-		private final T instance;
+    private static final class ConstantProvider<T> implements Provider<T> {
+        private final T instance;
 
-		private ConstantProvider(T instance) {
-			this.instance = instance;
-		}
+        private ConstantProvider(T instance) {
+            this.instance = instance;
+        }
 
-		@Override
-		public T get() {
-			return instance;
-		}
+        @Override
+        public T get() {
+            return instance;
+        }
 
-		@Override
-		public String toString() {
-			return "of(" + instance + ")";
-		}
+        @Override
+        public String toString() {
+            return "of(" + instance + ")";
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			return (obj instanceof ConstantProvider)
-					&& Objects.equal(instance,
-							((ConstantProvider<?>) obj).instance);
-		}
+        @Override
+        public boolean equals(Object obj) {
+            return (obj instanceof ConstantProvider)
+                    && Objects.equal(instance,
+                            ((ConstantProvider<?>) obj).instance);
+        }
 
-		@Override
-		public int hashCode() {
-			return Objects.hashCode(instance);
-		}
-	}
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(instance);
+        }
+    }
 
-	/**
-	 * Returns a Guice-friendly {@code com.google.inject.Provider} for the given
-	 * JSR-330 {@code javax.inject.Provider}. The converse method is
-	 * unnecessary, since Guice providers directly implement the JSR-330
-	 * interface.
-	 * 
-	 * @since 3.0
-	 */
-	public static <T> Provider<T> guicify(javax.inject.Provider<T> provider) {
-		if (provider instanceof Provider) {
-			return (Provider<T>) provider;
-		}
+    /**
+     * Returns a Guice-friendly {@code com.google.inject.Provider} for the given
+     * JSR-330 {@code javax.inject.Provider}. The converse method is
+     * unnecessary, since Guice providers directly implement the JSR-330
+     * interface.
+     * 
+     * @since 3.0
+     */
+    public static <T> Provider<T> guicify(javax.inject.Provider<T> provider) {
+        if (provider instanceof Provider) {
+            return (Provider<T>) provider;
+        }
 
-		return new GuicifiedProvider<T>(provider);
-	}
+        return new GuicifiedProvider<T>(provider);
+    }
 
 }

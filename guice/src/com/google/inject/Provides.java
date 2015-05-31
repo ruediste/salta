@@ -24,11 +24,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates methods of a {@link Module} to create a provider method binding. The method's return
- * type is bound to its returned value. Guice will pass dependencies to the method as parameters.
+ * Annotates methods of a {@link Module} to create a provider method binding.
+ * The method's return type is bound to its returned value. Guice will pass
+ * dependencies to the method as parameters.
  *
  * @author crazybob@google.com (Bob Lee)
  * @since 2.0
  */
-@Documented @Target(METHOD) @Retention(RUNTIME)
-public @interface Provides {}
+@Documented
+@Target(METHOD)
+@Retention(RUNTIME)
+public @interface Provides {
+}

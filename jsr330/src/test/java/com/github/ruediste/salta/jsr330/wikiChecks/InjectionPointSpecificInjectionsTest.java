@@ -14,22 +14,22 @@ import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.Salta;
 
 public class InjectionPointSpecificInjectionsTest {
-	private static class A {
-		@Inject
-		Logger log;
-	}
+    private static class A {
+        @Inject
+        Logger log;
+    }
 
-	@Test
-	public void test() {
-		A a = Salta.createInjector(new AbstractModule() {
+    @Test
+    public void test() {
+        A a = Salta.createInjector(new AbstractModule() {
 
-			@Override
-			protected void configure() throws Exception {
-				bindCreationRule(new CreationRuleImpl(CoreDependencyKey
-						.rawTypeMatcher(Logger.class), key -> () -> Logger
-						.getLogger(key.getRawType().getName())));
-			}
-		}).getInstance(A.class);
-		assertNotNull(a.log);
-	}
+            @Override
+            protected void configure() throws Exception {
+                bindCreationRule(new CreationRuleImpl(CoreDependencyKey
+                        .rawTypeMatcher(Logger.class), key -> () -> Logger
+                        .getLogger(key.getRawType().getName())));
+            }
+        }).getInstance(A.class);
+        assertNotNull(a.log);
+    }
 }

@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-
 package com.google.inject.internal;
 
 /**
- * Indicates that a result could not be returned while preparing or resolving a binding. The caller
- * should {@link Errors#merge(Errors) merge} the errors from this exception with their existing
- * errors.
+ * Indicates that a result could not be returned while preparing or resolving a
+ * binding. The caller should {@link Errors#merge(Errors) merge} the errors from
+ * this exception with their existing errors.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  */
 public class ErrorsException extends Exception {
 
-  private final Errors errors;
+    private final Errors errors;
 
-  public ErrorsException(Errors errors) {
-    this.errors = errors;
-  }
+    public ErrorsException(Errors errors) {
+        this.errors = errors;
+    }
 
-  public Errors getErrors() {
-    return errors;
-  }
+    public Errors getErrors() {
+        return errors;
+    }
 }

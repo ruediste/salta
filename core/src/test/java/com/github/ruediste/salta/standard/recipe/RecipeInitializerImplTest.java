@@ -11,25 +11,25 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
 public class RecipeInitializerImplTest {
 
-	Object instance;
+    Object instance;
 
-	@Test
-	public void test() throws Throwable {
+    @Test
+    public void test() throws Throwable {
 
-		RecipeCompiler compiler = new RecipeCompiler();
-		Object result = compiler.compileSupplier(new SupplierRecipe() {
+        RecipeCompiler compiler = new RecipeCompiler();
+        Object result = compiler.compileSupplier(new SupplierRecipe() {
 
-			@Override
-			protected Class<?> compileImpl(GeneratorAdapter mv,
-					MethodCompilationContext ctx) {
-				mv.push(1);
-				return new RecipeInitializerImpl(x -> {
-					instance = x;
-				}).compile(int.class, ctx);
-			}
-		}).get();
+            @Override
+            protected Class<?> compileImpl(GeneratorAdapter mv,
+                    MethodCompilationContext ctx) {
+                mv.push(1);
+                return new RecipeInitializerImpl(x -> {
+                    instance = x;
+                }).compile(int.class, ctx);
+            }
+        }).get();
 
-		assertEquals(1, result);
-		assertEquals(1, instance);
-	}
+        assertEquals(1, result);
+        assertEquals(1, instance);
+    }
 }

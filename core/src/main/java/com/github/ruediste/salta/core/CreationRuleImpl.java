@@ -15,23 +15,23 @@ import com.github.ruediste.salta.matchers.Matcher;
  */
 public class CreationRuleImpl implements CreationRule {
 
-	private Function<CoreDependencyKey<?>, Supplier<Object>> supplierFactory;
-	private Matcher<? super CoreDependencyKey<?>> matcher;
+    private Function<CoreDependencyKey<?>, Supplier<Object>> supplierFactory;
+    private Matcher<? super CoreDependencyKey<?>> matcher;
 
-	public CreationRuleImpl(Matcher<? super CoreDependencyKey<?>> matcher,
-			Function<CoreDependencyKey<?>, Supplier<Object>> supplierFactory) {
-		this.matcher = matcher;
-		this.supplierFactory = supplierFactory;
-	}
+    public CreationRuleImpl(Matcher<? super CoreDependencyKey<?>> matcher,
+            Function<CoreDependencyKey<?>, Supplier<Object>> supplierFactory) {
+        this.matcher = matcher;
+        this.supplierFactory = supplierFactory;
+    }
 
-	@Override
-	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-			CoreDependencyKey<?> key, CoreInjector injector) {
-		if (matcher.matches(key))
-			return Optional.of(ctx -> new SupplierRecipeImpl(supplierFactory
-					.apply(key)));
-		else
-			return Optional.empty();
-	}
+    @Override
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+            CoreDependencyKey<?> key, CoreInjector injector) {
+        if (matcher.matches(key))
+            return Optional.of(ctx -> new SupplierRecipeImpl(supplierFactory
+                    .apply(key)));
+        else
+            return Optional.empty();
+    }
 
 }

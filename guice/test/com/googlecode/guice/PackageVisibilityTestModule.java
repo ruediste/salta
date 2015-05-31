@@ -5,17 +5,24 @@ import com.google.inject.Inject;
 
 public class PackageVisibilityTestModule extends AbstractModule {
 
-  @Override
-  protected void configure() {
-    bind(PackagePrivateInterface.class).to(PackagePrivateImpl.class);
-  }
+    @Override
+    protected void configure() {
+        bind(PackagePrivateInterface.class).to(PackagePrivateImpl.class);
+    }
 
-  public static class PublicUserOfPackagePrivate {
-    @Inject public PublicUserOfPackagePrivate(PackagePrivateInterface ppi) {}
-    @Inject public void acceptPackagePrivateParameter(PackagePrivateInterface ppi) {}
-  }
+    public static class PublicUserOfPackagePrivate {
+        @Inject
+        public PublicUserOfPackagePrivate(PackagePrivateInterface ppi) {
+        }
 
-  interface PackagePrivateInterface {}
+        @Inject
+        public void acceptPackagePrivateParameter(PackagePrivateInterface ppi) {
+        }
+    }
 
-  static class PackagePrivateImpl implements PackagePrivateInterface {}
+    interface PackagePrivateInterface {
+    }
+
+    static class PackagePrivateImpl implements PackagePrivateInterface {
+    }
 }

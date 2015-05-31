@@ -29,131 +29,131 @@ import junit.framework.TestCase;
  */
 public class BindingAnnotationTest extends TestCase {
 
-	public void testAnnotationWithValueMatchesKeyWithTypeOnly()
-			throws CreationException {
-		Injector c = Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				bindConstant().annotatedWith(Blue.class).to("foo");
-				bind(BlueFoo.class);
-			}
-		});
+    public void testAnnotationWithValueMatchesKeyWithTypeOnly()
+            throws CreationException {
+        Injector c = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bindConstant().annotatedWith(Blue.class).to("foo");
+                bind(BlueFoo.class);
+            }
+        });
 
-		BlueFoo foo = c.getInstance(BlueFoo.class);
+        BlueFoo foo = c.getInstance(BlueFoo.class);
 
-		assertEquals("foo", foo.s);
-	}
+        assertEquals("foo", foo.s);
+    }
 
-	public void testRequireExactAnnotationsDisablesFallback() {
-		try {
-			Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					binder().requireExactBindingAnnotations();
-					bindConstant().annotatedWith(Blue.class).to("foo");
-					bind(BlueFoo.class);
-				}
-			}).getInstance(Blue.class);
-			fail();
-		} catch (com.github.ruediste.salta.core.SaltaException expected) {
-			// expected
-		}
-	}
+    public void testRequireExactAnnotationsDisablesFallback() {
+        try {
+            Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    binder().requireExactBindingAnnotations();
+                    bindConstant().annotatedWith(Blue.class).to("foo");
+                    bind(BlueFoo.class);
+                }
+            }).getInstance(Blue.class);
+            fail();
+        } catch (com.github.ruediste.salta.core.SaltaException expected) {
+            // expected
+        }
+    }
 
-	public void testRequireExactAnnotationsDoesntBreakIfDefaultsExist() {
-		Guice.createInjector(new AbstractModule() {
-			@Override
-			protected void configure() {
-				binder().requireExactBindingAnnotations();
-				bindConstant().annotatedWith(Red.class).to("foo");
-				bind(RedFoo.class);
-			}
-		}).getInstance(RedFoo.class);
-	}
+    public void testRequireExactAnnotationsDoesntBreakIfDefaultsExist() {
+        Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                binder().requireExactBindingAnnotations();
+                bindConstant().annotatedWith(Red.class).to("foo");
+                bind(RedFoo.class);
+            }
+        }).getInstance(RedFoo.class);
+    }
 
-	public void testAnnotationWithValueThatDoesntMatch() {
-		try {
-			Injector injector = Guice.createInjector(new AbstractModule() {
-				@Override
-				protected void configure() {
-					bindConstant().annotatedWith(createBlue(6)).to("six");
-					bind(String.class).toInstance("bar");
-					bind(BlueFoo.class);
-				}
-			});
-			BlueFoo instance = injector.getInstance(BlueFoo.class);
+    public void testAnnotationWithValueThatDoesntMatch() {
+        try {
+            Injector injector = Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bindConstant().annotatedWith(createBlue(6)).to("six");
+                    bind(String.class).toInstance("bar");
+                    bind(BlueFoo.class);
+                }
+            });
+            BlueFoo instance = injector.getInstance(BlueFoo.class);
 
-			fail();
-		} catch (com.github.ruediste.salta.core.SaltaException expected) {
-			assertContains(expected.getMessage(), "No recipe found for field");
-		}
-	}
+            fail();
+        } catch (com.github.ruediste.salta.core.SaltaException expected) {
+            assertContains(expected.getMessage(), "No recipe found for field");
+        }
+    }
 
-	static class BlueFoo {
-		@Inject
-		@Blue(5)
-		String s;
-	}
+    static class BlueFoo {
+        @Inject
+        @Blue(5)
+        String s;
+    }
 
-	static class RedFoo {
-		@Inject
-		@Red
-		String s;
-	}
+    static class RedFoo {
+        @Inject
+        @Red
+        String s;
+    }
 
-	static class ColorFoo {
-		@Inject
-		@Color(b = 2)
-		String s;
-	}
+    static class ColorFoo {
+        @Inject
+        @Color(b = 2)
+        String s;
+    }
 
-	@Retention(RUNTIME)
-	@BindingAnnotation
-	@interface Blue {
-		int value();
-	}
+    @Retention(RUNTIME)
+    @BindingAnnotation
+    @interface Blue {
+        int value();
+    }
 
-	@Retention(RUNTIME)
-	@BindingAnnotation
-	@interface Red {
-		int r() default 42;
+    @Retention(RUNTIME)
+    @BindingAnnotation
+    @interface Red {
+        int r() default 42;
 
-		int g() default 42;
+        int g() default 42;
 
-		int b() default 42;
-	}
+        int b() default 42;
+    }
 
-	@Retention(RUNTIME)
-	@BindingAnnotation
-	@interface Color {
-		int r() default 0;
+    @Retention(RUNTIME)
+    @BindingAnnotation
+    @interface Color {
+        int r() default 0;
 
-		int g() default 0;
+        int g() default 0;
 
-		int b();
-	}
+        int b();
+    }
 
-	public Blue createBlue(final int value) {
-		return new Blue() {
-			@Override
-			public int value() {
-				return value;
-			}
+    public Blue createBlue(final int value) {
+        return new Blue() {
+            @Override
+            public int value() {
+                return value;
+            }
 
-			@Override
-			public Class<? extends Annotation> annotationType() {
-				return Blue.class;
-			}
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return Blue.class;
+            }
 
-			@Override
-			public boolean equals(Object o) {
-				return o instanceof Blue && ((Blue) o).value() == value;
-			}
+            @Override
+            public boolean equals(Object o) {
+                return o instanceof Blue && ((Blue) o).value() == value;
+            }
 
-			@Override
-			public int hashCode() {
-				return 127 * "value".hashCode() ^ value;
-			}
-		};
-	}
+            @Override
+            public int hashCode() {
+                return 127 * "value".hashCode() ^ value;
+            }
+        };
+    }
 }

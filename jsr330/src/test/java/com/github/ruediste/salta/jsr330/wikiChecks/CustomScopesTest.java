@@ -26,60 +26,60 @@ import com.github.ruediste.salta.standard.util.SimpleScopeHandler;
 
 public class CustomScopesTest {
 
-	private Injector injector;
+    private Injector injector;
 
-	@Inject
-	@Named("batchScope")
-	private SimpleScopeHandler handler;
+    @Inject
+    @Named("batchScope")
+    private SimpleScopeHandler handler;
 
-	@Target({ TYPE, METHOD })
-	@Retention(RUNTIME)
-	@Scope
-	private @interface BatchScoped {
-	}
+    @Target({ TYPE, METHOD })
+    @Retention(RUNTIME)
+    @Scope
+    private @interface BatchScoped {
+    }
 
-	@Before
-	public void before() {
-		injector = Salta.createInjector(new AbstractModule() {
+    @Before
+    public void before() {
+        injector = Salta.createInjector(new AbstractModule() {
 
-			@Override
-			protected void configure() throws Exception {
-				SimpleScopeHandler handler = new SimpleScopeHandler();
-				bind(SimpleScopeHandler.class).named("batchScope").toInstance(
-						handler);
-				bindScope(BatchScoped.class, new ScopeImpl(handler));
-			}
-		});
+            @Override
+            protected void configure() throws Exception {
+                SimpleScopeHandler handler = new SimpleScopeHandler();
+                bind(SimpleScopeHandler.class).named("batchScope").toInstance(
+                        handler);
+                bindScope(BatchScoped.class, new ScopeImpl(handler));
+            }
+        });
 
-		injector.injectMembers(this);
-	}
+        injector.injectMembers(this);
+    }
 
-	@BatchScoped
-	private static class A {
-	}
+    @BatchScoped
+    private static class A {
+    }
 
-	@Test
-	public void testCustomScope() {
-		handler.enter();
-		A a1 = injector.getInstance(A.class);
-		A a2 = injector.getInstance(A.class);
-		assertSame(a1, a2);
-		handler.exit();
+    @Test
+    public void testCustomScope() {
+        handler.enter();
+        A a1 = injector.getInstance(A.class);
+        A a2 = injector.getInstance(A.class);
+        assertSame(a1, a2);
+        handler.exit();
 
-		handler.enter();
-		A a3 = injector.getInstance(A.class);
-		assertNotSame(a3, a1);
-		handler.exit();
-	}
+        handler.enter();
+        A a3 = injector.getInstance(A.class);
+        assertNotSame(a3, a1);
+        handler.exit();
+    }
 
-	@Test
-	public void accessOutsideScopeFails() {
-		try {
-			injector.getInstance(A.class);
-			fail();
-		} catch (SaltaException e) {
-			if (!e.getMessage().contains("outside of a scoping block"))
-				throw e;
-		}
-	}
+    @Test
+    public void accessOutsideScopeFails() {
+        try {
+            injector.getInstance(A.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("outside of a scoping block"))
+                throw e;
+        }
+    }
 }

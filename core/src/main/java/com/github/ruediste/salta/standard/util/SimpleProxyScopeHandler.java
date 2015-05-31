@@ -47,67 +47,67 @@ import com.google.common.collect.Maps;
  */
 public class SimpleProxyScopeHandler implements ScopeHandler {
 
-	protected final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
-	protected String scopeName;
+    protected final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
+    protected String scopeName;
 
-	public SimpleProxyScopeHandler(String scopeName) {
-		this.scopeName = scopeName;
-	}
+    public SimpleProxyScopeHandler(String scopeName) {
+        this.scopeName = scopeName;
+    }
 
-	public void enter(Map<Binding, Object> instances) {
-		checkState(values.get() == null, "Scope " + scopeName
-				+ "  is already in progress");
-		values.set(instances);
-	}
+    public void enter(Map<Binding, Object> instances) {
+        checkState(values.get() == null, "Scope " + scopeName
+                + "  is already in progress");
+        values.set(instances);
+    }
 
-	public void enter() {
-		checkState(values.get() == null, "Scope " + scopeName
-				+ "  is already in progress");
-		values.set(Maps.newHashMap());
-	}
+    public void enter() {
+        checkState(values.get() == null, "Scope " + scopeName
+                + "  is already in progress");
+        values.set(Maps.newHashMap());
+    }
 
-	public Map<Binding, Object> getValueMap() {
-		Map<Binding, Object> scopedObjects = values.get();
-		if (scopedObjects == null) {
-			throw new RuntimeException(
-					"Cannot access value map outside of scope " + scopeName);
-		}
-		return scopedObjects;
-	}
+    public Map<Binding, Object> getValueMap() {
+        Map<Binding, Object> scopedObjects = values.get();
+        if (scopedObjects == null) {
+            throw new RuntimeException(
+                    "Cannot access value map outside of scope " + scopeName);
+        }
+        return scopedObjects;
+    }
 
-	public void exit() {
-		checkState(values.get() != null, "Scope " + scopeName
-				+ "is not in progress");
-		values.remove();
-	}
+    public void exit() {
+        checkState(values.get() != null, "Scope " + scopeName
+                + "is not in progress");
+        values.remove();
+    }
 
-	@Override
-	public Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-			CoreDependencyKey<?> requestedKey) {
+    @Override
+    public Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
+            CoreDependencyKey<?> requestedKey) {
 
-		// create the proxy right away, such that it can be reused
-		// afterwards
-		Object proxy = Enhancer.create(requestedKey.getRawType(),
-				new Dispatcher() {
+        // create the proxy right away, such that it can be reused
+        // afterwards
+        Object proxy = Enhancer.create(requestedKey.getRawType(),
+                new Dispatcher() {
 
-					@Override
-					public Object loadObject() throws Exception {
-						return getScopedObjectMap(requestedKey)
-								.computeIfAbsent(binding, b -> supplier.get());
-					}
-				});
+                    @Override
+                    public Object loadObject() throws Exception {
+                        return getScopedObjectMap(requestedKey)
+                                .computeIfAbsent(binding, b -> supplier.get());
+                    }
+                });
 
-		return () -> proxy;
-	}
+        return () -> proxy;
+    }
 
-	protected Map<Binding, Object> getScopedObjectMap(
-			CoreDependencyKey<?> requestedKey) {
-		Map<Binding, Object> scopedObjects = values.get();
-		if (scopedObjects == null) {
-			throw new RuntimeException("Cannot access " + requestedKey
-					+ " outside of scope " + scopeName);
-		}
-		return scopedObjects;
-	}
+    protected Map<Binding, Object> getScopedObjectMap(
+            CoreDependencyKey<?> requestedKey) {
+        Map<Binding, Object> scopedObjects = values.get();
+        if (scopedObjects == null) {
+            throw new RuntimeException("Cannot access " + requestedKey
+                    + " outside of scope " + scopeName);
+        }
+        return scopedObjects;
+    }
 
 }

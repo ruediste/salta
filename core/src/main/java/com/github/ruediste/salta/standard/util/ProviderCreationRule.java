@@ -35,157 +35,157 @@ import com.google.common.reflect.TypeToken;
  */
 public class ProviderCreationRule implements CreationRule {
 
-	private Matcher<? super CoreDependencyKey<?>> matcher;
-	private BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper;
-	private Class<?> providerType;
+    private Matcher<? super CoreDependencyKey<?>> matcher;
+    private BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper;
+    private Class<?> providerType;
 
-	public static class ProviderAccessBeforeInstanceCreationFinishedException
-	        extends SaltaException {
-		private static final long serialVersionUID = 1L;
+    public static class ProviderAccessBeforeInstanceCreationFinishedException
+            extends SaltaException {
+        private static final long serialVersionUID = 1L;
 
-		ProviderAccessBeforeInstanceCreationFinishedException() {
-			super(
-			        "Attempt to access injected Provider before the instance construction finished (e.g. from construction, injected method or post construct method)");
-		}
-	}
+        ProviderAccessBeforeInstanceCreationFinishedException() {
+            super(
+                    "Attempt to access injected Provider before the instance construction finished (e.g. from construction, injected method or post construct method)");
+        }
+    }
 
-	protected static class ProviderImpl implements Supplier<Object> {
-		private volatile CompiledSupplier compiledRecipe;
+    protected static class ProviderImpl implements Supplier<Object> {
+        private volatile CompiledSupplier compiledRecipe;
 
-		private ThreadLocal<Boolean> isGetting = new ThreadLocal<>();
+        private ThreadLocal<Boolean> isGetting = new ThreadLocal<>();
 
-		private CoreDependencyKey<?> dependency;
+        private CoreDependencyKey<?> dependency;
 
-		private Object recipeLock;
+        private Object recipeLock;
 
-		private Supplier<CompiledSupplier> compiledRecipeSupplier;
+        private Supplier<CompiledSupplier> compiledRecipeSupplier;
 
-		public ProviderImpl(CoreDependencyKey<?> dependency, Object recipeLock,
-		        Supplier<CompiledSupplier> compiledRecipeSupplier) {
-			this.dependency = dependency;
-			this.recipeLock = recipeLock;
-			this.compiledRecipeSupplier = compiledRecipeSupplier;
-		}
+        public ProviderImpl(CoreDependencyKey<?> dependency, Object recipeLock,
+                Supplier<CompiledSupplier> compiledRecipeSupplier) {
+            this.dependency = dependency;
+            this.recipeLock = recipeLock;
+            this.compiledRecipeSupplier = compiledRecipeSupplier;
+        }
 
-		@Override
-		public Object get() {
-			if (isGetting.get() != null)
-				throw new ProviderAccessBeforeInstanceCreationFinishedException();
-			isGetting.set(true);
+        @Override
+        public Object get() {
+            if (isGetting.get() != null)
+                throw new ProviderAccessBeforeInstanceCreationFinishedException();
+            isGetting.set(true);
 
-			try {
-				if (compiledRecipe == null) {
-					synchronized (recipeLock) {
-						if (compiledRecipe == null) {
-							compiledRecipe = compiledRecipeSupplier.get();
-						}
-					}
-				}
+            try {
+                if (compiledRecipe == null) {
+                    synchronized (recipeLock) {
+                        if (compiledRecipe == null) {
+                            compiledRecipe = compiledRecipeSupplier.get();
+                        }
+                    }
+                }
 
-				return compiledRecipe.get();
-			} catch (SaltaException e) {
-				throw e;
-			} catch (Throwable e) {
-				throw new SaltaException(
-				        "Error while getting instance from provider for key "
-				                + dependency, e);
-			} finally {
-				isGetting.remove();
-			}
-		}
+                return compiledRecipe.get();
+            } catch (SaltaException e) {
+                throw e;
+            } catch (Throwable e) {
+                throw new SaltaException(
+                        "Error while getting instance from provider for key "
+                                + dependency, e);
+            } finally {
+                isGetting.remove();
+            }
+        }
 
-		@Override
-		public String toString() {
-			return "Provider<" + dependency + ">";
-		}
-	}
+        @Override
+        public String toString() {
+            return "Provider<" + dependency + ">";
+        }
+    }
 
-	/**
-	 * Create a new instance
-	 * 
-	 * @param matcher
-	 *            matcher for the injection points which should be injected with
-	 *            the provider
-	 * @param wrapper
-	 *            wrapper of a supplier to the actual instance which gets
-	 *            injected
-	 */
-	public ProviderCreationRule(Matcher<? super CoreDependencyKey<?>> matcher,
-	        BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper,
-	        Class<?> providerType) {
-		this.matcher = matcher;
-		this.wrapper = wrapper;
-		this.providerType = providerType;
-	}
+    /**
+     * Create a new instance
+     * 
+     * @param matcher
+     *            matcher for the injection points which should be injected with
+     *            the provider
+     * @param wrapper
+     *            wrapper of a supplier to the actual instance which gets
+     *            injected
+     */
+    public ProviderCreationRule(Matcher<? super CoreDependencyKey<?>> matcher,
+            BiFunction<CoreDependencyKey<?>, Supplier<?>, Object> wrapper,
+            Class<?> providerType) {
+        this.matcher = matcher;
+        this.wrapper = wrapper;
+        this.providerType = providerType;
+    }
 
-	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-	        CoreDependencyKey<?> key, CoreInjector injector) {
+    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+            CoreDependencyKey<?> key, CoreInjector injector) {
 
-		if (matcher.matches(key)) {
-			if (key.getType().getType() instanceof Class) {
-				throw new SaltaException(
-				        "Cannot inject a Provider that has no type parameter");
-			}
-			// determine dependency
-			TypeToken<?> requestedType = key.getType().resolveType(
-			        providerType.getTypeParameters()[0]);
+        if (matcher.matches(key)) {
+            if (key.getType().getType() instanceof Class) {
+                throw new SaltaException(
+                        "Cannot inject a Provider that has no type parameter");
+            }
+            // determine dependency
+            TypeToken<?> requestedType = key.getType().resolveType(
+                    providerType.getTypeParameters()[0]);
 
-			CoreDependencyKey<?> dep;
-			if (key instanceof InjectionPoint) {
-				InjectionPoint p = (InjectionPoint) key;
-				dep = new InjectionPoint(requestedType, p.getMember(),
-				        p.getAnnotatedElement(), p.getParameterIndex());
+            CoreDependencyKey<?> dep;
+            if (key instanceof InjectionPoint) {
+                InjectionPoint p = (InjectionPoint) key;
+                dep = new InjectionPoint(requestedType, p.getMember(),
+                        p.getAnnotatedElement(), p.getParameterIndex());
 
-			} else {
-				dep = DependencyKey.of(requestedType).withAnnotations(
-				        key.getAnnotatedElement().getAnnotations());
-			}
-			Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = injector
-			        .tryGetRecipeFunc(dep);
+            } else {
+                dep = DependencyKey.of(requestedType).withAnnotations(
+                        key.getAnnotatedElement().getAnnotations());
+            }
+            Optional<Function<RecipeCreationContext, SupplierRecipe>> innerRecipe = injector
+                    .tryGetRecipeFunc(dep);
 
-			if (!innerRecipe.isPresent())
-				return Optional.empty();
+            if (!innerRecipe.isPresent())
+                return Optional.empty();
 
-			return Optional
-			        .of(new Function<RecipeCreationContext, SupplierRecipe>() {
-				        @Override
-				        public String toString() {
-					        return "Provider[" + key + "]";
-				        }
+            return Optional
+                    .of(new Function<RecipeCreationContext, SupplierRecipe>() {
+                        @Override
+                        public String toString() {
+                            return "Provider[" + key + "]";
+                        }
 
-				        @Override
-				        public SupplierRecipe apply(RecipeCreationContext ctx) {
+                        @Override
+                        public SupplierRecipe apply(RecipeCreationContext ctx) {
 
-					        // create and wrap provider instance
-					        RecipeCompiler compiler = ctx.getCompiler();
-					        ProviderImpl provider = new ProviderImpl(key, ctx
-					                .getRecipeLock(), () -> compiler
-					                .compileSupplier(innerRecipe.get().apply(
-					                        ctx)));
+                            // create and wrap provider instance
+                            RecipeCompiler compiler = ctx.getCompiler();
+                            ProviderImpl provider = new ProviderImpl(key, ctx
+                                    .getRecipeLock(), () -> compiler
+                                    .compileSupplier(innerRecipe.get().apply(
+                                            ctx)));
 
-					        Object wrappedProvider = wrapper.apply(key,
-					                provider);
+                            Object wrappedProvider = wrapper.apply(key,
+                                    provider);
 
-					        // create creation recipe
-					        SupplierRecipe creationRecipe = new SupplierRecipe() {
+                            // create creation recipe
+                            SupplierRecipe creationRecipe = new SupplierRecipe() {
 
-						        @Override
-						        protected Class<?> compileImpl(
-						                GeneratorAdapter mv,
-						                MethodCompilationContext ctx) {
-							        ctx.addFieldAndLoad((Class) providerType,
-							                wrappedProvider);
-							        return providerType;
-						        }
-					        };
+                                @Override
+                                protected Class<?> compileImpl(
+                                        GeneratorAdapter mv,
+                                        MethodCompilationContext ctx) {
+                                    ctx.addFieldAndLoad((Class) providerType,
+                                            wrappedProvider);
+                                    return providerType;
+                                }
+                            };
 
-					        return creationRecipe;
-				        }
-			        });
-		}
+                            return creationRecipe;
+                        }
+                    });
+        }
 
-		return Optional.empty();
-	}
+        return Optional.empty();
+    }
 }

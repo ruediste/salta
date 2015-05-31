@@ -15,42 +15,42 @@ import com.github.ruediste.salta.jsr330.JSR330ReflectionUtil;
 
 public class JSR330ReflectionUtilTest {
 
-	@Before
-	public void setUp() throws Exception {
-	}
+    @Before
+    public void setUp() throws Exception {
+    }
 
-	@Qualifier
-	@java.lang.annotation.Retention(RetentionPolicy.RUNTIME)
-	private @interface TestQualifier {
+    @Qualifier
+    @java.lang.annotation.Retention(RetentionPolicy.RUNTIME)
+    private @interface TestQualifier {
 
-	}
+    }
 
-	private static class TestClass {
-		@Named("foo")
-		public int a;
+    private static class TestClass {
+        @Named("foo")
+        public int a;
 
-		@Inject
-		@TestQualifier
-		public int b;
+        @Inject
+        @TestQualifier
+        public int b;
 
-		@SuppressWarnings("unused")
-		@Inject
-		public int c;
-	}
+        @SuppressWarnings("unused")
+        @Inject
+        public int c;
+    }
 
-	@Test
-	public void getQualifiers() throws Exception {
-		assertEquals(
-				1,
-				JSR330ReflectionUtil.getQualifiers(
-						TestClass.class.getField("a")).size());
-		assertEquals(
-				1,
-				JSR330ReflectionUtil.getQualifiers(
-						TestClass.class.getField("b")).size());
-		assertEquals(
-				0,
-				JSR330ReflectionUtil.getQualifiers(
-						TestClass.class.getField("c")).size());
-	}
+    @Test
+    public void getQualifiers() throws Exception {
+        assertEquals(
+                1,
+                JSR330ReflectionUtil.getQualifiers(
+                        TestClass.class.getField("a")).size());
+        assertEquals(
+                1,
+                JSR330ReflectionUtil.getQualifiers(
+                        TestClass.class.getField("b")).size());
+        assertEquals(
+                0,
+                JSR330ReflectionUtil.getQualifiers(
+                        TestClass.class.getField("c")).size());
+    }
 }

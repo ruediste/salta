@@ -26,15 +26,15 @@ package com.github.ruediste.salta.standard;
  */
 public enum Stage {
 
-	/**
-	 * We want fast startup times at the expense of runtime performance and some
-	 * up front error checking.
-	 */
-	DEVELOPMENT,
+    /**
+     * We want fast startup times at the expense of runtime performance and some
+     * up front error checking.
+     */
+    DEVELOPMENT,
 
-	/**
-	 * We want to catch errors as early as possible and take performance hits up
-	 * front.
-	 */
-	PRODUCTION
+    /**
+     * We want to catch errors as early as possible and take performance hits up
+     * front.
+     */
+    PRODUCTION
 }

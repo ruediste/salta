@@ -25,52 +25,60 @@ import com.google.inject.spi.Message;
 import java.util.Collection;
 
 /**
- * Thrown when a programming error such as a misplaced annotation, illegal binding, or unsupported
- * scope is found. Clients should catch this exception, log it, and stop execution.
+ * Thrown when a programming error such as a misplaced annotation, illegal
+ * binding, or unsupported scope is found. Clients should catch this exception,
+ * log it, and stop execution.
  *
  * @author jessewilson@google.com (Jesse Wilson)
  * @since 2.0
  */
 public final class ConfigurationException extends RuntimeException {
 
-  private final ImmutableSet<Message> messages;
-  private Object partialValue = null;
+    private final ImmutableSet<Message> messages;
+    private Object partialValue = null;
 
-  /** Creates a ConfigurationException containing {@code messages}. */
-  public ConfigurationException(Iterable<Message> messages) {
-    this.messages = ImmutableSet.copyOf(messages); 
-    initCause(Errors.getOnlyCause(this.messages));
-  }
+    /** Creates a ConfigurationException containing {@code messages}. */
+    public ConfigurationException(Iterable<Message> messages) {
+        this.messages = ImmutableSet.copyOf(messages);
+        initCause(Errors.getOnlyCause(this.messages));
+    }
 
-  /** Returns a copy of this configuration exception with the specified partial value. */
-  public ConfigurationException withPartialValue(Object partialValue) {
-    checkState(this.partialValue == null,
-        "Can't clobber existing partial value %s with %s", this.partialValue, partialValue);
-    ConfigurationException result = new ConfigurationException(messages);
-    result.partialValue = partialValue;
-    return result;
-  }
+    /**
+     * Returns a copy of this configuration exception with the specified partial
+     * value.
+     */
+    public ConfigurationException withPartialValue(Object partialValue) {
+        checkState(this.partialValue == null,
+                "Can't clobber existing partial value %s with %s",
+                this.partialValue, partialValue);
+        ConfigurationException result = new ConfigurationException(messages);
+        result.partialValue = partialValue;
+        return result;
+    }
 
-  /** Returns messages for the errors that caused this exception. */
-  public Collection<Message> getErrorMessages() {
-    return messages;
-  }
+    /** Returns messages for the errors that caused this exception. */
+    public Collection<Message> getErrorMessages() {
+        return messages;
+    }
 
-  /**
-   * Returns a value that was only partially computed due to this exception. The caller can use
-   * this while collecting additional configuration problems.
-   *
-   * @return the partial value, or {@code null} if none was set. The type of the partial value is
-   *      specified by the throwing method.
-   */
-  @SuppressWarnings("unchecked") // this is *extremely* unsafe. We trust the caller here.
-  public <E> E getPartialValue() {
-    return (E) partialValue;
-  }
+    /**
+     * Returns a value that was only partially computed due to this exception.
+     * The caller can use this while collecting additional configuration
+     * problems.
+     *
+     * @return the partial value, or {@code null} if none was set. The type of
+     *         the partial value is specified by the throwing method.
+     */
+    @SuppressWarnings("unchecked")
+    // this is *extremely* unsafe. We trust the caller here.
+    public <E> E getPartialValue() {
+        return (E) partialValue;
+    }
 
-  @Override public String getMessage() {
-    return Errors.format("Guice configuration errors", messages);
-  }
+    @Override
+    public String getMessage() {
+        return Errors.format("Guice configuration errors", messages);
+    }
 
-  private static final long serialVersionUID = 0;
+    private static final long serialVersionUID = 0;
 }

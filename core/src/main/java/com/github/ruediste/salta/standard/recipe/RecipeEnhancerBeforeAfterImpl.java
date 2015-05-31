@@ -14,34 +14,34 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public class RecipeEnhancerBeforeAfterImpl implements RecipeEnhancer {
 
-	private BeforeAfterEnhancer beforeAfterEnhancer;
+    private BeforeAfterEnhancer beforeAfterEnhancer;
 
-	public RecipeEnhancerBeforeAfterImpl(BeforeAfterEnhancer beforeAfterEnhancer) {
-		this.beforeAfterEnhancer = beforeAfterEnhancer;
-	}
+    public RecipeEnhancerBeforeAfterImpl(BeforeAfterEnhancer beforeAfterEnhancer) {
+        this.beforeAfterEnhancer = beforeAfterEnhancer;
+    }
 
-	public interface BeforeAfterEnhancer {
-		void before();
+    public interface BeforeAfterEnhancer {
+        void before();
 
-		Object after(Object instance);
-	}
+        Object after(Object instance);
+    }
 
-	@Override
-	public Class<?> compile(MethodCompilationContext compilationContext,
-			SupplierRecipe innerRecipe) {
-		GeneratorAdapter mv = compilationContext.getMv();
+    @Override
+    public Class<?> compile(MethodCompilationContext compilationContext,
+            SupplierRecipe innerRecipe) {
+        GeneratorAdapter mv = compilationContext.getMv();
 
-		compilationContext.addFieldAndLoad(BeforeAfterEnhancer.class,
-				beforeAfterEnhancer);
-		mv.dup();
-		mv.invokeInterface(Type.getType(BeforeAfterEnhancer.class),
-				Method.getMethod("void before()"));
-		Class<?> t = innerRecipe.compile(compilationContext);
-		if (t.isPrimitive())
-			mv.box(Type.getType(t));
-		mv.invokeInterface(Type.getType(BeforeAfterEnhancer.class),
-				Method.getMethod("Object after(Object)"));
-		return Object.class;
-	}
+        compilationContext.addFieldAndLoad(BeforeAfterEnhancer.class,
+                beforeAfterEnhancer);
+        mv.dup();
+        mv.invokeInterface(Type.getType(BeforeAfterEnhancer.class),
+                Method.getMethod("void before()"));
+        Class<?> t = innerRecipe.compile(compilationContext);
+        if (t.isPrimitive())
+            mv.box(Type.getType(t));
+        mv.invokeInterface(Type.getType(BeforeAfterEnhancer.class),
+                Method.getMethod("Object after(Object)"));
+        return Object.class;
+    }
 
 }

@@ -31,120 +31,139 @@ import java.util.List;
  */
 public class ErrorHandlingTest {
 
-  public static void main(String[] args) throws CreationException {
-    try {
-      Guice.createInjector(new MyModule());
-    }
-    catch (CreationException e) {
-      e.printStackTrace();
-      System.err.println("--");
-    }
-
-    Injector bad = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(String.class).toProvider(new Provider<String>() {
-          public String get() {
-            return null;
-          }
-        });
-      }
-    });
-    try {
-      bad.getInstance(String.class);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.err.println("--");
-    }
-    try {
-      bad.getInstance(NeedsString.class);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.err.println("--");
-    }
-  }
-
-  static class NeedsString {
-    @Inject String mofo;
-  }
-
-  @Inject @Named("missing")
-  static List<String> missing = null;
-
-  static class Foo {
-    @Inject
-    public Foo(Runnable r) {}
-
-    @Inject void setNames(List<String> names) {}
-  }
-
-  static class Bar {
-    // Invalid constructor.
-    Bar(String s) {}
-
-    @Inject void setNumbers(@Named("numbers") List<Integer> numbers) {}
-
-    @Inject void bar(@Named("foo") String s) {}
-  }
-
-  static class Tee {
-    @Inject String s;
-
-    @Inject void tee(String s, int i) {}
-
-    @Inject Invalid invalid;
-  }
-
-  static class Invalid {
-    Invalid(String s) {}
-  }
-
-  @SuppressWarnings("MoreThanOneScopeAnnotationOnClass") // suppress compiler error to test
-  @Singleton 
-  @GoodScope
-  static class TooManyScopes {
-  }
-
-  @Target(ElementType.TYPE)
-  @Retention(RUNTIME)
-  @ScopeAnnotation
-  @interface GoodScope {}
-
-  @interface BadScope {}
-
-  @ImplementedBy(String.class)
-  interface I {}
-
-  static class MyModule extends AbstractModule {
-    protected void configure() {
-      bind(Runnable.class);
-      bind(Foo.class);
-      bind(Bar.class);
-      bind(Tee.class);
-      bind(new TypeLiteral<List<String>>() {});
-      bind(String.class).annotatedWith(Names.named("foo")).in(Named.class);
-      bind(Key.get(Runnable.class)).to(Key.get(Runnable.class));
-      bind(TooManyScopes.class);
-      bindScope(BadScope.class, Scopes.SINGLETON);
-      bind(Object.class).toInstance(new Object() {
-        @Inject void foo() {
-          throw new RuntimeException();
+    public static void main(String[] args) throws CreationException {
+        try {
+            Guice.createInjector(new MyModule());
+        } catch (CreationException e) {
+            e.printStackTrace();
+            System.err.println("--");
         }
-      });
-      requestStaticInjection(ErrorHandlingTest.class);
 
-      addError("I don't like %s", "you");
-      
-      Object o = "2";
-      try {
-        Integer i = (Integer) o;
-      } catch (Exception e) {
-        addError(e);
-      }
-
-      bind(Module.class).toInstance(this);
-      bind(I.class);
+        Injector bad = Guice.createInjector(new AbstractModule() {
+            protected void configure() {
+                bind(String.class).toProvider(new Provider<String>() {
+                    public String get() {
+                        return null;
+                    }
+                });
+            }
+        });
+        try {
+            bad.getInstance(String.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("--");
+        }
+        try {
+            bad.getInstance(NeedsString.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("--");
+        }
     }
-  }
+
+    static class NeedsString {
+        @Inject
+        String mofo;
+    }
+
+    @Inject
+    @Named("missing")
+    static List<String> missing = null;
+
+    static class Foo {
+        @Inject
+        public Foo(Runnable r) {
+        }
+
+        @Inject
+        void setNames(List<String> names) {
+        }
+    }
+
+    static class Bar {
+        // Invalid constructor.
+        Bar(String s) {
+        }
+
+        @Inject
+        void setNumbers(@Named("numbers") List<Integer> numbers) {
+        }
+
+        @Inject
+        void bar(@Named("foo") String s) {
+        }
+    }
+
+    static class Tee {
+        @Inject
+        String s;
+
+        @Inject
+        void tee(String s, int i) {
+        }
+
+        @Inject
+        Invalid invalid;
+    }
+
+    static class Invalid {
+        Invalid(String s) {
+        }
+    }
+
+    @SuppressWarnings("MoreThanOneScopeAnnotationOnClass")
+    // suppress compiler error to test
+    @Singleton
+    @GoodScope
+    static class TooManyScopes {
+    }
+
+    @Target(ElementType.TYPE)
+    @Retention(RUNTIME)
+    @ScopeAnnotation
+    @interface GoodScope {
+    }
+
+    @interface BadScope {
+    }
+
+    @ImplementedBy(String.class)
+    interface I {
+    }
+
+    static class MyModule extends AbstractModule {
+        protected void configure() {
+            bind(Runnable.class);
+            bind(Foo.class);
+            bind(Bar.class);
+            bind(Tee.class);
+            bind(new TypeLiteral<List<String>>() {
+            });
+            bind(String.class).annotatedWith(Names.named("foo"))
+                    .in(Named.class);
+            bind(Key.get(Runnable.class)).to(Key.get(Runnable.class));
+            bind(TooManyScopes.class);
+            bindScope(BadScope.class, Scopes.SINGLETON);
+            bind(Object.class).toInstance(new Object() {
+                @Inject
+                void foo() {
+                    throw new RuntimeException();
+                }
+            });
+            requestStaticInjection(ErrorHandlingTest.class);
+
+            addError("I don't like %s", "you");
+
+            Object o = "2";
+            try {
+                Integer i = (Integer) o;
+            } catch (Exception e) {
+                addError(e);
+            }
+
+            bind(Module.class).toInstance(this);
+            bind(I.class);
+        }
+    }
 }

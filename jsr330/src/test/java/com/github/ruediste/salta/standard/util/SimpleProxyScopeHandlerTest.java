@@ -23,73 +23,73 @@ import com.github.ruediste.salta.standard.ScopeImpl;
 
 public class SimpleProxyScopeHandlerTest {
 
-	private Injector injector;
+    private Injector injector;
 
-	@Inject
-	@Named("batch")
-	SimpleProxyScopeHandler handler;
+    @Inject
+    @Named("batch")
+    SimpleProxyScopeHandler handler;
 
-	@Target({ TYPE, METHOD })
-	@Retention(RUNTIME)
-	@Scope
-	private @interface BatchScoped {
-	}
+    @Target({ TYPE, METHOD })
+    @Retention(RUNTIME)
+    @Scope
+    private @interface BatchScoped {
+    }
 
-	@Before
-	public void setup() {
-		injector = Salta.createInjector(new AbstractModule() {
+    @Before
+    public void setup() {
+        injector = Salta.createInjector(new AbstractModule() {
 
-			@Override
-			protected void configure() throws Exception {
-				SimpleProxyScopeHandler handler = new SimpleProxyScopeHandler(
-						"batch");
-				bindScope(BatchScoped.class, new ScopeImpl(handler));
-				bind(SimpleProxyScopeHandler.class).named("batch").toInstance(
-						handler);
-			}
-		});
-		injector.injectMembers(this);
-	}
+            @Override
+            protected void configure() throws Exception {
+                SimpleProxyScopeHandler handler = new SimpleProxyScopeHandler(
+                        "batch");
+                bindScope(BatchScoped.class, new ScopeImpl(handler));
+                bind(SimpleProxyScopeHandler.class).named("batch").toInstance(
+                        handler);
+            }
+        });
+        injector.injectMembers(this);
+    }
 
-	private static class A {
+    private static class A {
 
-		@Inject
-		B b;
-	}
+        @Inject
+        B b;
+    }
 
-	@BatchScoped
-	static class B {
-		private int value;
+    @BatchScoped
+    static class B {
+        private int value;
 
-		public int getValue() {
-			return value;
-		}
+        public int getValue() {
+            return value;
+        }
 
-		public void setValue(int value) {
-			this.value = value;
-		}
-	}
+        public void setValue(int value) {
+            this.value = value;
+        }
+    }
 
-	@Test
-	public void testSimple() {
-		A a1 = injector.getInstance(A.class);
-		A a2 = injector.getInstance(A.class);
+    @Test
+    public void testSimple() {
+        A a1 = injector.getInstance(A.class);
+        A a2 = injector.getInstance(A.class);
 
-		handler.enter();
-		a1.b.setValue(3);
-		assertNotSame(a1, a2);
-		assertEquals(3, a2.b.getValue());
-		handler.exit();
+        handler.enter();
+        a1.b.setValue(3);
+        assertNotSame(a1, a2);
+        assertEquals(3, a2.b.getValue());
+        handler.exit();
 
-		handler.enter();
-		assertEquals(0, a2.b.getValue());
-		handler.exit();
+        handler.enter();
+        assertEquals(0, a2.b.getValue());
+        handler.exit();
 
-	}
+    }
 
-	@Test(expected = RuntimeException.class)
-	public void testFailureOutOfScope() {
-		A a = injector.getInstance(A.class);
-		a.b.getValue();
-	}
+    @Test(expected = RuntimeException.class)
+    public void testFailureOutOfScope() {
+        A a = injector.getInstance(A.class);
+        a.b.getValue();
+    }
 }

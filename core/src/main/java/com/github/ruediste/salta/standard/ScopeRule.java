@@ -9,11 +9,11 @@ import com.google.common.reflect.TypeToken;
  */
 public interface ScopeRule {
 
-	/**
-	 * If null is returned, the next rule is evaluated. If all rules fail, the
-	 * {@link StandardInjectorConfiguration#scopeAnnotationMap} is evaluated. If
-	 * still no scope is found, the
-	 * {@link StandardInjectorConfiguration#defaultScope} is used.
-	 */
-	Scope getScope(TypeToken<?> type);
+    /**
+     * If null is returned, the next rule is evaluated. If all rules fail, the
+     * {@link StandardInjectorConfiguration#scopeAnnotationMap} is evaluated. If
+     * still no scope is found, the
+     * {@link StandardInjectorConfiguration#defaultScope} is used.
+     */
+    Scope getScope(TypeToken<?> type);
 }

@@ -14,23 +14,23 @@ import com.github.ruediste.salta.core.compile.MethodCompilationContext;
  */
 public class RecipeInitializerImpl implements RecipeInitializer {
 
-	private Consumer<Object> consumer;
+    private Consumer<Object> consumer;
 
-	public RecipeInitializerImpl(Consumer<Object> consumer) {
-		this.consumer = consumer;
-	}
+    public RecipeInitializerImpl(Consumer<Object> consumer) {
+        this.consumer = consumer;
+    }
 
-	@Override
-	public Class<?> compileImpl(Class<?> argumentType, GeneratorAdapter mv,
-			MethodCompilationContext ctx) {
-		mv.dup();
-		ctx.addFieldAndLoad(Consumer.class, consumer);
-		mv.swap();
-		if (argumentType.isPrimitive())
-			mv.box(Type.getType(argumentType));
-		mv.invokeInterface(Type.getType(Consumer.class),
-				Method.getMethod("void accept(Object)"));
-		return argumentType;
-	}
+    @Override
+    public Class<?> compileImpl(Class<?> argumentType, GeneratorAdapter mv,
+            MethodCompilationContext ctx) {
+        mv.dup();
+        ctx.addFieldAndLoad(Consumer.class, consumer);
+        mv.swap();
+        if (argumentType.isPrimitive())
+            mv.box(Type.getType(argumentType));
+        mv.invokeInterface(Type.getType(Consumer.class),
+                Method.getMethod("void accept(Object)"));
+        return argumentType;
+    }
 
 }

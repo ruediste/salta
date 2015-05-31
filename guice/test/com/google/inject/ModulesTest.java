@@ -27,34 +27,34 @@ import com.google.inject.util.Modules;
  */
 public class ModulesTest extends TestCase {
 
-	public void testCombineVarargs() {
-		Module combined = Modules.combine(newModule(1), newModule(2L),
-				newModule((short) 3));
-		Injector injector = Guice.createInjector(combined);
-		assertEquals(1, injector.getInstance(Integer.class).intValue());
-		assertEquals(2L, injector.getInstance(Long.class).longValue());
-		assertEquals(3, injector.getInstance(Short.class).shortValue());
-	}
+    public void testCombineVarargs() {
+        Module combined = Modules.combine(newModule(1), newModule(2L),
+                newModule((short) 3));
+        Injector injector = Guice.createInjector(combined);
+        assertEquals(1, injector.getInstance(Integer.class).intValue());
+        assertEquals(2L, injector.getInstance(Long.class).longValue());
+        assertEquals(3, injector.getInstance(Short.class).shortValue());
+    }
 
-	public void testCombineIterable() {
-		Iterable<Module> modules = Arrays.asList(newModule(1), newModule(2L),
-				newModule((short) 3));
-		Injector injector = Guice.createInjector(Modules.combine(modules));
-		assertEquals(1, injector.getInstance(Integer.class).intValue());
-		assertEquals(2, injector.getInstance(Long.class).longValue());
-		assertEquals(3, injector.getInstance(Short.class).shortValue());
-	}
+    public void testCombineIterable() {
+        Iterable<Module> modules = Arrays.asList(newModule(1), newModule(2L),
+                newModule((short) 3));
+        Injector injector = Guice.createInjector(Modules.combine(modules));
+        assertEquals(1, injector.getInstance(Integer.class).intValue());
+        assertEquals(2, injector.getInstance(Long.class).longValue());
+        assertEquals(3, injector.getInstance(Short.class).shortValue());
+    }
 
-	private <T> Module newModule(final T toBind) {
-		return new AbstractModule() {
-			@Override
-			protected void configure() {
-				@SuppressWarnings("unchecked")
-				// getClass always needs a cast
-				Class<T> tClass = (Class<T>) toBind.getClass();
-				binder().skipSources(getClass()).bind(tClass)
-						.toInstance(toBind);
-			}
-		};
-	}
+    private <T> Module newModule(final T toBind) {
+        return new AbstractModule() {
+            @Override
+            protected void configure() {
+                @SuppressWarnings("unchecked")
+                // getClass always needs a cast
+                Class<T> tClass = (Class<T>) toBind.getClass();
+                binder().skipSources(getClass()).bind(tClass)
+                        .toInstance(toBind);
+            }
+        };
+    }
 }

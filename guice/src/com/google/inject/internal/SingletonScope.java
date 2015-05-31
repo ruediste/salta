@@ -12,26 +12,26 @@ import com.google.inject.Singleton;
  */
 public class SingletonScope implements Scope {
 
-	@Override
-	public String toString() {
-		return "Scopes.SINGLETON";
-	}
+    @Override
+    public String toString() {
+        return "Scopes.SINGLETON";
+    }
 
-	@Override
-	public <T> Provider<T> scope(Binding binding, CoreDependencyKey<T> requestedKey,
-			Provider<T> unscoped) {
-		T instance = unscoped.get();
-		return new Provider<T>() {
+    @Override
+    public <T> Provider<T> scope(Binding binding,
+            CoreDependencyKey<T> requestedKey, Provider<T> unscoped) {
+        T instance = unscoped.get();
+        return new Provider<T>() {
 
-			@Override
-			public T get() {
-				return instance;
-			}
+            @Override
+            public T get() {
+                return instance;
+            }
 
-			@Override
-			public String toString() {
-				return "SingletonProvider(" + requestedKey + ")";
-			}
-		};
-	}
+            @Override
+            public String toString() {
+                return "SingletonProvider(" + requestedKey + ")";
+            }
+        };
+    }
 }

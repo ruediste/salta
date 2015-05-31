@@ -11,38 +11,38 @@ import com.github.ruediste.salta.standard.binder.StandardBindingBuilderImpl;
 import com.google.common.reflect.TypeToken;
 
 public class StandardBindingBuilderImplGuice<T> extends
-		StandardBindingBuilderImpl<T> {
+        StandardBindingBuilderImpl<T> {
 
-	private GuiceInjectorConfiguration guiceConfig;
+    private GuiceInjectorConfiguration guiceConfig;
 
-	public StandardBindingBuilderImplGuice(
-			Matcher<CoreDependencyKey<?>> typeMatcher, TypeToken<T> type,
-			GuiceInjectorConfiguration guiceConfig, StandardInjector injector) {
-		super(typeMatcher, type, guiceConfig.config, injector);
-		this.guiceConfig = guiceConfig;
-	}
+    public StandardBindingBuilderImplGuice(
+            Matcher<CoreDependencyKey<?>> typeMatcher, TypeToken<T> type,
+            GuiceInjectorConfiguration guiceConfig, StandardInjector injector) {
+        super(typeMatcher, type, guiceConfig.config, injector);
+        this.guiceConfig = guiceConfig;
+    }
 
-	@Override
-	protected <P> Supplier<CreationRecipeFactory> createProviderRecipeFactorySupplier(
-			CoreDependencyKey<P> providerKey,
-			Function<? super P, ? extends T> providerWrapper) {
-		Supplier<CreationRecipeFactory> inner = super
-				.createProviderRecipeFactorySupplier(providerKey,
-						providerWrapper);
-		return () -> {
-			guiceConfig.implicitlyBoundKeys.add(providerKey);
-			return inner.get();
-		};
-	}
+    @Override
+    protected <P> Supplier<CreationRecipeFactory> createProviderRecipeFactorySupplier(
+            CoreDependencyKey<P> providerKey,
+            Function<? super P, ? extends T> providerWrapper) {
+        Supplier<CreationRecipeFactory> inner = super
+                .createProviderRecipeFactorySupplier(providerKey,
+                        providerWrapper);
+        return () -> {
+            guiceConfig.implicitlyBoundKeys.add(providerKey);
+            return inner.get();
+        };
+    }
 
-	@Override
-	protected Supplier<CreationRecipeFactory> createDefaultCreationRecipeFactorySupplier(
-			TypeToken<? extends T> implementation) {
-		Supplier<CreationRecipeFactory> inner = super
-				.createDefaultCreationRecipeFactorySupplier(implementation);
-		return () -> {
-			guiceConfig.typesBoundToDefaultCreationRecipe.add(implementation);
-			return inner.get();
-		};
-	}
+    @Override
+    protected Supplier<CreationRecipeFactory> createDefaultCreationRecipeFactorySupplier(
+            TypeToken<? extends T> implementation) {
+        Supplier<CreationRecipeFactory> inner = super
+                .createDefaultCreationRecipeFactorySupplier(implementation);
+        return () -> {
+            guiceConfig.typesBoundToDefaultCreationRecipe.add(implementation);
+            return inner.get();
+        };
+    }
 }

@@ -11,9 +11,9 @@ import com.google.common.reflect.TypeToken;
  * {@link StandardInjectorConfiguration#initializerFactories}
  */
 public interface RecipeInitializerFactory {
-	/**
-	 * Create a {@link RecipeInitializer}s based on a type. never return null.
-	 */
-	List<RecipeInitializer> getInitializers(RecipeCreationContext ctx,
-			TypeToken<?> type);
+    /**
+     * Create a {@link RecipeInitializer}s based on a type. never return null.
+     */
+    List<RecipeInitializer> getInitializers(RecipeCreationContext ctx,
+            TypeToken<?> type);
 }

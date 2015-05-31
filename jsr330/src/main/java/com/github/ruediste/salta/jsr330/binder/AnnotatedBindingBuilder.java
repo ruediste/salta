@@ -9,17 +9,17 @@ import java.lang.annotation.Annotation;
  */
 public interface AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	LinkedBindingBuilder<T> annotatedWith(
-			Class<? extends Annotation> availableAnnotationType);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    LinkedBindingBuilder<T> annotatedWith(
+            Class<? extends Annotation> availableAnnotationType);
 
-	/**
-	 * See the EDSL examples at {@link Binder}.
-	 */
-	LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation);
+    /**
+     * See the EDSL examples at {@link Binder}.
+     */
+    LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation);
 
-	LinkedBindingBuilder<T> named(String name);
+    LinkedBindingBuilder<T> named(String name);
 
 }

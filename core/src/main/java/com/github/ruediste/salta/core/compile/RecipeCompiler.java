@@ -31,167 +31,167 @@ import com.github.ruediste.salta.core.CoreInjector;
 import com.github.ruediste.salta.core.SaltaException;
 
 public class RecipeCompiler {
-	private static final AtomicInteger instanceCounter = new AtomicInteger();
+    private static final AtomicInteger instanceCounter = new AtomicInteger();
 
-	private static class CompilerClassLoader extends ClassLoader {
-		public CompilerClassLoader() {
-			super(Thread.currentThread().getContextClassLoader());
-		}
+    private static class CompilerClassLoader extends ClassLoader {
+        public CompilerClassLoader() {
+            super(Thread.currentThread().getContextClassLoader());
+        }
 
-		public Class<?> defineClass(String name, byte[] bb) {
-			return defineClass(name, bb, 0, bb.length);
-		}
-	}
+        public Class<?> defineClass(String name, byte[] bb) {
+            return defineClass(name, bb, 0, bb.length);
+        }
+    }
 
-	private final int instanceNr;
+    private final int instanceNr;
 
-	public RecipeCompiler() {
-		instanceNr = instanceCounter.incrementAndGet();
-	}
+    public RecipeCompiler() {
+        instanceNr = instanceCounter.incrementAndGet();
+    }
 
-	private CompilerClassLoader loader = new CompilerClassLoader();
-	private AtomicInteger classNumber = new AtomicInteger();
+    private CompilerClassLoader loader = new CompilerClassLoader();
+    private AtomicInteger classNumber = new AtomicInteger();
 
-	/**
-	 * Compile a recipe. May be called from multiple threads. Calling thread
-	 * must holde the {@link CoreInjector#recipeLock}
-	 */
-	public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
-		ClassCompilationContext ccc = createClass(CompiledSupplier.class);
-		ccc.addMethod(ACC_PUBLIC, "get", "()Ljava/lang/Object;", null,
-				new MethodRecipe() {
+    /**
+     * Compile a recipe. May be called from multiple threads. Calling thread
+     * must holde the {@link CoreInjector#recipeLock}
+     */
+    public CompiledSupplier compileSupplier(SupplierRecipe recipe) {
+        ClassCompilationContext ccc = createClass(CompiledSupplier.class);
+        ccc.addMethod(ACC_PUBLIC, "get", "()Ljava/lang/Object;", null,
+                new MethodRecipe() {
 
-					@Override
-					protected void compileImpl(GeneratorAdapter mv,
-							MethodCompilationContext ctx) {
+                    @Override
+                    protected void compileImpl(GeneratorAdapter mv,
+                            MethodCompilationContext ctx) {
 
-						Class<?> producedType = recipe.compile(ctx);
+                        Class<?> producedType = recipe.compile(ctx);
 
-						if (producedType.isPrimitive())
-							mv.box(Type.getType(producedType));
+                        if (producedType.isPrimitive())
+                            mv.box(Type.getType(producedType));
 
-						mv.visitInsn(ARETURN);
-					}
-				});
+                        mv.visitInsn(ARETURN);
+                    }
+                });
 
-		Class<?> cls = loadClass(ccc);
+        Class<?> cls = loadClass(ccc);
 
-		return (CompiledSupplier) instantiate(cls);
-	}
+        return (CompiledSupplier) instantiate(cls);
+    }
 
-	/**
-	 * Compile a recipe which takes a parameter. Calling thread must holde the
-	 * {@link CoreInjector#recipeLock}
-	 */
-	public CompiledFunction compileFunction(FunctionRecipe recipe) {
-		ClassCompilationContext ccc = createClass(CompiledFunction.class);
-		ccc.addMethod(ACC_PUBLIC, "get",
-				"(Ljava/lang/Object;)Ljava/lang/Object;", null,
-				new MethodRecipe() {
+    /**
+     * Compile a recipe which takes a parameter. Calling thread must holde the
+     * {@link CoreInjector#recipeLock}
+     */
+    public CompiledFunction compileFunction(FunctionRecipe recipe) {
+        ClassCompilationContext ccc = createClass(CompiledFunction.class);
+        ccc.addMethod(ACC_PUBLIC, "get",
+                "(Ljava/lang/Object;)Ljava/lang/Object;", null,
+                new MethodRecipe() {
 
-					@Override
-					protected void compileImpl(GeneratorAdapter mv,
-							MethodCompilationContext ctx) {
+                    @Override
+                    protected void compileImpl(GeneratorAdapter mv,
+                            MethodCompilationContext ctx) {
 
-						mv.loadArg(0);
+                        mv.loadArg(0);
 
-						Class<?> producedType = recipe.compile(Object.class,
-								ctx);
+                        Class<?> producedType = recipe.compile(Object.class,
+                                ctx);
 
-						if (producedType.isPrimitive())
-							mv.box(Type.getType(producedType));
+                        if (producedType.isPrimitive())
+                            mv.box(Type.getType(producedType));
 
-						mv.visitInsn(ARETURN);
-					}
-				});
-		Class<?> cls = loadClass(ccc);
-		return (CompiledFunction) instantiate(cls);
-	}
+                        mv.visitInsn(ARETURN);
+                    }
+                });
+        Class<?> cls = loadClass(ccc);
+        return (CompiledFunction) instantiate(cls);
+    }
 
-	public Class<?> loadClass(ClassCompilationContext ctx) {
-		// generate bytecode
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-		ctx.getClazz().accept(cw);
+    public Class<?> loadClass(ClassCompilationContext ctx) {
+        // generate bytecode
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        ctx.getClazz().accept(cw);
 
-		// load class
-		Class<?> cls;
-		byte[] bb = cw.toByteArray();
-		String className = Type.getObjectType(ctx.getClazz().name)
-				.getClassName();
+        // load class
+        Class<?> cls;
+        byte[] bb = cw.toByteArray();
+        String className = Type.getObjectType(ctx.getClazz().name)
+                .getClassName();
 
-		// try {
-		// Files.write(bb, new File("target/compiledRecipes/" + ctx.clazz.name
-		// + ".class"));
-		// } catch (IOException e2) {
-		// throw new SaltaException("Error while writing generated class", e2);
-		// }
+        // try {
+        // Files.write(bb, new File("target/compiledRecipes/" + ctx.clazz.name
+        // + ".class"));
+        // } catch (IOException e2) {
+        // throw new SaltaException("Error while writing generated class", e2);
+        // }
 
-		try {
-			cls = loader.defineClass(className, bb);
-			ctx.initFields(cls);
-		} catch (Throwable e) {
-			System.out.println("Error while loading compiled recipe class");
-			ClassReader cr = new ClassReader(bb);
-			cr.accept(new TraceClassVisitor(null, new ASMifier(),
-					new PrintWriter(System.out)), 0);
-			CheckClassAdapter.verify(cr, false, new PrintWriter(System.err));
+        try {
+            cls = loader.defineClass(className, bb);
+            ctx.initFields(cls);
+        } catch (Throwable e) {
+            System.out.println("Error while loading compiled recipe class");
+            ClassReader cr = new ClassReader(bb);
+            cr.accept(new TraceClassVisitor(null, new ASMifier(),
+                    new PrintWriter(System.out)), 0);
+            CheckClassAdapter.verify(cr, false, new PrintWriter(System.err));
 
-			throw new SaltaException("Error while loading compiled recipe", e);
-		}
+            throw new SaltaException("Error while loading compiled recipe", e);
+        }
 
-		// return result
-		return cls;
-	}
+        // return result
+        return cls;
+    }
 
-	private Object instantiate(Class<?> cls) {
+    private Object instantiate(Class<?> cls) {
 
-		Object instance;
-		try {
-			Constructor<?> constructor = cls.getConstructor();
-			constructor.setAccessible(true);
-			instance = constructor.newInstance();
-		} catch (Throwable e) {
-			throw new SaltaException(
-					"Error while instantiating compiled recipe", e);
-		}
+        Object instance;
+        try {
+            Constructor<?> constructor = cls.getConstructor();
+            constructor.setAccessible(true);
+            instance = constructor.newInstance();
+        } catch (Throwable e) {
+            throw new SaltaException(
+                    "Error while instantiating compiled recipe", e);
+        }
 
-		return instance;
-	}
+        return instance;
+    }
 
-	public ClassCompilationContext createClass(Class<?> implementedInterface) {
-		// setup clazz
-		ClassNode clazz = new ClassNode();
-		clazz.name = "salta/CompiledCreationRecipe" + instanceNr + "_"
-				+ classNumber.incrementAndGet();
-		clazz.access = ACC_FINAL & ACC_PUBLIC & ACC_SYNTHETIC;
-		clazz.version = V1_7;
-		clazz.superName = Type.getInternalName(Object.class);
-		if (implementedInterface != null)
-			clazz.interfaces.add(Type.getInternalName(implementedInterface));
+    public ClassCompilationContext createClass(Class<?> implementedInterface) {
+        // setup clazz
+        ClassNode clazz = new ClassNode();
+        clazz.name = "salta/CompiledCreationRecipe" + instanceNr + "_"
+                + classNumber.incrementAndGet();
+        clazz.access = ACC_FINAL & ACC_PUBLIC & ACC_SYNTHETIC;
+        clazz.version = V1_7;
+        clazz.superName = Type.getInternalName(Object.class);
+        if (implementedInterface != null)
+            clazz.interfaces.add(Type.getInternalName(implementedInterface));
 
-		// generate constructor
-		generateConstructor(clazz);
+        // generate constructor
+        generateConstructor(clazz);
 
-		return new ClassCompilationContext(clazz, false, this);
-	}
+        return new ClassCompilationContext(clazz, false, this);
+    }
 
-	private void generateConstructor(ClassVisitor cw) {
-		MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null,
-				null);
-		mv.visitCode();
-		Label l0 = new Label();
-		mv.visitLabel(l0);
-		mv.visitLineNumber(5, l0);
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V",
-				false);
-		mv.visitInsn(RETURN);
-		Label l1 = new Label();
-		mv.visitLabel(l1);
-		// mv.visitLocalVariable("this", "Lcom/github/ruediste/salta/core/Foo;",
-		// null, l0, l1, 0);
-		mv.visitMaxs(1, 1);
-		mv.visitEnd();
-	}
+    private void generateConstructor(ClassVisitor cw) {
+        MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null,
+                null);
+        mv.visitCode();
+        Label l0 = new Label();
+        mv.visitLabel(l0);
+        mv.visitLineNumber(5, l0);
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V",
+                false);
+        mv.visitInsn(RETURN);
+        Label l1 = new Label();
+        mv.visitLabel(l1);
+        // mv.visitLocalVariable("this", "Lcom/github/ruediste/salta/core/Foo;",
+        // null, l0, l1, 0);
+        mv.visitMaxs(1, 1);
+        mv.visitEnd();
+    }
 
 }

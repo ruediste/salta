@@ -11,50 +11,50 @@ import org.junit.Test;
 
 public class ProvidedByTest {
 
-	@ProvidedBy(AProvider.class)
-	private interface IA {
-	}
+    @ProvidedBy(AProvider.class)
+    private interface IA {
+    }
 
-	private static class A implements IA {
-		int value;
-	}
+    private static class A implements IA {
+        int value;
+    }
 
-	private static class AProvider implements Supplier<IA> {
+    private static class AProvider implements Supplier<IA> {
 
-		@Override
-		public IA get() {
-			A a = new A();
-			a.value = 3;
-			return a;
-		}
+        @Override
+        public IA get() {
+            A a = new A();
+            a.value = 3;
+            return a;
+        }
 
-	}
+    }
 
-	@Test
-	public void test() {
-		assertEquals(3, ((A) Salta.createInjector()
-				.getInstance(IA.class)).value);
-	}
+    @Test
+    public void test() {
+        assertEquals(3,
+                ((A) Salta.createInjector().getInstance(IA.class)).value);
+    }
 
-	@ProvidedBy(TestBProvider.class)
-	private static class TestB {
-		@Inject
-		public void shouldNotBeCalled(AProvider dummy) {
-			fail("Instance constructed by provider should not be injected");
-		}
-	}
+    @ProvidedBy(TestBProvider.class)
+    private static class TestB {
+        @Inject
+        public void shouldNotBeCalled(AProvider dummy) {
+            fail("Instance constructed by provider should not be injected");
+        }
+    }
 
-	private static class TestBProvider implements Supplier<TestB> {
+    private static class TestBProvider implements Supplier<TestB> {
 
-		@Override
-		public TestB get() {
-			return new TestB();
-		}
+        @Override
+        public TestB get() {
+            return new TestB();
+        }
 
-	}
+    }
 
-	@Test
-	public void constructedInstanceShouldNotBeInjected() {
-		Salta.createInjector().getInstance(TestB.class);
-	}
+    @Test
+    public void constructedInstanceShouldNotBeInjected() {
+        Salta.createInjector().getInstance(TestB.class);
+    }
 }

@@ -23,37 +23,37 @@ import java.lang.annotation.Annotation;
 
 class NamedImpl implements Named, Serializable {
 
-  private final String value;
+    private final String value;
 
-  public NamedImpl(String value) {
-    this.value = checkNotNull(value, "name");
-  }
-
-  public String value() {
-    return this.value;
-  }
-
-  public int hashCode() {
-    // This is specified in java.lang.Annotation.
-    return (127 * "value".hashCode()) ^ value.hashCode();
-  }
-
-  public boolean equals(Object o) {
-    if (!(o instanceof Named)) {
-      return false;
+    public NamedImpl(String value) {
+        this.value = checkNotNull(value, "name");
     }
 
-    Named other = (Named) o;
-    return value.equals(other.value());
-  }
+    public String value() {
+        return this.value;
+    }
 
-  public String toString() {
-    return "@" + Named.class.getName() + "(value=" + value + ")";
-  }
+    public int hashCode() {
+        // This is specified in java.lang.Annotation.
+        return (127 * "value".hashCode()) ^ value.hashCode();
+    }
 
-  public Class<? extends Annotation> annotationType() {
-    return Named.class;
-  }
+    public boolean equals(Object o) {
+        if (!(o instanceof Named)) {
+            return false;
+        }
 
-  private static final long serialVersionUID = 0;
+        Named other = (Named) o;
+        return value.equals(other.value());
+    }
+
+    public String toString() {
+        return "@" + Named.class.getName() + "(value=" + value + ")";
+    }
+
+    public Class<? extends Annotation> annotationType() {
+        return Named.class;
+    }
+
+    private static final long serialVersionUID = 0;
 }

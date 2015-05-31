@@ -13,32 +13,32 @@ import com.github.ruediste.salta.jsr330.Salta;
 
 public class SingletonAndProviderTest {
 
-	private static class A {
+    private static class A {
 
-	}
+    }
 
-	@Singleton
-	private static class B {
-		@Inject
-		Provider<A> aProvider;
+    @Singleton
+    private static class B {
+        @Inject
+        Provider<A> aProvider;
 
-		private boolean isInitialized;
+        private boolean isInitialized;
 
-		@PostConstruct
-		void init() {
-			aProvider.get();
-			isInitialized = true;
-		}
+        @PostConstruct
+        void init() {
+            aProvider.get();
+            isInitialized = true;
+        }
 
-		public boolean isInitialized() {
-			return isInitialized;
-		}
+        public boolean isInitialized() {
+            return isInitialized;
+        }
 
-	}
+    }
 
-	@Test
-	public void providerWorksInPostConstructOfSingleton() {
-		B b = Salta.createInjector().getInstance(B.class);
-		assertTrue(b.isInitialized());
-	}
+    @Test
+    public void providerWorksInPostConstructOfSingleton() {
+        B b = Salta.createInjector().getInstance(B.class);
+        assertTrue(b.isInitialized());
+    }
 }

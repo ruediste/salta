@@ -15,50 +15,50 @@ import com.github.ruediste.salta.jsr330.JSR330Module;
 
 public class JSR330FieldMembersInjectorRuleTest {
 
-	public static class TestClassA {
-		@Inject
-		TestClassB b;
+    public static class TestClassA {
+        @Inject
+        TestClassB b;
 
-		TestClassB b1;
+        TestClassB b1;
 
-		@Named("foo")
-		String c;
+        @Named("foo")
+        String c;
 
-	}
+    }
 
-	public static class TestClassB {
+    public static class TestClassB {
 
-	}
+    }
 
-	public static class TestClassC {
+    public static class TestClassC {
 
-		@Inject
-		final TestClassB bFinal = null;
-	}
+        @Inject
+        final TestClassB bFinal = null;
+    }
 
-	private Injector injector;
+    private Injector injector;
 
-	@Before
-	public void before() {
-		injector = Salta.createInjector();
-	}
+    @Before
+    public void before() {
+        injector = Salta.createInjector();
+    }
 
-	@Test
-	public void testInjectInjected() {
-		TestClassA a = injector.getInstance(TestClassA.class);
-		assertNotNull(a.b);
-	}
+    @Test
+    public void testInjectInjected() {
+        TestClassA a = injector.getInstance(TestClassA.class);
+        assertNotNull(a.b);
+    }
 
-	@Test
-	public void testNoInjectAnnotation() {
-		TestClassA a = injector.getInstance(TestClassA.class);
-		assertNull(a.b1);
-		assertNull(a.c);
-	}
+    @Test
+    public void testNoInjectAnnotation() {
+        TestClassA a = injector.getInstance(TestClassA.class);
+        assertNull(a.b1);
+        assertNull(a.c);
+    }
 
-	@Test(expected = SaltaException.class)
-	public void testFinalNotInjected() {
-		injector.getInstance(TestClassC.class);
-		fail();
-	}
+    @Test(expected = SaltaException.class)
+    public void testFinalNotInjected() {
+        injector.getInstance(TestClassC.class);
+        fail();
+    }
 }
