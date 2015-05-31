@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.standard.util.ProviderCreationRule.ProviderAccessBeforeInstanceCreationFinishedException;
-import com.github.ruediste.salta.standard.util.ProviderCreationRule.ProviderAccessBeforeRecipeCreationFinishedException;
 
 public class ProviderDependencyFactoryRuleTest {
 
@@ -92,7 +91,7 @@ public class ProviderDependencyFactoryRuleTest {
 		try {
 			injector.getInstance(TestClassE.class);
 		} catch (SaltaException e) {
-			if (!(e.getCause() instanceof ProviderAccessBeforeRecipeCreationFinishedException))
+			if (!(e.getCause() instanceof ProviderAccessBeforeInstanceCreationFinishedException))
 				throw e;
 		}
 
