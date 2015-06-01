@@ -131,7 +131,7 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
          * <p>
          * Register the {@link DefaultConstructionRule} to construct instances
          * using the {@link #instantiatorRules}, {@link #membersInjectorRules},
-         * {@link #membersInjectorFactories} and {@link #enhancerFactories}
+         * {@link #membersInjectorFactories} and {@link #initializerFactories}
          * </p>
          */
         public final List<ConstructionRule> constructionRules = new ArrayList<>();
@@ -145,7 +145,7 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
          * These rules typically include the {@link DefaultConstructionRule}
          * which constructs instances using the {@link #instantiatorRules},
          * {@link #membersInjectorRules}, {@link #membersInjectorFactories} and
-         * {@link #enhancerFactories}
+         * {@link #initializerFactories}
          */
         public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
                 TypeToken<?> type) {

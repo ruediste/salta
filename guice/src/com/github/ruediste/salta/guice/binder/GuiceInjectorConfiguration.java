@@ -48,8 +48,10 @@ public class GuiceInjectorConfiguration {
 
     /**
      * Automatically defined statically defined bindings. These bindings are
-     * evaluated after the {@link #staticBindings}, but before the
-     * {@link #jitBindingRules}
+     * evaluated after the
+     * {@link StandardInjectorConfiguration.CreationPipelineConfiguration.CreationPipelineSuppliers#staticBindingsSupplier}
+     * , but before the
+     * {@link StandardInjectorConfiguration.CreationPipelineConfiguration.CreationPipelineSuppliers#jitRulesSupplier}
      */
     public final List<StaticBinding> automaticStaticBindings = new ArrayList<>();
 

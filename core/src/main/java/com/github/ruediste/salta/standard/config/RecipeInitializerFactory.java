@@ -8,7 +8,7 @@ import com.google.common.reflect.TypeToken;
 
 /**
  * Factory to create a {@link RecipeInitializer} for a type. Used by
- * {@link StandardInjectorConfiguration#initializerFactories}
+ * {@link StandardInjectorConfiguration.ConstructionConfiguration#initializerFactories}
  */
 public interface RecipeInitializerFactory {
     /**

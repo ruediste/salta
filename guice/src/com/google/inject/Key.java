@@ -21,13 +21,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.inject.internal.Annotations.generateAnnotation;
 import static com.google.inject.internal.Annotations.isAllDefaultMethods;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.inject.internal.Annotations;
 import com.google.inject.internal.MoreTypes;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 
 /**
  * Binding key consisting of an injection type and an optional annotation.
@@ -75,7 +75,7 @@ public class Key<T> {
      * {@code @Bar}:
      *
      * <p>
-     * {@code new Key<Foo>(Bar.class) .
+     * {@code new Key<Foo>(Bar.class) }.
      */
     @SuppressWarnings("unchecked")
     protected Key(Class<? extends Annotation> annotationType) {
@@ -100,7 +100,7 @@ public class Key<T> {
      * {@code @Bar}:
      *
      * <p>
-     * {@code new Key<Foo>(new Bar()) .
+     * {@code new Key<Foo>(new Bar()) }.
      */
     @SuppressWarnings("unchecked")
     protected Key(Annotation annotation) {
@@ -125,7 +125,7 @@ public class Key<T> {
      * Example usage for a binding of type {@code Foo}:
      *
      * <p>
-     * {@code new Key<Foo>() .
+     * {@code new Key<Foo>() }.
      */
     @SuppressWarnings("unchecked")
     protected Key() {
@@ -438,19 +438,23 @@ public class Key<T> {
     static enum NullAnnotationStrategy implements AnnotationStrategy {
         INSTANCE;
 
+        @Override
         public boolean hasAttributes() {
             return false;
         }
 
+        @Override
         public AnnotationStrategy withoutAttributes() {
             throw new UnsupportedOperationException(
                     "Key already has no attributes.");
         }
 
+        @Override
         public Annotation getAnnotation() {
             return null;
         }
 
+        @Override
         public Class<? extends Annotation> getAnnotationType() {
             return null;
         }
@@ -470,18 +474,22 @@ public class Key<T> {
             this.annotation = checkNotNull(annotation, "annotation");
         }
 
+        @Override
         public boolean hasAttributes() {
             return true;
         }
 
+        @Override
         public AnnotationStrategy withoutAttributes() {
             return new AnnotationTypeStrategy(getAnnotationType(), annotation);
         }
 
+        @Override
         public Annotation getAnnotation() {
             return annotation;
         }
 
+        @Override
         public Class<? extends Annotation> getAnnotationType() {
             return annotation.annotationType();
         }
@@ -521,19 +529,23 @@ public class Key<T> {
             this.annotation = annotation;
         }
 
+        @Override
         public boolean hasAttributes() {
             return false;
         }
 
+        @Override
         public AnnotationStrategy withoutAttributes() {
             throw new UnsupportedOperationException(
                     "Key already has no attributes.");
         }
 
+        @Override
         public Annotation getAnnotation() {
             return annotation;
         }
 
+        @Override
         public Class<? extends Annotation> getAnnotationType() {
             return annotationType;
         }

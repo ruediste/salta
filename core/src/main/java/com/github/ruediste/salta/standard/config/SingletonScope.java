@@ -6,6 +6,7 @@ import com.github.ruediste.attachedProperties4J.AttachedProperty;
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.core.RecipeCreationContext;
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
@@ -56,8 +57,13 @@ public class SingletonScope implements Scope {
     public void instantiate(RecipeCreationContext ctx, Binding binding) {
         if (!instance.isSet(binding)) {
             SupplierRecipe innerRecipe = binding.getOrCreateRecipe(ctx);
-            instance.set(binding, ctx.getCompiler()
-                    .compileSupplier(innerRecipe).getNoThrow());
+            try {
+                instance.set(binding,
+                        ctx.getCompiler().compileSupplier(innerRecipe).get());
+            } catch (Throwable t) {
+                throw new SaltaException(
+                        "Error while instantiating instance for " + binding, t);
+            }
         }
     }
 }
