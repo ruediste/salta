@@ -54,10 +54,15 @@ public class SimpleProxyScopeHandler implements ScopeHandler {
         this.scopeName = scopeName;
     }
 
-    public void enter(Map<Binding, Object> instances) {
+    /**
+     * Enter the scope with a predefined map of instances. Make sure to
+     * synchronize access to the map (no two threads using the same map at the
+     * same time)
+     */
+    public void enter(Map<Binding, Object> valueMap) {
         checkState(values.get() == null, "Scope " + scopeName
                 + "  is already in progress");
-        values.set(instances);
+        values.set(valueMap);
     }
 
     public void enter() {
@@ -66,6 +71,12 @@ public class SimpleProxyScopeHandler implements ScopeHandler {
         values.set(Maps.newHashMap());
     }
 
+    /**
+     * Return the current value map.
+     * 
+     * @throws RuntimeException
+     *             if no scope is active
+     */
     public Map<Binding, Object> getValueMap() {
         Map<Binding, Object> scopedObjects = values.get();
         if (scopedObjects == null) {
