@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.standard.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -61,9 +62,18 @@ public abstract class MembersInjectorFactoryBase implements
                         result.add(new FixedFieldRecipeMembersInjector(f,
                                 recipe.get()));
                     } else {
-                        if (injectionInstruction != InjectionInstruction.INJECT_OPTIONAL)
-                            throw new SaltaException(
-                                    "No recipe found for field\n" + f);
+                        if (injectionInstruction != InjectionInstruction.INJECT_OPTIONAL) {
+                            Annotation qualifier = config.getRequiredQualifier(
+                                    f, f);
+                            if (qualifier != null)
+                                throw new SaltaException(
+                                        "No recipe found for field\n" + f
+                                                + "\nAnnotated with "
+                                                + qualifier);
+                            else
+                                throw new SaltaException(
+                                        "No recipe found for field\n" + f);
+                        }
                     }
 
                 }

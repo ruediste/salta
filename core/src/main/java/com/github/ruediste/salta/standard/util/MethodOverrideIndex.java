@@ -77,7 +77,7 @@ public class MethodOverrideIndex {
 
     }
 
-    private boolean doesOverride(Method m, Method ancestorMethod) {
+    public static boolean doesOverride(Method m, Method ancestorMethod) {
         if (Modifier.isFinal(ancestorMethod.getModifiers()))
             return false;
         if (Modifier.isPublic(ancestorMethod.getModifiers()))
