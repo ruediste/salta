@@ -155,4 +155,12 @@ public class ClassCompilationContext {
         return compiler;
     }
 
+    /**
+     * Returns the class loader which is used to load the compiled code.
+     * Required during compilation to check if the classes used by the compiled
+     * code will be the correct ones.
+     */
+    public ClassLoader getCompiledCodeClassLoader() {
+        return compiler.getLoader();
+    }
 }

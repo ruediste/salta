@@ -50,4 +50,7 @@ public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
         }
         return result;
     }
+
+    public ClassLoader generatedCodeParentClassLoader = Thread.currentThread()
+            .getContextClassLoader();
 }

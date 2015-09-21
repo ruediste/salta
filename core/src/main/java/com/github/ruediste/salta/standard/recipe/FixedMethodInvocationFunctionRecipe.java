@@ -40,7 +40,8 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
     public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
             MethodCompilationContext ctx) {
 
-        if (Accessibility.isMethodPublic(method))
+        if (Accessibility.isMethodAccessible(method,
+                ctx.getCompiledCodeClassLoader()))
             return compileDirect(argType, mv, ctx);
         else
             return compileDynamic(argType, mv, ctx);
@@ -90,7 +91,8 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
                 Type.getInternalName(FixedMethodInvocationFunctionRecipe.class),
                 "bootstrap", bootstrapDesc);
 
-        Class<?> returnType = ctx.publicSuperType(method.getReturnType());
+        Class<?> returnType = ctx.publicSuperType(method.getReturnType(),
+                ctx.getCompiledCodeClassLoader());
 
         mv.invokeDynamic(method.getName(),
                 Type.getMethodDescriptor(Type.getType(returnType), argTypes),

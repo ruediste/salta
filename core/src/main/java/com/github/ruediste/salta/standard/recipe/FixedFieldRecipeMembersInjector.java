@@ -33,11 +33,12 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
 
     @Override
     public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-            MethodCompilationContext compilationContext) {
-        if (Accessibility.isFieldPublic(field))
-            return compileDirect(argType, mv, compilationContext);
+            MethodCompilationContext ctx) {
+        if (Accessibility.isFieldAccessible(field,
+                ctx.getCompiledCodeClassLoader()))
+            return compileDirect(argType, mv, ctx);
         else
-            return compileDynamic(argType, mv, compilationContext);
+            return compileDynamic(argType, mv, ctx);
     }
 
     protected Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,

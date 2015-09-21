@@ -34,8 +34,8 @@ public class RecipeCompiler {
     private static final AtomicInteger instanceCounter = new AtomicInteger();
 
     private static class CompilerClassLoader extends ClassLoader {
-        public CompilerClassLoader() {
-            super(Thread.currentThread().getContextClassLoader());
+        public CompilerClassLoader(ClassLoader parent) {
+            super(parent);
         }
 
         public Class<?> defineClass(String name, byte[] bb) {
@@ -46,10 +46,15 @@ public class RecipeCompiler {
     private final int instanceNr;
 
     public RecipeCompiler() {
-        instanceNr = instanceCounter.incrementAndGet();
+        this(Thread.currentThread().getContextClassLoader());
     }
 
-    private CompilerClassLoader loader = new CompilerClassLoader();
+    public RecipeCompiler(ClassLoader generatedCodeParentClassLoader) {
+        instanceNr = instanceCounter.incrementAndGet();
+        loader = new CompilerClassLoader(generatedCodeParentClassLoader);
+    }
+
+    private final CompilerClassLoader loader;
     private AtomicInteger classNumber = new AtomicInteger();
 
     /**
@@ -127,7 +132,7 @@ public class RecipeCompiler {
         // }
 
         try {
-            cls = loader.defineClass(className, bb);
+            cls = getLoader().defineClass(className, bb);
             ctx.initFields(cls);
         } catch (Throwable e) {
             System.out.println("Error while loading compiled recipe class");
@@ -188,10 +193,12 @@ public class RecipeCompiler {
         mv.visitInsn(RETURN);
         Label l1 = new Label();
         mv.visitLabel(l1);
-        // mv.visitLocalVariable("this", "Lcom/github/ruediste/salta/core/Foo;",
-        // null, l0, l1, 0);
         mv.visitMaxs(1, 1);
         mv.visitEnd();
+    }
+
+    public CompilerClassLoader getLoader() {
+        return loader;
     }
 
 }

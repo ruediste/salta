@@ -207,6 +207,12 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
                     }
                     return result;
                 }
+
+                @Override
+                public String toString() {
+                    return "SupplierRecipe[given instantiator, default membersinjectors and initializers](instantiator="
+                            + recipeInstantiator + ")";
+                }
             };
         }
 

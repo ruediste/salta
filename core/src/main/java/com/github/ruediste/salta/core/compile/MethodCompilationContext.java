@@ -129,6 +129,15 @@ public class MethodCompilationContext {
         }
     }
 
+    /**
+     * Returns the class loader which is used to load the compiled code.
+     * Required during compilation to check if the classes used by the compiled
+     * code will be the correct ones.
+     */
+    public ClassLoader getCompiledCodeClassLoader() {
+        return classCtx.getCompiledCodeClassLoader();
+    }
+
     public ClassCompilationContext getClassCtx() {
         return classCtx;
     }
@@ -137,7 +146,7 @@ public class MethodCompilationContext {
      * see {@link MethodCompilationContext#castToPublic(Class, Class)}
      */
     public Class<?> castToPublic(Class<?> from, Class<?> to) {
-        if (!Accessibility.isClassPublic(to))
+        if (!Accessibility.isClassAccessible(to, getCompiledCodeClassLoader()))
             to = Object.class;
 
         if (from.equals(to))
@@ -168,10 +177,10 @@ public class MethodCompilationContext {
         throw new SaltaException("Cannot cast from " + from + " to " + to);
     }
 
-    public Class<?> publicSuperType(Class<?> cls) {
+    public Class<?> publicSuperType(Class<?> cls, ClassLoader cl) {
         if (cls.isPrimitive())
             return cls;
-        if (cls.isArray() || !Accessibility.isClassPublic(cls)) {
+        if (cls.isArray() || !Accessibility.isClassAccessible(cls, cl)) {
             return Object.class;
         }
         return cls;

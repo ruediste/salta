@@ -138,7 +138,8 @@ public class MethodCompilationContextTest {
 
     @Test
     public void assumptions() {
-        assertTrue(Accessibility.isClassPublic(int.class));
+        assertTrue(Accessibility.isClassAccessible(int.class, getClass()
+                .getClassLoader()));
         assertFalse(Object.class.isAssignableFrom(int.class));
     }
 

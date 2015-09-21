@@ -36,7 +36,8 @@ public class SingletonScope implements Scope {
                     MethodCompilationContext ctx) {
 
                 Class<?> fieldType = requestedKey.getRawType();
-                if (!Accessibility.isClassPublic(fieldType)) {
+                if (!Accessibility.isClassAccessible(fieldType,
+                        ctx.getCompiledCodeClassLoader())) {
                     fieldType = Object.class;
                 }
                 ctx.addFieldAndLoad((Class) fieldType, instance.get(binding));

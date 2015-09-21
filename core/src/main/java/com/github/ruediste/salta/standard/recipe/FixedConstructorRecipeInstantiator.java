@@ -40,11 +40,12 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
 
     @Override
     public Class<?> compileImpl(GeneratorAdapter mv,
-            MethodCompilationContext compilationContext) {
-        if (Accessibility.isConstructorPublic(constructor))
-            return compileDirect(mv, compilationContext);
+            MethodCompilationContext ctx) {
+        if (Accessibility.isConstructorAccessible(constructor,
+                ctx.getCompiledCodeClassLoader()))
+            return compileDirect(mv, ctx);
         else
-            return compileDynamic(mv, compilationContext);
+            return compileDynamic(mv, ctx);
     }
 
     private Class<?> compileDirect(GeneratorAdapter mv,
@@ -78,7 +79,8 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
             MethodCompilationContext ctx) {
 
         Class<?> resultType = constructor.getDeclaringClass();
-        if (!Accessibility.isClassPublic(resultType))
+        if (!Accessibility.isClassAccessible(resultType,
+                ctx.getCompiledCodeClassLoader()))
             resultType = Object.class;
 
         // push arguments

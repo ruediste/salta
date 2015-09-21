@@ -20,7 +20,7 @@ public class CoreInjector {
     @SuppressWarnings("unused")
     private CoreInjectorConfiguration config;
 
-    private final RecipeCompiler compiler = new RecipeCompiler();
+    private final RecipeCompiler compiler;
 
     private ConcurrentHashMap<CoreDependencyKey<?>, Optional<CompiledSupplier>> compiledRecipeCache = new ConcurrentHashMap<>();
 
@@ -35,7 +35,7 @@ public class CoreInjector {
             List<CreationRule> creationRules) {
         this.config = config;
         this.creationRules = creationRules;
-
+        compiler = new RecipeCompiler(config.generatedCodeParentClassLoader);
     }
 
     @SuppressWarnings("unchecked")
