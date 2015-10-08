@@ -21,13 +21,13 @@
 		<dependency>
 			<groupId>com.github.ruediste.salta</groupId>
 			<artifactId>salta-core</artifactId>
-			<version>0.2</version>
+			<version>0.3-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	
 	<parent>
 		<groupId>com.github.ruediste.salta</groupId>
 		<artifactId>salta-parent</artifactId>
-		<version>0.2</version>
+		<version>0.3-SNAPSHOT</version>
 	</parent>
 </project>

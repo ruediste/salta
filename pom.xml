@@ -3,7 +3,7 @@
 	<groupId>com.github.ruediste.salta</groupId>
 	<artifactId>salta-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.2</version>
+	<version>0.3-SNAPSHOT</version>
 	<name>Salta Parent</name>
 
 	<url>https://github.com/ruediste/salta</url>
