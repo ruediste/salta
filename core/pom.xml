@@ -45,7 +45,7 @@
 	<parent>
 		<groupId>com.github.ruediste.salta</groupId>
 		<artifactId>salta-parent</artifactId>
-		<version>0.2-SNAPSHOT</version>
+		<version>0.2</version>
 	</parent>
 	<description>Core of the Salta Framework. Provides most of the infrastructure, but no API</description>
 </project>
