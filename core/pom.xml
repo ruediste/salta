@@ -16,7 +16,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.7</version>
+			<version>1.7.12</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.github.ruediste</groupId>
 			<artifactId>attached-properties-4j</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-debug-all</artifactId>
-			<version>5.0.3</version>
+			<version>5.0.4</version>
 		</dependency>
 	</dependencies>
 	
