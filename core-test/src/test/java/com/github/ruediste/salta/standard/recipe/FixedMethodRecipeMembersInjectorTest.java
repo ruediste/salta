@@ -206,8 +206,9 @@ public class FixedMethodRecipeMembersInjectorTest {
 
         void m(Class<?> param, SupplierRecipe recipe)
                 throws NoSuchMethodException, SecurityException {
-            new FixedMethodRecipeMembersInjector(TestC.class.getDeclaredMethod(
-                    m, param), Arrays.asList(recipe)).compile(TestC.class, ctx);
+            new FixedMethodRecipeMembersInjector(
+                    TestC.class.getDeclaredMethod(m, param),
+                    Arrays.asList(recipe)).compile(TestC.class, ctx);
         }
 
         SupplierRecipe toObject(SupplierRecipe arg) {
@@ -217,8 +218,7 @@ public class FixedMethodRecipeMembersInjectorTest {
                 protected Class<?> compileImpl(GeneratorAdapter mv,
                         MethodCompilationContext ctx) {
                     arg.compile(ctx);
-                    mv.visitMethodInsn(
-                            INVOKESTATIC,
+                    mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$Helper",
                             "toObject",
                             "(Ljava/lang/Object;)Ljava/lang/Object;", false);
@@ -234,8 +234,7 @@ public class FixedMethodRecipeMembersInjectorTest {
                 @Override
                 protected Class<?> compileImpl(GeneratorAdapter mv,
                         MethodCompilationContext ctx) {
-                    mv.visitMethodInsn(
-                            INVOKESTATIC,
+                    mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$Helper",
                             "getPub",
                             "()Lcom/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$TestPub;",
@@ -252,8 +251,7 @@ public class FixedMethodRecipeMembersInjectorTest {
                 @Override
                 protected Class<?> compileImpl(GeneratorAdapter mv,
                         MethodCompilationContext ctx) {
-                    mv.visitMethodInsn(
-                            INVOKESTATIC,
+                    mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedMethodRecipeMembersInjectorTest$Helper",
                             "getPriv", "()Ljava/lang/Object;", false);
 

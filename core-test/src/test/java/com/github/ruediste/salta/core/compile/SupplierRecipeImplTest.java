@@ -31,19 +31,17 @@ public class SupplierRecipeImplTest {
                 binder().config().standardConfig.creationPipeline.creationRules
                         .add(new CreationRule() {
 
-                            @Override
-                            public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-                                    CoreDependencyKey<?> key,
-                                    CoreInjector injector) {
-                                if (key.getRawType().equals(int.class)) {
-                                    return Optional
-                                            .of(ctx -> new SupplierRecipeImpl(
-                                                    () -> 2));
-                                }
-                                return Optional.empty();
-                            }
+                    @Override
+                    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
+                            CoreDependencyKey<?> key, CoreInjector injector) {
+                        if (key.getRawType().equals(int.class)) {
+                            return Optional
+                                    .of(ctx -> new SupplierRecipeImpl(() -> 2));
+                        }
+                        return Optional.empty();
+                    }
 
-                        });
+                });
             }
         });
 

@@ -40,8 +40,8 @@ import java.util.Map.Entry;
  *            The annotation type has to be proxed.
  * @version $Id$
  */
-public final class AnnotationProxy<A extends Annotation> implements Annotation,
-        InvocationHandler {
+public final class AnnotationProxy<A extends Annotation>
+        implements Annotation, InvocationHandler {
 
     /**
      * Creates a new annotation proxy.
@@ -138,9 +138,9 @@ public final class AnnotationProxy<A extends Annotation> implements Annotation,
             this.properties.put(propertyName, property);
         }
 
-        this.proxedAnnotation = annotationType.cast(Proxy.newProxyInstance(
-                annotationType.getClassLoader(),
-                new Class<?>[] { annotationType }, this));
+        this.proxedAnnotation = annotationType
+                .cast(Proxy.newProxyInstance(annotationType.getClassLoader(),
+                        new Class<?>[] { annotationType }, this));
     }
 
     /**
@@ -277,8 +277,8 @@ public final class AnnotationProxy<A extends Annotation> implements Annotation,
 
         for (Entry<String, AnnotationProperty> property : this.properties
                 .entrySet()) {
-            hashCode += (127 * property.getKey().hashCode() ^ property
-                    .getValue().getValueHashCode());
+            hashCode += (127 * property.getKey().hashCode()
+                    ^ property.getValue().getValueHashCode());
         }
 
         return hashCode;
@@ -289,8 +289,8 @@ public final class AnnotationProxy<A extends Annotation> implements Annotation,
      */
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("@").append(
-                this.annotationType.getName()).append('(');
+        StringBuilder stringBuilder = new StringBuilder("@")
+                .append(this.annotationType.getName()).append('(');
         int counter = 0;
         for (Entry<String, AnnotationProperty> property : this.properties
                 .entrySet()) {
@@ -373,20 +373,27 @@ public final class AnnotationProxy<A extends Annotation> implements Annotation,
          *            the property value.
          */
         public void setValue(Object value) {
-            if (value != null
-                    && !(this.type.isAssignableFrom(value.getClass())
-                            || (this.type == Boolean.TYPE && value.getClass() == Boolean.class)
-                            || (this.type == Byte.TYPE && value.getClass() == Byte.class)
-                            || (this.type == Character.TYPE && value.getClass() == Character.class)
-                            || (this.type == Double.TYPE && value.getClass() == Double.class)
-                            || (this.type == Float.TYPE && value.getClass() == Float.class)
-                            || (this.type == Integer.TYPE && value.getClass() == Integer.class)
-                            || (this.type == Long.TYPE && value.getClass() == Long.class) || (this.type == Short.TYPE && value
-                            .getClass() == Short.class))) {
+            if (value != null && !(this.type.isAssignableFrom(value.getClass())
+                    || (this.type == Boolean.TYPE
+                            && value.getClass() == Boolean.class)
+                    || (this.type == Byte.TYPE
+                            && value.getClass() == Byte.class)
+                    || (this.type == Character.TYPE
+                            && value.getClass() == Character.class)
+                    || (this.type == Double.TYPE
+                            && value.getClass() == Double.class)
+                    || (this.type == Float.TYPE
+                            && value.getClass() == Float.class)
+                    || (this.type == Integer.TYPE
+                            && value.getClass() == Integer.class)
+                    || (this.type == Long.TYPE
+                            && value.getClass() == Long.class)
+                    || (this.type == Short.TYPE
+                            && value.getClass() == Short.class))) {
                 throw new IllegalArgumentException(
                         "Cannot assign value of type '"
-                                + value.getClass().getName()
-                                + "' to property '" + this.name + "' of type '"
+                                + value.getClass().getName() + "' to property '"
+                                + this.name + "' of type '"
                                 + this.type.getName() + "'");
             }
             this.value = value;
@@ -541,11 +548,10 @@ public final class AnnotationProxy<A extends Annotation> implements Annotation,
          */
         @Override
         public String toString() {
-            return "(name="
-                    + this.name
-                    + ", type="
-                    + (this.type.isArray() ? (this.type.getComponentType()
-                            .getName() + "[]") : this.type.getName())
+            return "(name=" + this.name + ", type="
+                    + (this.type.isArray()
+                            ? (this.type.getComponentType().getName() + "[]")
+                            : this.type.getName())
                     + ", value=" + this.valueToString() + ")";
         }
 

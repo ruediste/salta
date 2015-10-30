@@ -27,7 +27,8 @@ public class ScopesTest {
     @Test
     public void scopeOnClass() {
         Injector injector = Salta.createInjector();
-        assertSame(injector.getInstance(A.class), injector.getInstance(A.class));
+        assertSame(injector.getInstance(A.class),
+                injector.getInstance(A.class));
     }
 
     @Test
@@ -71,7 +72,8 @@ public class ScopesTest {
                 bind(B.class).in(Singleton.class);
             }
         });
-        assertSame(injector.getInstance(B.class), injector.getInstance(B.class));
+        assertSame(injector.getInstance(B.class),
+                injector.getInstance(B.class));
     }
 
     @Test

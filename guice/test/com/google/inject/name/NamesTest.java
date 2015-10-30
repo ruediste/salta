@@ -67,14 +67,10 @@ public class NamesTest extends TestCase {
             }
         });
 
-        assertEquals(
-                "Sharks",
-                injector.getInstance(Key.get(String.class,
-                        Names.named("SanJose"))));
-        assertEquals(
-                "Oilers",
-                injector.getInstance(Key.get(String.class,
-                        Names.named("Edmonton"))));
+        assertEquals("Sharks", injector
+                .getInstance(Key.get(String.class, Names.named("SanJose"))));
+        assertEquals("Oilers", injector
+                .getInstance(Key.get(String.class, Names.named("Edmonton"))));
     }
 
     public void testBindPropertiesUsingMap() {
@@ -87,14 +83,10 @@ public class NamesTest extends TestCase {
             }
         });
 
-        assertEquals(
-                "Sharks",
-                injector.getInstance(Key.get(String.class,
-                        Names.named("SanJose"))));
-        assertEquals(
-                "Oilers",
-                injector.getInstance(Key.get(String.class,
-                        Names.named("Edmonton"))));
+        assertEquals("Sharks", injector
+                .getInstance(Key.get(String.class, Names.named("SanJose"))));
+        assertEquals("Oilers", injector
+                .getInstance(Key.get(String.class, Names.named("Edmonton"))));
     }
 
     public void testBindPropertiesIncludesInheritedProperties() {
@@ -112,18 +104,12 @@ public class NamesTest extends TestCase {
             }
         });
 
-        assertEquals(
-                "Pats",
-                injector.getInstance(Key.get(String.class,
-                        Names.named("Regina"))));
-        assertEquals(
-                "Oilers",
-                injector.getInstance(Key.get(String.class,
-                        Names.named("Edmonton"))));
-        assertEquals(
-                "Sharks",
-                injector.getInstance(Key.get(String.class,
-                        Names.named("SanJose"))));
+        assertEquals("Pats", injector
+                .getInstance(Key.get(String.class, Names.named("Regina"))));
+        assertEquals("Oilers", injector
+                .getInstance(Key.get(String.class, Names.named("Edmonton"))));
+        assertEquals("Sharks", injector
+                .getInstance(Key.get(String.class, Names.named("SanJose"))));
 
         try {
             injector.getInstance(Key.get(String.class, Names.named("Calgary")));

@@ -23,8 +23,8 @@ import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.google.common.base.Defaults;
 import com.google.common.reflect.TypeToken;
 
-public abstract class MembersInjectorFactoryBase implements
-        RecipeMembersInjectorFactory {
+public abstract class MembersInjectorFactoryBase
+        implements RecipeMembersInjectorFactory {
 
     private StandardInjectorConfiguration config;
 
@@ -63,8 +63,8 @@ public abstract class MembersInjectorFactoryBase implements
                                 recipe.get()));
                     } else {
                         if (injectionInstruction != InjectionInstruction.INJECT_OPTIONAL) {
-                            Annotation qualifier = config.getRequiredQualifier(
-                                    f, f);
+                            Annotation qualifier = config
+                                    .getRequiredQualifier(f, f);
                             if (qualifier != null)
                                 throw new SaltaException(
                                         "No recipe found for field\n" + f
@@ -106,8 +106,7 @@ public abstract class MembersInjectorFactoryBase implements
                         }
                         if (!fieldFound)
                             throw new SaltaException(
-                                    "Qualifier has been specified on "
-                                            + method
+                                    "Qualifier has been specified on " + method
                                             + ".\nSpecify qualifiers on parameters instead");
                     }
 
@@ -118,9 +117,9 @@ public abstract class MembersInjectorFactoryBase implements
                         Parameter parameter = parameters[i];
                         @SuppressWarnings({ "unchecked", "rawtypes" })
                         CoreDependencyKey<Object> dependency = new InjectionPoint<>(
-                                (TypeToken) t.resolveType(parameter
-                                        .getParameterizedType()), method,
-                                parameter, i);
+                                (TypeToken) t.resolveType(
+                                        parameter.getParameterizedType()),
+                                method, parameter, i);
                         Optional<SupplierRecipe> recipe;
                         recipe = ctx.tryGetRecipe(dependency);
                         if (!recipe.isPresent()) {
@@ -140,8 +139,8 @@ public abstract class MembersInjectorFactoryBase implements
                     }
 
                     // add injector
-                    result.add(new FixedMethodRecipeMembersInjector(method,
-                            args));
+                    result.add(
+                            new FixedMethodRecipeMembersInjector(method, args));
                 }
             }
         }

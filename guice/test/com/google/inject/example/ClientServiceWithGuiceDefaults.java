@@ -38,8 +38,8 @@ public class ClientServiceWithGuiceDefaults {
     }
 
     @Singleton
-    public static class ServiceImpl implements
-            ClientServiceWithGuiceDefaults.Service {
+    public static class ServiceImpl
+            implements ClientServiceWithGuiceDefaults.Service {
         public void go() {
             // ...
         }

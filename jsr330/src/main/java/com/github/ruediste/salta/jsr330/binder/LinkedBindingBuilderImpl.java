@@ -43,8 +43,8 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>
 
     @Override
     public ScopedBindingBuilder<T> toProvider(Provider<? extends T> provider) {
-        return new ScopedBindingBuilderImpl<>(delegate.toProviderInstance(
-                provider, x -> () -> x.get()));
+        return new ScopedBindingBuilderImpl<>(
+                delegate.toProviderInstance(provider, x -> () -> x.get()));
     }
 
     @Override
@@ -62,8 +62,8 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>
     @Override
     public <P extends Provider<? extends T>> ScopedBindingBuilder<T> toProvider(
             CoreDependencyKey<P> providerKey) {
-        return new ScopedBindingBuilderImpl<>(delegate.toProvider(providerKey,
-                p -> p.get()));
+        return new ScopedBindingBuilderImpl<>(
+                delegate.toProvider(providerKey, p -> p.get()));
     }
 
     @Override
@@ -76,8 +76,8 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>
     @Override
     public <S extends T> ScopedBindingBuilder<T> toConstructor(
             Constructor<S> constructor, TypeToken<? extends S> type) {
-        return new ScopedBindingBuilderImpl<>(delegate.toConstructor(
-                constructor, type));
+        return new ScopedBindingBuilderImpl<>(
+                delegate.toConstructor(constructor, type));
     }
 
 }

@@ -16,8 +16,8 @@ import com.github.ruediste.salta.standard.config.ConstructionRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public abstract class ProvidedByConstructionRuleBase implements
-        ConstructionRule {
+public abstract class ProvidedByConstructionRuleBase
+        implements ConstructionRule {
 
     private Class<?> providerClass;
     private String methodName;
@@ -58,8 +58,8 @@ public abstract class ProvidedByConstructionRuleBase implements
                         recipe.compile(compilationContext);
                         Method method;
                         try {
-                            method = Method.getMethod(providerClass.getMethod(
-                                    methodName, parameterTypes));
+                            method = Method.getMethod(providerClass
+                                    .getMethod(methodName, parameterTypes));
                         } catch (NoSuchMethodException | SecurityException e) {
                             throw new SaltaException(
                                     "Error while retrieving method", e);

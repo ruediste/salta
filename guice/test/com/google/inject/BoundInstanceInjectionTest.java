@@ -89,8 +89,8 @@ public class BoundInstanceInjectionTest extends TestCase {
             }).getInstance(Object.class);
             fail();
         } catch (SaltaException expected) {
-            if (!expected.getMessage().contains(
-                    "Multiple required qualifiers found"))
+            if (!expected.getMessage()
+                    .contains("Multiple required qualifiers found"))
                 throw expected;
         }
     }
@@ -105,8 +105,8 @@ public class BoundInstanceInjectionTest extends TestCase {
             }).getInstance(String.class);
             fail();
         } catch (SaltaException expected) {
-            if (!expected.getMessage().contains(
-                    "Multiple required qualifiers found"))
+            if (!expected.getMessage()
+                    .contains("Multiple required qualifiers found"))
                 throw expected;
         }
     }

@@ -166,10 +166,11 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
                 TypeToken<?> boundType, RecipeCreationContext ctx) {
 
             // create seed recipe
-            Optional<Function<RecipeCreationContext, SupplierRecipe>> seedRecipe = createConstructionRecipe(boundType);
+            Optional<Function<RecipeCreationContext, SupplierRecipe>> seedRecipe = createConstructionRecipe(
+                    boundType);
             if (!seedRecipe.isPresent())
-                throw new SaltaException("Cannot find construction recipe for "
-                        + boundType);
+                throw new SaltaException(
+                        "Cannot find construction recipe for " + boundType);
 
             return seedRecipe.get().apply(ctx);
         }
@@ -184,7 +185,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 
             List<RecipeMembersInjector> memberInjectors = createRecipeMembersInjectors(
                     ctx, type);
-            List<RecipeInitializer> initializers = createInitializers(ctx, type);
+            List<RecipeInitializer> initializers = createInitializers(ctx,
+                    type);
 
             return new SupplierRecipe() {
 
@@ -202,8 +204,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
                     }
                     // apply initializers
                     for (RecipeInitializer initializer : initializers) {
-                        result = initializer
-                                .compile(result, compilationContext);
+                        result = initializer.compile(result,
+                                compilationContext);
                     }
                     return result;
                 }
@@ -340,8 +342,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         public Scope getScope(Class<? extends Annotation> scopeAnnotation) {
             Scope scope = scopeAnnotationMap.get(scopeAnnotation);
             if (scope == null)
-                throw new SaltaException("Unknown scope annotation "
-                        + scopeAnnotation);
+                throw new SaltaException(
+                        "Unknown scope annotation " + scopeAnnotation);
             return scope;
         }
 
@@ -489,8 +491,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         return new RequiredQualifierMatcher(this, availableQualifier);
     }
 
-    private static final class RequiredQualifierMatcher implements
-            Matcher<CoreDependencyKey<?>> {
+    private static final class RequiredQualifierMatcher
+            implements Matcher<CoreDependencyKey<?>> {
         private Annotation availableQualifier;
         private StandardInjectorConfiguration config;
 
@@ -508,8 +510,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 
         @Override
         public int hashCode() {
-            return availableQualifier == null ? 0 : availableQualifier
-                    .hashCode();
+            return availableQualifier == null ? 0
+                    : availableQualifier.hashCode();
         }
 
         @Override
@@ -539,8 +541,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         return new RequiredQualifierTypeMatcher(this, availableQualifierType);
     }
 
-    private static final class RequiredQualifierTypeMatcher implements
-            Matcher<CoreDependencyKey<?>> {
+    private static final class RequiredQualifierTypeMatcher
+            implements Matcher<CoreDependencyKey<?>> {
         private StandardInjectorConfiguration config;
         private Class<? extends Annotation> availableQualifierType;
 
@@ -560,8 +562,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 
         @Override
         public int hashCode() {
-            return availableQualifierType == null ? 0 : availableQualifierType
-                    .hashCode();
+            return availableQualifierType == null ? 0
+                    : availableQualifierType.hashCode();
         }
 
         @Override
@@ -646,8 +648,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         if (requiredQualifier == null)
             return availableQualiferType == null;
         else
-            return requiredQualifier.annotationType().equals(
-                    availableQualiferType);
+            return requiredQualifier.annotationType()
+                    .equals(availableQualiferType);
     }
 
     public MembersInjectorFactory membersInjectorFactory;

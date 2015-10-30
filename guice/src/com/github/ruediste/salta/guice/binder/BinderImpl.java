@@ -48,8 +48,8 @@ public class BinderImpl implements Binder {
     @Override
     public <T> AnnotatedBindingBuilder<T> bind(TypeLiteral<T> typeLiteral) {
         checkForFrameworkTypes(typeLiteral.getRawType());
-        return new AnnotatedBindingBuilderImpl<T>(delegate.bind(typeLiteral
-                .getTypeToken()));
+        return new AnnotatedBindingBuilderImpl<T>(
+                delegate.bind(typeLiteral.getTypeToken()));
     }
 
     @Override
@@ -155,9 +155,10 @@ public class BinderImpl implements Binder {
     }
 
     @Override
-    public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
-        Consumer<T> membersInjector = delegate.getMembersInjector(typeLiteral
-                .getTypeToken());
+    public <T> MembersInjector<T> getMembersInjector(
+            TypeLiteral<T> typeLiteral) {
+        Consumer<T> membersInjector = delegate
+                .getMembersInjector(typeLiteral.getTypeToken());
         return new MembersInjector<T>() {
             @Override
             public void injectMembers(T instance) {
@@ -193,8 +194,8 @@ public class BinderImpl implements Binder {
             delegate.getConfiguration().config.enhancerFactories
                     .add(new EnhancerFactory() {
 
-                        final class ProvisionInvocationImpl extends
-                                ProvisionInvocation<Object> {
+                        final class ProvisionInvocationImpl
+                                extends ProvisionInvocation<Object> {
 
                             Object value;
                             boolean isProvisioned;
@@ -232,17 +233,15 @@ public class BinderImpl implements Binder {
                                 CoreDependencyKey<?> requestedKey) {
                             if (!newMatcher.matches(requestedKey.getType()))
                                 return null;
-                            return new RecipeEnhancerWrapperImpl(
-                                    supplier -> {
-                                        ProvisionInvocationImpl invocation = new ProvisionInvocationImpl(
-                                                requestedKey.getType(),
-                                                supplier);
-                                        listener.onProvision(invocation);
-                                        if (!invocation.isProvisioned)
-                                            return supplier.get();
-                                        else
-                                            return invocation.value;
-                                    });
+                            return new RecipeEnhancerWrapperImpl(supplier -> {
+                                ProvisionInvocationImpl invocation = new ProvisionInvocationImpl(
+                                        requestedKey.getType(), supplier);
+                                listener.onProvision(invocation);
+                                if (!invocation.isProvisioned)
+                                    return supplier.get();
+                                else
+                                    return invocation.value;
+                            });
                         }
                     });
         }
@@ -282,15 +281,15 @@ public class BinderImpl implements Binder {
     @Override
     public void bindScope(Class<? extends Annotation> annotationType,
             Scope scope) {
-        delegate.bindScope(annotationType, new ScopeImpl(new GuiceScopeAdapter(
-                scope)));
+        delegate.bindScope(annotationType,
+                new ScopeImpl(new GuiceScopeAdapter(scope)));
     }
 
     @Override
     public <T> LinkedBindingBuilder<T> bind(Key<T> key) {
-        return new LinkedBindingBuilderImpl<>(delegate.bind(
-                key.getTypeLiteral().getTypeToken()).annotatedWith(
-                key.getAnnotation()));
+        return new LinkedBindingBuilderImpl<>(
+                delegate.bind(key.getTypeLiteral().getTypeToken())
+                        .annotatedWith(key.getAnnotation()));
     }
 
     @Override

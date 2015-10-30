@@ -133,50 +133,50 @@ public class ProviderInjectionTest extends TestCase {
             @Override
             protected void configure() {
                 // instance injection
-                bind(Count.class).annotatedWith(named("a")).toInstance(
-                        new Count(0) {
-                            @Inject
-                            void initialize(@Named("b") Count bCount) {
-                                value = bCount.value + 1;
-                            }
-                        });
+                bind(Count.class).annotatedWith(named("a"))
+                        .toInstance(new Count(0) {
+                    @Inject
+                    void initialize(@Named("b") Count bCount) {
+                        value = bCount.value + 1;
+                    }
+                });
 
                 // provider injection
-                bind(Count.class).annotatedWith(named("b")).toProvider(
-                        new Provider<Count>() {
-                            Count count;
+                bind(Count.class).annotatedWith(named("b"))
+                        .toProvider(new Provider<Count>() {
+                    Count count;
 
-                            @Inject
-                            void initialize(@Named("c") Count cCount) {
-                                count = new Count(cCount.value + 2);
-                            }
+                    @Inject
+                    void initialize(@Named("c") Count cCount) {
+                        count = new Count(cCount.value + 2);
+                    }
 
-                            @Override
-                            public Count get() {
-                                return count;
-                            }
-                        });
+                    @Override
+                    public Count get() {
+                        return count;
+                    }
+                });
 
                 // field and method injection, fields first
-                bind(Count.class).annotatedWith(named("c")).toInstance(
-                        new Count(0) {
-                            @Inject
-                            @Named("d")
-                            Count dCount;
+                bind(Count.class).annotatedWith(named("c"))
+                        .toInstance(new Count(0) {
+                    @Inject
+                    @Named("d")
+                    Count dCount;
 
-                            @Inject
-                            void initialize(@Named("e") Count eCount) {
-                                value = dCount.value + eCount.value + 4;
-                            }
-                        });
+                    @Inject
+                    void initialize(@Named("e") Count eCount) {
+                        value = dCount.value + eCount.value + 4;
+                    }
+                });
 
                 // static injection
                 requestStaticInjection(StaticallyInjectable.class);
 
-                bind(Count.class).annotatedWith(named("d")).toInstance(
-                        new Count(8));
-                bind(Count.class).annotatedWith(named("e")).toInstance(
-                        new Count(16));
+                bind(Count.class).annotatedWith(named("d"))
+                        .toInstance(new Count(8));
+                bind(Count.class).annotatedWith(named("e"))
+                        .toInstance(new Count(16));
             }
         });
 

@@ -51,11 +51,10 @@ public class ConstantBindingBuilderTest {
                 null, d -> true);
         StandardStaticBinding binding = builder.createBinding(Integer.class, 3);
         RecipeCompiler compiler = new RecipeCompiler();
-        assertEquals(
-                3,
-                compiler.compileSupplier(
-                        binding.createRecipe(new RecipeCreationContextImpl(null)))
-                        .get());
+        assertEquals(3,
+                compiler.compileSupplier(binding
+                        .createRecipe(new RecipeCreationContextImpl(null)))
+                .get());
     }
 
     @Test

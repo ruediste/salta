@@ -28,8 +28,8 @@ public class CreationRuleImpl implements CreationRule {
     public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
             CoreDependencyKey<?> key, CoreInjector injector) {
         if (matcher.matches(key))
-            return Optional.of(ctx -> new SupplierRecipeImpl(supplierFactory
-                    .apply(key)));
+            return Optional.of(
+                    ctx -> new SupplierRecipeImpl(supplierFactory.apply(key)));
         else
             return Optional.empty();
     }

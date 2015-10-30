@@ -35,5 +35,5 @@ public @interface ProvidedBy {
     /**
      * The implementation type.
      */
-    Class<? extends Supplier<?>> value();
+    Class<? extends Supplier<?>>value();
 }

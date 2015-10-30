@@ -49,7 +49,7 @@ import com.google.common.reflect.TypeToken;
 /**
  * Since many API types are not present in the core, the documentation has been
  * moved to the Binder classes of the JSR330 or the Guice API.
- * */
+ */
 public class StandardBinder {
 
     protected StandardInjectorConfiguration config;
@@ -141,8 +141,8 @@ public class StandardBinder {
      * @since 2.0
      */
     public <T> void requestInjection(TypeToken<T> type, T instance) {
-        config.dynamicInitializers.add(() -> injector.injectMembers(type,
-                instance));
+        config.dynamicInitializers
+                .add(() -> injector.injectMembers(type, instance));
     }
 
     /**
@@ -167,10 +167,8 @@ public class StandardBinder {
     public void requestStaticInjection(Class<?>... types) {
         for (Class<?> type : types) {
             if (type.isInterface()) {
-                throw new SaltaException(
-                        "Requested static injection of "
-                                + type
-                                + ", but interfaces do not have static injection points.");
+                throw new SaltaException("Requested static injection of " + type
+                        + ", but interfaces do not have static injection points.");
             }
             config.requestedStaticInjections.add(type);
         }
@@ -337,52 +335,50 @@ public class StandardBinder {
                     if (!found)
                         return null;
 
-                    return new RecipeEnhancerImpl(
-                            inner -> {
-                                if (inner == null)
-                                    return null;
+                    return new RecipeEnhancerImpl(inner -> {
+                        if (inner == null)
+                            return null;
 
-                                try {
-                                    Enhancer e = new Enhancer();
-                                    LazyLoader loader = new LazyLoader() {
+                        try {
+                            Enhancer e = new Enhancer();
+                            LazyLoader loader = new LazyLoader() {
 
-                                        @Override
-                                        public Object loadObject()
-                                                throws Exception {
-                                            return inner;
-                                        }
-                                    };
-                                    MethodInterceptor interceptor = new MethodInterceptor() {
+                                @Override
+                                public Object loadObject() throws Exception {
+                                    return inner;
+                                }
+                            };
+                            MethodInterceptor interceptor = new MethodInterceptor() {
 
-                                        @Override
-                                        public Object intercept(Object obj,
-                                                Method method, Object[] args,
-                                                MethodProxy proxy)
-                                                throws Throwable {
-                                            return saltaInterceptor.intercept(
-                                                    inner, method, args, proxy);
-                                        }
-                                    };
-                                    e.setSuperclass(requestedKey.getRawType());
-                                    e.setCallbacks(new Callback[] { loader,
-                                            interceptor });
-                                    e.setCallbackFilter(new CallbackFilter() {
+                                @Override
+                                public Object intercept(Object obj,
+                                        Method method, Object[] args,
+                                        MethodProxy proxy) throws Throwable {
+                                    return saltaInterceptor.intercept(inner,
+                                            method, args, proxy);
+                                }
+                            };
+                            e.setSuperclass(requestedKey.getRawType());
+                            e.setCallbacks(
+                                    new Callback[] { loader, interceptor });
+                            e.setCallbackFilter(new CallbackFilter() {
 
-                                        @Override
-                                        public int accept(Method method) {
-                                            if (methodMatcher.matches(method))
-                                                return 1;
-                                            else
-                                                return 0;
-                                        }
-                                    });
-                                    return e.create();
-                                } catch (Throwable t) {
-                                    throw new SaltaException(
-                                            "Error while creating proxy to enhance "
-                                                    + requestedKey, t);
+                                @Override
+                                public int accept(Method method) {
+                                    if (methodMatcher.matches(method))
+                                        return 1;
+                                    else
+                                        return 0;
                                 }
                             });
+                            return e.create();
+                        } catch (Throwable t) {
+                            throw new SaltaException(
+                                    "Error while creating proxy to enhance "
+                                            + requestedKey,
+                                    t);
+                        }
+                    });
                 }
                 return null;
             }

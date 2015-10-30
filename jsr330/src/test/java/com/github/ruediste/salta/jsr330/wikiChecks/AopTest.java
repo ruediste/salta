@@ -36,8 +36,8 @@ public class AopTest {
                 MethodProxy proxy) throws Throwable {
             if (today.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG,
                     Locale.ENGLISH).startsWith("S")) {
-                throw new IllegalStateException(method.getName()
-                        + " not allowed on weekends!");
+                throw new IllegalStateException(
+                        method.getName() + " not allowed on weekends!");
             }
             return proxy.invoke(delegate, args);
         }

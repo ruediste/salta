@@ -51,8 +51,8 @@ public class KeyAdapter<T> extends CoreDependencyKey<T> {
                     Class<? extends Annotation> annotationType = key
                             .getAnnotationType();
                     if (annotationType != null)
-                        return new Annotation[] { AnnotationProxy
-                                .newProxy(annotationType) };
+                        return new Annotation[] {
+                                AnnotationProxy.newProxy(annotationType) };
                     else
                         return new Annotation[] {};
 

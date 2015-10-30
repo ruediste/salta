@@ -95,21 +95,20 @@ public class MethodCompilationContext {
                     });
         }
         getMv().visitVarInsn(ALOAD, 0);
-        getMv().visitInvokeDynamicInsn(
-                "get",
-                Type.getMethodDescriptor(Type.getType(Supplier.class), Type
-                        .getObjectType(getClassCtx().getInternalClassName())),
+        getMv().visitInvokeDynamicInsn("get",
+                Type.getMethodDescriptor(Type.getType(Supplier.class),
+                        Type.getObjectType(
+                                getClassCtx().getInternalClassName())),
                 new Handle(Opcodes.H_INVOKESTATIC,
                         "java/lang/invoke/LambdaMetafactory", "metafactory",
                         desc(CallSite.class, MethodHandles.Lookup.class,
                                 String.class, MethodType.class,
                                 MethodType.class, MethodHandle.class,
                                 MethodType.class)),
-                new Object[] {
-                        Type.getType("()Ljava/lang/Object;"),
-                        new Handle(Opcodes.H_INVOKESPECIAL, getClassCtx()
-                                .getInternalClassName(), lambdaName,
-                                "()Ljava/lang/Object;"),
+                new Object[] { Type.getType("()Ljava/lang/Object;"),
+                        new Handle(Opcodes.H_INVOKESPECIAL,
+                                getClassCtx().getInternalClassName(),
+                                lambdaName, "()Ljava/lang/Object;"),
                         Type.getType("()Ljava/lang/Object;") });
 
     }
@@ -208,7 +207,8 @@ public class MethodCompilationContext {
                 classCtx.getCompiler());
         CodeSizeEvaluator cse = new CodeSizeEvaluator(null);
         MethodCompilationContext mcc = new MethodCompilationContext(ccc,
-                new GeneratorAdapter(cse, access, "method", desc), access, desc);
+                new GeneratorAdapter(cse, access, "method", desc), access,
+                desc);
         CodeSizeHelper helper = new CodeSizeHelper();
         helper.ctx = mcc;
         helper.cse = cse;

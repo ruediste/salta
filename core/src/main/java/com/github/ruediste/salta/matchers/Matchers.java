@@ -68,8 +68,7 @@ public class Matchers {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof OrMatcher
-                    && ((OrMatcher) other).a.equals(a)
+            return other instanceof OrMatcher && ((OrMatcher) other).a.equals(a)
                     && ((OrMatcher) other).b.equals(b);
         }
 
@@ -154,8 +153,9 @@ public class Matchers {
     private static void checkForRuntimeRetention(
             Class<? extends Annotation> annotationType) {
         Retention retention = annotationType.getAnnotation(Retention.class);
-        checkArgument(retention != null
-                && retention.value() == RetentionPolicy.RUNTIME,
+        checkArgument(
+                retention != null
+                        && retention.value() == RetentionPolicy.RUNTIME,
                 "Annotation %s is missing RUNTIME retention",
                 annotationType.getSimpleName());
     }
@@ -169,8 +169,8 @@ public class Matchers {
         return new AnnotatedWithType(annotationType);
     }
 
-    private static class AnnotatedWithType implements
-            Matcher<AnnotatedElement>, Serializable {
+    private static class AnnotatedWithType
+            implements Matcher<AnnotatedElement>, Serializable {
         private final Class<? extends Annotation> annotationType;
 
         public AnnotatedWithType(Class<? extends Annotation> annotationType) {
@@ -214,8 +214,8 @@ public class Matchers {
         return new AnnotatedWith(annotation);
     }
 
-    private static class AnnotatedWith implements Matcher<AnnotatedElement>,
-            Serializable {
+    private static class AnnotatedWith
+            implements Matcher<AnnotatedElement>, Serializable {
         private final Annotation annotation;
 
         public AnnotatedWith(Annotation annotation) {
@@ -225,8 +225,8 @@ public class Matchers {
 
         @Override
         public boolean matches(AnnotatedElement element) {
-            Annotation fromElement = element.getAnnotation(annotation
-                    .annotationType());
+            Annotation fromElement = element
+                    .getAnnotation(annotation.annotationType());
             return fromElement != null && annotation.equals(fromElement);
         }
 

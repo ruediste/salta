@@ -70,8 +70,8 @@ public class FixedConstructorRecipeInstantiatorTest {
 
     @Test
     public void testPublicConstructorInnerClass() {
-        assertNotNull(injector
-                .getInstance(PrivateTestClassPublicConstructor.class));
+        assertNotNull(
+                injector.getInstance(PrivateTestClassPublicConstructor.class));
     }
 
     @Test

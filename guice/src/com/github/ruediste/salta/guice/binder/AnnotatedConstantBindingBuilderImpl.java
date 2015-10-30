@@ -5,8 +5,8 @@ import java.lang.annotation.Annotation;
 import com.google.inject.binder.AnnotatedConstantBindingBuilder;
 import com.google.inject.binder.ConstantBindingBuilder;
 
-public class AnnotatedConstantBindingBuilderImpl implements
-        AnnotatedConstantBindingBuilder {
+public class AnnotatedConstantBindingBuilderImpl
+        implements AnnotatedConstantBindingBuilder {
 
     private com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder delegate;
 

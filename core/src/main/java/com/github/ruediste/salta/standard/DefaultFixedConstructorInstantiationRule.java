@@ -21,8 +21,8 @@ import com.google.common.reflect.TypeToken;
  * Default {@link FixedConstructorInstantiationRule}, using
  * {@link StandardInjectorConfiguration#isInjectionOptional(java.lang.reflect.AnnotatedElement)}
  */
-public class DefaultFixedConstructorInstantiationRule implements
-        FixedConstructorInstantiationRule {
+public class DefaultFixedConstructorInstantiationRule
+        implements FixedConstructorInstantiationRule {
 
     private StandardInjectorConfiguration config;
 
@@ -37,8 +37,8 @@ public class DefaultFixedConstructorInstantiationRule implements
 
         ArrayList<SupplierRecipe> args = resolveArguments(config, typeToken,
                 ctx, constructor);
-        return Optional.of(createRecipeInstantiator(typeToken, constructor,
-                args));
+        return Optional
+                .of(createRecipeInstantiator(typeToken, constructor, args));
 
     }
 
@@ -59,8 +59,8 @@ public class DefaultFixedConstructorInstantiationRule implements
                 args.add(argRecipe.get());
             else {
                 if (config.isInjectionOptional(parameter)) {
-                    args.add(new SupplierRecipeImpl(() -> Defaults
-                            .defaultValue(parameter.getType())));
+                    args.add(new SupplierRecipeImpl(
+                            () -> Defaults.defaultValue(parameter.getType())));
                 } else {
                     throw new SaltaException(
                             "Cannot resolve constructor parameter of "

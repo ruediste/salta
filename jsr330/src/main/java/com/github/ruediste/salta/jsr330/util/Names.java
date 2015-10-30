@@ -47,11 +47,11 @@ public class Names {
     public static void bindProperties(Binder binder, Properties properties) {
 
         // use enumeration to include the default properties
-        for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration<?> e = properties.propertyNames(); e
+                .hasMoreElements();) {
             String propertyName = (String) e.nextElement();
             String value = properties.getProperty(propertyName);
-            binder.bind(String.class)
-                    .annotatedWith(new NamedImpl(propertyName))
+            binder.bind(String.class).annotatedWith(new NamedImpl(propertyName))
                     .toInstance(value);
         }
     }

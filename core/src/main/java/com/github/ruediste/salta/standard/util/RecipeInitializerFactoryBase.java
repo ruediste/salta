@@ -20,8 +20,8 @@ import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
 import com.google.common.base.Defaults;
 import com.google.common.reflect.TypeToken;
 
-public abstract class RecipeInitializerFactoryBase implements
-        RecipeInitializerFactory {
+public abstract class RecipeInitializerFactoryBase
+        implements RecipeInitializerFactory {
 
     private StandardInjectorConfiguration config;
 
@@ -54,9 +54,9 @@ public abstract class RecipeInitializerFactoryBase implements
                         Parameter parameter = parameters[i];
                         @SuppressWarnings({ "unchecked", "rawtypes" })
                         CoreDependencyKey<Object> dependency = new InjectionPoint<>(
-                                (TypeToken) t.resolveType(parameter
-                                        .getParameterizedType()), method,
-                                parameter, i);
+                                (TypeToken) t.resolveType(
+                                        parameter.getParameterizedType()),
+                                method, parameter, i);
                         Optional<SupplierRecipe> recipe = ctx
                                 .tryGetRecipe(dependency);
 

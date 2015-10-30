@@ -37,13 +37,13 @@ public class MethodOverrideIndexTest {
         MethodOverrideIndex idx = new MethodOverrideIndex(MyTestB.class);
         assertFalse(idx.isOverridden(MyTestA.class.getDeclaredMethod("a")));
         assertTrue(idx.isOverridden(MyTestA.class.getDeclaredMethod("b")));
-        assertFalse(idx.isOverridden(MyTestA.class.getDeclaredMethod("d",
-                int.class)));
+        assertFalse(idx
+                .isOverridden(MyTestA.class.getDeclaredMethod("d", int.class)));
 
         assertFalse(idx.isOverridden(MyTestB.class.getDeclaredMethod("b")));
         assertFalse(idx.isOverridden(MyTestB.class.getDeclaredMethod("c")));
-        assertFalse(idx.isOverridden(MyTestB.class.getDeclaredMethod("d",
-                long.class)));
+        assertFalse(idx.isOverridden(
+                MyTestB.class.getDeclaredMethod("d", long.class)));
     }
 
     @Test
@@ -105,14 +105,14 @@ public class MethodOverrideIndexTest {
     @Test
     public void testGenericOverride() throws Exception {
         MethodOverrideIndex idx = new MethodOverrideIndex(BDerived.class);
-        assertTrue(idx.isOverridden(BBase.class.getDeclaredMethod("set",
-                Object.class)));
+        assertTrue(idx.isOverridden(
+                BBase.class.getDeclaredMethod("set", Object.class)));
     }
 
     @Test
     public void testSubclassRawOverride() throws Exception {
         MethodOverrideIndex idx = new MethodOverrideIndex(BDerived.class);
-        assertTrue(idx.isOverridden(BBase.class.getDeclaredMethod("foo",
-                List.class)));
+        assertTrue(idx.isOverridden(
+                BBase.class.getDeclaredMethod("foo", List.class)));
     }
 }

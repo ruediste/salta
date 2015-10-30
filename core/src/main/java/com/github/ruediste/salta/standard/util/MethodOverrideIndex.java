@@ -34,8 +34,8 @@ public class MethodOverrideIndex {
     }
 
     public MethodOverrideIndex(TypeToken<?> leafType) {
-        ancestors = Collections.unmodifiableList(Lists.reverse(new ArrayList<>(
-                leafType.getTypes())));
+        ancestors = Collections.unmodifiableList(
+                Lists.reverse(new ArrayList<>(leafType.getTypes())));
 
         // we visit parent classes always before child classes
         for (TypeToken<?> type : ancestors) {
@@ -50,8 +50,9 @@ public class MethodOverrideIndex {
                 Signature signature = new Signature(type, m);
 
                 // record the methods
-                methodsBySignature.computeIfAbsent(signature,
-                        s -> new HashSet<>()).add(m);
+                methodsBySignature
+                        .computeIfAbsent(signature, s -> new HashSet<>())
+                        .add(m);
 
                 // get current leaf methods for the signature
                 Set<Method> oldLeaves = leafMethods.get(signature);
@@ -88,8 +89,8 @@ public class MethodOverrideIndex {
             return false;
 
         // ancestorMethod must be package visible
-        String ancestorPackage = ancestorMethod.getDeclaringClass()
-                .getPackage().getName();
+        String ancestorPackage = ancestorMethod.getDeclaringClass().getPackage()
+                .getName();
         String mPackage = m.getDeclaringClass().getPackage().getName();
         if (Objects.equals(ancestorPackage, mPackage))
             return true;
@@ -119,8 +120,8 @@ public class MethodOverrideIndex {
     public boolean isOverridden(Method m) {
         TypeToken<?> type = scannedMethods.get(m);
         if (type == null)
-            throw new RuntimeException("Method " + m
-                    + " was not scanned by this override index");
+            throw new RuntimeException(
+                    "Method " + m + " was not scanned by this override index");
         Set<Method> leaves = leafMethods.get(new Signature(type, m));
         return !leaves.contains(m);
     }

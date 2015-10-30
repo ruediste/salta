@@ -49,8 +49,8 @@ public class ProvidesMethodTest {
             }
 
         });
-        assertEquals("Hello World", injector.getInstance(DependencyKey.of(
-                String.class).withAnnotations(Names.named("works"))));
+        assertEquals("Hello World", injector.getInstance(DependencyKey
+                .of(String.class).withAnnotations(Names.named("works"))));
 
         try {
             injector.getInstance(DependencyKey.of(String.class)

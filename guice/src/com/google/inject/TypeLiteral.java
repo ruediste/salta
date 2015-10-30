@@ -208,7 +208,8 @@ public class TypeLiteral<T> {
      */
     @SuppressWarnings("unchecked")
     public TypeLiteral<?> getSupertype(Class<?> supertype) {
-        return new TypeLiteral(token.getSupertype((Class<? super T>) supertype));
+        return new TypeLiteral(
+                token.getSupertype((Class<? super T>) supertype));
     }
 
     /**

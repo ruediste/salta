@@ -35,8 +35,8 @@ public class TypeLiteralInjectionTest extends TestCase {
             Guice.createInjector(new AbstractModule() {
                 @Override
                 protected void configure() {
-                    bind(TypeLiteral.class).toInstance(
-                            TypeLiteral.get(String.class));
+                    bind(TypeLiteral.class)
+                            .toInstance(TypeLiteral.get(String.class));
                 }
             });
             fail();
@@ -61,8 +61,8 @@ public class TypeLiteralInjectionTest extends TestCase {
     }
 
     public void testInjectTypeLiteralWithClassTypes() {
-        B<Integer> b = Guice.createInjector().getInstance(
-                new Key<B<Integer>>() {
+        B<Integer> b = Guice.createInjector()
+                .getInstance(new Key<B<Integer>>() {
                 });
         assertEquals(TypeLiteral.get(String.class), b.string);
         assertEquals(TypeLiteral.get(Integer.class), b.t);

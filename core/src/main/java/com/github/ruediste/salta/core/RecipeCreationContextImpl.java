@@ -97,7 +97,8 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
     }
 
     @Override
-    public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency) {
+    public Optional<SupplierRecipe> tryGetRecipe(
+            CoreDependencyKey<?> dependency) {
         return coreInjector.tryGetRecipeFunc(dependency)
                 .map(f -> f.apply(this));
     }

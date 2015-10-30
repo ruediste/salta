@@ -20,8 +20,8 @@ public class FixedMethodRecipeInitializer extends
     public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
             MethodCompilationContext compilationContext) {
         mv.dup();
-        Class<?> returnType = super
-                .compileImpl(argType, mv, compilationContext);
+        Class<?> returnType = super.compileImpl(argType, mv,
+                compilationContext);
         compilationContext.pop(returnType);
         return argType;
     }

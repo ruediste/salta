@@ -29,8 +29,8 @@ public class ClientServiceWithDependencyInjection {
         void go();
     }
 
-    public static class ServiceImpl implements
-            ClientServiceWithDependencyInjection.Service {
+    public static class ServiceImpl
+            implements ClientServiceWithDependencyInjection.Service {
         public void go() {
             // ...
         }

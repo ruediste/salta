@@ -44,8 +44,8 @@ public class CoreInjector {
         try {
             tryGetCompiledRecipe = tryGetCompiledRecipe(key);
         } catch (Throwable e) {
-            throw new SaltaException(
-                    "Error while creating instance for " + key, e);
+            throw new SaltaException("Error while creating instance for " + key,
+                    e);
         }
 
         if (!tryGetCompiledRecipe.isPresent()) {
@@ -58,8 +58,8 @@ public class CoreInjector {
         try {
             return (T) tryGetCompiledRecipe.get().get();
         } catch (Throwable e) {
-            throw new SaltaException(
-                    "Error while creating instance for " + key, e);
+            throw new SaltaException("Error while creating instance for " + key,
+                    e);
         }
     }
 
@@ -72,14 +72,15 @@ public class CoreInjector {
             } catch (SaltaException e) {
                 throw e;
             } catch (Throwable e) {
-                throw new SaltaException("Error while creating instance for "
-                        + key, e);
+                throw new SaltaException(
+                        "Error while creating instance for " + key, e);
             }
         };
     }
 
     public CompiledSupplier getCompiledRecipe(CoreDependencyKey<?> key) {
-        Optional<CompiledSupplier> tryGetCompiledRecipe = tryGetCompiledRecipe(key);
+        Optional<CompiledSupplier> tryGetCompiledRecipe = tryGetCompiledRecipe(
+                key);
         if (!tryGetCompiledRecipe.isPresent())
             throw new SaltaException("No recipe found for " + key);
         return tryGetCompiledRecipe.get();
@@ -127,7 +128,8 @@ public class CoreInjector {
         try {
             ctx.processQueuedActions();
         } catch (SaltaException e) {
-            throw new SaltaException("Error while processing queued actions", e);
+            throw new SaltaException("Error while processing queued actions",
+                    e);
         }
         return result;
     }
@@ -148,15 +150,16 @@ public class CoreInjector {
      * Get the value of the optional, throwing an exception including the key if
      * the optional is empty
      */
-    private <T> T getFromOptional(Optional<T> optional, CoreDependencyKey<?> key) {
+    private <T> T getFromOptional(Optional<T> optional,
+            CoreDependencyKey<?> key) {
         if (optional.isPresent())
             return optional.get();
         throw new SaltaException("Dependency cannot be resolved:\n" + key);
     }
 
     public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> key) {
-        return withRecipeCreationContext(ctx -> tryGetRecipeFunc(key).map(
-                f -> f.apply(ctx)));
+        return withRecipeCreationContext(
+                ctx -> tryGetRecipeFunc(key).map(f -> f.apply(ctx)));
     }
 
     /**
@@ -174,8 +177,8 @@ public class CoreInjector {
                     recipeCache.put(key, result);
                 } catch (Throwable t) {
                     recipeCache.remove(key);
-                    throw new SaltaException("Error while creating recipe for "
-                            + key, t);
+                    throw new SaltaException(
+                            "Error while creating recipe for " + key, t);
                 }
             }
             return result;
@@ -198,8 +201,8 @@ public class CoreInjector {
                     break;
             }
 
-            return recipeFunction
-                    .map(new Function<Function<RecipeCreationContext, SupplierRecipe>, Function<RecipeCreationContext, SupplierRecipe>>() {
+            return recipeFunction.map(
+                    new Function<Function<RecipeCreationContext, SupplierRecipe>, Function<RecipeCreationContext, SupplierRecipe>>() {
                         @Override
                         public Function<RecipeCreationContext, SupplierRecipe> apply(
                                 Function<RecipeCreationContext, SupplierRecipe> f) {

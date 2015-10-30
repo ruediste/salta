@@ -79,15 +79,14 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
         // push arguments
         for (int i = 0; i < argumentRecipes.size(); i++) {
             Class<?> t = argumentRecipes.get(i).compile(ctx);
-            argTypes[i + 1] = Type.getType(ctx.castToPublic(t,
-                    method.getParameterTypes()[i]));
+            argTypes[i + 1] = Type.getType(
+                    ctx.castToPublic(t, method.getParameterTypes()[i]));
         }
 
         String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;";
 
         // call
-        Handle bsm = new Handle(
-                H_INVOKESTATIC,
+        Handle bsm = new Handle(H_INVOKESTATIC,
                 Type.getInternalName(FixedMethodInvocationFunctionRecipe.class),
                 "bootstrap", bootstrapDesc);
 

@@ -164,8 +164,8 @@ public class BinderTest {
             fail();
         } catch (CreationException expected) {
             assertContains(expected.getMessage(),
-                    "1) Missing constant value. Please call to(...).", "at "
-                            + getClass().getName());
+                    "1) Missing constant value. Please call to(...).",
+                    "at " + getClass().getName());
         }
     }
 
@@ -181,7 +181,8 @@ public class BinderTest {
             }).getInstance(Runnable.class);
             fail();
         } catch (SaltaException expected) {
-            assertContains(expected.getMessage(), "Detected Dependency Circle:");
+            assertContains(expected.getMessage(),
+                    "Detected Dependency Circle:");
         }
     }
 
@@ -192,8 +193,8 @@ public class BinderTest {
                 @Override
                 public void configure() {
                     String none = null;
-                    bindConstant().annotatedWith(Names.named("nullOne")).to(
-                            none);
+                    bindConstant().annotatedWith(Names.named("nullOne"))
+                            .to(none);
                 }
             });
             fail();
@@ -232,15 +233,15 @@ public class BinderTest {
                 assertEquals(
                         "Provider<Key[type=java.util.List<java.lang.String>, annotation=[none]]>",
                         getProvider(Key.get(new TypeLiteral<List<String>>() {
-                        })).toString());
+                })).toString());
 
                 assertEquals("BindingBuilder<java.lang.Integer>",
                         bind(Integer.class).toString());
                 assertEquals("BindingBuilder<java.lang.Integer>",
                         bind(Integer.class).annotatedWith(Names.named("a"))
                                 .toString());
-                assertEquals("ConstantBindingBuilder", bindConstant()
-                        .toString());
+                assertEquals("ConstantBindingBuilder",
+                        bindConstant().toString());
                 assertEquals("ConstantBindingBuilder", bindConstant()
                         .annotatedWith(Names.named("b")).toString());
             }
@@ -255,15 +256,15 @@ public class BinderTest {
                 try {
                     assertNotSerializable(binder());
                     assertNotSerializable(getProvider(Integer.class));
-                    assertNotSerializable(getProvider(Key
-                            .get(new TypeLiteral<List<String>>() {
-                            })));
+                    assertNotSerializable(getProvider(
+                            Key.get(new TypeLiteral<List<String>>() {
+                    })));
                     assertNotSerializable(bind(Integer.class));
-                    assertNotSerializable(bind(Integer.class).annotatedWith(
-                            Names.named("a")));
+                    assertNotSerializable(bind(Integer.class)
+                            .annotatedWith(Names.named("a")));
                     assertNotSerializable(bindConstant());
-                    assertNotSerializable(bindConstant().annotatedWith(
-                            Names.named("b")));
+                    assertNotSerializable(
+                            bindConstant().annotatedWith(Names.named("b")));
                 } catch (IOException e) {
                     fail(e.getMessage());
                 }
@@ -379,9 +380,9 @@ public class BinderTest {
                 @Override
                 protected void configure() {
                     bind(HasImplementedBy1.class);
-                    bind(HasImplementedBy1.class).toInstance(
-                            new HasImplementedBy1() {
-                            });
+                    bind(HasImplementedBy1.class)
+                            .toInstance(new HasImplementedBy1() {
+                    });
                 }
             }).getInstance(HasImplementedBy1.class);
             fail();
@@ -399,12 +400,13 @@ public class BinderTest {
             @Override
             protected void configure() {
                 bind(HasImplementedByThatNeedsAnotherImplementedBy.class);
-                bind(HasImplementedBy1.class).toInstance(
-                        new HasImplementedBy1() {
-                        });
+                bind(HasImplementedBy1.class)
+                        .toInstance(new HasImplementedBy1() {
+                });
             }
         });
-        assertFalse(injector.getInstance(HasImplementedBy1.class) instanceof ImplementsHasImplementedBy1);
+        assertFalse(injector.getInstance(
+                HasImplementedBy1.class) instanceof ImplementsHasImplementedBy1);
     }
 
     /**
@@ -446,8 +448,8 @@ public class BinderTest {
                 injector.getInstance(HasProvidedBy2.class).getClass());
         assertSame(ExtendsHasImplementedBy2.class,
                 injector.getInstance(HasImplementedBy2.class).getClass());
-        assertSame(JustAClass.class, injector.getInstance(JustAClass.class)
-                .getClass());
+        assertSame(JustAClass.class,
+                injector.getInstance(JustAClass.class).getClass());
     }
 
     @Test
@@ -460,8 +462,8 @@ public class BinderTest {
         } catch (SaltaException expected) {
             assertContains(expected.getMessage(),
                     "1) Could not find a suitable constructor in "
-                            + NoInjectConstructor.class.getName(), "at "
-                            + MissingParameter.class.getName()
+                            + NoInjectConstructor.class.getName(),
+                    "at " + MissingParameter.class.getName()
                             + ".<init>(BinderTest.java:");
         }
     }
@@ -512,26 +514,26 @@ public class BinderTest {
 
         @Override
         protected void configure() {
-            bind(AbstractModule.class).annotatedWith(red).toProvider(
-                    Providers.<AbstractModule> of(null));
-            bind(Binder.class).annotatedWith(red).toProvider(
-                    Providers.<Binder> of(null));
-            bind(Binding.class).annotatedWith(red).toProvider(
-                    Providers.<Binding> of(null));
-            bind(Injector.class).annotatedWith(red).toProvider(
-                    Providers.<Injector> of(null));
-            bind(Key.class).annotatedWith(red).toProvider(
-                    Providers.<Key> of(null));
-            bind(Module.class).annotatedWith(red).toProvider(
-                    Providers.<Module> of(null));
-            bind(Provider.class).annotatedWith(red).toProvider(
-                    Providers.<Provider> of(null));
-            bind(Scope.class).annotatedWith(red).toProvider(
-                    Providers.<Scope> of(null));
-            bind(Stage.class).annotatedWith(red).toProvider(
-                    Providers.<Stage> of(null));
-            bind(TypeLiteral.class).annotatedWith(red).toProvider(
-                    Providers.<TypeLiteral> of(null));
+            bind(AbstractModule.class).annotatedWith(red)
+                    .toProvider(Providers.<AbstractModule> of(null));
+            bind(Binder.class).annotatedWith(red)
+                    .toProvider(Providers.<Binder> of(null));
+            bind(Binding.class).annotatedWith(red)
+                    .toProvider(Providers.<Binding> of(null));
+            bind(Injector.class).annotatedWith(red)
+                    .toProvider(Providers.<Injector> of(null));
+            bind(Key.class).annotatedWith(red)
+                    .toProvider(Providers.<Key> of(null));
+            bind(Module.class).annotatedWith(red)
+                    .toProvider(Providers.<Module> of(null));
+            bind(Provider.class).annotatedWith(red)
+                    .toProvider(Providers.<Provider> of(null));
+            bind(Scope.class).annotatedWith(red)
+                    .toProvider(Providers.<Scope> of(null));
+            bind(Stage.class).annotatedWith(red)
+                    .toProvider(Providers.<Stage> of(null));
+            bind(TypeLiteral.class).annotatedWith(red)
+                    .toProvider(Providers.<TypeLiteral> of(null));
             bind(new TypeLiteral<Key<String>>() {
             }).toProvider(Providers.<Key<String>> of(null));
         }
@@ -544,62 +546,62 @@ public class BinderTest {
             Guice.createInjector(new OuterCoreModule());
             fail();
         } catch (CreationException expected) {
-            assertContains(
-                    expected.getMessage(),
+            assertContains(expected.getMessage(),
                     "Binding to core guice framework type is not allowed: AbstractModule.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: Binder.",
+            "Binding to core guice framework type is not allowed: Binder.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: Binding.",
+            "Binding to core guice framework type is not allowed: Binding.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: Injector.",
+            "Binding to core guice framework type is not allowed: Injector.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: Key.",
+            "Binding to core guice framework type is not allowed: Key.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: Module.",
+            "Binding to core guice framework type is not allowed: Module.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to Provider is not allowed.",
+            "Binding to Provider is not allowed.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: Scope.",
+            "Binding to core guice framework type is not allowed: Scope.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: Stage.",
+            "Binding to core guice framework type is not allowed: Stage.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: TypeLiteral.",
+            "Binding to core guice framework type is not allowed: TypeLiteral.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
                     asModuleChain(OuterCoreModule.class, InnerCoreModule.class),
 
-                    "Binding to core guice framework type is not allowed: Key.",
+            "Binding to core guice framework type is not allowed: Key.",
                     "at " + InnerCoreModule.class.getName()
                             + getDeclaringSourcePart(getClass()),
-                    asModuleChain(OuterCoreModule.class, InnerCoreModule.class));
+                    asModuleChain(OuterCoreModule.class,
+                            InnerCoreModule.class));
         }
     }
 
@@ -671,8 +673,8 @@ public class BinderTest {
     static interface HasImplementedByThatWantsExplicit {
     }
 
-    static class ImplementsHasImplementedByThatWantsExplicit implements
-            HasImplementedByThatWantsExplicit {
+    static class ImplementsHasImplementedByThatWantsExplicit
+            implements HasImplementedByThatWantsExplicit {
         @Inject
         ImplementsHasImplementedByThatWantsExplicit(JustAnInterface jai) {
         }

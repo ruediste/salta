@@ -29,7 +29,8 @@ public class Salta {
     /**
      * Creates an injector for the given set of modules.
      */
-    public static Injector createInjector(Stage stage, List<SaltaModule> modules) {
+    public static Injector createInjector(Stage stage,
+            List<SaltaModule> modules) {
         JSR330InjectorConfiguration config = new JSR330InjectorConfiguration(
                 stage);
         InjectorImpl injector = new InjectorImpl(config);

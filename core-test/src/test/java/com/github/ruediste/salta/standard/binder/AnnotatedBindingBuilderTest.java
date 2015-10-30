@@ -43,8 +43,8 @@ public class AnnotatedBindingBuilderTest {
 
             @Override
             protected void configure() {
-                bind(TestB.class).annotatedWith(Names.named("foo")).to(
-                        TestB.class);
+                bind(TestB.class).annotatedWith(Names.named("foo"))
+                        .to(TestB.class);
             }
         }).getInstance(TestA.class).b);
     }

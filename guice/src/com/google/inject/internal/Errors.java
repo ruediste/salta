@@ -159,19 +159,22 @@ public final class Errors implements Serializable {
     }
 
     public Errors recursiveImplementationType() {
-        return addMessage("@ImplementedBy points to the same class it annotates.");
+        return addMessage(
+                "@ImplementedBy points to the same class it annotates.");
     }
 
     public Errors recursiveProviderType() {
         return addMessage("@ProvidedBy points to the same class it annotates.");
     }
 
-    public Errors missingRuntimeRetention(Class<? extends Annotation> annotation) {
-        return addMessage(format(
-                "Please annotate %s with @Retention(RUNTIME).", annotation));
+    public Errors missingRuntimeRetention(
+            Class<? extends Annotation> annotation) {
+        return addMessage(format("Please annotate %s with @Retention(RUNTIME).",
+                annotation));
     }
 
-    public Errors missingScopeAnnotation(Class<? extends Annotation> annotation) {
+    public Errors missingScopeAnnotation(
+            Class<? extends Annotation> annotation) {
         return addMessage(format("Please annotate %s with @ScopeAnnotation.",
                 annotation));
     }
@@ -196,16 +199,16 @@ public final class Errors implements Serializable {
             Object source) {
         return addMessage(
                 "%s is annotated with %s, but scope annotations are not supported "
-                        + "for abstract types.%n Bound at %s.", type,
-                scopeAnnotation, convert(source));
+                        + "for abstract types.%n Bound at %s.",
+                type, scopeAnnotation, convert(source));
     }
 
     public Errors misplacedBindingAnnotation(Member member,
             Annotation bindingAnnotation) {
         return addMessage(
                 "%s is annotated with %s, but binding annotations should be applied "
-                        + "to its parameters instead.", member,
-                bindingAnnotation);
+                        + "to its parameters instead.",
+                member, bindingAnnotation);
     }
 
     private static final String CONSTRUCTOR_RULES = "Classes must have either one (and only one) constructor "
@@ -219,7 +222,8 @@ public final class Errors implements Serializable {
     public Errors tooManyConstructors(Class<?> implementation) {
         return addMessage(
                 "%s has more than one constructor annotated with @Inject. "
-                        + CONSTRUCTOR_RULES, implementation);
+                        + CONSTRUCTOR_RULES,
+                implementation);
     }
 
     public Errors constructorNotDefinedByType(Constructor<?> constructor,
@@ -228,7 +232,8 @@ public final class Errors implements Serializable {
     }
 
     public Errors voidProviderMethod() {
-        return addMessage("Provider methods must return a value. Do not return void.");
+        return addMessage(
+                "Provider methods must return a value. Do not return void.");
     }
 
     public Errors missingConstantValues() {
@@ -246,7 +251,8 @@ public final class Errors implements Serializable {
             Class<? extends Annotation> a, Class<? extends Annotation> b) {
         return addMessage(
                 "%s has more than one annotation annotated with @BindingAnnotation: "
-                        + "%s and %s", member, a, b);
+                        + "%s and %s",
+                member, a, b);
     }
 
     public Errors staticInjectionOnInterface(Class<?> clazz) {
@@ -316,8 +322,8 @@ public final class Errors implements Serializable {
             Throwable t) {
         return addMessage(
                 "A binding to %s was already configured at %s and an error was thrown "
-                        + "while checking duplicate bindings.  Error: %s", key,
-                convert(source), t);
+                        + "while checking duplicate bindings.  Error: %s",
+                key, convert(source), t);
     }
 
     public Errors errorInjectingMethod(Throwable cause) {
@@ -336,13 +342,14 @@ public final class Errors implements Serializable {
 
     public Errors errorInUserInjector(MembersInjector<?> listener,
             TypeLiteral<?> type, RuntimeException cause) {
-        return errorInUserCode(cause, "Error injecting %s using %s.%n"
-                + " Reason: %s", type, listener, cause);
+        return errorInUserCode(cause,
+                "Error injecting %s using %s.%n" + " Reason: %s", type,
+                listener, cause);
     }
 
     public Errors exposedButNotBound(Key<?> key) {
-        return addMessage(
-                "Could not expose() %s, it must be explicitly bound.", key);
+        return addMessage("Could not expose() %s, it must be explicitly bound.",
+                key);
     }
 
     public Errors keyNotFullySpecified(TypeLiteral<?> typeLiteral) {
@@ -385,11 +392,13 @@ public final class Errors implements Serializable {
     }
 
     public Errors cannotInjectRawProvider() {
-        return addMessage("Cannot inject a Provider that has no type parameter");
+        return addMessage(
+                "Cannot inject a Provider that has no type parameter");
     }
 
     public Errors cannotInjectRawMembersInjector() {
-        return addMessage("Cannot inject a MembersInjector that has no type parameter");
+        return addMessage(
+                "Cannot inject a MembersInjector that has no type parameter");
     }
 
     public Errors cannotInjectTypeLiteralOf(Type unsupportedType) {
@@ -397,7 +406,8 @@ public final class Errors implements Serializable {
     }
 
     public Errors cannotInjectRawTypeLiteral() {
-        return addMessage("Cannot inject a TypeLiteral that has no type parameter");
+        return addMessage(
+                "Cannot inject a TypeLiteral that has no type parameter");
     }
 
     public Errors cannotSatisfyCircularDependency(Class<?> expectedType) {
@@ -608,11 +618,10 @@ public final class Errors implements Serializable {
                 @Override
                 public String toString(Key key) {
                     if (key.getAnnotationType() != null) {
-                        return key.getTypeLiteral()
-                                + " annotated with "
-                                + (key.getAnnotation() != null ? key
-                                        .getAnnotation() : key
-                                        .getAnnotationType());
+                        return key.getTypeLiteral() + " annotated with "
+                                + (key.getAnnotation() != null
+                                        ? key.getAnnotation()
+                                        : key.getAnnotationType());
                     } else {
                         return key.getTypeLiteral().toString();
                     }

@@ -112,8 +112,8 @@ public class ProvisionListenerTest extends TestCase {
                 bindListener(new AbstractMatcher<TypeToken<?>>() {
                     @Override
                     public boolean matches(TypeToken<?> binding) {
-                        return binding.getRawType().equals(
-                                DependsOnFooBombInField.class);
+                        return binding.getRawType()
+                                .equals(DependsOnFooBombInField.class);
                     }
                 }, listener);
             }
@@ -139,8 +139,8 @@ public class ProvisionListenerTest extends TestCase {
                 bindListener(new AbstractMatcher<TypeToken<?>>() {
                     @Override
                     public boolean matches(TypeToken<?> type) {
-                        return type.getRawType().equals(
-                                DependsOnFooBombInCxtor.class);
+                        return type.getRawType()
+                                .equals(DependsOnFooBombInCxtor.class);
                     }
                 }, listener);
             }
@@ -253,7 +253,8 @@ public class ProvisionListenerTest extends TestCase {
             protected void configure() {
                 bindListener(Matchers.any(), new ProvisionListener() {
                     @Override
-                    public <T> void onProvision(ProvisionInvocation<T> provision) {
+                    public <T> void onProvision(
+                            ProvisionInvocation<T> provision) {
                         provision.getBinding().getProvider().get(); // AGH!
                     }
                 });
@@ -344,8 +345,8 @@ public class ProvisionListenerTest extends TestCase {
         }
     }
 
-    private static class CountAndCaptureExceptionListener implements
-            ProvisionListener {
+    private static class CountAndCaptureExceptionListener
+            implements ProvisionListener {
         int beforeProvision = 0;
         int afterProvision = 0;
         AtomicReference<RuntimeException> capture = new AtomicReference<RuntimeException>();
@@ -418,8 +419,8 @@ public class ProvisionListenerTest extends TestCase {
                     @Inject
                     Foo foo;
                 });
-                bindListener(Matchers.any(), new SpecialChecker(Foo.class,
-                        notified));
+                bindListener(Matchers.any(),
+                        new SpecialChecker(Foo.class, notified));
             }
         });
         assertTrue(notified.get());
@@ -461,8 +462,8 @@ public class ProvisionListenerTest extends TestCase {
         Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bindListener(Matchers.any(), new SpecialChecker(Foo.class,
-                        notified));
+                bindListener(Matchers.any(),
+                        new SpecialChecker(Foo.class, notified));
             }
         }).injectMembers(object);
         assertTrue(notified.get());
@@ -479,12 +480,12 @@ public class ProvisionListenerTest extends TestCase {
 
         @Override
         public <T> void onProvision(ProvisionInvocation<T> provision) {
-            if (MembersInjector.class.equals(provision.getBinding().getKey()
-                    .getRawType()))
+            if (MembersInjector.class
+                    .equals(provision.getBinding().getKey().getRawType()))
                 return;
             notified.set(true);
-            assertEquals(notifyType, provision.getBinding().getKey()
-                    .getRawType());
+            assertEquals(notifyType,
+                    provision.getBinding().getKey().getRawType());
         }
     }
 
@@ -541,8 +542,8 @@ public class ProvisionListenerTest extends TestCase {
                 @Override
                 protected void configure() {
                     bindListener(Matchers.any(), new Counter());
-                    bind(Injector.class).toProvider(
-                            Providers.<Injector> of(null));
+                    bind(Injector.class)
+                            .toProvider(Providers.<Injector> of(null));
                 }
             });
             fail();
@@ -558,7 +559,8 @@ public class ProvisionListenerTest extends TestCase {
             protected void configure() {
                 bindListener(Matchers.any(), new ProvisionListener() {
                     @Override
-                    public <T> void onProvision(ProvisionInvocation<T> provision) {
+                    public <T> void onProvision(
+                            ProvisionInvocation<T> provision) {
                         Object provisioned = provision.provision();
                         if (provisioned instanceof X) {
                             ((X) provisioned).init();

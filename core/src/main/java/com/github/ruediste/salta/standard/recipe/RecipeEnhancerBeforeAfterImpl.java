@@ -16,7 +16,8 @@ public class RecipeEnhancerBeforeAfterImpl implements RecipeEnhancer {
 
     private BeforeAfterEnhancer beforeAfterEnhancer;
 
-    public RecipeEnhancerBeforeAfterImpl(BeforeAfterEnhancer beforeAfterEnhancer) {
+    public RecipeEnhancerBeforeAfterImpl(
+            BeforeAfterEnhancer beforeAfterEnhancer) {
         this.beforeAfterEnhancer = beforeAfterEnhancer;
     }
 

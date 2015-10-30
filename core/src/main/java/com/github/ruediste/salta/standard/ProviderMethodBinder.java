@@ -48,9 +48,9 @@ public abstract class ProviderMethodBinder {
                 TypeToken<?> boundType = t
                         .resolveType(m.getGenericReturnType());
                 Matcher<CoreDependencyKey<?>> matcher = CoreDependencyKey
-                        .typeMatcher(boundType).and(
-                                config.requredQualifierMatcher(config
-                                        .getAvailableQualifier(m)));
+                        .typeMatcher(boundType)
+                        .and(config.requredQualifierMatcher(
+                                config.getAvailableQualifier(m)));
 
                 config.creationPipeline.staticBindings.add(new StaticBinding() {
 
@@ -61,9 +61,11 @@ public abstract class ProviderMethodBinder {
                         Parameter[] parameters = m.getParameters();
                         for (int i = 0; i < parameters.length; i++) {
                             Parameter p = parameters[i];
-                            args.add(ctx.getRecipe(new InjectionPoint<>(t
-                                    .resolveType(p.getParameterizedType()), m,
-                                    p, i)));
+                            args.add(
+                                    ctx.getRecipe(new InjectionPoint<>(
+                                            t.resolveType(
+                                                    p.getParameterizedType()),
+                                            m, p, i)));
                         }
                         FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(
                                 m, args);

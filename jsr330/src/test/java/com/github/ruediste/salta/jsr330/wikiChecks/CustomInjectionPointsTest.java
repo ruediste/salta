@@ -58,12 +58,15 @@ public class CustomInjectionPointsTest {
                                     // if the annotation is present,
                                     // register an injector
                                     TypeToken<?> fieldType = currentType
-                                            .resolveType(field.getGenericType());
-                                    result.add(new FixedFieldRecipeMembersInjector(
-                                            field,
-                                            new SupplierRecipeImpl(
-                                                    () -> retrieveResource(
-                                                            fieldType, resource))));
+                                            .resolveType(
+                                                    field.getGenericType());
+                                    result.add(
+                                            new FixedFieldRecipeMembersInjector(
+                                                    field,
+                                                    new SupplierRecipeImpl(
+                                                            () -> retrieveResource(
+                                                                    fieldType,
+                                                                    resource))));
                                 }
                             }
                         }

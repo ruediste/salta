@@ -44,8 +44,8 @@ public class SimpleProxyScopeHandlerTest {
                 SimpleProxyScopeHandler handler = new SimpleProxyScopeHandler(
                         "batch");
                 bindScope(BatchScoped.class, new ScopeImpl(handler));
-                bind(SimpleProxyScopeHandler.class).named("batch").toInstance(
-                        handler);
+                bind(SimpleProxyScopeHandler.class).named("batch")
+                        .toInstance(handler);
             }
         });
         injector.injectMembers(this);

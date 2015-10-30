@@ -51,8 +51,7 @@ public class JitBindingsTest extends TestCase {
     }
 
     private String inChildMessage(Class<?> clazz) {
-        return "Unable to create binding for "
-                + clazz.getName()
+        return "Unable to create binding for " + clazz.getName()
                 + ". It was already configured on one or more child injectors or private modules";
     }
 
@@ -382,7 +381,8 @@ public class JitBindingsTest extends TestCase {
                     if (getBinding == GetBindingCheck.ALLOW_BINDING_PROVIDER) {
                         throw expected;
                     }
-                    if (!expected.getMessage().contains("No recipe found for")) {
+                    if (!expected.getMessage()
+                            .contains("No recipe found for")) {
                         throw expected;
                     }
                 }
@@ -392,7 +392,8 @@ public class JitBindingsTest extends TestCase {
                     fail("should have failed tring to retrieve class: "
                             + classes[i]);
                 } catch (ConfigurationException expected) {
-                    assertContains(expected.getMessage(), jitFailed(classes[i]));
+                    assertContains(expected.getMessage(),
+                            jitFailed(classes[i]));
                     assertEquals(1, expected.getErrorMessages().size());
                 }
             }

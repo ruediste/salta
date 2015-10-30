@@ -61,10 +61,10 @@ public class ModuleAnnotatedMethodScannerTest extends TestCase {
 
         // assert no bindings named "foo" or "foo2" exist -- they were munged.
 
-        Binding<String> fooBinding = injector.getBinding(Key.get(String.class,
-                named("foo")));
-        Binding<String> foo2Binding = injector.getBinding(Key.get(String.class,
-                named("foo2")));
+        Binding<String> fooBinding = injector
+                .getBinding(Key.get(String.class, named("foo")));
+        Binding<String> foo2Binding = injector
+                .getBinding(Key.get(String.class, named("foo2")));
         assertEquals("foo", fooBinding.getProvider().get());
         assertEquals("foo2", foo2Binding.getProvider().get());
 

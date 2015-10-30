@@ -32,14 +32,14 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
 
     @Override
     public ScopedBindingBuilder to(TypeLiteral<? extends T> implementation) {
-        return new ScopedBindingBuilderImpl(delegate.to(implementation
-                .getTypeToken()));
+        return new ScopedBindingBuilderImpl(
+                delegate.to(implementation.getTypeToken()));
     }
 
     @Override
     public ScopedBindingBuilder to(Key<? extends T> targetKey) {
-        return new ScopedBindingBuilderImpl(delegate.to(KeyAdapter
-                .of(targetKey)));
+        return new ScopedBindingBuilderImpl(
+                delegate.to(KeyAdapter.of(targetKey)));
     }
 
     @Override
@@ -91,21 +91,22 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl
     @Override
     public <P extends javax.inject.Provider<? extends T>> ScopedBindingBuilder toProvider(
             Key<P> providerKey) {
-        return new ScopedBindingBuilderImpl(delegate.toProvider(
-                KeyAdapter.of(providerKey), t -> t.get()));
+        return new ScopedBindingBuilderImpl(
+                delegate.toProvider(KeyAdapter.of(providerKey), t -> t.get()));
     }
 
     @Override
     public <S extends T> ScopedBindingBuilder toConstructor(
             Constructor<S> constructor) {
-        return new ScopedBindingBuilderImpl(delegate.toConstructor(constructor));
+        return new ScopedBindingBuilderImpl(
+                delegate.toConstructor(constructor));
     }
 
     @Override
     public <S extends T> ScopedBindingBuilder toConstructor(
             Constructor<S> constructor, TypeLiteral<? extends S> type) {
-        return new ScopedBindingBuilderImpl(delegate.toConstructor(constructor,
-                type.getTypeToken()));
+        return new ScopedBindingBuilderImpl(
+                delegate.toConstructor(constructor, type.getTypeToken()));
     }
 
 }

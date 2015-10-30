@@ -93,8 +93,8 @@ public class MoreTypes {
             // javax.inject.Provider and is covariant
             @SuppressWarnings("unchecked")
             TypeLiteral<T> guiceProviderType = (TypeLiteral<T>) TypeLiteral
-                    .get(Types.providerOf(parameterizedType
-                            .getActualTypeArguments()[0]));
+                    .get(Types.providerOf(
+                            parameterizedType.getActualTypeArguments()[0]));
             return guiceProviderType;
         }
 
@@ -169,8 +169,8 @@ public class MoreTypes {
             // to nested classes exists.
             Type rawType = parameterizedType.getRawType();
             checkArgument(rawType instanceof Class,
-                    "Expected a Class, but <%s> is of type %s", type, type
-                            .getClass().getName());
+                    "Expected a Class, but <%s> is of type %s", type,
+                    type.getClass().getName());
             return (Class<?>) rawType;
 
         } else if (type instanceof GenericArrayType) {
@@ -187,8 +187,8 @@ public class MoreTypes {
         } else {
             throw new IllegalArgumentException(
                     "Expected a Class, ParameterizedType, or "
-                            + "GenericArrayType, but <" + type
-                            + "> is of type " + type.getClass().getName());
+                            + "GenericArrayType, but <" + type + "> is of type "
+                            + type.getClass().getName());
         }
     }
 
@@ -243,8 +243,7 @@ public class MoreTypes {
             }
             TypeVariable<?> va = (TypeVariable) a;
             TypeVariable<?> vb = (TypeVariable) b;
-            return va.getGenericDeclaration()
-                    .equals(vb.getGenericDeclaration())
+            return va.getGenericDeclaration().equals(vb.getGenericDeclaration())
                     && va.getName().equals(vb.getName());
 
         } else {
@@ -259,8 +258,8 @@ public class MoreTypes {
     }
 
     public static String typeToString(Type type) {
-        return type instanceof Class ? ((Class) type).getName() : type
-                .toString();
+        return type instanceof Class ? ((Class) type).getName()
+                : type.toString();
     }
 
     /**
@@ -319,7 +318,8 @@ public class MoreTypes {
         Type declaredBy = getGenericSupertype(type, rawType, declaredByRaw);
         if (declaredBy instanceof ParameterizedType) {
             int index = indexOf(declaredByRaw.getTypeParameters(), unknown);
-            return ((ParameterizedType) declaredBy).getActualTypeArguments()[index];
+            return ((ParameterizedType) declaredBy)
+                    .getActualTypeArguments()[index];
         }
 
         return unknown;
@@ -341,12 +341,12 @@ public class MoreTypes {
     private static Class<?> declaringClassOf(TypeVariable typeVariable) {
         GenericDeclaration genericDeclaration = typeVariable
                 .getGenericDeclaration();
-        return genericDeclaration instanceof Class ? (Class<?>) genericDeclaration
-                : null;
+        return genericDeclaration instanceof Class
+                ? (Class<?>) genericDeclaration : null;
     }
 
-    public static class ParameterizedTypeImpl implements ParameterizedType,
-            Serializable, CompositeType {
+    public static class ParameterizedTypeImpl
+            implements ParameterizedType, Serializable, CompositeType {
         private final Type ownerType;
         private final Type rawType;
         private final Type[] typeArguments;
@@ -420,8 +420,8 @@ public class MoreTypes {
 
             stringBuilder.append("<").append(typeToString(typeArguments[0]));
             for (int i = 1; i < typeArguments.length; i++) {
-                stringBuilder.append(", ").append(
-                        typeToString(typeArguments[i]));
+                stringBuilder.append(", ")
+                        .append(typeToString(typeArguments[i]));
             }
             return stringBuilder.append(">").toString();
         }
@@ -443,8 +443,8 @@ public class MoreTypes {
         private static final long serialVersionUID = 0;
     }
 
-    public static class GenericArrayTypeImpl implements GenericArrayType,
-            Serializable, CompositeType {
+    public static class GenericArrayTypeImpl
+            implements GenericArrayType, Serializable, CompositeType {
         private final Type componentType;
 
         public GenericArrayTypeImpl(Type componentType) {
@@ -483,8 +483,8 @@ public class MoreTypes {
      * lower bounds. We only support what the Java 6 language needs - at most
      * one bound. If a lower bound is set, the upper bound must be Object.class.
      */
-    public static class WildcardTypeImpl implements WildcardType, Serializable,
-            CompositeType {
+    public static class WildcardTypeImpl
+            implements WildcardType, Serializable, CompositeType {
         private final Type upperBound;
         private final Type lowerBound;
 
@@ -520,9 +520,8 @@ public class MoreTypes {
         }
 
         public boolean isFullySpecified() {
-            return MoreTypes.isFullySpecified(upperBound)
-                    && (lowerBound == null || MoreTypes
-                            .isFullySpecified(lowerBound));
+            return MoreTypes.isFullySpecified(upperBound) && (lowerBound == null
+                    || MoreTypes.isFullySpecified(lowerBound));
         }
 
         @Override

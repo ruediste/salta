@@ -90,8 +90,7 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
                         ctx.addFieldAndLoad(Field.class, field);
 
                         // unreflect
-                        mv.visitMethodInsn(
-                                INVOKEVIRTUAL,
+                        mv.visitMethodInsn(INVOKEVIRTUAL,
                                 "java/lang/invoke/MethodHandles$Lookup",
                                 "unreflectSetter",
                                 "(Ljava/lang/reflect/Field;)Ljava/lang/invoke/MethodHandle;",
@@ -101,10 +100,8 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
                         mv.loadArg(2);
 
                         // asType
-                        mv.visitMethodInsn(
-                                INVOKEVIRTUAL,
-                                "java/lang/invoke/MethodHandle",
-                                "asType",
+                        mv.visitMethodInsn(INVOKEVIRTUAL,
+                                "java/lang/invoke/MethodHandle", "asType",
                                 "(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
                                 false);
 
@@ -119,13 +116,14 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
                 });
 
         // set field
-        Handle bsm = new Handle(H_INVOKESTATIC, ctx.getClassCtx()
-                .getInternalClassName(), bootstrapName, bootstrapDesc);
+        Handle bsm = new Handle(H_INVOKESTATIC,
+                ctx.getClassCtx().getInternalClassName(), bootstrapName,
+                bootstrapDesc);
 
-        mv.invokeDynamic(
-                "field",
+        mv.invokeDynamic("field",
                 Type.getMethodDescriptor(Type.getType(void.class),
-                        Type.getType(argType), valueType), bsm);
+                        Type.getType(argType), valueType),
+                bsm);
         return argType;
     }
 

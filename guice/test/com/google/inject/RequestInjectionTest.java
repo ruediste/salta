@@ -106,8 +106,9 @@ public class RequestInjectionTest extends TestCase {
                 }
             });
         } catch (SaltaException expected) {
-            if (!(expected.getMessage().contains("No recipe found for field") && expected
-                    .getMessage().contains(NeedsRunnable.class.getName())))
+            if (!(expected.getMessage().contains("No recipe found for field")
+                    && expected.getMessage()
+                            .contains(NeedsRunnable.class.getName())))
                 throw expected;
         }
     }
@@ -127,8 +128,8 @@ public class RequestInjectionTest extends TestCase {
                 }
             });
         } catch (SaltaException expected) {
-            if (!expected.getMessage().contains(
-                    "Error while injecting members of instance of "
+            if (!expected.getMessage()
+                    .contains("Error while injecting members of instance of "
                             + NeedsRunnable.class.getName()))
                 throw expected;
         }

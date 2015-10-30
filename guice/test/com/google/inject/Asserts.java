@@ -46,17 +46,16 @@ public class Asserts {
      * of classes as modules.
      */
     public static String asModuleChain(Class... classes) {
-        return Joiner
-                .on(" -> ")
-                .appendTo(
-                        new StringBuilder(" (via modules: "),
+        return Joiner.on(" -> ")
+                .appendTo(new StringBuilder(" (via modules: "),
                         Iterables.transform(ImmutableList.copyOf(classes),
                                 new Function<Class, String>() {
                                     @Override
                                     public String apply(Class input) {
                                         return input.getName();
                                     }
-                                })).append(")").toString();
+                                }))
+                .append(")").toString();
     }
 
     /**
@@ -102,23 +101,25 @@ public class Asserts {
     public static void assertContains(String text, String... substrings) {
         /*
          * if[NO_AOP] // when we strip out bytecode manipulation, we lose the
-         * ability to generate some source lines. if
-         * (text.contains("(Unknown Source)")) { return; } end[NO_AOP]
+         * ability to generate some source lines. if (text.contains(
+         * "(Unknown Source)")) { return; } end[NO_AOP]
          */
 
         int startingFrom = 0;
         for (String substring : substrings) {
             int index = text.indexOf(substring, startingFrom);
-            assertTrue(String.format(
-                    "Expected \"%s\" to contain substring \"%s\"", text,
-                    substring), index >= startingFrom);
+            assertTrue(
+                    String.format("Expected \"%s\" to contain substring \"%s\"",
+                            text, substring),
+                    index >= startingFrom);
             startingFrom = index + substring.length();
         }
 
         String lastSubstring = substrings[substrings.length - 1];
-        assertTrue(String.format(
-                "Expected \"%s\" to contain substring \"%s\" only once),",
-                text, lastSubstring),
+        assertTrue(
+                String.format(
+                        "Expected \"%s\" to contain substring \"%s\" only once),",
+                        text, lastSubstring),
                 text.indexOf(lastSubstring, startingFrom) == -1);
     }
 

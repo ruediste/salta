@@ -36,8 +36,8 @@ public class SerializationTest extends TestCase {
         Asserts.reserialize(new MyAbstractModule());
     }
 
-    static class MyAbstractModule extends AbstractModule implements
-            Serializable {
+    static class MyAbstractModule extends AbstractModule
+            implements Serializable {
         @Override
         protected void configure() {
         }

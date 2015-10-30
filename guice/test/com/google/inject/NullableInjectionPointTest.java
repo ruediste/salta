@@ -26,38 +26,38 @@ public class NullableInjectionPointTest extends TestCase {
     }
 
     public void testInjectNullIntoNullableConstructor() {
-        NullableFooConstructor nfc = createInjector().getInstance(
-                NullableFooConstructor.class);
+        NullableFooConstructor nfc = createInjector()
+                .getInstance(NullableFooConstructor.class);
         assertNull(nfc.foo);
     }
 
     public void testInjectNullIntoNullableMethod() {
-        NullableFooMethod nfm = createInjector().getInstance(
-                NullableFooMethod.class);
+        NullableFooMethod nfm = createInjector()
+                .getInstance(NullableFooMethod.class);
         assertNull(nfm.foo);
     }
 
     public void testInjectNullIntoNullableField() {
-        NullableFooField nff = createInjector().getInstance(
-                NullableFooField.class);
+        NullableFooField nff = createInjector()
+                .getInstance(NullableFooField.class);
         assertNull(nff.foo);
     }
 
     public void testInjectNullIntoCustomNullableConstructor() {
-        CustomNullableFooConstructor nfc = createInjector().getInstance(
-                CustomNullableFooConstructor.class);
+        CustomNullableFooConstructor nfc = createInjector()
+                .getInstance(CustomNullableFooConstructor.class);
         assertNull(nfc.foo);
     }
 
     public void testInjectNullIntoCustomNullableMethod() {
-        CustomNullableFooMethod nfm = createInjector().getInstance(
-                CustomNullableFooMethod.class);
+        CustomNullableFooMethod nfm = createInjector()
+                .getInstance(CustomNullableFooMethod.class);
         assertNull(nfm.foo);
     }
 
     public void testInjectNullIntoCustomNullableField() {
-        CustomNullableFooField nff = createInjector().getInstance(
-                CustomNullableFooField.class);
+        CustomNullableFooField nff = createInjector()
+                .getInstance(CustomNullableFooField.class);
         assertNull(nff.foo);
     }
 
@@ -112,7 +112,8 @@ public class NullableInjectionPointTest extends TestCase {
         try {
             injector.getInstance(FooField.class);
         } catch (ProvisionException expected) {
-            assertContains(expected.getMessage(), "null returned by binding at");
+            assertContains(expected.getMessage(),
+                    "null returned by binding at");
         }
     }
 
@@ -134,7 +135,8 @@ public class NullableInjectionPointTest extends TestCase {
         try {
             injector.getInstance(FooField.class);
         } catch (ProvisionException expected) {
-            assertContains(expected.getMessage(), "null returned by binding at");
+            assertContains(expected.getMessage(),
+                    "null returned by binding at");
         }
     }
 

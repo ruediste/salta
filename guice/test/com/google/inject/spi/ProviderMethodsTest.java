@@ -205,8 +205,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
             });
             fail();
         } catch (SaltaException expected) {
-            if (!expected.getMessage().contains(
-                    "Multiple avalable qualifiers found on"))
+            if (!expected.getMessage()
+                    .contains("Multiple avalable qualifiers found on"))
                 throw expected;
         }
 
@@ -218,30 +218,26 @@ public class ProviderMethodsTest extends TestCase implements Module {
     }
 
     public void testGenericProviderMethods() {
-        Injector injector = Guice.createInjector(
-                new ProvideTs<String>("A", "B") {
+        Injector injector = Guice
+                .createInjector(new ProvideTs<String>("A", "B") {
                 }, new ProvideTs<Integer>(1, 2) {
                 });
 
-        assertEquals("A", injector.getInstance(Key.get(String.class,
-                Names.named("First"))));
-        assertEquals(
-                "B",
-                injector.getInstance(Key.get(String.class,
-                        Names.named("Second"))));
+        assertEquals("A", injector
+                .getInstance(Key.get(String.class, Names.named("First"))));
+        assertEquals("B", injector
+                .getInstance(Key.get(String.class, Names.named("Second"))));
         assertEquals(ImmutableSet.of("A", "B"),
                 injector.getInstance(Key.get(Types.setOf(String.class))));
 
-        assertEquals(
-                1,
+        assertEquals(1,
                 injector.getInstance(
                         Key.get(Integer.class, Names.named("First")))
-                        .intValue());
-        assertEquals(
-                2,
+                .intValue());
+        assertEquals(2,
                 injector.getInstance(
                         Key.get(Integer.class, Names.named("Second")))
-                        .intValue());
+                .intValue());
         assertEquals(ImmutableSet.of(1, 2),
                 injector.getInstance(Key.get(Types.setOf(Integer.class))));
     }
@@ -292,21 +288,18 @@ public class ProviderMethodsTest extends TestCase implements Module {
             }
         });
 
-        assertEquals(
-                1,
+        assertEquals(1,
                 injector.getInstance(
                         Key.get(Integer.class, Names.named("count")))
-                        .intValue());
-        assertEquals(
-                2,
+                .intValue());
+        assertEquals(2,
                 injector.getInstance(
                         Key.get(Integer.class, Names.named("count")))
-                        .intValue());
-        assertEquals(
-                3,
+                .intValue());
+        assertEquals(3,
                 injector.getInstance(
                         Key.get(Integer.class, Names.named("count")))
-                        .intValue());
+                .intValue());
     }
 
     /**
@@ -513,8 +506,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
             Guice.createInjector(new Sub1Module(), new Sub2Module());
             fail("Expected injector creation failure");
         } catch (SaltaException expected) {
-            if (!expected.getMessage().contains(
-                    "Duplicate static binding found"))
+            if (!expected.getMessage()
+                    .contains("Duplicate static binding found"))
                 throw expected;
         }
     }
@@ -608,8 +601,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
         }
     }
 
-    private static class CallerInspecterSubClassModule extends
-            CallerInspecterModule {
+    private static class CallerInspecterSubClassModule
+            extends CallerInspecterModule {
         String bazCallerClass;
 
         @Override
@@ -806,7 +799,8 @@ public class ProviderMethodsTest extends TestCase implements Module {
     public void testOverrideProviderMethod_subclassRawTypes_parameterType() {
         class SubClassModule extends SuperClassModule {
             @Override
-            Collection<String> annotatedGenericParameterProviderMethod(List foo) {
+            Collection<String> annotatedGenericParameterProviderMethod(
+                    List foo) {
                 return super.annotatedGenericParameterProviderMethod(foo);
             }
         }
@@ -890,17 +884,16 @@ public class ProviderMethodsTest extends TestCase implements Module {
         // as an override (it is,
         // but since it is synthetic it would be annoying to throw an error on
         // it).
-        assertEquals("foo",
-                Guice.createInjector(new ExposedSub())
-                        .getInstance(String.class));
+        assertEquals("foo", Guice.createInjector(new ExposedSub())
+                .getInstance(String.class));
     }
 
     interface ProviderInterface<T> {
         T getT();
     }
 
-    static class ModuleImpl extends AbstractModule implements
-            ProviderInterface<String> {
+    static class ModuleImpl extends AbstractModule
+            implements ProviderInterface<String> {
         @Override
         protected void configure() {
         }

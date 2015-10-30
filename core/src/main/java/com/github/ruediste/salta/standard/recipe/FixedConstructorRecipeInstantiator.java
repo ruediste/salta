@@ -87,8 +87,8 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
         Type[] argTypes = new Type[argumentDependencies.size()];
         for (int i = 0; i < argumentDependencies.size(); i++) {
             Class<?> t = argumentDependencies.get(i).compile(ctx);
-            argTypes[i] = Type.getType(ctx.castToPublic(t,
-                    constructor.getParameterTypes()[i]));
+            argTypes[i] = Type.getType(
+                    ctx.castToPublic(t, constructor.getParameterTypes()[i]));
         }
 
         Type[] origArgTypes = new Type[constructor.getParameterCount()];

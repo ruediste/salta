@@ -77,12 +77,14 @@ public class MatcherTest extends TestCase {
 
     public void testAnnotatedWith() {
         assertTrue(annotatedWith(Foo.class).matches(Bar.class));
-        assertFalse(annotatedWith(Foo.class).matches(
-                MatcherTest.class.getMethods()[0]));
-        assertEquals("annotatedWith(Foo.class)", annotatedWith(Foo.class)
-                .toString());
-        assertEqualsBothWays(annotatedWith(Foo.class), annotatedWith(Foo.class));
-        assertFalse(annotatedWith(Foo.class).equals(annotatedWith(Named.class)));
+        assertFalse(annotatedWith(Foo.class)
+                .matches(MatcherTest.class.getMethods()[0]));
+        assertEquals("annotatedWith(Foo.class)",
+                annotatedWith(Foo.class).toString());
+        assertEqualsBothWays(annotatedWith(Foo.class),
+                annotatedWith(Foo.class));
+        assertFalse(
+                annotatedWith(Foo.class).equals(annotatedWith(Named.class)));
 
         try {
             annotatedWith(Baz.class);
@@ -99,8 +101,8 @@ public class MatcherTest extends TestCase {
                 subclassesOf(Runnable.class).toString());
         assertEqualsBothWays(subclassesOf(Runnable.class),
                 subclassesOf(Runnable.class));
-        assertFalse(subclassesOf(Runnable.class).equals(
-                subclassesOf(Object.class)));
+        assertFalse(subclassesOf(Runnable.class)
+                .equals(subclassesOf(Object.class)));
     }
 
     public void testOnly() {
@@ -129,22 +131,22 @@ public class MatcherTest extends TestCase {
         assertFalse(inPackage(matchersPackage).matches(Object.class));
         assertEqualsBothWays(inPackage(matchersPackage),
                 inPackage(matchersPackage));
-        assertFalse(inPackage(matchersPackage).equals(
-                inPackage(Object.class.getPackage())));
+        assertFalse(inPackage(matchersPackage)
+                .equals(inPackage(Object.class.getPackage())));
     }
 
     public void testInSubpackage() {
         String stringPackageName = String.class.getPackage().getName();
-        assertEquals("inSubpackage(java.lang)", inSubpackage(stringPackageName)
-                .toString());
+        assertEquals("inSubpackage(java.lang)",
+                inSubpackage(stringPackageName).toString());
         assertTrue(inSubpackage(stringPackageName).matches(Object.class));
         assertTrue(inSubpackage(stringPackageName).matches(Method.class));
         assertFalse(inSubpackage(stringPackageName).matches(Matchers.class));
         assertFalse(inSubpackage("jav").matches(Object.class));
         assertEqualsBothWays(inSubpackage(stringPackageName),
                 inSubpackage(stringPackageName));
-        assertFalse(inSubpackage(stringPackageName).equals(
-                inSubpackage(Matchers.class.getPackage().getName())));
+        assertFalse(inSubpackage(stringPackageName)
+                .equals(inSubpackage(Matchers.class.getPackage().getName())));
     }
 
     public void testReturns() throws NoSuchMethodException {
@@ -165,8 +167,8 @@ public class MatcherTest extends TestCase {
         assertEqualWhenReserialized(only("foo"));
         assertEqualWhenReserialized(identicalTo(Object.class));
         assertEqualWhenReserialized(inPackage(String.class.getPackage()));
-        assertEqualWhenReserialized(inSubpackage(String.class.getPackage()
-                .getName()));
+        assertEqualWhenReserialized(
+                inSubpackage(String.class.getPackage().getName()));
         assertEqualWhenReserialized(returns(any()));
         assertEqualWhenReserialized(subclassesOf(AbstractList.class));
         assertEqualWhenReserialized(only("a").or(only("b")));

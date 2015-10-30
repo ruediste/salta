@@ -109,9 +109,8 @@ public final class Providers {
 
         @Override
         public boolean equals(Object obj) {
-            return (obj instanceof ConstantProvider)
-                    && Objects.equal(instance,
-                            ((ConstantProvider<?>) obj).instance);
+            return (obj instanceof ConstantProvider) && Objects.equal(instance,
+                    ((ConstantProvider<?>) obj).instance);
         }
 
         @Override

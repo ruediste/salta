@@ -70,10 +70,9 @@ public class FixedFieldRecipeMembersInjectorTest {
         }
 
         void f(Class<?> param, SupplierRecipe recipe) throws Exception {
-            new FixedFieldRecipeMembersInjector(
-                    TestMain.class.getDeclaredField(m + "_"
-                            + param.getSimpleName()), recipe).compile(
-                    TestMain.class, ctx);
+            new FixedFieldRecipeMembersInjector(TestMain.class
+                    .getDeclaredField(m + "_" + param.getSimpleName()), recipe)
+                            .compile(TestMain.class, ctx);
         }
 
         SupplierRecipe toObject(SupplierRecipe arg) {
@@ -83,8 +82,7 @@ public class FixedFieldRecipeMembersInjectorTest {
                 protected Class<?> compileImpl(GeneratorAdapter mv,
                         MethodCompilationContext ctx) {
                     arg.compile(ctx);
-                    mv.visitMethodInsn(
-                            INVOKESTATIC,
+                    mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
                             "toObject",
                             "(Ljava/lang/Object;)Ljava/lang/Object;", false);
@@ -100,8 +98,7 @@ public class FixedFieldRecipeMembersInjectorTest {
                 @Override
                 protected Class<?> compileImpl(GeneratorAdapter mv,
                         MethodCompilationContext ctx) {
-                    mv.visitMethodInsn(
-                            INVOKESTATIC,
+                    mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
                             "getPub",
                             "()Lcom/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$TestPub;",
@@ -118,8 +115,7 @@ public class FixedFieldRecipeMembersInjectorTest {
                 @Override
                 protected Class<?> compileImpl(GeneratorAdapter mv,
                         MethodCompilationContext ctx) {
-                    mv.visitMethodInsn(
-                            INVOKESTATIC,
+                    mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
                             "getPriv", "()Ljava/lang/Object;", false);
 

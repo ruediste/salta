@@ -48,7 +48,7 @@ public class InjectionPoint<T> extends CoreDependencyKey<T> {
      * Get the Field object in the case of field injection, the Method object in
      * the case of method parameter injection or the Constructor object in the
      * case of constructor parameter injection.
-     * */
+     */
     public Member getMember() {
         return member;
     }

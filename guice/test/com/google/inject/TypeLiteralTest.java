@@ -67,11 +67,12 @@ public class TypeLiteralTest extends TestCase {
 
     public List<? extends CharSequence> wildcardExtends;
 
-    public void testWithWildcardType() throws NoSuchFieldException, IOException {
-        TypeLiteral<?> a = TypeLiteral.get(getClass().getField(
-                "wildcardExtends").getGenericType());
-        TypeLiteral<?> b = TypeLiteral.get(Types.listOf(Types
-                .subtypeOf(CharSequence.class)));
+    public void testWithWildcardType()
+            throws NoSuchFieldException, IOException {
+        TypeLiteral<?> a = TypeLiteral
+                .get(getClass().getField("wildcardExtends").getGenericType());
+        TypeLiteral<?> b = TypeLiteral
+                .get(Types.listOf(Types.subtypeOf(CharSequence.class)));
         TypeLiteral<?> c = new TypeLiteral<List<? extends CharSequence>>() {
         };
         assertEqualsBothWays(a, b);
@@ -131,9 +132,9 @@ public class TypeLiteralTest extends TestCase {
         Class[] primitives = new Class[] { boolean.class, byte.class,
                 short.class, int.class, long.class, float.class, double.class,
                 char.class, void.class };
-        Class[] wrappers = new Class[] { Boolean.class, Byte.class,
-                Short.class, Integer.class, Long.class, Float.class,
-                Double.class, Character.class, Void.class };
+        Class[] wrappers = new Class[] { Boolean.class, Byte.class, Short.class,
+                Integer.class, Long.class, Float.class, Double.class,
+                Character.class, Void.class };
 
         for (int t = 0; t < primitives.length; t++) {
             @SuppressWarnings("unchecked")
@@ -167,8 +168,8 @@ public class TypeLiteralTest extends TestCase {
         assertEquals(ImmutableList.<Type> of(Object.class),
                 ImmutableList.copyOf(aTv.getBounds()));
         assertEquals("A", aTv.toString());
-        assertEqualsBothWays(aTl,
-                TypeLiteral.get(HasTypeParameters.class.getTypeParameters()[0]));
+        assertEqualsBothWays(aTl, TypeLiteral
+                .get(HasTypeParameters.class.getTypeParameters()[0]));
     }
 
     class HasTypeParameters<A, B extends List<A> & Runnable, C extends Runnable> {

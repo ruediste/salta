@@ -10,8 +10,8 @@ import com.github.ruediste.salta.standard.StandardInjector;
 import com.github.ruediste.salta.standard.binder.StandardBindingBuilderImpl;
 import com.google.common.reflect.TypeToken;
 
-public class StandardBindingBuilderImplGuice<T> extends
-        StandardBindingBuilderImpl<T> {
+public class StandardBindingBuilderImplGuice<T>
+        extends StandardBindingBuilderImpl<T> {
 
     private GuiceInjectorConfiguration guiceConfig;
 
@@ -26,9 +26,8 @@ public class StandardBindingBuilderImplGuice<T> extends
     protected <P> Supplier<CreationRecipeFactory> createProviderRecipeFactorySupplier(
             CoreDependencyKey<P> providerKey,
             Function<? super P, ? extends T> providerWrapper) {
-        Supplier<CreationRecipeFactory> inner = super
-                .createProviderRecipeFactorySupplier(providerKey,
-                        providerWrapper);
+        Supplier<CreationRecipeFactory> inner = super.createProviderRecipeFactorySupplier(
+                providerKey, providerWrapper);
         return () -> {
             guiceConfig.implicitlyBoundKeys.add(providerKey);
             return inner.get();
@@ -38,8 +37,8 @@ public class StandardBindingBuilderImplGuice<T> extends
     @Override
     protected Supplier<CreationRecipeFactory> createDefaultCreationRecipeFactorySupplier(
             TypeToken<? extends T> implementation) {
-        Supplier<CreationRecipeFactory> inner = super
-                .createDefaultCreationRecipeFactorySupplier(implementation);
+        Supplier<CreationRecipeFactory> inner = super.createDefaultCreationRecipeFactorySupplier(
+                implementation);
         return () -> {
             guiceConfig.typesBoundToDefaultCreationRecipe.add(implementation);
             return inner.get();

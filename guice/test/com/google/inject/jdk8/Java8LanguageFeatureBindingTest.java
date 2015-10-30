@@ -150,8 +150,8 @@ public class Java8LanguageFeatureBindingTest extends TestCase {
             @Override
             protected void configure() {
                 AtomicInteger i = new AtomicInteger();
-                bind(String.class).toProvider(
-                        () -> "Hello" + i.incrementAndGet());
+                bind(String.class)
+                        .toProvider(() -> "Hello" + i.incrementAndGet());
             }
         });
 

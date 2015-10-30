@@ -91,8 +91,8 @@ public class ProviderDependencyFactoryRuleTest {
         try {
             injector.getInstance(TestClassE.class);
         } catch (SaltaException e) {
-            if (!(e.getRecursiveCauses()
-                    .anyMatch(x -> x instanceof ProviderAccessBeforeInstanceCreationFinishedException)))
+            if (!(e.getRecursiveCauses().anyMatch(
+                    x -> x instanceof ProviderAccessBeforeInstanceCreationFinishedException)))
                 throw e;
         }
 

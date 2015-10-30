@@ -53,8 +53,8 @@ public class StaticBindingSet implements CreationRule {
 
     public StaticBinding getBinding(CoreDependencyKey<?> key) {
         StaticBinding binding = null;
-        List<StaticBinding> typeSpecificBindings = staticBindingMap.get(key
-                .getType());
+        List<StaticBinding> typeSpecificBindings = staticBindingMap
+                .get(key.getType());
         if (typeSpecificBindings == null)
             typeSpecificBindings = Collections.emptyList();
 
@@ -77,8 +77,8 @@ public class StaticBindingSet implements CreationRule {
             CoreDependencyKey<?> key, CoreInjector injector) {
         StaticBinding binding = getBinding(key);
         if (binding != null) {
-            return Optional.of(ctx -> binding.getScope().createRecipe(ctx,
-                    binding, key));
+            return Optional.of(
+                    ctx -> binding.getScope().createRecipe(ctx, binding, key));
         }
         return Optional.empty();
     }

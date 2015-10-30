@@ -107,8 +107,8 @@ public class ClassCompilationContext {
             return name;
         MethodNode m = new MethodNode(access, name, desc, null, exceptions);
         getClazz().methods.add(m);
-        GeneratorAdapter mv = new GeneratorAdapter(m.access, new Method(m.name,
-                m.desc), m);
+        GeneratorAdapter mv = new GeneratorAdapter(m.access,
+                new Method(m.name, m.desc), m);
         mv.visitCode();
         recipe.compile(new MethodCompilationContext(this, mv, access, desc));
         mv.visitMaxs(0, 0);
@@ -141,12 +141,12 @@ public class ClassCompilationContext {
             try {
                 Field field = recipeClass.getField(entry.name);
                 field.setAccessible(true);
-                modifiersField.setInt(field, field.getModifiers()
-                        & ~Modifier.FINAL);
+                modifiersField.setInt(field,
+                        field.getModifiers() & ~Modifier.FINAL);
                 field.set(null, entry.value);
             } catch (Exception e) {
-                throw new SaltaException("Error while setting parameter "
-                        + entry.name, e);
+                throw new SaltaException(
+                        "Error while setting parameter " + entry.name, e);
             }
         }
     }

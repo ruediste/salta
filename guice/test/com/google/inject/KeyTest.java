@@ -69,9 +69,10 @@ public class KeyTest extends TestCase {
     }
 
     public void testProviderKey() throws NoSuchMethodException {
-        Key<?> actual = Key.get(
-                getClass().getMethod("foo", List.class, List.class)
-                        .getGenericParameterTypes()[0]).providerKey();
+        Key<?> actual = Key
+                .get(getClass().getMethod("foo", List.class, List.class)
+                        .getGenericParameterTypes()[0])
+                .providerKey();
         Key<?> expected = Key.get(getClass().getMethod("bar", Provider.class)
                 .getGenericParameterTypes()[0]);
         assertEqualsBothWays(expected, actual);
@@ -97,9 +98,9 @@ public class KeyTest extends TestCase {
         Class[] primitives = new Class[] { boolean.class, byte.class,
                 short.class, int.class, long.class, float.class, double.class,
                 char.class, void.class };
-        Class[] wrappers = new Class[] { Boolean.class, Byte.class,
-                Short.class, Integer.class, Long.class, Float.class,
-                Double.class, Character.class, Void.class };
+        Class[] wrappers = new Class[] { Boolean.class, Byte.class, Short.class,
+                Integer.class, Long.class, Float.class, Double.class,
+                Character.class, Void.class };
 
         for (int t = 0; t < primitives.length; t++) {
             @SuppressWarnings("unchecked")
@@ -143,14 +144,14 @@ public class KeyTest extends TestCase {
         }));
         assertNotSerializable(Key.get(new TypeLiteral<List<B[]>>() {
         }));
-        assertNotSerializable(Key.get(Types.listOf(Types
-                .subtypeOf(CharSequence.class))));
+        assertNotSerializable(
+                Key.get(Types.listOf(Types.subtypeOf(CharSequence.class))));
     }
 
     public void testEqualityOfAnnotationTypesAndInstances()
             throws NoSuchFieldException {
-        Foo instance = getClass().getDeclaredField("baz").getAnnotation(
-                Foo.class);
+        Foo instance = getClass().getDeclaredField("baz")
+                .getAnnotation(Foo.class);
         Key<String> keyWithInstance = Key.get(String.class, instance);
         Key<String> keyWithLiteral = Key.get(String.class, Foo.class);
         assertEqualsBothWays(keyWithInstance, keyWithLiteral);
@@ -172,8 +173,8 @@ public class KeyTest extends TestCase {
             Key.get(String.class, Bar.class);
             fail();
         } catch (IllegalArgumentException expected) {
-            assertContains(expected.getMessage(), Bar.class.getName()
-                    + " is not retained at runtime.",
+            assertContains(expected.getMessage(),
+                    Bar.class.getName() + " is not retained at runtime.",
                     "Please annotate it with @Retention(RUNTIME).");
         }
     }
@@ -294,7 +295,7 @@ public class KeyTest extends TestCase {
 
         String v2() default "foo";
 
-        Class<?> clazz();
+        Class<?>clazz();
     }
 
     @Retention(RUNTIME)

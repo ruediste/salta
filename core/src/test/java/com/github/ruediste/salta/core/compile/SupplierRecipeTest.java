@@ -29,8 +29,8 @@ public class SupplierRecipeTest {
             protected Class<?> compileImpl(GeneratorAdapter mv,
                     MethodCompilationContext ctx) {
 
-                ctx.addFieldAndLoad(String.class, ctx.getClassCtx()
-                        .getInternalClassName());
+                ctx.addFieldAndLoad(String.class,
+                        ctx.getClassCtx().getInternalClassName());
                 return String.class;
             }
         };
@@ -43,16 +43,16 @@ public class SupplierRecipeTest {
                 mv.dup();
                 Class<?> t = innerNameRecipe.compile(ctx);
                 ctx.castToPublic(t, String.class);
-                ctx.addFieldAndLoad(String.class, ctx.getClassCtx()
-                        .getInternalClassName());
+                ctx.addFieldAndLoad(String.class,
+                        ctx.getClassCtx().getInternalClassName());
                 mv.invokeConstructor(Type.getType(TestClass.class),
                         Method.getMethod("void <init>(String, String)"));
                 // mv.pop();
                 return TestClass.class;
             }
         };
-        TestClass test = (TestClass) new RecipeCompiler().compileSupplier(
-                recipe).get();
+        TestClass test = (TestClass) new RecipeCompiler()
+                .compileSupplier(recipe).get();
         assertTrue("expected different classes",
                 !test.innerName.equals(test.outerName));
     }

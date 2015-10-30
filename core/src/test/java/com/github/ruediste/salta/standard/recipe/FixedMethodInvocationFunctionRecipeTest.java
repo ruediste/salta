@@ -22,8 +22,9 @@ public class FixedMethodInvocationFunctionRecipeTest {
 
     @Test
     public void assumption_voidClassEqualsVoidReturnType() throws Exception {
-        assertTrue(void.class.equals(getClass().getMethod(
-                "assumption_voidClassEqualsVoidReturnType").getReturnType()));
+        assertTrue(void.class.equals(
+                getClass().getMethod("assumption_voidClassEqualsVoidReturnType")
+                        .getReturnType()));
     }
 
     int count;
@@ -73,8 +74,8 @@ public class FixedMethodInvocationFunctionRecipeTest {
         protected Class<?> loadClass(String name, boolean resolve)
                 throws ClassNotFoundException {
             if (name.startsWith(clsToLoad.getName())) {
-                InputStream in = getResourceAsStream(name.replace('.', '/')
-                        + ".class");
+                InputStream in = getResourceAsStream(
+                        name.replace('.', '/') + ".class");
                 try {
                     byte[] bb = ByteStreams.toByteArray(in);
                     return defineClass(name, bb, 0, bb.length);

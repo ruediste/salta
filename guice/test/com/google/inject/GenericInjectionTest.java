@@ -72,8 +72,8 @@ public class GenericInjectionTest extends TestCase {
             }
         });
 
-        Parameterized<String> parameterized = injector.getInstance(Key
-                .get(new TypeLiteral<Parameterized<String>>() {
+        Parameterized<String> parameterized = injector
+                .getInstance(Key.get(new TypeLiteral<Parameterized<String>>() {
                 }));
         assertNotNull(parameterized);
     }
@@ -119,9 +119,9 @@ public class GenericInjectionTest extends TestCase {
 
         assertParameterizedDepsInjected(Key.get(type), new AbstractModule() {
             protected void configure() {
-                bind(type)
-                        .to(new TypeLiteral<SubParameterizedDeps<String, Long, Integer>>() {
-                        });
+                bind(type).to(
+                        new TypeLiteral<SubParameterizedDeps<String, Long, Integer>>() {
+                });
             }
         });
     }
@@ -138,7 +138,8 @@ public class GenericInjectionTest extends TestCase {
     }
 
     @SuppressWarnings("unchecked")
-    public void assertParameterizedDepsInjected(Key<?> key, Module bindingModule) {
+    public void assertParameterizedDepsInjected(Key<?> key,
+            Module bindingModule) {
         Module bindDataModule = new AbstractModule() {
             protected void configure() {
             }
@@ -162,7 +163,8 @@ public class GenericInjectionTest extends TestCase {
         Injector injector = Guice.createInjector(bindDataModule, bindingModule);
         ParameterizedDeps<String, Integer> parameterizedDeps = (ParameterizedDeps<String, Integer>) injector
                 .getInstance(key);
-        assertEquals(ImmutableMap.of("one", 1, "two", 2), parameterizedDeps.map);
+        assertEquals(ImmutableMap.of("one", 1, "two", 2),
+                parameterizedDeps.map);
         assertEquals(ImmutableSet.of("one", "two"), parameterizedDeps.keys);
         assertEquals(ImmutableSet.of(1, 2),
                 ImmutableSet.copyOf(parameterizedDeps.values));

@@ -12,13 +12,14 @@ import com.google.common.reflect.TypeToken;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface StandardLinkedBindingBuilder<T> extends
-        StandardScopedBindingBuilder<T> {
+public interface StandardLinkedBindingBuilder<T>
+        extends StandardScopedBindingBuilder<T> {
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
      */
-    public StandardScopedBindingBuilder<T> to(Class<? extends T> implementation);
+    public StandardScopedBindingBuilder<T> to(
+            Class<? extends T> implementation);
 
     /**
      * See the EDSL examples at {@link StandardBinder}.

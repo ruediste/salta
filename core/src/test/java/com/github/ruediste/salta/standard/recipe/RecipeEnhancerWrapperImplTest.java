@@ -31,14 +31,14 @@ public class RecipeEnhancerWrapperImplTest {
                 return new RecipeEnhancerWrapperImpl(
                         new Function<Supplier<Object>, Object>() {
 
-                            @Override
-                            public Object apply(Supplier<Object> t) {
-                                assertNull(supplier);
-                                supplier = t;
-                                instance = t.get();
-                                return "Hello";
-                            }
-                        }).compile(ctx, new SupplierRecipe() {
+                    @Override
+                    public Object apply(Supplier<Object> t) {
+                        assertNull(supplier);
+                        supplier = t;
+                        instance = t.get();
+                        return "Hello";
+                    }
+                }).compile(ctx, new SupplierRecipe() {
 
                     @Override
                     protected Class<?> compileImpl(GeneratorAdapter mv,

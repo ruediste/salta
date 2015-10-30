@@ -23,15 +23,16 @@ public class AnnotatedBindingBuilderImpl<T> extends LinkedBindingBuilderImpl<T>
     }
 
     @Override
-    public LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
+    public LinkedBindingBuilder<T> annotatedWith(
+            Annotation availableAnnotation) {
         return new LinkedBindingBuilderImpl<>(
                 delegate.annotatedWith(availableAnnotation));
     }
 
     @Override
     public LinkedBindingBuilder<T> named(String name) {
-        return new LinkedBindingBuilderImpl<>(delegate.annotatedWith(Names
-                .named(name)));
+        return new LinkedBindingBuilderImpl<>(
+                delegate.annotatedWith(Names.named(name)));
     }
 
 }

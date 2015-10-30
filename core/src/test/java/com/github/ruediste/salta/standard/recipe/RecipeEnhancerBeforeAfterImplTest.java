@@ -30,20 +30,20 @@ public class RecipeEnhancerBeforeAfterImplTest {
                 return new RecipeEnhancerBeforeAfterImpl(
                         new BeforeAfterEnhancer() {
 
-                            @Override
-                            public void before() {
-                                assertFalse(beforeSeen);
-                                beforeSeen = true;
-                            }
+                    @Override
+                    public void before() {
+                        assertFalse(beforeSeen);
+                        beforeSeen = true;
+                    }
 
-                            @Override
-                            public Object after(Object instance) {
-                                assertTrue(beforeSeen);
-                                assertNull(afterSeen);
-                                afterSeen = instance;
-                                return "Hello";
-                            }
-                        }).compile(ctx, new SupplierRecipe() {
+                    @Override
+                    public Object after(Object instance) {
+                        assertTrue(beforeSeen);
+                        assertNull(afterSeen);
+                        afterSeen = instance;
+                        return "Hello";
+                    }
+                }).compile(ctx, new SupplierRecipe() {
 
                     @Override
                     protected Class<?> compileImpl(GeneratorAdapter mv,

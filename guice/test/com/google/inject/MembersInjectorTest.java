@@ -54,7 +54,8 @@ public class MembersInjectorTest extends TestCase {
         Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                MembersInjector<A<C>> aMembersInjector = getMembersInjector(new TypeLiteral<A<C>>() {
+                MembersInjector<A<C>> aMembersInjector = getMembersInjector(
+                        new TypeLiteral<A<C>>() {
                 });
                 try {
                     aMembersInjector.injectMembers(uninjectableA);
@@ -64,7 +65,8 @@ public class MembersInjectorTest extends TestCase {
                             "Cannot use injector before it is initialized");
                 }
 
-                MembersInjector<B> bMembersInjector = getMembersInjector(B.class);
+                MembersInjector<B> bMembersInjector = getMembersInjector(
+                        B.class);
                 try {
                     bMembersInjector.injectMembers(uninjectableB);
                     fail();
@@ -124,8 +126,8 @@ public class MembersInjectorTest extends TestCase {
         bMembersInjector.injectMembers(anotherInjectableB);
         assertSame(myFavouriteC, anotherInjectableB.c);
 
-        assertEquals("MembersInjector<java.lang.String>", injector
-                .getMembersInjector(String.class).toString());
+        assertEquals("MembersInjector<java.lang.String>",
+                injector.getMembersInjector(String.class).toString());
     }
 
     public void testMembersInjectorWithNonInjectedTypes() {
@@ -161,8 +163,8 @@ public class MembersInjectorTest extends TestCase {
     }
 
     public void testInjectingMembersInjector() {
-        InjectsMembersInjector injectsMembersInjector = Guice.createInjector(
-                new AbstractModule() {
+        InjectsMembersInjector injectsMembersInjector = Guice
+                .createInjector(new AbstractModule() {
                     @Override
                     protected void configure() {
                         bind(C.class).toInstance(myFavouriteC);
@@ -180,8 +182,8 @@ public class MembersInjectorTest extends TestCase {
             Guice.createInjector(new AbstractModule() {
                 @Override
                 protected void configure() {
-                    bind(MembersInjector.class).toProvider(
-                            Providers.<MembersInjector> of(null));
+                    bind(MembersInjector.class)
+                            .toProvider(Providers.<MembersInjector> of(null));
                 }
             });
             fail();
@@ -209,7 +211,7 @@ public class MembersInjectorTest extends TestCase {
         try {
             Guice.createInjector().getInstance(
                     InjectsBrokenMembersInjector.class).aMembersInjector
-                    .injectMembers(new A<>());
+                            .injectMembers(new A<>());
             fail();
         } catch (SaltaException expected) {
             if (!expected.getMessage().contains("No recipe found for field"))

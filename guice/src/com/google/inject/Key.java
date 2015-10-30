@@ -254,7 +254,8 @@ public class Key<T> {
     /**
      * Gets a key for an injection type and an annotation strategy.
      */
-    static <T> Key<T> get(Class<T> type, AnnotationStrategy annotationStrategy) {
+    static <T> Key<T> get(Class<T> type,
+            AnnotationStrategy annotationStrategy) {
         return new Key<T>(type, annotationStrategy);
     }
 
@@ -421,16 +422,14 @@ public class Key<T> {
 
     private static void ensureRetainedAtRuntime(
             Class<? extends Annotation> annotationType) {
-        checkArgument(
-                Annotations.isRetainedAtRuntime(annotationType),
+        checkArgument(Annotations.isRetainedAtRuntime(annotationType),
                 "%s is not retained at runtime. Please annotate it with @Retention(RUNTIME).",
                 annotationType.getName());
     }
 
     private static void ensureIsBindingAnnotation(
             Class<? extends Annotation> annotationType) {
-        checkArgument(
-                Annotations.isBindingAnnotation(annotationType),
+        checkArgument(Annotations.isBindingAnnotation(annotationType),
                 "%s is not a binding annotation. Please annotate it with @BindingAnnotation.",
                 annotationType.getName());
     }

@@ -40,17 +40,11 @@ public class JSR330ReflectionUtilTest {
 
     @Test
     public void getQualifiers() throws Exception {
-        assertEquals(
-                1,
-                JSR330ReflectionUtil.getQualifiers(
-                        TestClass.class.getField("a")).size());
-        assertEquals(
-                1,
-                JSR330ReflectionUtil.getQualifiers(
-                        TestClass.class.getField("b")).size());
-        assertEquals(
-                0,
-                JSR330ReflectionUtil.getQualifiers(
-                        TestClass.class.getField("c")).size());
+        assertEquals(1, JSR330ReflectionUtil
+                .getQualifiers(TestClass.class.getField("a")).size());
+        assertEquals(1, JSR330ReflectionUtil
+                .getQualifiers(TestClass.class.getField("b")).size());
+        assertEquals(0, JSR330ReflectionUtil
+                .getQualifiers(TestClass.class.getField("c")).size());
     }
 }

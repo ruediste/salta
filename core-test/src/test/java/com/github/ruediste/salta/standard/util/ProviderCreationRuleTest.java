@@ -56,8 +56,8 @@ public class ProviderCreationRuleTest {
         try {
             Salta.createInjector().getInstance(A.class);
         } catch (SaltaException e) {
-            if (!e.getMessage().contains(
-                    "Cannot resolve initializer parameter of"))
+            if (!e.getMessage()
+                    .contains("Cannot resolve initializer parameter of"))
                 throw e;
         }
     }

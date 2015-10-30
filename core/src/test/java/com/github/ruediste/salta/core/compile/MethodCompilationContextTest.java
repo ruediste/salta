@@ -107,15 +107,14 @@ public class MethodCompilationContextTest {
 
             protected void toInteger(GeneratorAdapter mv) {
                 mv.visitMethodInsn(INVOKESTATIC,
-                        Type.getInternalName(CastTestHelper.class),
-                        "toInteger",
+                        Type.getInternalName(CastTestHelper.class), "toInteger",
                         "(Ljava/lang/Integer;)Ljava/lang/Integer;", false);
             }
 
             protected void acceptInt(GeneratorAdapter mv) {
                 mv.visitMethodInsn(INVOKESTATIC,
-                        Type.getInternalName(CastTestHelper.class),
-                        "acceptInt", "(I)V", false);
+                        Type.getInternalName(CastTestHelper.class), "acceptInt",
+                        "(I)V", false);
             }
 
             protected void toObject(GeneratorAdapter mv) {
@@ -138,8 +137,8 @@ public class MethodCompilationContextTest {
 
     @Test
     public void assumptions() {
-        assertTrue(Accessibility.isClassAccessible(int.class, getClass()
-                .getClassLoader()));
+        assertTrue(Accessibility.isClassAccessible(int.class,
+                getClass().getClassLoader()));
         assertFalse(Object.class.isAssignableFrom(int.class));
     }
 

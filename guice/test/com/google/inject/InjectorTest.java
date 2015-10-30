@@ -76,8 +76,8 @@ public class InjectorTest extends TestCase {
                 injector.getInstance(Key.get(SampleSingleton.class)));
         assertSame(singleton, injector.getInstance(SampleSingleton.class));
 
-        assertSame(other, injector.getInstance(Key.get(SampleSingleton.class,
-                Other.class)));
+        assertSame(other, injector
+                .getInstance(Key.get(SampleSingleton.class, Other.class)));
     }
 
     static class SampleSingleton {
@@ -316,12 +316,11 @@ public class InjectorTest extends TestCase {
                             throws ExecutionException, InterruptedException {
                         Future<JustInTime> future = executorService
                                 .submit(new Callable<JustInTime>() {
-                                    @Override
-                                    public JustInTime call() throws Exception {
-                                        return injector
-                                                .getInstance(JustInTime.class);
-                                    }
-                                });
+                            @Override
+                            public JustInTime call() throws Exception {
+                                return injector.getInstance(JustInTime.class);
+                            }
+                        });
                         got.set(future.get());
                     }
                 });

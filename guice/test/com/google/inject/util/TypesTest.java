@@ -65,8 +65,8 @@ public class TypesTest extends TestCase {
                 .getGenericType();
         innerFloatDouble = (ParameterizedType) getClass().getDeclaredField("b")
                 .getGenericType();
-        listSetStringArray = (ParameterizedType) getClass().getDeclaredField(
-                "c").getGenericType();
+        listSetStringArray = (ParameterizedType) getClass()
+                .getDeclaredField("c").getGenericType();
         listString = (ParameterizedType) getClass().getDeclaredField("d")
                 .getGenericType();
         setString = (ParameterizedType) getClass().getDeclaredField("e")
@@ -86,8 +86,8 @@ public class TypesTest extends TestCase {
 
     public void testDefensiveCopies() {
         Type[] arguments = new Type[] { String.class, Integer.class };
-        ParameterizedType parameterizedType = Types.newParameterizedType(
-                Map.class, arguments);
+        ParameterizedType parameterizedType = Types
+                .newParameterizedType(Map.class, arguments);
         arguments[0] = null;
         assertEquals(String.class,
                 parameterizedType.getActualTypeArguments()[0]);
@@ -166,19 +166,19 @@ public class TypesTest extends TestCase {
 
     private WildcardType getWildcard(String fieldName)
             throws NoSuchFieldException {
-        ParameterizedType type = (ParameterizedType) getClass().getField(
-                fieldName).getGenericType();
+        ParameterizedType type = (ParameterizedType) getClass()
+                .getField(fieldName).getGenericType();
         return (WildcardType) type.getActualTypeArguments()[0];
     }
 
     public void testEqualsAndHashcode() {
-        ParameterizedType parameterizedType = Types.newParameterizedType(
-                Map.class, String.class, Integer.class);
+        ParameterizedType parameterizedType = Types
+                .newParameterizedType(Map.class, String.class, Integer.class);
         assertEqualsBothWays(mapStringInteger, parameterizedType);
         assertEquals(mapStringInteger.toString(), parameterizedType.toString());
 
-        GenericArrayType genericArrayType = Types.arrayOf(Types.arrayOf(Types
-                .newParameterizedType(Set.class, String.class)));
+        GenericArrayType genericArrayType = Types.arrayOf(Types
+                .arrayOf(Types.newParameterizedType(Set.class, String.class)));
         assertEqualsBothWays(setStringArray, genericArrayType);
         assertEquals(setStringArray.toString(), genericArrayType.toString());
     }
@@ -208,16 +208,16 @@ public class TypesTest extends TestCase {
             Types.newParameterizedType(Owning.class, String.class);
             fail();
         } catch (IllegalArgumentException expected) {
-            assertContains(expected.getMessage(), "No owner type for enclosed "
-                    + Owning.class);
+            assertContains(expected.getMessage(),
+                    "No owner type for enclosed " + Owning.class);
         }
 
         try {
             Types.newParameterizedTypeWithOwner(Object.class, Set.class,
                     String.class);
         } catch (IllegalArgumentException expected) {
-            assertContains(expected.getMessage(), "Owner type for unenclosed "
-                    + Set.class);
+            assertContains(expected.getMessage(),
+                    "Owner type for unenclosed " + Set.class);
         }
     }
 

@@ -16,8 +16,8 @@ public class AccessibilityTest {
 
     @Test
     public void ispublic_arrayWithPublicElements_isAccessible() {
-        assertTrue(Accessibility.isClassAccessible(int[].class, getClass()
-                .getClassLoader()));
+        assertTrue(Accessibility.isClassAccessible(int[].class,
+                getClass().getClassLoader()));
     }
 
     private class A {
@@ -25,7 +25,7 @@ public class AccessibilityTest {
 
     @Test
     public void ispublic_arrayWithPrivateElements_isNotAccessible() {
-        assertFalse(Accessibility.isClassAccessible(A[].class, getClass()
-                .getClassLoader()));
+        assertFalse(Accessibility.isClassAccessible(A[].class,
+                getClass().getClassLoader()));
     }
 }

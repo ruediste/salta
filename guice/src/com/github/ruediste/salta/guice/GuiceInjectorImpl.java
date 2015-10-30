@@ -29,7 +29,8 @@ public class GuiceInjectorImpl implements Injector {
     }
 
     @Override
-    public <T> MembersInjector<T> getMembersInjector(TypeLiteral<T> typeLiteral) {
+    public <T> MembersInjector<T> getMembersInjector(
+            TypeLiteral<T> typeLiteral) {
         TypeToken<MembersInjector<T>> injectorType = new TypeToken<MembersInjector<T>>() {
             private static final long serialVersionUID = 1L;
         }.where(new TypeParameter<T>() {

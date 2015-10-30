@@ -28,8 +28,8 @@ public class DefaultConstructionRule implements ConstructionRule {
     public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
             TypeToken<?> type) {
         // create seed recipe
-        return config.construction.createRecipeInstantiator(type).map(
-                instantiator -> ctx -> config.construction
+        return config.construction.createRecipeInstantiator(type)
+                .map(instantiator -> ctx -> config.construction
                         .createConstructionRecipe(ctx, type,
                                 instantiator.apply(ctx)));
 

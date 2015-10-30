@@ -70,8 +70,8 @@ public abstract class StaticMembersInjectorBase {
             InjectionInstruction injectionInstruction = shouldInject(f);
             if (injectionInstruction == InjectionInstruction.NO_INJECT)
                 continue;
-            InjectionPoint<?> d = new InjectionPoint<>(TypeToken.of(f
-                    .getGenericType()), f, f, null);
+            InjectionPoint<?> d = new InjectionPoint<>(
+                    TypeToken.of(f.getGenericType()), f, f, null);
             f.setAccessible(true);
             Optional<CompiledSupplier> instance = injector
                     .tryGetCompiledRecipe(d);
@@ -96,8 +96,8 @@ public abstract class StaticMembersInjectorBase {
             Parameter[] parameters = m.getParameters();
             for (int i = 0; i < parameters.length; i++) {
                 Parameter p = parameters[i];
-                CoreDependencyKey<?> d = new InjectionPoint<>(TypeToken.of(p
-                        .getParameterizedType()), m, p, i);
+                CoreDependencyKey<?> d = new InjectionPoint<>(
+                        TypeToken.of(p.getParameterizedType()), m, p, i);
                 if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
                     Optional<CompiledSupplier> tmp = injector
                             .tryGetCompiledRecipe(d);

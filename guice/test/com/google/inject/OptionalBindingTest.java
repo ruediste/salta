@@ -72,24 +72,24 @@ public class OptionalBindingTest extends TestCase {
     private Module toInstanceModule = new AbstractModule() {
         @Override
         protected void configure() {
-            bind(HasOptionalInjections.class).toInstance(
-                    new HasOptionalInjections());
+            bind(HasOptionalInjections.class)
+                    .toInstance(new HasOptionalInjections());
         }
     };
 
     private Module toProviderInstanceModule = new AbstractModule() {
         @Override
         protected void configure() {
-            bind(HasOptionalInjections.class).toProvider(
-                    new HasOptionalInjectionsProvider());
+            bind(HasOptionalInjections.class)
+                    .toProvider(new HasOptionalInjectionsProvider());
         }
     };
 
     private Module toProviderModule = new AbstractModule() {
         @Override
         protected void configure() {
-            bind(HasOptionalInjections.class).toProvider(
-                    HasOptionalInjectionsProvider.class);
+            bind(HasOptionalInjections.class)
+                    .toProvider(HasOptionalInjectionsProvider.class);
         }
     };
 
@@ -269,8 +269,7 @@ public class OptionalBindingTest extends TestCase {
             Guice.createInjector().getInstance(HasOptionalConstructor.class);
             fail();
         } catch (SaltaException expected) {
-            assertContains(
-                    expected.getMessage(),
+            assertContains(expected.getMessage(),
                     "OptionalBindingTest$HasOptionalConstructor() "
                             + "is annotated @Inject(optional=true), but constructors cannot be optional");
         }

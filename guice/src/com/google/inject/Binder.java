@@ -129,10 +129,9 @@ import com.google.inject.spi.ProvisionListener;
  * This admittedly odd construct is the way to bind a parameterized type. It
  * tells Guice how to honor an injection request for an element of type
  * {@code PaymentService<CreditCard>}. The class
- * {@code CreditCardPaymentService} must implement the
- * {@code PaymentService<CreditCard>} interface. Guice cannot currently bind or
- * inject a generic type, such as {@code Set<E>}; all type parameters must be
- * fully specified.
+ * {@code CreditCardPaymentService} must implement the {@code PaymentService
+ * <CreditCard>} interface. Guice cannot currently bind or inject a generic
+ * type, such as {@code Set<E>}; all type parameters must be fully specified.
  *
  * <pre>
  * bind(Service.class).toInstance(new ServiceImpl());

@@ -64,8 +64,8 @@ public class ProvisionExceptionTest extends TestCase {
             }).getInstance(A.class);
             fail();
         } catch (SaltaException e) {
-            if (!e.getMessage().contains(
-                    UnsupportedOperationException.class.getName()))
+            if (!e.getMessage()
+                    .contains(UnsupportedOperationException.class.getName()))
                 throw e;
         }
     }
@@ -139,8 +139,8 @@ public class ProvisionExceptionTest extends TestCase {
             }).getInstance(F.class);
             fail();
         } catch (ProvisionException e) {
-            assertContains(e.getMessage(), "1) User Exception", "at "
-                    + ProvisionExceptionTest.class.getName(),
+            assertContains(e.getMessage(), "1) User Exception",
+                    "at " + ProvisionExceptionTest.class.getName(),
                     getDeclaringSourcePart(getClass()));
         }
     }
@@ -202,8 +202,8 @@ public class ProvisionExceptionTest extends TestCase {
         }
 
         try {
-            Guice.createInjector().getInstance(
-                    ConstructorWithBindingAnnotation.class);
+            Guice.createInjector()
+                    .getInstance(ConstructorWithBindingAnnotation.class);
             fail();
         } catch (SaltaException e) {
             if (!e.getMessage().contains("on parameters instead"))
@@ -215,8 +215,8 @@ public class ProvisionExceptionTest extends TestCase {
         Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(String.class).annotatedWith(Green.class).toInstance(
-                        "lime!");
+                bind(String.class).annotatedWith(Green.class)
+                        .toInstance("lime!");
             }
         });
         injector.getInstance(LikeScala.class);
@@ -234,8 +234,8 @@ public class ProvisionExceptionTest extends TestCase {
             injector.getInstance(D.class);
             fail();
         } catch (SaltaException e) {
-            if (!e.getMessage().contains(
-                    UnsupportedOperationException.class.getName()))
+            if (!e.getMessage()
+                    .contains(UnsupportedOperationException.class.getName()))
                 throw e;
         }
     }
@@ -252,8 +252,8 @@ public class ProvisionExceptionTest extends TestCase {
             injector.getInstance(D.class);
             fail();
         } catch (SaltaException e) {
-            if (!e.getMessage().contains(
-                    UnsupportedOperationException.class.getName()))
+            if (!e.getMessage()
+                    .contains(UnsupportedOperationException.class.getName()))
                 throw e;
         }
     }

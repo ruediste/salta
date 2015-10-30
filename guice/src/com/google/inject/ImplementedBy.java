@@ -34,5 +34,5 @@ public @interface ImplementedBy {
     /**
      * The implementation type.
      */
-    Class<?> value();
+    Class<?>value();
 }

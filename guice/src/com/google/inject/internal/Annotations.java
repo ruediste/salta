@@ -190,14 +190,14 @@ public class Annotations {
      * Returns the scope annotation on {@code type}, or null if none is
      * specified.
      */
-    public static Class<? extends Annotation> findScopeAnnotation(
-            Errors errors, Class<?> implementation) {
+    public static Class<? extends Annotation> findScopeAnnotation(Errors errors,
+            Class<?> implementation) {
         return findScopeAnnotation(errors, implementation.getAnnotations());
     }
 
     /** Returns the scoping annotation, or null if there isn't one. */
-    public static Class<? extends Annotation> findScopeAnnotation(
-            Errors errors, Annotation[] annotations) {
+    public static Class<? extends Annotation> findScopeAnnotation(Errors errors,
+            Annotation[] annotations) {
         Class<? extends Annotation> found = null;
 
         for (Annotation annotation : annotations) {
@@ -218,7 +218,8 @@ public class Annotations {
     static boolean containsComponentAnnotation(Annotation[] annotations) {
         for (Annotation annotation : annotations) {
             // TODO(user): Should we scope this down to dagger.Component?
-            if (annotation.annotationType().getSimpleName().equals("Component")) {
+            if (annotation.annotationType().getSimpleName()
+                    .equals("Component")) {
                 return true;
             }
         }
@@ -233,7 +234,9 @@ public class Annotations {
     static class AnnotationChecker {
         private final Collection<Class<? extends Annotation>> annotationTypes;
 
-        /** Returns true if the given class has one of the desired annotations. */
+        /**
+         * Returns true if the given class has one of the desired annotations.
+         */
         private CacheLoader<Class<? extends Annotation>, Boolean> hasAnnotations = new CacheLoader<Class<? extends Annotation>, Boolean>() {
             public Boolean load(Class<? extends Annotation> annotationType) {
                 for (Annotation annotation : annotationType.getAnnotations()) {
@@ -286,7 +289,7 @@ public class Annotations {
         Class<? extends Annotation> scopeAnnotation = findScopeAnnotation(
                 errors, type);
         if (scopeAnnotation != null
-        // We let Dagger Components through to aid migrations.
+                // We let Dagger Components through to aid migrations.
                 && !containsComponentAnnotation(type.getAnnotations())) {
             errors.withSource(type).scopeAnnotationOnAbstractType(
                     scopeAnnotation, type, source);
@@ -306,8 +309,8 @@ public class Annotations {
      * Returns the binding annotation on {@code member}, or null if there isn't
      * one.
      */
-    public static Annotation findBindingAnnotation(Errors errors,
-            Member member, Annotation[] annotations) {
+    public static Annotation findBindingAnnotation(Errors errors, Member member,
+            Annotation[] annotations) {
         Annotation found = null;
 
         for (Annotation annotation : annotations) {

@@ -42,10 +42,10 @@ import com.google.inject.Provides;
  */
 public class NamedEquivalanceTest extends TestCase {
 
-    private static final Module GUICE_BINDING_MODULE = moduleWithAnnotation(Names
-            .named("foo"));
-    private static final Module JSR330_BINDING_MODULE = moduleWithAnnotation(new JsrNamed(
-            "foo"));
+    private static final Module GUICE_BINDING_MODULE = moduleWithAnnotation(
+            Names.named("foo"));
+    private static final Module JSR330_BINDING_MODULE = moduleWithAnnotation(
+            new JsrNamed("foo"));
     private static final Module GUICE_PROVIDER_METHOD_MODULE = getGuiceBindingProviderMethodModule();
     private static final Module JSR330_PROVIDER_METHOD_MODULE = getJsr330BindingProviderMethodModule();
 
@@ -139,17 +139,18 @@ public class NamedEquivalanceTest extends TestCase {
         }
     }
 
-    private static void assertDuplicateBinding(Module a, Module b, boolean fails) {
+    private static void assertDuplicateBinding(Module a, Module b,
+            boolean fails) {
         try {
-            Guice.createInjector(a, b).getInstance(
-                    Key.get(String.class, Names.named("foo")));
+            Guice.createInjector(a, b)
+                    .getInstance(Key.get(String.class, Names.named("foo")));
             if (fails) {
                 fail("should have thrown CreationException");
             }
         } catch (SaltaException e) {
             if (fails) {
-                if (!e.getMessage().contains(
-                        "multiple bindings match dependency"))
+                if (!e.getMessage()
+                        .contains("multiple bindings match dependency"))
                     throw e;
             } else {
                 throw e;
@@ -262,8 +263,8 @@ public class NamedEquivalanceTest extends TestCase {
         private static final long serialVersionUID = 0;
     }
 
-    private static class GuiceNamed implements com.google.inject.name.Named,
-            Serializable {
+    private static class GuiceNamed
+            implements com.google.inject.name.Named, Serializable {
         private final String value;
 
         public GuiceNamed(String value) {

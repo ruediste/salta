@@ -116,8 +116,8 @@ public class GuiceModule implements Module {
         if (guiceConfig.requireExplicitBindings) {
 
             for (TypeToken<?> type : guiceConfig.typesBoundToDefaultCreationRecipe) {
-                ProvidedBy providedBy = type.getRawType().getAnnotation(
-                        ProvidedBy.class);
+                ProvidedBy providedBy = type.getRawType()
+                        .getAnnotation(ProvidedBy.class);
                 if (providedBy != null) {
                     StandardStaticBinding binding = new StandardStaticBinding();
                     binding.dependencyMatcher = DependencyKey
@@ -133,8 +133,8 @@ public class GuiceModule implements Module {
 
             HashSet<Class<?>> rawTypes = new HashSet<Class<?>>();
             for (TypeToken<?> type : guiceConfig.typesBoundToDefaultCreationRecipe) {
-                ImplementedBy implementedBy = type.getRawType().getAnnotation(
-                        ImplementedBy.class);
+                ImplementedBy implementedBy = type.getRawType()
+                        .getAnnotation(ImplementedBy.class);
                 if (implementedBy != null) {
                     if (rawTypes.add(implementedBy.value())) {
                         StandardStaticBinding binding = new StandardStaticBinding();
@@ -159,8 +159,8 @@ public class GuiceModule implements Module {
                     binding.recipeFactory = ctx -> config.construction
                             .createConcreteConstructionRecipe(foo.getType(),
                                     ctx);
-                    binding.scopeSupplier = () -> config.scope.getScope(foo
-                            .getType());
+                    binding.scopeSupplier = () -> config.scope
+                            .getScope(foo.getType());
                     guiceConfig.automaticStaticBindings.add(binding);
                 }
             }
@@ -190,13 +190,13 @@ public class GuiceModule implements Module {
         if (guiceConfig.stage == Stage.PRODUCTION)
             addEagerInstantiationDynamicInitializer();
 
-        binder().getDelegate()
-                .bindScope(Singleton.class, config.singletonScope);
+        binder().getDelegate().bindScope(Singleton.class,
+                config.singletonScope);
         binder().getDelegate().bindScope(javax.inject.Singleton.class,
                 config.singletonScope);
 
-        config.construction.constructionRules.add(new DefaultConstructionRule(
-                config));
+        config.construction.constructionRules
+                .add(new DefaultConstructionRule(config));
         addStageCreationRule();
         config.membersInjectorFactory = new MembersInjectorFactory() {
 
@@ -220,9 +220,9 @@ public class GuiceModule implements Module {
         };
 
         config.creationPipeline.coreCreationRuleSuppliers
-                .add(config.creationPipeline.coreCreationRuleSuppliers
-                        .indexOf(config.creationPipeline.suppliers.staticBindingsSupplier) + 1,
-                        guiceConfig.automaticStaticBindingsSupplier);
+                .add(config.creationPipeline.coreCreationRuleSuppliers.indexOf(
+                        config.creationPipeline.suppliers.staticBindingsSupplier)
+                        + 1, guiceConfig.automaticStaticBindingsSupplier);
     }
 
     private void addStageCreationRule() {
@@ -248,16 +248,17 @@ public class GuiceModule implements Module {
                 .add(new ProvidedByConstructionRuleBase(Provider.class) {
 
                     @Override
-                    protected DependencyKey<?> getProviderKey(TypeToken<?> type) {
+                    protected DependencyKey<?> getProviderKey(
+                            TypeToken<?> type) {
                         ProvidedBy providedBy = type.getRawType()
                                 .getAnnotation(ProvidedBy.class);
                         if (providedBy != null) {
-                            if (!type.isAssignableFrom(TypeToken.of(
-                                    providedBy.value()).resolveType(
-                                    Provider.class.getTypeParameters()[0]))) {
+                            if (!type.isAssignableFrom(
+                                    TypeToken.of(providedBy.value())
+                                            .resolveType(Provider.class
+                                                    .getTypeParameters()[0]))) {
                                 throw new SaltaException(
-                                        "Provider "
-                                                + providedBy.value()
+                                        "Provider " + providedBy.value()
                                                 + " specified by @ProvidedBy does not provide "
                                                 + type);
                             }
@@ -284,8 +285,7 @@ public class GuiceModule implements Module {
                         if (idx.isOverridden(m)) {
                             throw new SaltaException(
                                     "Overriding @Provides methods is not allowed:\n "
-                                            + m
-                                            + "\nis overridden by \n "
+                                            + m + "\nis overridden by \n "
                                             + idx.getOverridingMethods(m)
                                                     .stream()
                                                     .map(java.util.Objects::toString)
@@ -328,7 +328,8 @@ public class GuiceModule implements Module {
                 if (guiceInject == null && inject == null) {
                     return InjectionInstruction.NO_INJECT;
                 }
-                return config.isInjectionOptional(method) ? InjectionInstruction.INJECT_OPTIONAL
+                return config.isInjectionOptional(method)
+                        ? InjectionInstruction.INJECT_OPTIONAL
                         : InjectionInstruction.INJECT;
             }
 
@@ -340,27 +341,23 @@ public class GuiceModule implements Module {
                 if (guiceInject == null && inject == null) {
                     return InjectionInstruction.NO_INJECT;
                 }
-                return config.isInjectionOptional(field) ? InjectionInstruction.INJECT_OPTIONAL
+                return config.isInjectionOptional(field)
+                        ? InjectionInstruction.INJECT_OPTIONAL
                         : InjectionInstruction.INJECT;
             }
         }.injectStaticMembers(config, injector.getSaltaInjector()));
     }
 
     private void addEagerInstantiationDynamicInitializer() {
-        config.dynamicInitializers
-                .add(() -> {
-                    injector.getSaltaInjector()
-                            .getCoreInjector()
-                            .withRecipeCreationContext(
-                                    ctx -> {
-                                        for (Binding b : config.creationPipeline.staticBindings) {
-                                            b.getScope()
-                                                    .performEagerInstantiation(
-                                                            ctx, b);
-                                        }
-                                        return null;
-                                    });
-                });
+        config.dynamicInitializers.add(() -> {
+            injector.getSaltaInjector().getCoreInjector()
+                    .withRecipeCreationContext(ctx -> {
+                for (Binding b : config.creationPipeline.staticBindings) {
+                    b.getScope().performEagerInstantiation(ctx, b);
+                }
+                return null;
+            });
+        });
     }
 
     private void addConstructorInstantiationRule() {
@@ -384,12 +381,11 @@ public class GuiceModule implements Module {
                     protected Integer getConstructorPriority(Constructor<?> c) {
                         Inject guiceInject = c.getAnnotation(Inject.class);
                         if (guiceInject != null && guiceInject.optional()) {
-                            throw new SaltaException(
-                                    c
-                                            + " is annotated @Inject(optional=true), but constructors cannot be optional");
+                            throw new SaltaException(c
+                                    + " is annotated @Inject(optional=true), but constructors cannot be optional");
                         }
-                        if (c.isAnnotationPresent(Inject.class)
-                                || c.isAnnotationPresent(javax.inject.Inject.class))
+                        if (c.isAnnotationPresent(Inject.class) || c
+                                .isAnnotationPresent(javax.inject.Inject.class))
                             return 2;
                         boolean isInnerClass = c.getDeclaringClass()
                                 .getEnclosingClass() != null;
@@ -398,7 +394,8 @@ public class GuiceModule implements Module {
                             return null;
 
                         if (c.getParameterCount() == 0
-                                && (Modifier.isPublic(c.getModifiers()) || isInnerClass))
+                                && (Modifier.isPublic(c.getModifiers())
+                                        || isInnerClass))
                             return 1;
                         return null;
                     }
@@ -417,7 +414,8 @@ public class GuiceModule implements Module {
                                 .getAnnotation(ImplementedBy.class);
                         if (implementedBy != null) {
 
-                            if (type.getRawType().equals(implementedBy.value())) {
+                            if (type.getRawType()
+                                    .equals(implementedBy.value())) {
                                 throw new SaltaException(
                                         "@ImplementedBy points to the same class it annotates. type: "
                                                 + type);
@@ -431,35 +429,30 @@ public class GuiceModule implements Module {
 
     private void addTypeLiteralCreationRule() {
         // Rule for type literals
-        config.creationPipeline.creationRules
-                .add(new CreationRuleImpl(
-                        k -> TypeLiteral.class.equals(k.getRawType()),
-                        key -> {
-                            TypeToken<?> type = key.getType();
-                            if (type.getType() instanceof Class) {
-                                throw new SaltaException(
-                                        "Cannot inject a TypeLiteral that has no type parameter");
-                            }
-                            TypeToken<?> typeParameter = type
-                                    .resolveType(TypeLiteral.class
-                                            .getTypeParameters()[0]);
-                            if (typeParameter.getType() instanceof TypeVariable)
-                                throw new SaltaException(
-                                        "TypeLiteral<"
-                                                + typeParameter
-                                                + "> cannot be used as a key; It is not fully specified.");
-                            TypeLiteral<?> typeLiteral = TypeLiteral
-                                    .get(typeParameter.getType());
-                            return () -> typeLiteral;
-                        }));
+        config.creationPipeline.creationRules.add(new CreationRuleImpl(
+                k -> TypeLiteral.class.equals(k.getRawType()), key -> {
+                    TypeToken<?> type = key.getType();
+                    if (type.getType() instanceof Class) {
+                        throw new SaltaException(
+                                "Cannot inject a TypeLiteral that has no type parameter");
+                    }
+                    TypeToken<?> typeParameter = type.resolveType(
+                            TypeLiteral.class.getTypeParameters()[0]);
+                    if (typeParameter.getType() instanceof TypeVariable)
+                        throw new SaltaException("TypeLiteral<" + typeParameter
+                                + "> cannot be used as a key; It is not fully specified.");
+                    TypeLiteral<?> typeLiteral = TypeLiteral
+                            .get(typeParameter.getType());
+                    return () -> typeLiteral;
+                }));
     }
 
     private void addQualifierExtractors() {
         // qualifiers
         config.requiredQualifierExtractors.add(annotatedElement -> {
-            return Arrays.stream(annotatedElement.getAnnotations()).filter(
-                    a -> a.annotationType().isAnnotationPresent(
-                            BindingAnnotation.class)
+            return Arrays.stream(annotatedElement.getAnnotations())
+                    .filter(a -> a.annotationType()
+                            .isAnnotationPresent(BindingAnnotation.class)
                             || a.annotationType().isAnnotationPresent(
                                     javax.inject.Qualifier.class));
         });
@@ -467,9 +460,9 @@ public class GuiceModule implements Module {
         config.availableQualifierExtractors
                 .add(new Function<AnnotatedElement, Stream<Annotation>>() {
                     @Override
-                    public Stream<Annotation> apply(AnnotatedElement annotated) {
-                        return Arrays
-                                .stream(annotated.getAnnotations())
+                    public Stream<Annotation> apply(
+                            AnnotatedElement annotated) {
+                        return Arrays.stream(annotated.getAnnotations())
                                 .filter(a -> a.annotationType()
                                         .isAnnotationPresent(
                                                 BindingAnnotation.class)
@@ -493,9 +486,8 @@ public class GuiceModule implements Module {
                                 throw new SaltaException(
                                         "Cannot inject a MembersInjector that has no type parameter");
                             }
-                            TypeToken<?> dependency = key
-                                    .getType()
-                                    .resolveType(rawType.getTypeParameters()[0]);
+                            TypeToken<?> dependency = key.getType().resolveType(
+                                    rawType.getTypeParameters()[0]);
                             return dependency;
                         } else
                             return null;
@@ -527,16 +519,19 @@ public class GuiceModule implements Module {
 
     private void addProviderCrationRules() {
         // provider creation rule
-        config.creationPipeline.creationRules.add(new ProviderCreationRule(
-                key -> key.getRawType().equals(Provider.class),
+        config.creationPipeline.creationRules
+                .add(new ProviderCreationRule(
+                        key -> key.getRawType().equals(
+                                Provider.class),
                 (type, supplier) -> (Provider<Object>) () -> supplier.get(),
                 Provider.class));
         config.creationPipeline.creationRules
                 .add(new ProviderCreationRule(
-                        key -> key.getRawType().equals(
-                                javax.inject.Provider.class),
+                        key -> key.getRawType()
+                                .equals(javax.inject.Provider.class),
                         (type, supplier) -> (javax.inject.Provider<Object>) () -> supplier
-                                .get(), javax.inject.Provider.class));
+                                .get(),
+                        javax.inject.Provider.class));
     }
 
     private void addMembersInjectorFactory() {
@@ -565,7 +560,8 @@ public class GuiceModule implements Module {
                         if (index.isOverridden(method))
                             return InjectionInstruction.NO_INJECTION;
 
-                        return config.isInjectionOptional(method) ? InjectionInstruction.INJECT_OPTIONAL
+                        return config.isInjectionOptional(method)
+                                ? InjectionInstruction.INJECT_OPTIONAL
                                 : InjectionInstruction.INJECT;
                     }
 
@@ -586,7 +582,8 @@ public class GuiceModule implements Module {
                         if (Modifier.isStatic(field.getModifiers()))
                             return InjectionInstruction.NO_INJECTION;
 
-                        return config.isInjectionOptional(field) ? InjectionInstruction.INJECT_OPTIONAL
+                        return config.isInjectionOptional(field)
+                                ? InjectionInstruction.INJECT_OPTIONAL
                                 : InjectionInstruction.INJECT;
                     }
                 });
@@ -624,8 +621,8 @@ public class GuiceModule implements Module {
                                 || javax.inject.Named.class
                                         .equals(availableType)) {
                             return Named.class.equals(required.annotationType())
-                                    || javax.inject.Named.class.equals(required
-                                            .annotationType());
+                                    || javax.inject.Named.class
+                                            .equals(required.annotationType());
                         }
                         return null;
                     }
@@ -646,13 +643,13 @@ public class GuiceModule implements Module {
                         if (key instanceof InjectionPoint) {
                             Member member = ((InjectionPoint<?>) key)
                                     .getMember();
-                            return new SupplierRecipeImpl(() -> Logger
-                                    .getLogger(member.getDeclaringClass()
-                                            .getName()));
+                            return new SupplierRecipeImpl(
+                                    () -> Logger.getLogger(member
+                                            .getDeclaringClass().getName()));
 
                         }
-                        return new SupplierRecipeImpl(() -> Logger
-                                .getAnonymousLogger());
+                        return new SupplierRecipeImpl(
+                                () -> Logger.getAnonymousLogger());
                     });
                 }
                 return Optional.empty();

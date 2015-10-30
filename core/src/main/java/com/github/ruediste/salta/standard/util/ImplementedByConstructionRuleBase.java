@@ -14,8 +14,8 @@ import com.github.ruediste.salta.standard.config.ConstructionRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public abstract class ImplementedByConstructionRuleBase implements
-        ConstructionRule {
+public abstract class ImplementedByConstructionRuleBase
+        implements ConstructionRule {
 
     public ImplementedByConstructionRuleBase() {
         super();

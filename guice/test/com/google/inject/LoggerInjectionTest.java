@@ -45,8 +45,8 @@ public class LoggerInjectionTest extends TestCase {
         assertNull(injector.getProvider(Logger.class).get().getName());
         assertNull(injector.getBinding(Logger.class).getProvider().get()
                 .getName());
-        assertEquals("Provider<java.util.logging.Logger>", injector
-                .getProvider(Logger.class).toString());
+        assertEquals("Provider<java.util.logging.Logger>",
+                injector.getProvider(Logger.class).toString());
     }
 
     public void testCanBindAnnotatedLogger() {
@@ -58,8 +58,9 @@ public class LoggerInjectionTest extends TestCase {
             }
         });
 
-        assertNull(injector.getInstance(
-                Key.get(Logger.class, Names.named("anonymous"))).getName());
+        assertNull(injector
+                .getInstance(Key.get(Logger.class, Names.named("anonymous")))
+                .getName());
     }
 
 }

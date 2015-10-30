@@ -21,8 +21,8 @@ import com.google.common.reflect.TypeToken;
 
 public class StandardInjector {
 
-    private final static class ClassDependencyKey<T> extends
-            CoreDependencyKey<T> {
+    private final static class ClassDependencyKey<T>
+            extends CoreDependencyKey<T> {
 
         private Class<T> type;
 
@@ -127,8 +127,7 @@ public class StandardInjector {
 
         if (!config.errorMessages.isEmpty()) {
             throw new SaltaException("There were Errors:\n"
-                    + config.errorMessages.stream()
-                            .map(msg -> msg.getMessage())
+                    + config.errorMessages.stream().map(msg -> msg.getMessage())
                             .collect(joining("\n")));
         }
 
@@ -137,7 +136,8 @@ public class StandardInjector {
                         .map(s -> s.get()).collect(toList()));
 
         while (!config.staticInitializers.isEmpty()) {
-            ArrayList<Runnable> tmp = new ArrayList<>(config.staticInitializers);
+            ArrayList<Runnable> tmp = new ArrayList<>(
+                    config.staticInitializers);
             config.staticInitializers.clear();
             for (Runnable initializer : tmp) {
                 initializer.run();

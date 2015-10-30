@@ -95,8 +95,8 @@ public class BindingTest extends TestCase {
             }).in(Scopes.SINGLETON);
 
             // Provider.
-            bind(Foo.class).annotatedWith(named("provider")).toProvider(
-                    FooProvider.class);
+            bind(Foo.class).annotatedWith(named("provider"))
+                    .toProvider(FooProvider.class);
 
             // Class.
             bind(Bar.class).in(Scopes.SINGLETON);
@@ -238,8 +238,8 @@ public class BindingTest extends TestCase {
         } catch (ConfigurationException expected) {
             assertContains(expected.getMessage(),
                     "Could not find a suitable constructor in "
-                            + PrivateNoArg.class.getName(), "at "
-                            + PrivateNoArg.class.getName()
+                            + PrivateNoArg.class.getName(),
+                    "at " + PrivateNoArg.class.getName()
                             + ".class(BindingTest.java:");
         }
     }
@@ -294,7 +294,7 @@ public class BindingTest extends TestCase {
                 });
                 bind(i).toConstructor(constructor,
                         new TypeLiteral<C<Injector>>() {
-                        });
+                });
             }
         });
 
@@ -449,12 +449,12 @@ public class BindingTest extends TestCase {
             @Override
             public void configure() {
                 bind(Bacon.class).to(UncookedBacon.class);
-                bind(Bacon.class).annotatedWith(named("Turkey")).to(
-                        TurkeyBacon.class);
+                bind(Bacon.class).annotatedWith(named("Turkey"))
+                        .to(TurkeyBacon.class);
                 try {
-                    bind(Bacon.class)
-                            .annotatedWith(named("Cooked"))
-                            .toConstructor(Bacon.class.getDeclaredConstructor());
+                    bind(Bacon.class).annotatedWith(named("Cooked"))
+                            .toConstructor(
+                                    Bacon.class.getDeclaredConstructor());
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new RuntimeException(e);
                 }
@@ -464,13 +464,13 @@ public class BindingTest extends TestCase {
         assertEquals(Food.PORK, bacon.getMaterial());
         assertFalse(bacon.isCooked());
 
-        Bacon turkeyBacon = injector.getInstance(Key.get(Bacon.class,
-                named("Turkey")));
+        Bacon turkeyBacon = injector
+                .getInstance(Key.get(Bacon.class, named("Turkey")));
         assertEquals(Food.TURKEY, turkeyBacon.getMaterial());
         assertTrue(turkeyBacon.isCooked());
 
-        Bacon cookedBacon = injector.getInstance(Key.get(Bacon.class,
-                named("Cooked")));
+        Bacon cookedBacon = injector
+                .getInstance(Key.get(Bacon.class, named("Cooked")));
         assertEquals(Food.PORK, cookedBacon.getMaterial());
         assertTrue(cookedBacon.isCooked());
     }

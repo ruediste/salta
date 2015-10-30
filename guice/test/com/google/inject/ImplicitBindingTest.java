@@ -86,8 +86,8 @@ public class ImplicitBindingTest extends TestCase {
                 bind(I.class).to(AlternateImpl.class);
             }
         });
-        assertEquals(AlternateImpl.class, injector.getInstance(I.class)
-                .getClass());
+        assertEquals(AlternateImpl.class,
+                injector.getInstance(I.class).getClass());
     }
 
     @ProvidedBy(ProvidedProvider.class)
@@ -97,8 +97,8 @@ public class ImplicitBindingTest extends TestCase {
 
     public void testNoImplicitBindingIsCreatedForAnnotatedKeys() {
         try {
-            Guice.createInjector().getInstance(
-                    Key.get(I.class, Names.named("i")));
+            Guice.createInjector()
+                    .getInstance(Key.get(I.class, Names.named("i")));
             fail();
         } catch (SaltaException expected) {
             if (!expected.getMessage().contains("No instance found for"))
@@ -158,8 +158,8 @@ public class ImplicitBindingTest extends TestCase {
     static interface InvalidProvidedBy {
     }
 
-    static class InvalidProvidedByProvider implements
-            Provider<InvalidProvidedBy> {
+    static class InvalidProvidedByProvider
+            implements Provider<InvalidProvidedBy> {
         @Inject
         InvalidProvidedBy2 a;
 
@@ -173,8 +173,8 @@ public class ImplicitBindingTest extends TestCase {
     static interface InvalidProvidedBy2 {
     }
 
-    static class InvalidProvidedBy2Provider implements
-            Provider<InvalidProvidedBy2> {
+    static class InvalidProvidedBy2Provider
+            implements Provider<InvalidProvidedBy2> {
         @Inject
         Invalid2 a;
 
@@ -290,15 +290,15 @@ public class ImplicitBindingTest extends TestCase {
     }
 
     public void testProvidedByNonEmptyEnum() {
-        NonEmptyEnum cardSuit = Guice.createInjector().getInstance(
-                NonEmptyEnum.class);
+        NonEmptyEnum cardSuit = Guice.createInjector()
+                .getInstance(NonEmptyEnum.class);
 
         assertEquals(NonEmptyEnum.HEARTS, cardSuit);
     }
 
     public void testProvidedByEmptyEnum() {
-        EmptyEnum emptyEnumValue = Guice.createInjector().getInstance(
-                EmptyEnum.class);
+        EmptyEnum emptyEnumValue = Guice.createInjector()
+                .getInstance(EmptyEnum.class);
         assertNull(emptyEnumValue);
     }
 

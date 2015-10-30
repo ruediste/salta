@@ -33,8 +33,8 @@ public abstract class AbstractMatcher<T> implements Matcher<T> {
         return new OrMatcher<T>(this, other);
     }
 
-    private static class AndMatcher<T> extends AbstractMatcher<T> implements
-            Serializable {
+    private static class AndMatcher<T> extends AbstractMatcher<T>
+            implements Serializable {
         private final Matcher<? super T> a, b;
 
         public AndMatcher(Matcher<? super T> a, Matcher<? super T> b) {
@@ -66,8 +66,8 @@ public abstract class AbstractMatcher<T> implements Matcher<T> {
         private static final long serialVersionUID = 0;
     }
 
-    private static class OrMatcher<T> extends AbstractMatcher<T> implements
-            Serializable {
+    private static class OrMatcher<T> extends AbstractMatcher<T>
+            implements Serializable {
         private final Matcher<? super T> a, b;
 
         public OrMatcher(Matcher<? super T> a, Matcher<? super T> b) {
@@ -81,8 +81,7 @@ public abstract class AbstractMatcher<T> implements Matcher<T> {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof OrMatcher
-                    && ((OrMatcher) other).a.equals(a)
+            return other instanceof OrMatcher && ((OrMatcher) other).a.equals(a)
                     && ((OrMatcher) other).b.equals(b);
         }
 

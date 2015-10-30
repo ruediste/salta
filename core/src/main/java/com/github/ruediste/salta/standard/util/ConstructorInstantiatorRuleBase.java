@@ -21,12 +21,13 @@ import com.google.common.reflect.TypeToken;
  * Base class for {@link InstantiatorRule}s which use a constructor to
  * instantiate a class (Probably the majority of cases)
  */
-public abstract class ConstructorInstantiatorRuleBase implements
-        InstantiatorRule {
+public abstract class ConstructorInstantiatorRuleBase
+        implements InstantiatorRule {
 
     private StandardInjectorConfiguration config;
 
-    public ConstructorInstantiatorRuleBase(StandardInjectorConfiguration config) {
+    public ConstructorInstantiatorRuleBase(
+            StandardInjectorConfiguration config) {
         this.config = config;
 
     }
@@ -91,8 +92,9 @@ public abstract class ConstructorInstantiatorRuleBase implements
                     + ".\nSpecify qualifiers on parameters instead");
         }
 
-        return Optional.of(ctx -> config.createFixedConstructorInstantiator(
-                typeToken, ctx, constructor));
+        return Optional
+                .of(ctx -> config.createFixedConstructorInstantiator(typeToken,
+                        ctx, constructor));
 
     }
 
@@ -100,8 +102,7 @@ public abstract class ConstructorInstantiatorRuleBase implements
             Class<?> clazz,
             ArrayList<Constructor<?>> highestPriorityConstructors) {
         return new SaltaException(
-                "Ambigous eligible constructors found on type\n"
-                        + typeToken
+                "Ambigous eligible constructors found on type\n" + typeToken
                         + "\nConstructors:\n"
                         + highestPriorityConstructors.stream()
                                 .map(Object::toString)

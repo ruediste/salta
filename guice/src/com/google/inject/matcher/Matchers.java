@@ -44,8 +44,8 @@ public class Matchers {
 
     private static final Matcher<Object> ANY = new Any();
 
-    private static class Any extends AbstractMatcher<Object> implements
-            Serializable {
+    private static class Any extends AbstractMatcher<Object>
+            implements Serializable {
         public boolean matches(Object o) {
             return true;
         }
@@ -69,8 +69,8 @@ public class Matchers {
         return new Not<T>(p);
     }
 
-    private static class Not<T> extends AbstractMatcher<T> implements
-            Serializable {
+    private static class Not<T> extends AbstractMatcher<T>
+            implements Serializable {
         final Matcher<? super T> delegate;
 
         private Not(Matcher<? super T> delegate) {
@@ -103,8 +103,9 @@ public class Matchers {
     private static void checkForRuntimeRetention(
             Class<? extends Annotation> annotationType) {
         Retention retention = annotationType.getAnnotation(Retention.class);
-        checkArgument(retention != null
-                && retention.value() == RetentionPolicy.RUNTIME,
+        checkArgument(
+                retention != null
+                        && retention.value() == RetentionPolicy.RUNTIME,
                 "Annotation %s is missing RUNTIME retention",
                 annotationType.getSimpleName());
     }
@@ -118,8 +119,8 @@ public class Matchers {
         return new AnnotatedWithType(annotationType);
     }
 
-    private static class AnnotatedWithType extends
-            AbstractMatcher<AnnotatedElement> implements Serializable {
+    private static class AnnotatedWithType
+            extends AbstractMatcher<AnnotatedElement>implements Serializable {
         private final Class<? extends Annotation> annotationType;
 
         public AnnotatedWithType(Class<? extends Annotation> annotationType) {
@@ -162,8 +163,8 @@ public class Matchers {
         return new AnnotatedWith(annotation);
     }
 
-    private static class AnnotatedWith extends
-            AbstractMatcher<AnnotatedElement> implements Serializable {
+    private static class AnnotatedWith extends AbstractMatcher<AnnotatedElement>
+            implements Serializable {
         private final Annotation annotation;
 
         public AnnotatedWith(Annotation annotation) {
@@ -172,8 +173,8 @@ public class Matchers {
         }
 
         public boolean matches(AnnotatedElement element) {
-            Annotation fromElement = element.getAnnotation(annotation
-                    .annotationType());
+            Annotation fromElement = element
+                    .getAnnotation(annotation.annotationType());
             return fromElement != null && annotation.equals(fromElement);
         }
 
@@ -204,8 +205,8 @@ public class Matchers {
         return new SubclassesOf(superclass);
     }
 
-    private static class SubclassesOf extends AbstractMatcher<Class> implements
-            Serializable {
+    private static class SubclassesOf extends AbstractMatcher<Class>
+            implements Serializable {
         private final Class<?> superclass;
 
         public SubclassesOf(Class<?> superclass) {
@@ -242,8 +243,8 @@ public class Matchers {
         return new Only(value);
     }
 
-    private static class Only extends AbstractMatcher<Object> implements
-            Serializable {
+    private static class Only extends AbstractMatcher<Object>
+            implements Serializable {
         private final Object value;
 
         public Only(Object value) {
@@ -279,8 +280,8 @@ public class Matchers {
         return new IdenticalTo(value);
     }
 
-    private static class IdenticalTo extends AbstractMatcher<Object> implements
-            Serializable {
+    private static class IdenticalTo extends AbstractMatcher<Object>
+            implements Serializable {
         private final Object value;
 
         public IdenticalTo(Object value) {
@@ -319,8 +320,8 @@ public class Matchers {
         return new InPackage(targetPackage);
     }
 
-    private static class InPackage extends AbstractMatcher<Class> implements
-            Serializable {
+    private static class InPackage extends AbstractMatcher<Class>
+            implements Serializable {
         private final transient Package targetPackage;
         private final String packageName;
 
@@ -367,8 +368,8 @@ public class Matchers {
         return new InSubpackage(targetPackageName);
     }
 
-    private static class InSubpackage extends AbstractMatcher<Class> implements
-            Serializable {
+    private static class InSubpackage extends AbstractMatcher<Class>
+            implements Serializable {
         private final String targetPackageName;
 
         public InSubpackage(String targetPackageName) {
@@ -409,8 +410,8 @@ public class Matchers {
         return new Returns(returnType);
     }
 
-    private static class Returns extends AbstractMatcher<Method> implements
-            Serializable {
+    private static class Returns extends AbstractMatcher<Method>
+            implements Serializable {
         private final Matcher<? super Class<?>> returnType;
 
         public Returns(Matcher<? super Class<?>> returnType) {

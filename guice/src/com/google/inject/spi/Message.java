@@ -72,7 +72,9 @@ public final class Message implements Serializable {
         this(ImmutableList.of(), message, null);
     }
 
-    /** @since 2.0 */
+    /**
+     * @since 2.0
+     */
     public List<Object> getSources() {
         return sources;
     }
@@ -114,7 +116,9 @@ public final class Message implements Serializable {
                 && sources.equals(e.sources);
     }
 
-    /** @since 2.0 */
+    /**
+     * @since 2.0
+     */
     public void applyTo(Binder binder) {
         binder.addError(this);
     }

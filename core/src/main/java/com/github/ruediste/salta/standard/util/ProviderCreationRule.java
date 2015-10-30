@@ -44,8 +44,7 @@ public class ProviderCreationRule implements CreationRule {
         private static final long serialVersionUID = 1L;
 
         ProviderAccessBeforeInstanceCreationFinishedException() {
-            super(
-                    "Attempt to access injected Provider before the instance construction finished (e.g. from construction, injected method or post construct method)");
+            super("Attempt to access injected Provider before the instance construction finished (e.g. from construction, injected method or post construct method)");
         }
     }
 
@@ -88,7 +87,8 @@ public class ProviderCreationRule implements CreationRule {
             } catch (Throwable e) {
                 throw new SaltaException(
                         "Error while getting instance from provider for key "
-                                + dependency, e);
+                                + dependency,
+                        e);
             } finally {
                 isGetting.remove();
             }
@@ -129,8 +129,8 @@ public class ProviderCreationRule implements CreationRule {
                         "Cannot inject a Provider that has no type parameter");
             }
             // determine dependency
-            TypeToken<?> requestedType = key.getType().resolveType(
-                    providerType.getTypeParameters()[0]);
+            TypeToken<?> requestedType = key.getType()
+                    .resolveType(providerType.getTypeParameters()[0]);
 
             CoreDependencyKey<?> dep;
             if (key instanceof InjectionPoint) {
@@ -160,10 +160,10 @@ public class ProviderCreationRule implements CreationRule {
 
                             // create and wrap provider instance
                             RecipeCompiler compiler = ctx.getCompiler();
-                            ProviderImpl provider = new ProviderImpl(key, ctx
-                                    .getRecipeLock(), () -> compiler
-                                    .compileSupplier(innerRecipe.get().apply(
-                                            ctx)));
+                            ProviderImpl provider = new ProviderImpl(key,
+                                    ctx.getRecipeLock(),
+                                    () -> compiler.compileSupplier(
+                                            innerRecipe.get().apply(ctx)));
 
                             Object wrappedProvider = wrapper.apply(key,
                                     provider);

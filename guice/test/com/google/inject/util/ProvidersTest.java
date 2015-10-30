@@ -62,8 +62,8 @@ public class ProvidersTest extends TestCase {
                 .testEquals();
     }
 
-    private static class JavaxProvider implements
-            javax.inject.Provider<Integer> {
+    private static class JavaxProvider
+            implements javax.inject.Provider<Integer> {
         private final int value;
 
         public JavaxProvider(int value) {
@@ -86,8 +86,8 @@ public class ProvidersTest extends TestCase {
         }
     }
 
-    private static class JavaxProviderWithDependencies implements
-            javax.inject.Provider<Integer> {
+    private static class JavaxProviderWithDependencies
+            implements javax.inject.Provider<Integer> {
         private int value;
 
         @Inject

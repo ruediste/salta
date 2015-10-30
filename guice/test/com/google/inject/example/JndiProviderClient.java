@@ -36,8 +36,8 @@ class JndiProviderClient {
                 bind(Context.class).to(InitialContext.class);
 
                 // Bind to DataSource from JNDI.
-                bind(DataSource.class).toProvider(
-                        fromJndi(DataSource.class, "..."));
+                bind(DataSource.class)
+                        .toProvider(fromJndi(DataSource.class, "..."));
             }
         });
     }

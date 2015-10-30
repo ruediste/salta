@@ -183,8 +183,10 @@ public class Jsr330Test extends TestCase {
             }
         });
 
-        assertSame(injector.getInstance(J.class), injector.getInstance(J.class));
-        assertSame(injector.getInstance(K.class), injector.getInstance(K.class));
+        assertSame(injector.getInstance(J.class),
+                injector.getInstance(J.class));
+        assertSame(injector.getInstance(K.class),
+                injector.getInstance(K.class));
     }
 
     public void testInjectingFinalFieldsIsForbidden() {
@@ -228,8 +230,7 @@ public class Jsr330Test extends TestCase {
             }).getInstance(N.class);
             fail();
         } catch (SaltaException expected) {
-            assertContains(
-                    expected.getMessage(),
+            assertContains(expected.getMessage(),
                     "Method is annotated with @Inject but declares type parameters",
                     "setB");
         }
@@ -255,12 +256,12 @@ public class Jsr330Test extends TestCase {
             @Override
             protected void configure() {
                 bind(B.class).toProvider(BProvider.class);
-                bind(B.class).annotatedWith(Names.named("1")).toProvider(
-                        BProvider.class);
-                bind(B.class).annotatedWith(Names.named("2")).toProvider(
-                        Key.get(BProvider.class));
-                bind(B.class).annotatedWith(Names.named("3")).toProvider(
-                        TypeLiteral.get(BProvider.class));
+                bind(B.class).annotatedWith(Names.named("1"))
+                        .toProvider(BProvider.class);
+                bind(B.class).annotatedWith(Names.named("2"))
+                        .toProvider(Key.get(BProvider.class));
+                bind(B.class).annotatedWith(Names.named("3"))
+                        .toProvider(TypeLiteral.get(BProvider.class));
             }
         });
 

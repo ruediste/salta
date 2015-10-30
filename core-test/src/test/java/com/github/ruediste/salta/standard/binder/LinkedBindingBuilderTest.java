@@ -87,10 +87,10 @@ public class LinkedBindingBuilderTest {
 
             @Override
             protected void configure() {
-                bind(TestIA.class).annotatedWith(Names.named("x")).toInstance(
-                        instance);
-                bind(TestIA.class).annotatedWith(Names.named("y")).toInstance(
-                        instance);
+                bind(TestIA.class).annotatedWith(Names.named("x"))
+                        .toInstance(instance);
+                bind(TestIA.class).annotatedWith(Names.named("y"))
+                        .toInstance(instance);
             }
         });
 
@@ -172,10 +172,10 @@ public class LinkedBindingBuilderTest {
 
             @Override
             protected void configure() {
-                bind(TestIA.class).annotatedWith(Names.named("x")).toProvider(
-                        provider);
-                bind(TestIA.class).annotatedWith(Names.named("y")).toProvider(
-                        provider);
+                bind(TestIA.class).annotatedWith(Names.named("x"))
+                        .toProvider(provider);
+                bind(TestIA.class).annotatedWith(Names.named("y"))
+                        .toProvider(provider);
             }
         });
 
@@ -185,8 +185,8 @@ public class LinkedBindingBuilderTest {
         assertNull("instance field not injected", instance.b);
         assertNotNull("provider field injected", provider.b);
 
-        assertSame(instance, injector.getInstance(DependencyKey
-                .of(TestIA.class).withAnnotations(Names.named("y"))));
+        assertSame(instance, injector.getInstance(DependencyKey.of(TestIA.class)
+                .withAnnotations(Names.named("y"))));
         assertEquals(1, provider.injectionCount);
     }
 
@@ -217,24 +217,24 @@ public class LinkedBindingBuilderTest {
 
             @Override
             protected void configure() {
-                bind(TestIA.class).annotatedWith(Names.named("x")).toProvider(
-                        ProviderIA1.class);
-                bind(TestIA.class).annotatedWith(Names.named("y")).toProvider(
-                        ProviderIA1.class);
+                bind(TestIA.class).annotatedWith(Names.named("x"))
+                        .toProvider(ProviderIA1.class);
+                bind(TestIA.class).annotatedWith(Names.named("y"))
+                        .toProvider(ProviderIA1.class);
             }
         });
 
-        TestA retrievedX = (TestA) injector.getInstance(DependencyKey.of(
-                TestIA.class).withAnnotations(Names.named("x")));
+        TestA retrievedX = (TestA) injector.getInstance(DependencyKey
+                .of(TestIA.class).withAnnotations(Names.named("x")));
 
         assertNull("instance field not injected", retrievedX.b);
 
-        TestA retrievedY = (TestA) injector.getInstance(DependencyKey.of(
-                TestIA.class).withAnnotations(Names.named("y")));
+        TestA retrievedY = (TestA) injector.getInstance(DependencyKey
+                .of(TestIA.class).withAnnotations(Names.named("y")));
         assertNotSame(retrievedX, retrievedY);
 
-        assertNotSame(retrievedX, injector.getInstance(DependencyKey.of(
-                TestIA.class).withAnnotations(Names.named("x"))));
+        assertNotSame(retrievedX, injector.getInstance(DependencyKey
+                .of(TestIA.class).withAnnotations(Names.named("x"))));
     }
 
     private static class ProviderIACircular implements Provider<TestIA> {
@@ -314,8 +314,8 @@ public class LinkedBindingBuilderTest {
             @Override
             protected void configure() {
                 try {
-                    bind(TestConstructorMembersInjected.class).toConstructor(
-                            TestConstructorMembersInjected.class
+                    bind(TestConstructorMembersInjected.class)
+                            .toConstructor(TestConstructorMembersInjected.class
                                     .getConstructor());
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new RuntimeException(e);
@@ -323,7 +323,7 @@ public class LinkedBindingBuilderTest {
             }
         });
 
-        assertNotNull(injector
-                .getInstance(TestConstructorMembersInjected.class).b);
+        assertNotNull(
+                injector.getInstance(TestConstructorMembersInjected.class).b);
     }
 }
