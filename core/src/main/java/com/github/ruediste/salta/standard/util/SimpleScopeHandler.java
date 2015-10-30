@@ -1,14 +1,10 @@
 package com.github.ruediste.salta.standard.util;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.Map;
 import java.util.function.Supplier;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.standard.ScopeImpl.ScopeHandler;
-import com.google.common.collect.Maps;
 
 /**
  * Scopes a single execution of a block of code. Apply this scope with a
@@ -40,25 +36,10 @@ import com.google.common.collect.Maps;
  * @author Fedor Karpelevitch
  * @author Ruedi Steinmann
  */
-public class SimpleScopeHandler implements ScopeHandler {
+public class SimpleScopeHandler extends SimpleScopeHandlerBase {
 
-    protected final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
-
-    public void enter(Map<Binding, Object> instances) {
-        checkState(values.get() == null,
-                "A scoping block is already in progress");
-        values.set(instances);
-    }
-
-    public void enter() {
-        checkState(values.get() == null,
-                "A scoping block is already in progress");
-        values.set(Maps.newHashMap());
-    }
-
-    public void exit() {
-        checkState(values.get() != null, "No scoping block in progress");
-        values.remove();
+    public SimpleScopeHandler(String scopeName) {
+        super(scopeName);
     }
 
     @Override
@@ -66,7 +47,11 @@ public class SimpleScopeHandler implements ScopeHandler {
             CoreDependencyKey<?> requestedKey) {
 
         return () -> {
-            Map<Binding, Object> scopedObjects = getScopedObjectMap(requestedKey);
+            Map<Binding, Object> scopedObjects = values.get();
+            if (scopedObjects == null) {
+                throw new RuntimeException("Cannot access " + requestedKey
+                        + " outside of scope " + scopeName);
+            }
             if (!scopedObjects.containsKey(binding)) {
                 Object current = supplier.get();
                 scopedObjects.put(binding, current);
@@ -75,16 +60,6 @@ public class SimpleScopeHandler implements ScopeHandler {
                 return scopedObjects.get(binding);
 
         };
-    }
-
-    private Map<Binding, Object> getScopedObjectMap(
-            CoreDependencyKey<?> requestedKey) {
-        Map<Binding, Object> scopedObjects = values.get();
-        if (scopedObjects == null) {
-            throw new RuntimeException("Cannot access " + requestedKey
-                    + " outside of a scoping block");
-        }
-        return scopedObjects;
     }
 
 }

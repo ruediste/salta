@@ -1,17 +1,13 @@
 package com.github.ruediste.salta.standard.util;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.Map;
 import java.util.function.Supplier;
 
-import net.sf.cglib.proxy.Dispatcher;
-import net.sf.cglib.proxy.Enhancer;
-
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.core.CoreDependencyKey;
-import com.github.ruediste.salta.standard.ScopeImpl.ScopeHandler;
-import com.google.common.collect.Maps;
+
+import net.sf.cglib.proxy.Dispatcher;
+import net.sf.cglib.proxy.Enhancer;
 
 /**
  * Scopes a single execution of a block of code. In contrast to
@@ -45,51 +41,10 @@ import com.google.common.collect.Maps;
  * @author Fedor Karpelevitch
  * @author Ruedi Steinmann
  */
-public class SimpleProxyScopeHandler implements ScopeHandler {
-
-    protected final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
-    protected String scopeName;
+public class SimpleProxyScopeHandler extends SimpleScopeHandlerBase {
 
     public SimpleProxyScopeHandler(String scopeName) {
-        this.scopeName = scopeName;
-    }
-
-    /**
-     * Enter the scope with a predefined map of instances. Make sure to
-     * synchronize access to the map (no two threads using the same map at the
-     * same time)
-     */
-    public void enter(Map<Binding, Object> valueMap) {
-        checkState(values.get() == null, "Scope " + scopeName
-                + "  is already in progress");
-        values.set(valueMap);
-    }
-
-    public void enter() {
-        checkState(values.get() == null, "Scope " + scopeName
-                + "  is already in progress");
-        values.set(Maps.newHashMap());
-    }
-
-    /**
-     * Return the current value map.
-     * 
-     * @throws RuntimeException
-     *             if no scope is active
-     */
-    public Map<Binding, Object> getValueMap() {
-        Map<Binding, Object> scopedObjects = values.get();
-        if (scopedObjects == null) {
-            throw new RuntimeException(
-                    "Cannot access value map outside of scope " + scopeName);
-        }
-        return scopedObjects;
-    }
-
-    public void exit() {
-        checkState(values.get() != null, "Scope " + scopeName
-                + "is not in progress");
-        values.remove();
+        super(scopeName);
     }
 
     @Override
@@ -103,22 +58,18 @@ public class SimpleProxyScopeHandler implements ScopeHandler {
 
                     @Override
                     public Object loadObject() throws Exception {
-                        return getScopedObjectMap(requestedKey)
-                                .computeIfAbsent(binding, b -> supplier.get());
+                        Map<Binding, Object> scopedObjects = values.get();
+                        if (scopedObjects == null) {
+                            throw new RuntimeException(
+                                    "Cannot access " + requestedKey
+                                            + " outside of scope " + scopeName);
+                        }
+                        return scopedObjects.computeIfAbsent(binding,
+                                b -> supplier.get());
                     }
                 });
 
         return () -> proxy;
-    }
-
-    protected Map<Binding, Object> getScopedObjectMap(
-            CoreDependencyKey<?> requestedKey) {
-        Map<Binding, Object> scopedObjects = values.get();
-        if (scopedObjects == null) {
-            throw new RuntimeException("Cannot access " + requestedKey
-                    + " outside of scope " + scopeName);
-        }
-        return scopedObjects;
     }
 
 }
