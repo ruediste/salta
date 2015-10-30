@@ -14,6 +14,9 @@ import com.github.ruediste.salta.core.Scope;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
+/**
+ * {@link Scope} implementation delegating to a {@link ScopeHandler}.
+ */
 public class ScopeImpl implements Scope {
 
     private ScopeHandler handler;
@@ -46,8 +49,8 @@ public class ScopeImpl implements Scope {
         CompiledSupplier compilerInnerRecipe = ctx.getCompiler()
                 .compileSupplier(binding.getOrCreateRecipe(ctx));
 
-        Supplier<Object> scoped = handler.scope(
-                compilerInnerRecipe::getNoThrow, binding, requestedKey);
+        Supplier<Object> scoped = handler.scope(compilerInnerRecipe::getNoThrow,
+                binding, requestedKey);
         return new SupplierRecipe() {
 
             @Override

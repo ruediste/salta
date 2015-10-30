@@ -92,13 +92,13 @@ public class JSR330Module extends AbstractModule {
 
     protected void addDefaultConstructionRule(
             StandardInjectorConfiguration config) {
-        config.construction.constructionRules.add(new DefaultConstructionRule(
-                config));
+        config.construction.constructionRules
+                .add(new DefaultConstructionRule(config));
     }
 
     protected void addJitBindingRule(StandardInjectorConfiguration config) {
-        config.creationPipeline.jitBindingRules.add(new DefaultJITBindingRule(
-                config));
+        config.creationPipeline.jitBindingRules
+                .add(new DefaultJITBindingRule(config));
     }
 
     protected void addJitBindingKeyRule(StandardInjectorConfiguration config) {
@@ -118,9 +118,10 @@ public class JSR330Module extends AbstractModule {
                 key -> () -> config.stage));
     }
 
-    protected void addInjectionOptionalRule(StandardInjectorConfiguration config) {
-        config.injectionOptionalRules.add(e -> Optional.of(e
-                .isAnnotationPresent(InjectionOptional.class)));
+    protected void addInjectionOptionalRule(
+            StandardInjectorConfiguration config) {
+        config.injectionOptionalRules.add(e -> Optional
+                .of(e.isAnnotationPresent(InjectionOptional.class)));
     }
 
     protected void addFixedConstructorInstantiatorFactory(
@@ -132,20 +133,15 @@ public class JSR330Module extends AbstractModule {
     protected void addSingletonInstantiationDynamicInitializer(
             StandardInjectorConfiguration config) {
         Injector injector = binder().getInjector();
-        config.dynamicInitializers
-                .add(() -> {
-                    injector.getDelegate()
-                            .getCoreInjector()
-                            .withRecipeCreationContext(
-                                    ctx -> {
-                                        for (Binding b : config.creationPipeline.staticBindings) {
-                                            b.getScope()
-                                                    .performEagerInstantiation(
-                                                            ctx, b);
-                                        }
-                                        return null;
-                                    });
-                });
+        config.dynamicInitializers.add(() -> {
+            injector.getDelegate().getCoreInjector()
+                    .withRecipeCreationContext(ctx -> {
+                for (Binding b : config.creationPipeline.staticBindings) {
+                    b.getScope().performEagerInstantiation(ctx, b);
+                }
+                return null;
+            });
+        });
     }
 
     protected void setMembersInjectorFactory(
@@ -223,27 +219,31 @@ public class JSR330Module extends AbstractModule {
         config.dynamicInitializers.add(() -> new StaticMembersInjectorBase() {
             @Override
             protected InjectionInstruction shouldInject(Method method) {
-                return method.isAnnotationPresent(Inject.class) ? InjectionInstruction.INJECT
+                return method.isAnnotationPresent(Inject.class)
+                        ? InjectionInstruction.INJECT
                         : InjectionInstruction.NO_INJECT;
             }
 
             @Override
             protected InjectionInstruction shouldInject(Field field) {
-                return field.isAnnotationPresent(Inject.class) ? InjectionInstruction.INJECT
+                return field.isAnnotationPresent(Inject.class)
+                        ? InjectionInstruction.INJECT
                         : InjectionInstruction.NO_INJECT;
             }
         }.injectStaticMembers(config, injector));
     }
 
-    protected void addQualifierExtractors(StandardInjectorConfiguration config) {
+    protected void addQualifierExtractors(
+            StandardInjectorConfiguration config) {
         config.requiredQualifierExtractors.add(annotatedElement -> Arrays
-                .stream(annotatedElement.getAnnotations()).filter(
-                        a -> a.annotationType().isAnnotationPresent(
-                                Qualifier.class)));
+                .stream(annotatedElement.getAnnotations())
+                .filter(a -> a.annotationType()
+                        .isAnnotationPresent(Qualifier.class)));
 
-        config.availableQualifierExtractors.add(annotated -> Arrays.stream(
-                annotated.getAnnotations()).filter(
-                a -> a.annotationType().isAnnotationPresent(Qualifier.class)));
+        config.availableQualifierExtractors
+                .add(annotated -> Arrays.stream(annotated.getAnnotations())
+                        .filter(a -> a.annotationType()
+                                .isAnnotationPresent(Qualifier.class)));
     }
 
     protected void addMembersInjectorCreationRule(
@@ -291,11 +291,12 @@ public class JSR330Module extends AbstractModule {
                 });
     }
 
-    protected void addProviderCreationRule(StandardInjectorConfiguration config) {
-        config.creationPipeline.creationRules.add(new ProviderCreationRule(
-                key -> {
+    protected void addProviderCreationRule(
+            StandardInjectorConfiguration config) {
+        config.creationPipeline.creationRules
+                .add(new ProviderCreationRule(key -> {
                     return key.getRawType().equals(Provider.class);
-                }, (type, supplier) -> new Provider<Object>() {
+                } , (type, supplier) -> new Provider<Object>() {
                     @Override
                     public Object get() {
                         return supplier.get();
@@ -322,7 +323,7 @@ public class JSR330Module extends AbstractModule {
                                 throw new SaltaException(
                                         "@PostConstruct methods may not declare generic type parameters");
                             }
-                            return true;
+                            return !overrideIndex.isOverridden(method);
                         }
 
                         return false;
@@ -353,7 +354,8 @@ public class JSR330Module extends AbstractModule {
                         }
                         if (index.isOverridden(method))
                             return InjectionInstruction.NO_INJECTION;
-                        return config.isInjectionOptional(method) ? InjectionInstruction.INJECT_OPTIONAL
+                        return config.isInjectionOptional(method)
+                                ? InjectionInstruction.INJECT_OPTIONAL
                                 : InjectionInstruction.INJECT;
                     }
 
@@ -372,7 +374,8 @@ public class JSR330Module extends AbstractModule {
                         if (!annotationPresent)
                             return InjectionInstruction.NO_INJECTION;
                         else
-                            return config.isInjectionOptional(field) ? InjectionInstruction.INJECT_OPTIONAL
+                            return config.isInjectionOptional(field)
+                                    ? InjectionInstruction.INJECT_OPTIONAL
                                     : InjectionInstruction.INJECT;
                     }
 
@@ -393,7 +396,8 @@ public class JSR330Module extends AbstractModule {
                                 .getEnclosingClass() != null;
 
                         if (c.getParameterCount() == 0
-                                && (Modifier.isPublic(c.getModifiers()) || isInnerClass))
+                                && (Modifier.isPublic(c.getModifiers())
+                                        || isInnerClass))
                             return 1;
                         return null;
                     }
@@ -425,7 +429,8 @@ public class JSR330Module extends AbstractModule {
         config.construction.constructionRules
                 .add(new ProvidedByConstructionRuleBase(Supplier.class) {
                     @Override
-                    protected DependencyKey<?> getProviderKey(TypeToken<?> type) {
+                    protected DependencyKey<?> getProviderKey(
+                            TypeToken<?> type) {
                         ProvidedBy providedBy = type.getRawType()
                                 .getAnnotation(ProvidedBy.class);
 

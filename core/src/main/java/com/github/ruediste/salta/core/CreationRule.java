@@ -18,6 +18,14 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public interface CreationRule {
 
+    /**
+     * Create a function to create the compileable recipe. The caller owns the
+     * {@link CoreInjector#recipeLock}. This method should return as fast as
+     * possible. The rule only needs to make sure if it really matches the given
+     * injection point. Any expensive operations should be performed while the
+     * returned function is executed. It is guaranteed that it is only invoked
+     * once (while the caller owns the recipe lock.
+     */
     Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
             CoreDependencyKey<?> key, CoreInjector injector);
 

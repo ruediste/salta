@@ -148,7 +148,10 @@ public class RecipeCompiler {
         return cls;
     }
 
-    private Object instantiate(Class<?> cls) {
+    /**
+     * Instantiate the given class by callint its no args constructor.
+     */
+    public Object instantiate(Class<?> cls) {
 
         Object instance;
         try {
