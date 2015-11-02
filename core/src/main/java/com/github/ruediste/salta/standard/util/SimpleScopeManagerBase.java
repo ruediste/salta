@@ -8,12 +8,12 @@ import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.standard.ScopeImpl.ScopeHandler;
 import com.google.common.collect.Maps;
 
-public abstract class SimpleScopeHandlerBase implements ScopeHandler {
+public abstract class SimpleScopeManagerBase implements ScopeHandler {
 
     protected final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
     protected final String scopeName;
 
-    public SimpleScopeHandlerBase(String scopeName) {
+    public SimpleScopeManagerBase(String scopeName) {
         this.scopeName = scopeName;
     }
 

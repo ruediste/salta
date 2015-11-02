@@ -11,7 +11,7 @@ import net.sf.cglib.proxy.Enhancer;
 
 /**
  * Scopes a single execution of a block of code. In contrast to
- * {@link SimpleScopeHandler}, this scope handler creates a proxy, which will
+ * {@link SimpleScopeManager}, this scope handler creates a proxy, which will
  * always delegate to the instance in the current scope. Apply this scope with a
  * try/finally block:
  * 
@@ -41,9 +41,9 @@ import net.sf.cglib.proxy.Enhancer;
  * @author Fedor Karpelevitch
  * @author Ruedi Steinmann
  */
-public class SimpleProxyScopeHandler extends SimpleScopeHandlerBase {
+public class SimpleProxyScopeManager extends SimpleScopeManagerBase {
 
-    public SimpleProxyScopeHandler(String scopeName) {
+    public SimpleProxyScopeManager(String scopeName) {
         super(scopeName);
     }
 

@@ -22,7 +22,7 @@ import com.github.ruediste.salta.jsr330.AbstractModule;
 import com.github.ruediste.salta.jsr330.Injector;
 import com.github.ruediste.salta.jsr330.Salta;
 import com.github.ruediste.salta.standard.ScopeImpl;
-import com.github.ruediste.salta.standard.util.SimpleScopeHandler;
+import com.github.ruediste.salta.standard.util.SimpleScopeManager;
 
 public class CustomScopesTest {
 
@@ -30,7 +30,7 @@ public class CustomScopesTest {
 
     @Inject
     @Named("batchScope")
-    private SimpleScopeHandler handler;
+    private SimpleScopeManager handler;
 
     @Target({ TYPE, METHOD })
     @Retention(RUNTIME)
@@ -44,9 +44,9 @@ public class CustomScopesTest {
 
             @Override
             protected void configure() throws Exception {
-                SimpleScopeHandler handler = new SimpleScopeHandler(
+                SimpleScopeManager handler = new SimpleScopeManager(
                         "Test Scope");
-                bind(SimpleScopeHandler.class).named("batchScope")
+                bind(SimpleScopeManager.class).named("batchScope")
                         .toInstance(handler);
                 bindScope(BatchScoped.class, new ScopeImpl(handler));
             }
@@ -79,7 +79,7 @@ public class CustomScopesTest {
             injector.getInstance(A.class);
             fail();
         } catch (SaltaException e) {
-            if (!e.getMessage().contains("outside of a scoping block"))
+            if (!e.getMessage().contains("outside of scope Test Scope"))
                 throw e;
         }
     }

@@ -27,7 +27,7 @@ public class SimpleProxyScopeHandlerTest {
 
     @Inject
     @Named("batch")
-    SimpleProxyScopeHandler handler;
+    SimpleProxyScopeManager handler;
 
     @Target({ TYPE, METHOD })
     @Retention(RUNTIME)
@@ -41,10 +41,10 @@ public class SimpleProxyScopeHandlerTest {
 
             @Override
             protected void configure() throws Exception {
-                SimpleProxyScopeHandler handler = new SimpleProxyScopeHandler(
+                SimpleProxyScopeManager handler = new SimpleProxyScopeManager(
                         "batch");
                 bindScope(BatchScoped.class, new ScopeImpl(handler));
-                bind(SimpleProxyScopeHandler.class).named("batch")
+                bind(SimpleProxyScopeManager.class).named("batch")
                         .toInstance(handler);
             }
         });

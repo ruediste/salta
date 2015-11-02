@@ -36,9 +36,9 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
  * @author Fedor Karpelevitch
  * @author Ruedi Steinmann
  */
-public class SimpleScopeHandler extends SimpleScopeHandlerBase {
+public class SimpleScopeManager extends SimpleScopeManagerBase {
 
-    public SimpleScopeHandler(String scopeName) {
+    public SimpleScopeManager(String scopeName) {
         super(scopeName);
     }
 
