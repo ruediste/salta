@@ -47,11 +47,9 @@ public class SimpleScopeManager extends SimpleScopeManagerBase {
             CoreDependencyKey<?> requestedKey) {
 
         return () -> {
-            Map<Binding, Object> scopedObjects = values.get();
-            if (scopedObjects == null) {
-                throw new RuntimeException("Cannot access " + requestedKey
-                        + " outside of scope " + scopeName);
-            }
+            Map<Binding, Object> scopedObjects = tryGetValueMap()
+                    .orElseThrow(() -> new RuntimeException("Cannot access "
+                            + requestedKey + " outside of scope " + scopeName));
             if (!scopedObjects.containsKey(binding)) {
                 Object current = supplier.get();
                 scopedObjects.put(binding, current);

@@ -1,8 +1,7 @@
 package com.github.ruediste.salta.standard.util;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.Map;
+import java.util.Optional;
 
 import com.github.ruediste.salta.core.Binding;
 import com.github.ruediste.salta.standard.ScopeImpl.ScopeHandler;
@@ -10,17 +9,31 @@ import com.google.common.collect.Maps;
 
 public abstract class SimpleScopeManagerBase implements ScopeHandler {
 
-    protected final ThreadLocal<Map<Binding, Object>> values = new ThreadLocal<>();
+    protected final ThreadLocal<ScopeState> currentState = new ThreadLocal<>();
     protected final String scopeName;
 
     public SimpleScopeManagerBase(String scopeName) {
         this.scopeName = scopeName;
     }
 
-    public void enter(Map<Binding, Object> instances) {
-        checkState(values.get() == null,
-                "A scoping block is already in progress");
-        values.set(instances);
+    public static class ScopeState {
+        Map<Binding, Object> data = Maps.newHashMap();
+
+        ScopeState() {
+        }
+    }
+
+    public void inScopeDo(ScopeState state, Runnable runnable) {
+        ScopeState old = setState(state);
+        try {
+            runnable.run();
+        } finally {
+            setState(old);
+        }
+    }
+
+    public Optional<Map<Binding, Object>> tryGetValueMap() {
+        return Optional.ofNullable(currentState.get()).map(d -> d.data);
     }
 
     /**
@@ -30,27 +43,36 @@ public abstract class SimpleScopeManagerBase implements ScopeHandler {
      *             if no scope is active
      */
     public Map<Binding, Object> getValueMap() {
-        Map<Binding, Object> scopedObjects = values.get();
-        if (scopedObjects == null) {
-            throw new RuntimeException(
-                    "Cannot access value map outside of scope " + scopeName);
-        }
-        return scopedObjects;
-    }
-
-    public void enter() {
-        checkState(values.get() == null,
-                "A scoping block is already in progress");
-        values.set(Maps.newHashMap());
+        return tryGetValueMap().orElseThrow(() -> new RuntimeException(
+                "Cannot access value map outside of scope " + scopeName));
     }
 
     /**
-     * Exit the scope
+     * Set a fresh scope state.
+     * 
+     * @return the old scope state
      */
-    public Map<Binding, Object> exit() {
-        Map<Binding, Object> currentValues = values.get();
-        checkState(currentValues != null, "No scoping block in progress");
-        values.remove();
-        return currentValues;
+    public ScopeState setFreshState() {
+        return setState(createFreshState());
+    }
+
+    public ScopeState createFreshState() {
+        return new ScopeState();
+    }
+
+    /**
+     * Set a given scope state
+     * 
+     * @param state
+     *            state to set, or null to set to an empty state
+     * @return the old scope state
+     */
+    public ScopeState setState(ScopeState state) {
+        ScopeState old = currentState.get();
+        if (state == null)
+            currentState.remove();
+        else
+            currentState.set(state);
+        return old;
     }
 }

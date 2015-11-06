@@ -58,12 +58,11 @@ public class SimpleProxyScopeManager extends SimpleScopeManagerBase {
 
                     @Override
                     public Object loadObject() throws Exception {
-                        Map<Binding, Object> scopedObjects = values.get();
-                        if (scopedObjects == null) {
-                            throw new RuntimeException(
-                                    "Cannot access " + requestedKey
-                                            + " outside of scope " + scopeName);
-                        }
+                        Map<Binding, Object> scopedObjects = tryGetValueMap()
+                                .orElseThrow(() -> new RuntimeException(
+                                        "Cannot access " + requestedKey
+                                                + " outside of scope "
+                                                + scopeName));
                         return scopedObjects.computeIfAbsent(binding,
                                 b -> supplier.get());
                     }

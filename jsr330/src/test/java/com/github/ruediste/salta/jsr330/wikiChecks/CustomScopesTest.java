@@ -61,16 +61,16 @@ public class CustomScopesTest {
 
     @Test
     public void testCustomScope() {
-        handler.enter();
+        handler.setFreshState();
         A a1 = injector.getInstance(A.class);
         A a2 = injector.getInstance(A.class);
         assertSame(a1, a2);
-        handler.exit();
+        handler.setState(null);
 
-        handler.enter();
+        handler.setFreshState();
         A a3 = injector.getInstance(A.class);
         assertNotSame(a3, a1);
-        handler.exit();
+        handler.setState(null);
     }
 
     @Test

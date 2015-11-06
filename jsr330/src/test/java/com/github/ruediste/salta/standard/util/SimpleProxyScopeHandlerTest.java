@@ -75,15 +75,15 @@ public class SimpleProxyScopeHandlerTest {
         A a1 = injector.getInstance(A.class);
         A a2 = injector.getInstance(A.class);
 
-        handler.enter();
+        handler.setFreshState();
         a1.b.setValue(3);
         assertNotSame(a1, a2);
         assertEquals(3, a2.b.getValue());
-        handler.exit();
+        handler.setState(null);
 
-        handler.enter();
+        handler.setFreshState();
         assertEquals(0, a2.b.getValue());
-        handler.exit();
+        handler.setState(null);
 
     }
 
