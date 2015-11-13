@@ -1,10 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>salta-core</artifactId>
+	
+	<parent>
+		<groupId>com.github.ruediste.salta</groupId>
+		<artifactId>salta-parent</artifactId>
+		<version>0.3-SNAPSHOT</version>
+	</parent><artifactId>salta-core</artifactId>
 	<packaging>jar</packaging>
 
-	<name>Salta Core</name>
+	<name>Salta Core</name><description>Core of the Salta Framework. Provides most of the infrastructure, but no API</description>
 	<url>https://github.com/ruediste/salta</url>
 
 	<properties>
@@ -12,7 +18,7 @@
 	</properties>
 
 	<dependencies>
-		
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -29,7 +35,7 @@
 		<dependency>
 			<groupId>com.github.ruediste</groupId>
 			<artifactId>attached-properties-4j</artifactId>
-			<version>0.0.2</version>
+			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -41,11 +47,7 @@
 			<version>5.0.4</version>
 		</dependency>
 	</dependencies>
+
 	
-	<parent>
-		<groupId>com.github.ruediste.salta</groupId>
-		<artifactId>salta-parent</artifactId>
-		<version>0.3-SNAPSHOT</version>
-	</parent>
-	<description>Core of the Salta Framework. Provides most of the infrastructure, but no API</description>
+	
 </project>
