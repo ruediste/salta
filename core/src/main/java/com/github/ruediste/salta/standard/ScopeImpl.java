@@ -33,7 +33,6 @@ public class ScopeImpl implements Scope {
          * @param requestedKey
          *            Key beeing requested. Be aware that the same binding can
          *            be requested using different keys.
-         * @return
          */
         Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
                 CoreDependencyKey<?> requestedKey);

@@ -27,12 +27,12 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import junit.framework.Assert;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+
+import junit.framework.Assert;
 
 /**
  * @author jessewilson@google.com (Jesse Wilson)
@@ -58,26 +58,14 @@ public class Asserts {
                 .append(")").toString();
     }
 
-    /**
-     * Returns the source file appears in error messages based on
-     * {@link #getIncludeStackTraceOption()} value.
-     */
     public static String getDeclaringSourcePart(Class clazz) {
         return ".configure(" + clazz.getSimpleName() + ".java:";
     }
 
-    /**
-     * Returns true if {@link #getIncludeStackTraceOption()} returns
-     * {@link IncludeStackTraceOption#OFF}.
-     */
     public static boolean isIncludeStackTraceOff() {
         return false;
     }
 
-    /**
-     * Returns true if {@link #getIncludeStackTraceOption()} returns
-     * {@link IncludeStackTraceOption#COMPLETE}.
-     */
     public static boolean isIncludeStackTraceComplete() {
         return true;
     }
