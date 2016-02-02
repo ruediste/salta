@@ -1,11 +1,13 @@
 package com.github.ruediste.salta.standard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import com.github.ruediste.salta.core.SaltaException;
 import com.github.ruediste.salta.jsr330.AbstractModule;
-import com.github.ruediste.salta.jsr330.JSR330Module;
+import com.github.ruediste.salta.jsr330.Injector;
 import com.github.ruediste.salta.jsr330.MembersInjector;
 import com.github.ruediste.salta.jsr330.Provides;
 import com.github.ruediste.salta.jsr330.Salta;
@@ -37,7 +39,7 @@ public class ProviderMethodBinderTest {
         assertEquals(5, a.value);
     }
 
-    private static class TestB {
+    private class TestB {
     }
 
     @Test
@@ -55,5 +57,50 @@ public class ProviderMethodBinderTest {
         }).getInstance(TestA.class);
 
         assertEquals(5, a.value);
+    }
+
+    class TestModuleBase extends AbstractModule {
+
+        @Override
+        protected void configure() throws Exception {
+        }
+
+        @Provides
+        TestA produceTestA(MembersInjector<TestB> foo) {
+            return new TestA(5);
+        }
+
+        @Provides
+        TestB produceTestB() {
+            return new TestB();
+        }
+    }
+
+    @Test
+    public void testOverrideProvidesMethos() {
+        Injector injector = Salta.createInjector(new TestModuleBase() {
+
+            @Override
+            @Provides
+            TestA produceTestA(MembersInjector<TestB> foo) {
+                return new TestA(6);
+            }
+
+            @Override
+            TestB produceTestB() {
+                return null;
+            }
+        });
+        TestA a = injector.getInstance(TestA.class);
+
+        assertEquals(6, a.value);
+
+        try {
+            injector.getInstance(TestB.class);
+            fail();
+        } catch (SaltaException e) {
+            if (!e.getMessage().contains("No instance found for"))
+                throw e;
+        }
     }
 }

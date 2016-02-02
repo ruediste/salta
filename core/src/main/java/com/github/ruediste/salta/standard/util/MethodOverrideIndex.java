@@ -117,6 +117,10 @@ public class MethodOverrideIndex {
         return scannedMethods.containsKey(m);
     }
 
+    /**
+     * Return true if the given method is overridden by another method scanned
+     * by this index
+     */
     public boolean isOverridden(Method m) {
         TypeToken<?> type = scannedMethods.get(m);
         if (type == null)

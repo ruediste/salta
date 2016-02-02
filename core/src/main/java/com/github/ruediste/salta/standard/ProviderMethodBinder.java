@@ -16,6 +16,7 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
 import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.FixedMethodInvocationFunctionRecipe;
+import com.github.ruediste.salta.standard.util.MethodOverrideIndex;
 import com.google.common.reflect.TypeToken;
 
 /**
@@ -30,16 +31,21 @@ public abstract class ProviderMethodBinder {
     }
 
     public void bindProviderMethodsOf(Object instance) {
-        for (TypeToken<?> t : TypeToken.of(instance.getClass()).getTypes()) {
-            Class<?> cls = t.getRawType();
-            if (cls.isInterface())
+        MethodOverrideIndex index = new MethodOverrideIndex(
+                TypeToken.of(instance.getClass()));
+        for (TypeToken<?> t : index.getAncestors()) {
+            Class<?> rawType = t.getRawType();
+            if (rawType.isInterface())
                 continue;
 
-            for (Method m : cls.getDeclaredMethods()) {
+            for (Method m : rawType.getDeclaredMethods()) {
                 if (Modifier.isStatic(m.getModifiers()) || m.isBridge()
                         || m.isSynthetic()) {
                     continue;
                 }
+                if (index.isOverridden(m))
+                    continue;
+
                 if (!isProviderMethod(m)) {
                     continue;
                 }
@@ -96,7 +102,6 @@ public abstract class ProviderMethodBinder {
                     }
                 });
             }
-            cls = cls.getSuperclass();
         }
     }
 
