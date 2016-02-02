@@ -30,7 +30,7 @@
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
-			<artifactId>cglib-nodep</artifactId>
+			<artifactId>cglib</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ruediste</groupId>
