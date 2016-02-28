@@ -1,5 +1,6 @@
 package com.github.ruediste.salta.jsr330;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.inject.Provider;
@@ -107,6 +108,16 @@ public class InjectorImpl implements Injector {
     @Override
     public StandardInjector getDelegate() {
         return delegate;
+    }
+
+    @Override
+    public <T> Optional<T> tryGetInstance(CoreDependencyKey<T> key) {
+        return delegate.tryGetInstance(key);
+    }
+
+    @Override
+    public <T> Optional<T> tryGetInstance(Class<T> type) {
+        return delegate.tryGetInstance(type);
     }
 
 }

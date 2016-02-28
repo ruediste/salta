@@ -17,6 +17,8 @@
 
 package com.github.ruediste.salta.jsr330;
 
+import java.util.Optional;
+
 import javax.inject.Provider;
 
 import com.github.ruediste.salta.core.CoreDependencyKey;
@@ -121,6 +123,8 @@ public interface Injector {
      */
     <T> T getInstance(CoreDependencyKey<T> key);
 
+    <T> Optional<T> tryGetInstance(CoreDependencyKey<T> key);
+
     /**
      * Returns the appropriate instance for the given injection type; equivalent
      * to {@code getProvider(type).get()}. When feasible, avoid using this
@@ -130,6 +134,8 @@ public interface Injector {
      *             if there was a runtime failure while providing an instance.
      */
     <T> T getInstance(Class<T> type);
+
+    <T> Optional<T> tryGetInstance(Class<T> type);
 
     StandardInjector getDelegate();
 }

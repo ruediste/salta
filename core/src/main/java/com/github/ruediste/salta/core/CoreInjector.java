@@ -39,6 +39,25 @@ public class CoreInjector {
     }
 
     @SuppressWarnings("unchecked")
+    public <T> Optional<T> tryGetInstance(CoreDependencyKey<T> key) {
+        Optional<CompiledSupplier> compiledRecipe;
+        try {
+            compiledRecipe = tryGetCompiledRecipe(key);
+        } catch (Throwable e) {
+            throw new SaltaException("Error while creating instance for " + key,
+                    e);
+        }
+        return compiledRecipe.map(s -> {
+            try {
+                return (T) s.get();
+            } catch (Throwable e) {
+                throw new SaltaException(
+                        "Error while creating instance for " + key, e);
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
     public <T> T getInstance(CoreDependencyKey<T> key) {
         Optional<CompiledSupplier> tryGetCompiledRecipe;
         try {

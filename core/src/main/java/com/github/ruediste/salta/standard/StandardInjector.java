@@ -8,6 +8,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -178,10 +179,18 @@ public class StandardInjector {
         return getProvider(DependencyKey.of(type));
     }
 
-    public <T> T getInstance(CoreDependencyKey<T> key) {
+    public <T> Optional<T> tryGetInstance(CoreDependencyKey<T> key) {
+        checkInitialized();
+        return coreInjector.tryGetInstance(key);
+    }
 
+    public <T> T getInstance(CoreDependencyKey<T> key) {
         checkInitialized();
         return coreInjector.getInstance(key);
+    }
+
+    public <T> Optional<T> tryGetInstance(Class<T> type) {
+        return tryGetInstance(new ClassDependencyKey<T>(type));
     }
 
     public <T> T getInstance(Class<T> type) {
