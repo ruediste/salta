@@ -30,7 +30,8 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
     public ScopedBindingBuilder<T> to(CoreDependencyKey<? extends T> implementation);
 
     /**
-     * See the EDSL examples at {@link Binder}.
+     * Bind to the specified instance. The members of the instance will be
+     * injected. See the EDSL examples at {@link Binder}.
      */
     public void toInstance(T instance);
 

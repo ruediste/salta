@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import com.github.ruediste.salta.standard.ReflectionUtil;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
@@ -85,8 +86,8 @@ public class MethodOverrideIndex {
             return false;
 
         // ancestorMethod must be package visible
-        String ancestorPackage = ancestorMethod.getDeclaringClass().getPackage().getName();
-        String mPackage = m.getDeclaringClass().getPackage().getName();
+        String ancestorPackage = ReflectionUtil.getPackageName(ancestorMethod.getDeclaringClass());
+        String mPackage = ReflectionUtil.getPackageName(m.getDeclaringClass());
         if (Objects.equals(ancestorPackage, mPackage))
             return true;
         return false;

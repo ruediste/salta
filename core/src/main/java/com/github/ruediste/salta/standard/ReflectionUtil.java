@@ -10,6 +10,15 @@ public class ReflectionUtil {
     private ReflectionUtil() {
     }
 
+    public static String getPackageName(Class<?> clazz) {
+        return getPackageName(clazz.getName());
+    }
+
+    public static String getPackageName(String classFullName) {
+        int lastDot = classFullName.lastIndexOf('.');
+        return lastDot < 0 ? "" : classFullName.substring(0, lastDot);
+    }
+
     public static Annotation createAnnotation(Class<?> annotationClass) {
         return (Annotation) Proxy.newProxyInstance(annotationClass.getClassLoader(), new Class[] { Annotation.class },
                 new InvocationHandler() {
