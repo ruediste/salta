@@ -31,25 +31,21 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
     Constructor<?> constructor;
     List<SupplierRecipe> argumentDependencies;
 
-    public FixedConstructorRecipeInstantiator(Constructor<?> constructor,
-            List<SupplierRecipe> argumentDependencies) {
+    public FixedConstructorRecipeInstantiator(Constructor<?> constructor, List<SupplierRecipe> argumentDependencies) {
         constructor.setAccessible(true);
         this.constructor = constructor;
         this.argumentDependencies = new ArrayList<>(argumentDependencies);
     }
 
     @Override
-    public Class<?> compileImpl(GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
-        if (Accessibility.isConstructorAccessible(constructor,
-                ctx.getCompiledCodeClassLoader()))
+    public Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+        if (Accessibility.isConstructorAccessible(constructor, ctx.getCompiledCodeClassLoader()))
             return compileDirect(mv, ctx);
         else
             return compileDynamic(mv, ctx);
     }
 
-    private Class<?> compileDirect(GeneratorAdapter mv,
-            MethodCompilationContext compilationContext) {
+    private Class<?> compileDirect(GeneratorAdapter mv, MethodCompilationContext compilationContext) {
 
         mv.newInstance(Type.getType(constructor.getDeclaringClass()));
         mv.dup();
@@ -69,26 +65,22 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
         }
 
         // call constructor
-        mv.invokeConstructor(Type.getType(constructor.getDeclaringClass()),
-                Method.getMethod(constructor));
+        mv.invokeConstructor(Type.getType(constructor.getDeclaringClass()), Method.getMethod(constructor));
 
         return constructor.getDeclaringClass();
     }
 
-    private Class<?> compileDynamic(GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    private Class<?> compileDynamic(GeneratorAdapter mv, MethodCompilationContext ctx) {
 
         Class<?> resultType = constructor.getDeclaringClass();
-        if (!Accessibility.isClassAccessible(resultType,
-                ctx.getCompiledCodeClassLoader()))
+        if (!Accessibility.isClassAccessible(resultType, ctx.getCompiledCodeClassLoader()))
             resultType = Object.class;
 
         // push arguments
         Type[] argTypes = new Type[argumentDependencies.size()];
         for (int i = 0; i < argumentDependencies.size(); i++) {
             Class<?> t = argumentDependencies.get(i).compile(ctx);
-            argTypes[i] = Type.getType(
-                    ctx.castToPublic(t, constructor.getParameterTypes()[i]));
+            argTypes[i] = Type.getType(ctx.castToPublic(t, constructor.getParameterTypes()[i]));
         }
 
         Type[] origArgTypes = new Type[constructor.getParameterCount()];
@@ -99,18 +91,16 @@ public class FixedConstructorRecipeInstantiator extends RecipeInstantiator {
         String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;";
 
         // call
-        Handle bsm = new Handle(H_INVOKESTATIC,
-                Type.getInternalName(FixedConstructorRecipeInstantiator.class),
+        Handle bsm = new Handle(H_INVOKESTATIC, Type.getInternalName(FixedConstructorRecipeInstantiator.class),
                 "bootstrap", bootstrapDesc);
-        mv.invokeDynamic("init",
-                Type.getMethodDescriptor(Type.getType(resultType), argTypes),
-                bsm, ctx.addField(Constructor.class, constructor).getName());
+        mv.invokeDynamic("init", Type.getMethodDescriptor(Type.getType(resultType), argTypes), bsm,
+                ctx.addField(Constructor.class, constructor).getName());
 
         return resultType;
     }
 
-    public static CallSite bootstrap(Lookup lookup, String methodName,
-            MethodType type, String constructorFieldName) throws Exception {
+    public static CallSite bootstrap(Lookup lookup, String methodName, MethodType type, String constructorFieldName)
+            throws Exception {
         Field field = lookup.lookupClass().getField(constructorFieldName);
         field.setAccessible(true);
         Constructor<?> constructor = (Constructor<?>) field.get(null);

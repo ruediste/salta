@@ -17,8 +17,7 @@ public class JSR330InjectorConfiguration implements AttachedPropertyBearer {
         this(new StandardInjectorConfiguration(stage));
     }
 
-    public JSR330InjectorConfiguration(
-            StandardInjectorConfiguration standardConfig) {
+    public JSR330InjectorConfiguration(StandardInjectorConfiguration standardConfig) {
         this.standardConfig = standardConfig;
     }
 

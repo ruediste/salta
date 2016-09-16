@@ -21,23 +21,19 @@ public class LoggerCreationRule implements CreationRule {
     private Class<?> loggerClass;
     private Function<Class<?>, Object> loggerFactory;
 
-    public LoggerCreationRule(Class<?> loggerClass,
-            Function<Class<?>, Object> loggerFactory) {
+    public LoggerCreationRule(Class<?> loggerClass, Function<Class<?>, Object> loggerFactory) {
         this.loggerClass = loggerClass;
         this.loggerFactory = loggerFactory;
 
     }
 
     @Override
-    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-            CoreDependencyKey<?> key, CoreInjector injector) {
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(CoreDependencyKey<?> key,
+            CoreInjector injector) {
 
-        if (key instanceof InjectionPoint
-                && loggerClass.equals(key.getRawType())) {
-            Class<?> declaringClass = ((InjectionPoint<?>) key).getMember()
-                    .getDeclaringClass();
-            return Optional.of(ctx -> new SupplierRecipeImpl(
-                    () -> loggerFactory.apply(declaringClass)));
+        if (key instanceof InjectionPoint && loggerClass.equals(key.getRawType())) {
+            Class<?> declaringClass = ((InjectionPoint<?>) key).getMember().getDeclaringClass();
+            return Optional.of(ctx -> new SupplierRecipeImpl(() -> loggerFactory.apply(declaringClass)));
         }
         return Optional.empty();
     }

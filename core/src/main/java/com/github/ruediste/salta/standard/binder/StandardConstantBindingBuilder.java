@@ -27,19 +27,16 @@ public class StandardConstantBindingBuilder {
 
     private void bind(Class<?> cls, Object value) {
         if (value == null)
-            throw new SaltaException(
-                    "Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
+            throw new SaltaException("Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
         config.creationPipeline.staticBindings.add(createBinding(cls, value));
         if (Primitives.isWrapperType(cls)) {
-            config.creationPipeline.staticBindings
-                    .add(createBinding(Primitives.unwrap(cls), value));
+            config.creationPipeline.staticBindings.add(createBinding(Primitives.unwrap(cls), value));
         }
     }
 
     StandardStaticBinding createBinding(Class<?> cls, Object value) {
         StandardStaticBinding binding = new StandardStaticBinding();
-        binding.dependencyMatcher = annotationMatcher
-                .and(d -> d.getRawType().equals(cls));
+        binding.dependencyMatcher = annotationMatcher.and(d -> d.getRawType().equals(cls));
         binding.possibleTypes.add(TypeToken.of(cls));
         binding.recipeFactory = new CreationRecipeFactory() {
 
@@ -49,8 +46,7 @@ public class StandardConstantBindingBuilder {
 
                     @SuppressWarnings({ "unchecked", "rawtypes" })
                     @Override
-                    public Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext compilationContext) {
+                    public Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext compilationContext) {
                         compilationContext.addFieldAndLoad((Class) cls, value);
                         return cls;
                     }

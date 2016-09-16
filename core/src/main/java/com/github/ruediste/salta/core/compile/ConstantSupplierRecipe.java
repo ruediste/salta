@@ -17,8 +17,7 @@ public class ConstantSupplierRecipe<T> extends SupplierRecipe {
     }
 
     @Override
-    protected Class<?> compileImpl(GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
         ctx.addFieldAndLoad(valueClass, value);
         return valueClass;
     }

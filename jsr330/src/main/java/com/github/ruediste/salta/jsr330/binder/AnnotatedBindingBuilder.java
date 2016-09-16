@@ -12,8 +12,7 @@ public interface AnnotatedBindingBuilder<T> extends LinkedBindingBuilder<T> {
     /**
      * See the EDSL examples at {@link Binder}.
      */
-    LinkedBindingBuilder<T> annotatedWith(
-            Class<? extends Annotation> availableAnnotationType);
+    LinkedBindingBuilder<T> annotatedWith(Class<? extends Annotation> availableAnnotationType);
 
     /**
      * See the EDSL examples at {@link Binder}.

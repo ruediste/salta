@@ -21,20 +21,17 @@ import com.google.common.reflect.TypeToken;
  * Base class for {@link InstantiatorRule}s which use a constructor to
  * instantiate a class (Probably the majority of cases)
  */
-public abstract class ConstructorInstantiatorRuleBase
-        implements InstantiatorRule {
+public abstract class ConstructorInstantiatorRuleBase implements InstantiatorRule {
 
     private StandardInjectorConfiguration config;
 
-    public ConstructorInstantiatorRuleBase(
-            StandardInjectorConfiguration config) {
+    public ConstructorInstantiatorRuleBase(StandardInjectorConfiguration config) {
         this.config = config;
 
     }
 
     @Override
-    public Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(
-            TypeToken<?> typeToken) {
+    public Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(TypeToken<?> typeToken) {
 
         Type type = typeToken.getType();
 
@@ -64,14 +61,12 @@ public abstract class ConstructorInstantiatorRuleBase
                 // constructor should not be used
                 continue;
 
-            if (highestPriority != null
-                    && highestPriority > constructorPriority)
+            if (highestPriority != null && highestPriority > constructorPriority)
                 // highest priority is higher than priority of current
                 // constructor
                 continue;
 
-            if (highestPriority == null
-                    || highestPriority < constructorPriority) {
+            if (highestPriority == null || highestPriority < constructorPriority) {
                 // we have to increase the priority
                 highestPriority = constructorPriority;
             }
@@ -79,8 +74,7 @@ public abstract class ConstructorInstantiatorRuleBase
             highestPriorityConstructors.add(c);
         }
         if (highestPriorityConstructors.size() > 1)
-            throw multipleConstructorsFound(typeToken, clazz,
-                    highestPriorityConstructors);
+            throw multipleConstructorsFound(typeToken, clazz, highestPriorityConstructors);
 
         if (highestPriorityConstructors.isEmpty()) {
             return Optional.empty();
@@ -88,25 +82,18 @@ public abstract class ConstructorInstantiatorRuleBase
 
         Constructor<?> constructor = highestPriorityConstructors.get(0);
         if (config.getRequiredQualifier(constructor, constructor) != null) {
-            throw new SaltaException("Qualifier specified on " + constructor
-                    + ".\nSpecify qualifiers on parameters instead");
+            throw new SaltaException(
+                    "Qualifier specified on " + constructor + ".\nSpecify qualifiers on parameters instead");
         }
 
-        return Optional
-                .of(ctx -> config.createFixedConstructorInstantiator(typeToken,
-                        ctx, constructor));
+        return Optional.of(ctx -> config.createFixedConstructorInstantiator(typeToken, ctx, constructor));
 
     }
 
-    protected SaltaException multipleConstructorsFound(TypeToken<?> typeToken,
-            Class<?> clazz,
+    protected SaltaException multipleConstructorsFound(TypeToken<?> typeToken, Class<?> clazz,
             ArrayList<Constructor<?>> highestPriorityConstructors) {
-        return new SaltaException(
-                "Ambigous eligible constructors found on type\n" + typeToken
-                        + "\nConstructors:\n"
-                        + highestPriorityConstructors.stream()
-                                .map(Object::toString)
-                                .collect(joining("\n->", "->", "")));
+        return new SaltaException("Ambigous eligible constructors found on type\n" + typeToken + "\nConstructors:\n"
+                + highestPriorityConstructors.stream().map(Object::toString).collect(joining("\n->", "->", "")));
     }
 
     /**

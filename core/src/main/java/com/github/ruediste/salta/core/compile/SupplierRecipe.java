@@ -59,15 +59,13 @@ public abstract class SupplierRecipe {
                 // code is too big, we have to separate all sub recipes
                 separateSubRecipes = true;
                 CodeSizeHelper innerHelper = ctx.getCodeSizeHelper();
-                returnType = innerHelper.ctx.withSeparateSubRecipes(true,
-                        mv -> compileImpl(mv, innerHelper.ctx));
+                returnType = innerHelper.ctx.withSeparateSubRecipes(true, mv -> compileImpl(mv, innerHelper.ctx));
                 codeSize = innerHelper.getSize();
 
                 // do a cast to public, such that we can generate a method
                 // afterwards. This modifies the code size again, therefore the
                 // size was saved before
-                returnType = innerHelper.ctx.castToPublic(returnType,
-                        returnType);
+                returnType = innerHelper.ctx.castToPublic(returnType, returnType);
             }
 
         }
@@ -78,28 +76,23 @@ public abstract class SupplierRecipe {
         }
 
         if (ctx.isSeparateSubRecipes()) {
-            ClassCompilationContext ccc = ctx.getClassCtx().getCompiler()
-                    .createClass(null);
+            ClassCompilationContext ccc = ctx.getClassCtx().getCompiler().createClass(null);
 
             String desc = Type.getMethodDescriptor(Type.getType(returnType));
-            String methodName = ccc.addMethod(ACC_PUBLIC + ACC_STATIC, desc,
-                    null, new MethodRecipe() {
+            String methodName = ccc.addMethod(ACC_PUBLIC + ACC_STATIC, desc, null, new MethodRecipe() {
 
-                        @Override
-                        protected void compileImpl(GeneratorAdapter mv,
-                                MethodCompilationContext ctx) {
-                            SupplierRecipe.this.compileImpl(mv, ctx);
-                            mv.returnValue();
-                        }
-                    });
+                @Override
+                protected void compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+                    SupplierRecipe.this.compileImpl(mv, ctx);
+                    mv.returnValue();
+                }
+            });
             ctx.getClassCtx().getCompiler().loadClass(ccc);
 
-            ctx.getMv().visitMethodInsn(INVOKESTATIC,
-                    ccc.getInternalClassName(), methodName, desc, false);
+            ctx.getMv().visitMethodInsn(INVOKESTATIC, ccc.getInternalClassName(), methodName, desc, false);
             return returnType;
         } else
-            return ctx.withSeparateSubRecipes(separateSubRecipes,
-                    mv -> compileImpl(mv, ctx));
+            return ctx.withSeparateSubRecipes(separateSubRecipes, mv -> compileImpl(mv, ctx));
     }
 
     /**
@@ -109,7 +102,6 @@ public abstract class SupplierRecipe {
      * @return type of the supplied instance
      * 
      */
-    protected abstract Class<?> compileImpl(GeneratorAdapter mv,
-            MethodCompilationContext ctx);
+    protected abstract Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx);
 
 }

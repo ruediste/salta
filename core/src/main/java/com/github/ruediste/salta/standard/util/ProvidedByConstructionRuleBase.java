@@ -16,8 +16,7 @@ import com.github.ruediste.salta.standard.config.ConstructionRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public abstract class ProvidedByConstructionRuleBase
-        implements ConstructionRule {
+public abstract class ProvidedByConstructionRuleBase implements ConstructionRule {
 
     private Class<?> providerClass;
     private String methodName;
@@ -28,8 +27,8 @@ public abstract class ProvidedByConstructionRuleBase
         this(providerClass, "get", Object.class);
     }
 
-    public ProvidedByConstructionRuleBase(Class<?> providerClass,
-            String methodName, Class<?> returnType, Class<?>... argumentTypes) {
+    public ProvidedByConstructionRuleBase(Class<?> providerClass, String methodName, Class<?> returnType,
+            Class<?>... argumentTypes) {
         this.providerClass = providerClass;
         this.methodName = methodName;
         this.returnType = returnType;
@@ -43,8 +42,7 @@ public abstract class ProvidedByConstructionRuleBase
     protected abstract DependencyKey<?> getProviderKey(TypeToken<?> type);
 
     @Override
-    public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
-            TypeToken<?> type) {
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(TypeToken<?> type) {
 
         DependencyKey<?> providerKey = getProviderKey(type);
         if (providerKey != null) {
@@ -53,16 +51,13 @@ public abstract class ProvidedByConstructionRuleBase
                 return new RecipeInstantiator() {
 
                     @Override
-                    public Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext compilationContext) {
+                    public Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext compilationContext) {
                         recipe.compile(compilationContext);
                         Method method;
                         try {
-                            method = Method.getMethod(providerClass
-                                    .getMethod(methodName, parameterTypes));
+                            method = Method.getMethod(providerClass.getMethod(methodName, parameterTypes));
                         } catch (NoSuchMethodException | SecurityException e) {
-                            throw new SaltaException(
-                                    "Error while retrieving method", e);
+                            throw new SaltaException("Error while retrieving method", e);
                         }
                         mv.invokeInterface(Type.getType(providerClass), method);
                         return returnType;

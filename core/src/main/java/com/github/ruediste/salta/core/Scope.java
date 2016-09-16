@@ -18,16 +18,14 @@ public interface Scope {
      * @param requestedKey
      *            the key beeing requested
      */
-    SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding,
-            CoreDependencyKey<?> requestedKey);
+    SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding, CoreDependencyKey<?> requestedKey);
 
     /**
      * Perform an eager instantiation if applicable for this scope. Only called
      * if eager instantiations should actually be perfomed, so the scope does
      * not have to check a configuration by itself.
      */
-    default void performEagerInstantiation(RecipeCreationContext ctx,
-            Binding binding) {
+    default void performEagerInstantiation(RecipeCreationContext ctx, Binding binding) {
     }
 
 }

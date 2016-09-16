@@ -22,8 +22,7 @@ import com.google.common.reflect.TypeToken;
 
 public class StandardInjector {
 
-    private final static class ClassDependencyKey<T>
-            extends CoreDependencyKey<T> {
+    private final static class ClassDependencyKey<T> extends CoreDependencyKey<T> {
 
         private Class<T> type;
 
@@ -73,8 +72,7 @@ public class StandardInjector {
                 }
 
                 @Override
-                public <A extends Annotation> A getAnnotation(
-                        Class<A> annotationClass) {
+                public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
                     return null;
                 }
             };
@@ -119,8 +117,7 @@ public class StandardInjector {
 
     private void checkInitialized() {
         if (!initialized) {
-            throw new SaltaException(
-                    "Cannot use injector before it is initialized");
+            throw new SaltaException("Cannot use injector before it is initialized");
         }
     }
 
@@ -128,17 +125,14 @@ public class StandardInjector {
 
         if (!config.errorMessages.isEmpty()) {
             throw new SaltaException("There were Errors:\n"
-                    + config.errorMessages.stream().map(msg -> msg.getMessage())
-                            .collect(joining("\n")));
+                    + config.errorMessages.stream().map(msg -> msg.getMessage()).collect(joining("\n")));
         }
 
         coreInjector = new CoreInjector(config.config,
-                config.creationPipeline.coreCreationRuleSuppliers.stream()
-                        .map(s -> s.get()).collect(toList()));
+                config.creationPipeline.coreCreationRuleSuppliers.stream().map(s -> s.get()).collect(toList()));
 
         while (!config.staticInitializers.isEmpty()) {
-            ArrayList<Runnable> tmp = new ArrayList<>(
-                    config.staticInitializers);
+            ArrayList<Runnable> tmp = new ArrayList<>(config.staticInitializers);
             config.staticInitializers.clear();
             for (Runnable initializer : tmp) {
                 initializer.run();
@@ -147,8 +141,7 @@ public class StandardInjector {
 
         initialized = true;
         while (!config.dynamicInitializers.isEmpty()) {
-            ArrayList<Runnable> tmp = new ArrayList<>(
-                    config.dynamicInitializers);
+            ArrayList<Runnable> tmp = new ArrayList<>(config.dynamicInitializers);
             config.dynamicInitializers.clear();
             for (Runnable initializer : tmp) {
                 initializer.run();
@@ -205,16 +198,13 @@ public class StandardInjector {
 
     @SuppressWarnings("unchecked")
     public <T> MembersInjectionToken<T> getMembersInjectionToken(T value) {
-        return getMembersInjectionToken(value,
-                (TypeToken<T>) TypeToken.of(value.getClass()));
+        return getMembersInjectionToken(value, (TypeToken<T>) TypeToken.of(value.getClass()));
     }
 
-    public <T> MembersInjectionToken<T> getMembersInjectionToken(T value,
-            TypeToken<T> type) {
+    public <T> MembersInjectionToken<T> getMembersInjectionToken(T value, TypeToken<T> type) {
         synchronized (memberInjectionTokens) {
             @SuppressWarnings("unchecked")
-            MembersInjectionToken<T> token = (MembersInjectionToken<T>) memberInjectionTokens
-                    .get(value);
+            MembersInjectionToken<T> token = (MembersInjectionToken<T>) memberInjectionTokens.get(value);
 
             if (token == null) {
                 token = new MembersInjectionToken<T>(this, value, type);

@@ -41,11 +41,9 @@ public class SimpleProxyScopeHandlerTest {
 
             @Override
             protected void configure() throws Exception {
-                SimpleProxyScopeManager handler = new SimpleProxyScopeManager(
-                        "batch");
+                SimpleProxyScopeManager handler = new SimpleProxyScopeManager("batch");
                 bindScope(BatchScoped.class, new ScopeImpl(handler));
-                bind(SimpleProxyScopeManager.class).named("batch")
-                        .toInstance(handler);
+                bind(SimpleProxyScopeManager.class).named("batch").toInstance(handler);
             }
         });
         injector.injectMembers(this);

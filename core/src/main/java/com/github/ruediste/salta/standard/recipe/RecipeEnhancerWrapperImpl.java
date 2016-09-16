@@ -19,19 +19,16 @@ public class RecipeEnhancerWrapperImpl implements RecipeEnhancer {
 
     private Function<Supplier<Object>, Object> wrapperEnhancer;
 
-    public RecipeEnhancerWrapperImpl(
-            Function<Supplier<Object>, Object> wrapperListener) {
+    public RecipeEnhancerWrapperImpl(Function<Supplier<Object>, Object> wrapperListener) {
         this.wrapperEnhancer = wrapperListener;
     }
 
     @Override
-    public Class<?> compile(MethodCompilationContext ctx,
-            SupplierRecipe innerRecipe) {
+    public Class<?> compile(MethodCompilationContext ctx, SupplierRecipe innerRecipe) {
         GeneratorAdapter mv = ctx.getMv();
         ctx.addFieldAndLoad(Function.class, wrapperEnhancer);
         ctx.compileToSupplier(innerRecipe);
-        mv.invokeInterface(Type.getType(Function.class),
-                Method.getMethod("Object apply(Object)"));
+        mv.invokeInterface(Type.getType(Function.class), Method.getMethod("Object apply(Object)"));
         return Object.class;
     }
 

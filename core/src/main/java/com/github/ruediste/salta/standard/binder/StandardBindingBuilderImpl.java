@@ -25,8 +25,7 @@ import com.github.ruediste.salta.standard.config.StandardInjectorConfiguration;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public class StandardBindingBuilderImpl<T>
-        implements StandardAnnotatedBindingBuilder<T> {
+public class StandardBindingBuilderImpl<T> implements StandardAnnotatedBindingBuilder<T> {
     protected Matcher<CoreDependencyKey<?>> typeMatcher;
     protected Matcher<CoreDependencyKey<?>> annotationMatcher;
 
@@ -41,17 +40,15 @@ public class StandardBindingBuilderImpl<T>
     protected Supplier<Scope> scopeSupplier;
     protected StandardInjector injector;
 
-    public StandardBindingBuilderImpl(Matcher<CoreDependencyKey<?>> typeMatcher,
-            TypeToken<T> type, StandardInjectorConfiguration config,
-            StandardInjector injector) {
+    public StandardBindingBuilderImpl(Matcher<CoreDependencyKey<?>> typeMatcher, TypeToken<T> type,
+            StandardInjectorConfiguration config, StandardInjector injector) {
         this.injector = injector;
         binding = new StandardStaticBinding();
 
         this.typeMatcher = typeMatcher;
         this.type = type;
         this.config = config;
-        recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(
-                type);
+        recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(type);
         scopeSupplier = () -> config.scope.getScope(type);
     }
 
@@ -59,8 +56,7 @@ public class StandardBindingBuilderImpl<T>
         if (annotationMatcher != null)
             binding.dependencyMatcher = typeMatcher.and(annotationMatcher);
         else
-            binding.dependencyMatcher = typeMatcher
-                    .and(config.requredQualifierMatcher((Annotation) null));
+            binding.dependencyMatcher = typeMatcher.and(config.requredQualifierMatcher((Annotation) null));
 
         binding.possibleTypes.add(type);
         binding.recipeFactory = recipeFactorySupplier.get();
@@ -70,16 +66,13 @@ public class StandardBindingBuilderImpl<T>
     }
 
     @Override
-    public StandardScopedBindingBuilder<T> to(
-            Class<? extends T> implementation) {
+    public StandardScopedBindingBuilder<T> to(Class<? extends T> implementation) {
         return to(TypeToken.of(implementation));
     }
 
     @Override
-    public StandardScopedBindingBuilder<T> to(
-            TypeToken<? extends T> implementation) {
-        recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(
-                implementation);
+    public StandardScopedBindingBuilder<T> to(TypeToken<? extends T> implementation) {
+        recipeFactorySupplier = createDefaultCreationRecipeFactorySupplier(implementation);
         scopeSupplier = () -> config.scope.getScope(implementation);
         return this;
     }
@@ -87,14 +80,12 @@ public class StandardBindingBuilderImpl<T>
     protected Supplier<CreationRecipeFactory> createDefaultCreationRecipeFactorySupplier(
             TypeToken<? extends T> implementation) {
         return () -> {
-            return ctx -> config.construction
-                    .createConcreteConstructionRecipe(implementation, ctx);
+            return ctx -> config.construction.createConcreteConstructionRecipe(implementation, ctx);
         };
     }
 
     @Override
-    public StandardScopedBindingBuilder<T> to(
-            CoreDependencyKey<? extends T> implementation) {
+    public StandardScopedBindingBuilder<T> to(CoreDependencyKey<? extends T> implementation) {
 
         recipeFactorySupplier = () -> ctx -> {
             return ctx.getRecipe(implementation);
@@ -107,10 +98,9 @@ public class StandardBindingBuilderImpl<T>
     @Override
     public void toInstance(T instance) {
         if (instance == null)
-            throw new SaltaException(
-                    "Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
-        MembersInjectionToken<T> token = injector.getMembersInjectionToken(
-                instance, (TypeToken<T>) TypeToken.of(instance.getClass()));
+            throw new SaltaException("Binding to null instances is not allowed. Use toProvider(Providers.of(null))");
+        MembersInjectionToken<T> token = injector.getMembersInjectionToken(instance,
+                (TypeToken<T>) TypeToken.of(instance.getClass()));
         config.dynamicInitializers.add(() -> token.getValue());
         scopeSupplier = () -> config.defaultScope;
         recipeFactorySupplier = () -> new CreationRecipeFactory() {
@@ -131,8 +121,7 @@ public class StandardBindingBuilderImpl<T>
 
                 return new SupplierRecipe() {
                     @Override
-                    protected Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext ctx) {
+                    protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                         ctx.addFieldAndLoad(Object.class, injected);
                         return Object.class;
                     }
@@ -143,15 +132,11 @@ public class StandardBindingBuilderImpl<T>
 
     @SuppressWarnings("unchecked")
     @Override
-    public StandardScopedBindingBuilder<T> toProvider(
-            Supplier<? extends T> provider) {
-        MembersInjectionToken<Supplier<?>> token = injector
-                .getMembersInjectionToken(provider,
-                        (TypeToken<Supplier<?>>) TypeToken
-                                .of(provider.getClass()));
+    public StandardScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider) {
+        MembersInjectionToken<Supplier<?>> token = injector.getMembersInjectionToken(provider,
+                (TypeToken<Supplier<?>>) TypeToken.of(provider.getClass()));
         scopeSupplier = () -> config.defaultScope;
-        recipeFactorySupplier = () -> ctx -> new SupplierRecipeImpl(
-                () -> token.getValue().get());
+        recipeFactorySupplier = () -> ctx -> new SupplierRecipeImpl(() -> token.getValue().get());
         return this;
     }
 
@@ -159,63 +144,52 @@ public class StandardBindingBuilderImpl<T>
     public <P> StandardScopedBindingBuilder<T> toProviderInstance(P provider,
             Function<P, Supplier<? extends T>> providerWrapper) {
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        MembersInjectionToken<P> token = injector.getMembersInjectionToken(
-                provider, (TypeToken) TypeToken.of(provider.getClass()));
+        MembersInjectionToken<P> token = injector.getMembersInjectionToken(provider,
+                (TypeToken) TypeToken.of(provider.getClass()));
 
         scopeSupplier = () -> config.defaultScope;
         recipeFactorySupplier = () -> ctx -> {
-            Supplier<? extends T> wrappedProvider = providerWrapper
-                    .apply(token.getValue());
+            Supplier<? extends T> wrappedProvider = providerWrapper.apply(token.getValue());
             return new SupplierRecipeImpl(() -> wrappedProvider.get());
         };
         return this;
     }
 
-    public static class RecursiveAccessOfInstanceOfProviderClassException
-            extends SaltaException {
+    public static class RecursiveAccessOfInstanceOfProviderClassException extends SaltaException {
         private static final long serialVersionUID = 1L;
 
-        public RecursiveAccessOfInstanceOfProviderClassException(
-                String provider) {
-            super("Access of provider before creation finished. Circular dependency of provider "
-                    + provider);
+        public RecursiveAccessOfInstanceOfProviderClassException(String provider) {
+            super("Access of provider before creation finished. Circular dependency of provider " + provider);
         }
     }
 
     @Override
-    public <P> StandardScopedBindingBuilder<T> toProvider(
-            CoreDependencyKey<P> providerKey,
+    public <P> StandardScopedBindingBuilder<T> toProvider(CoreDependencyKey<P> providerKey,
             Function<? super P, ? extends T> providerWrapper) {
         scopeSupplier = () -> config.defaultScope;
-        recipeFactorySupplier = createProviderRecipeFactorySupplier(providerKey,
-                providerWrapper);
+        recipeFactorySupplier = createProviderRecipeFactorySupplier(providerKey, providerWrapper);
         return this;
     }
 
-    protected <P> Supplier<CreationRecipeFactory> createProviderRecipeFactorySupplier(
-            CoreDependencyKey<P> providerKey,
+    protected <P> Supplier<CreationRecipeFactory> createProviderRecipeFactorySupplier(CoreDependencyKey<P> providerKey,
             Function<? super P, ? extends T> providerWrapper) {
         return new Supplier<CreationRecipeFactory>() {
             @Override
             public CreationRecipeFactory get() {
                 return new CreationRecipeFactory() {
                     @Override
-                    public SupplierRecipe createRecipe(
-                            RecipeCreationContext ctx) {
+                    public SupplierRecipe createRecipe(RecipeCreationContext ctx) {
                         // entered when creating the recipe
                         SupplierRecipe recipe = ctx.getRecipe(providerKey);
 
                         return new SupplierRecipe() {
 
                             @Override
-                            protected Class<?> compileImpl(GeneratorAdapter mv,
-                                    MethodCompilationContext ctx) {
-                                ctx.addFieldAndLoad(Function.class,
-                                        providerWrapper);
+                            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+                                ctx.addFieldAndLoad(Function.class, providerWrapper);
                                 recipe.compile(ctx);
                                 mv.invokeInterface(Type.getType(Function.class),
-                                        Method.getMethod(
-                                                "Object apply(Object)"));
+                                        Method.getMethod("Object apply(Object)"));
                                 return Object.class;
                             }
                         };
@@ -226,25 +200,20 @@ public class StandardBindingBuilderImpl<T>
     }
 
     @Override
-    public <S extends T> StandardScopedBindingBuilder<T> toConstructor(
-            Constructor<S> constructor) {
-        return toConstructor(constructor,
-                TypeToken.of(constructor.getDeclaringClass()));
+    public <S extends T> StandardScopedBindingBuilder<T> toConstructor(Constructor<S> constructor) {
+        return toConstructor(constructor, TypeToken.of(constructor.getDeclaringClass()));
     }
 
     @Override
-    public <S extends T> StandardScopedBindingBuilder<T> toConstructor(
-            Constructor<S> constructor, TypeToken<? extends S> type) {
+    public <S extends T> StandardScopedBindingBuilder<T> toConstructor(Constructor<S> constructor,
+            TypeToken<? extends S> type) {
 
         recipeFactorySupplier = () -> ctx -> {
-            RecipeInstantiator instantiator = config
-                    .createFixedConstructorInstantiator(type, ctx, constructor);
-            return config.construction.createConstructionRecipe(ctx, type,
-                    instantiator);
+            RecipeInstantiator instantiator = config.createFixedConstructorInstantiator(type, ctx, constructor);
+            return config.construction.createConstructionRecipe(ctx, type, instantiator);
 
         };
-        scopeSupplier = () -> config.scope
-                .getScope(constructor.getDeclaringClass());
+        scopeSupplier = () -> config.scope.getScope(constructor.getDeclaringClass());
         return this;
     }
 
@@ -262,24 +231,20 @@ public class StandardBindingBuilderImpl<T>
     @Override
     public void asEagerSingleton() {
         this.scopeSupplier = () -> config.singletonScope;
-        config.dynamicInitializers.add(() -> injector.getCoreInjector()
-                .withRecipeCreationContext(ctx -> {
-                    binding.getScope().performEagerInstantiation(ctx, binding);
-                    return null;
-                }));
+        config.dynamicInitializers.add(() -> injector.getCoreInjector().withRecipeCreationContext(ctx -> {
+            binding.getScope().performEagerInstantiation(ctx, binding);
+            return null;
+        }));
     }
 
     @Override
-    public StandardLinkedBindingBuilder<T> annotatedWith(
-            Class<? extends Annotation> availableAnnotationType) {
-        annotationMatcher = config
-                .requredQualifierMatcher(availableAnnotationType);
+    public StandardLinkedBindingBuilder<T> annotatedWith(Class<? extends Annotation> availableAnnotationType) {
+        annotationMatcher = config.requredQualifierMatcher(availableAnnotationType);
         return this;
     }
 
     @Override
-    public StandardLinkedBindingBuilder<T> annotatedWith(
-            Annotation availableAnnotation) {
+    public StandardLinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
         annotationMatcher = config.requredQualifierMatcher(availableAnnotation);
         return this;
     }

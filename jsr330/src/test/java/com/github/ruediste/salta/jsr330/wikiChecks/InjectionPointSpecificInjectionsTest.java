@@ -25,10 +25,8 @@ public class InjectionPointSpecificInjectionsTest {
 
             @Override
             protected void configure() throws Exception {
-                bindCreationRule(new CreationRuleImpl(
-                        CoreDependencyKey.rawTypeMatcher(Logger.class),
-                        key -> () -> Logger
-                                .getLogger(key.getRawType().getName())));
+                bindCreationRule(new CreationRuleImpl(CoreDependencyKey.rawTypeMatcher(Logger.class),
+                        key -> () -> Logger.getLogger(key.getRawType().getName())));
             }
         }).getInstance(A.class);
         assertNotNull(a.log);

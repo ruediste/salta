@@ -13,26 +13,22 @@ public class StandardAnnotatedConstantBindingBuilder {
 
     private StandardInjectorConfiguration config;
 
-    public StandardAnnotatedConstantBindingBuilder(
-            StandardInjectorConfiguration config) {
+    public StandardAnnotatedConstantBindingBuilder(StandardInjectorConfiguration config) {
         this.config = config;
     }
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
      */
-    public StandardConstantBindingBuilder annotatedWith(
-            Class<? extends Annotation> annotationType) {
-        return new StandardConstantBindingBuilder(config,
-                config.requredQualifierMatcher(annotationType));
+    public StandardConstantBindingBuilder annotatedWith(Class<? extends Annotation> annotationType) {
+        return new StandardConstantBindingBuilder(config, config.requredQualifierMatcher(annotationType));
     }
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
      */
     public StandardConstantBindingBuilder annotatedWith(Annotation annotation) {
-        return new StandardConstantBindingBuilder(config,
-                config.requredQualifierMatcher(annotation));
+        return new StandardConstantBindingBuilder(config, config.requredQualifierMatcher(annotation));
     }
 
     @Override

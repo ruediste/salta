@@ -9,8 +9,7 @@ public interface CompiledSupplier {
         } catch (SaltaException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SaltaException(
-                    "Error while getting instance from compiled recipe", e);
+            throw new SaltaException("Error while getting instance from compiled recipe", e);
         }
     }
 }

@@ -43,13 +43,11 @@ public class SimpleScopeManager extends SimpleScopeManagerBase {
     }
 
     @Override
-    public Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-            CoreDependencyKey<?> requestedKey) {
+    public Supplier<Object> scope(Supplier<Object> supplier, Binding binding, CoreDependencyKey<?> requestedKey) {
 
         return () -> {
-            Map<Binding, Object> scopedObjects = tryGetValueMap()
-                    .orElseThrow(() -> new RuntimeException("Cannot access "
-                            + requestedKey + " outside of scope " + scopeName));
+            Map<Binding, Object> scopedObjects = tryGetValueMap().orElseThrow(
+                    () -> new RuntimeException("Cannot access " + requestedKey + " outside of scope " + scopeName));
             if (!scopedObjects.containsKey(binding)) {
                 Object current = supplier.get();
                 scopedObjects.put(binding, current);

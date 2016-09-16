@@ -26,29 +26,23 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
     private Method method;
     private List<SupplierRecipe> argumentRecipes;
 
-    public FixedMethodInvocationFunctionRecipe(Method method,
-            List<SupplierRecipe> argumentRecipes) {
-        Preconditions.checkArgument(
-                argumentRecipes.stream().allMatch(x -> x != null),
-                "argument recipe is null");
+    public FixedMethodInvocationFunctionRecipe(Method method, List<SupplierRecipe> argumentRecipes) {
+        Preconditions.checkArgument(argumentRecipes.stream().allMatch(x -> x != null), "argument recipe is null");
         this.method = method;
         this.argumentRecipes = argumentRecipes;
         method.setAccessible(true);
     }
 
     @Override
-    public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
 
-        if (Accessibility.isMethodAccessible(method,
-                ctx.getCompiledCodeClassLoader()))
+        if (Accessibility.isMethodAccessible(method, ctx.getCompiledCodeClassLoader()))
             return compileDirect(argType, mv, ctx);
         else
             return compileDynamic(argType, mv, ctx);
     }
 
-    private Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    private Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
 
         // cast receiver
         argType = ctx.castToPublic(argType, method.getDeclaringClass());
@@ -69,8 +63,7 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
         return ctx.castToPublic(method.getReturnType(), method.getReturnType());
     }
 
-    private Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    private Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
         // cast receiver
         Type[] argTypes = new Type[argumentRecipes.size() + 1];
         argType = ctx.castToPublic(argType, method.getDeclaringClass());
@@ -79,29 +72,25 @@ public class FixedMethodInvocationFunctionRecipe implements FunctionRecipe {
         // push arguments
         for (int i = 0; i < argumentRecipes.size(); i++) {
             Class<?> t = argumentRecipes.get(i).compile(ctx);
-            argTypes[i + 1] = Type.getType(
-                    ctx.castToPublic(t, method.getParameterTypes()[i]));
+            argTypes[i + 1] = Type.getType(ctx.castToPublic(t, method.getParameterTypes()[i]));
         }
 
         String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;";
 
         // call
-        Handle bsm = new Handle(H_INVOKESTATIC,
-                Type.getInternalName(FixedMethodInvocationFunctionRecipe.class),
+        Handle bsm = new Handle(H_INVOKESTATIC, Type.getInternalName(FixedMethodInvocationFunctionRecipe.class),
                 "bootstrap", bootstrapDesc);
 
-        Class<?> returnType = ctx.publicSuperType(method.getReturnType(),
-                ctx.getCompiledCodeClassLoader());
+        Class<?> returnType = ctx.publicSuperType(method.getReturnType(), ctx.getCompiledCodeClassLoader());
 
-        mv.invokeDynamic(method.getName(),
-                Type.getMethodDescriptor(Type.getType(returnType), argTypes),
-                bsm, ctx.addField(Method.class, method).getName());
+        mv.invokeDynamic(method.getName(), Type.getMethodDescriptor(Type.getType(returnType), argTypes), bsm,
+                ctx.addField(Method.class, method).getName());
 
         return returnType;
     }
 
-    public static CallSite bootstrap(Lookup lookup, String methodName,
-            MethodType type, String methodFieldName) throws Exception {
+    public static CallSite bootstrap(Lookup lookup, String methodName, MethodType type, String methodFieldName)
+            throws Exception {
         Field field = lookup.lookupClass().getField(methodFieldName);
         field.setAccessible(true);
         Method method = (Method) field.get(null);

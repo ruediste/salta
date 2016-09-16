@@ -26,14 +26,12 @@ public interface CreationRule {
      * returned function is executed. It is guaranteed that it is only invoked
      * once (while the caller owns the recipe lock.
      */
-    Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-            CoreDependencyKey<?> key, CoreInjector injector);
+    Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(CoreDependencyKey<?> key, CoreInjector injector);
 
     static CreationRule combine(Iterable<CreationRule> rules) {
         return (key, injector) -> {
             for (CreationRule rule : rules) {
-                Optional<Function<RecipeCreationContext, SupplierRecipe>> result = rule
-                        .apply(key, injector);
+                Optional<Function<RecipeCreationContext, SupplierRecipe>> result = rule.apply(key, injector);
                 if (result.isPresent())
                     return result;
             }

@@ -44,10 +44,8 @@ public class CustomScopesTest {
 
             @Override
             protected void configure() throws Exception {
-                SimpleScopeManager handler = new SimpleScopeManager(
-                        "Test Scope");
-                bind(SimpleScopeManager.class).named("batchScope")
-                        .toInstance(handler);
+                SimpleScopeManager handler = new SimpleScopeManager("Test Scope");
+                bind(SimpleScopeManager.class).named("batchScope").toInstance(handler);
                 bindScope(BatchScoped.class, new ScopeImpl(handler));
             }
         });

@@ -88,16 +88,14 @@ public abstract class AbstractModule implements SaltaModule {
      * Gets direct access to the underlying {@code Binder}.
      */
     protected Binder binder() {
-        checkState(binder != null,
-                "The binder can only be used inside configure()");
+        checkState(binder != null, "The binder can only be used inside configure()");
         return binder;
     }
 
     /**
      * @see Binder#bindScope(Class, Scope)
      */
-    protected void bindScope(Class<? extends Annotation> scopeAnnotation,
-            Scope scope) {
+    protected void bindScope(Class<? extends Annotation> scopeAnnotation, Scope scope) {
         binder().bindScope(scopeAnnotation, scope);
     }
 
@@ -210,18 +208,15 @@ public abstract class AbstractModule implements SaltaModule {
         binder().bindCreationRule(rule);
     }
 
-    protected void bindMembersInjectorFactory(
-            RecipeMembersInjectorFactory factory) {
+    protected void bindMembersInjectorFactory(RecipeMembersInjectorFactory factory) {
         binder().bindMembersInjectorFactory(factory);
     }
 
     /**
      * @see Binder#bindInterceptor(Matcher, Matcher, SaltaMethodInterceptor)
      */
-    public final void bindInterceptor(
-            Matcher<? super CoreDependencyKey<?>> keyMatcher,
-            Matcher<? super Method> methodMatcher,
-            SaltaMethodInterceptor saltaInterceptor) {
+    public final void bindInterceptor(Matcher<? super CoreDependencyKey<?>> keyMatcher,
+            Matcher<? super Method> methodMatcher, SaltaMethodInterceptor saltaInterceptor) {
         binder().bindInterceptor(keyMatcher, methodMatcher, saltaInterceptor);
     }
 

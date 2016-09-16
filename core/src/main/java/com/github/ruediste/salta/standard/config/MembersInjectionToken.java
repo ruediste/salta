@@ -13,8 +13,7 @@ public class MembersInjectionToken<T> {
     private volatile boolean injected;
     private TypeToken<T> type;
 
-    public MembersInjectionToken(StandardInjector injector, T value,
-            TypeToken<T> type) {
+    public MembersInjectionToken(StandardInjector injector, T value, TypeToken<T> type) {
         this.injector = injector;
         this.value = value;
         this.type = type;

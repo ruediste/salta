@@ -21,16 +21,12 @@ public final class DefaultJITBindingRule implements JITBindingRule {
     @Override
     public JITBinding apply(JITBindingKey key) {
         TypeToken<?> type = DefaultJITBindingKeyRule.jitBindingKeyType.get(key);
-        if (!config
-                .doQualifiersMatch(
-                        DefaultJITBindingKeyRule.jitBindingKeyRequiredQualifiers
-                                .get(key),
-                        config.getAvailableQualifier(type.getRawType())))
+        if (!config.doQualifiersMatch(DefaultJITBindingKeyRule.jitBindingKeyRequiredQualifiers.get(key),
+                config.getAvailableQualifier(type.getRawType())))
             return null;
 
         Optional<Function<RecipeCreationContext, SupplierRecipe>> recipe = config.construction
-                .createConstructionRecipe(type)
-                .map(seed -> ctx -> seed.apply(ctx));
+                .createConstructionRecipe(type).map(seed -> ctx -> seed.apply(ctx));
         if (!recipe.isPresent())
             return null;
 

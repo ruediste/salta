@@ -28,13 +28,13 @@ public class PostConstructTest {
 
     @Test
     public void testPostConstructCalled() {
-        assertEquals("initialization called once", 1, Salta.createInjector()
-                .getInstance(TestClass.class).initializeCount);
+        assertEquals("initialization called once", 1,
+                Salta.createInjector().getInstance(TestClass.class).initializeCount);
     }
 
     @Test
     public void testPostConstructCalledOnDerived() {
-        assertEquals("initialization called once", 1, Salta.createInjector()
-                .getInstance(TestClassDerived.class).initializeCount);
+        assertEquals("initialization called once", 1,
+                Salta.createInjector().getInstance(TestClassDerived.class).initializeCount);
     }
 }

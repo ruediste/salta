@@ -100,8 +100,7 @@ public class BuiltinBindingsTest {
     @Test
     public void typeTokenRaw() {
         C c = injector.getInstance(C.class);
-        assertEquals(TypeToken.of(TypeToken.class)
-                .resolveType(TypeToken.class.getTypeParameters()[0]), c.token);
+        assertEquals(TypeToken.of(TypeToken.class).resolveType(TypeToken.class.getTypeParameters()[0]), c.token);
     }
 
     @Test

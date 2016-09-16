@@ -32,12 +32,9 @@ public class AopTest {
         private Calendar today = new GregorianCalendar();
 
         @Override
-        public Object intercept(Object delegate, Method method, Object[] args,
-                MethodProxy proxy) throws Throwable {
-            if (today.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG,
-                    Locale.ENGLISH).startsWith("S")) {
-                throw new IllegalStateException(
-                        method.getName() + " not allowed on weekends!");
+        public Object intercept(Object delegate, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+            if (today.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.ENGLISH).startsWith("S")) {
+                throw new IllegalStateException(method.getName() + " not allowed on weekends!");
             }
             return proxy.invoke(delegate, args);
         }
@@ -58,8 +55,7 @@ public class AopTest {
 
             @Override
             protected void configure() throws Exception {
-                bindInterceptor(Matchers.any(),
-                        Matchers.annotatedWith(NotOnWeekends.class), blocker);
+                bindInterceptor(Matchers.any(), Matchers.annotatedWith(NotOnWeekends.class), blocker);
             }
         }).getInstance(RealBillingService.class);
 

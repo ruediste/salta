@@ -63,8 +63,7 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
 
             @SuppressWarnings("unchecked")
             @Override
-            public <A extends Annotation> A getAnnotation(
-                    Class<A> annotationClass) {
+            public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
                 return (A) annotations.get(annotationClass);
             }
         };
@@ -75,8 +74,7 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
     }
 
     @SafeVarargs
-    public final DependencyKey<T> withAnnotations(
-            Class<? extends Annotation>... cls) {
+    public final DependencyKey<T> withAnnotations(Class<? extends Annotation>... cls) {
         Annotation[] annotations = new Annotation[cls.length];
         for (int i = 0; i < cls.length; i++) {
             annotations[i] = AnnotationProxy.newProxy(cls[i]);
@@ -84,10 +82,8 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
         return withAnnotations(annotations);
     }
 
-    public DependencyKey<T> withAnnotations(
-            Annotation... additionalAnnotations) {
-        HashMap<Class<? extends Annotation>, Annotation> tmp = new HashMap<>(
-                annotations);
+    public DependencyKey<T> withAnnotations(Annotation... additionalAnnotations) {
+        HashMap<Class<? extends Annotation>, Annotation> tmp = new HashMap<>(annotations);
         for (Annotation a : additionalAnnotations) {
             if (a == null)
                 continue;
@@ -110,8 +106,7 @@ public class DependencyKey<T> extends CoreDependencyKey<T> {
         if (!Objects.equals(getClass(), obj.getClass()))
             return false;
         DependencyKey<?> other = (DependencyKey<?>) obj;
-        return Objects.equals(type, other.type)
-                && Objects.equals(annotations, other.annotations);
+        return Objects.equals(type, other.type) && Objects.equals(annotations, other.annotations);
     }
 
     @SuppressWarnings("unchecked")

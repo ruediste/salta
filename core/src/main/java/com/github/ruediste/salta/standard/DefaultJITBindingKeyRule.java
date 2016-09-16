@@ -23,9 +23,7 @@ public final class DefaultJITBindingKeyRule implements JITBindingKeyRule {
 
     @Override
     public void apply(CoreDependencyKey<?> dependency, JITBindingKey key) {
-        DefaultJITBindingKeyRule.jitBindingKeyType.set(key,
-                dependency.getType());
-        DefaultJITBindingKeyRule.jitBindingKeyRequiredQualifiers.set(key,
-                config.getRequiredQualifier(dependency));
+        DefaultJITBindingKeyRule.jitBindingKeyType.set(key, dependency.getType());
+        DefaultJITBindingKeyRule.jitBindingKeyRequiredQualifiers.set(key, config.getRequiredQualifier(dependency));
     }
 }

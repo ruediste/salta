@@ -65,8 +65,7 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         this(stage, new CoreInjectorConfiguration());
     }
 
-    public StandardInjectorConfiguration(Stage stage,
-            CoreInjectorConfiguration config) {
+    public StandardInjectorConfiguration(Stage stage, CoreInjectorConfiguration config) {
         this.stage = stage;
         this.config = config;
         creationPipeline.suppliers.initialize();
@@ -84,17 +83,14 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
     /**
      * Create an instantiator for the given constructor
      */
-    public RecipeInstantiator createFixedConstructorInstantiator(
-            TypeToken<?> typeToken, RecipeCreationContext ctx,
+    public RecipeInstantiator createFixedConstructorInstantiator(TypeToken<?> typeToken, RecipeCreationContext ctx,
             Constructor<?> constructor) {
         for (FixedConstructorInstantiationRule rule : fixedConstructorInstantiatorFactoryRules) {
-            Optional<RecipeInstantiator> result = rule.create(typeToken, ctx,
-                    constructor);
+            Optional<RecipeInstantiator> result = rule.create(typeToken, ctx, constructor);
             if (result.isPresent())
                 return result.get();
         }
-        throw new SaltaException("No constructor instantiator found for "
-                + constructor + " of type " + typeToken);
+        throw new SaltaException("No constructor instantiator found for " + constructor + " of type " + typeToken);
     }
 
     /**
@@ -147,11 +143,9 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
          * {@link #membersInjectorRules}, {@link #membersInjectorFactories} and
          * {@link #initializerFactories}
          */
-        public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
-                TypeToken<?> type) {
+        public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(TypeToken<?> type) {
             for (ConstructionRule rule : constructionRules) {
-                Optional<Function<RecipeCreationContext, SupplierRecipe>> result = rule
-                        .createConstructionRecipe(type);
+                Optional<Function<RecipeCreationContext, SupplierRecipe>> result = rule.createConstructionRecipe(type);
                 if (result.isPresent())
                     return result;
             }
@@ -162,15 +156,12 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
          * create a concreate construction recipe based on
          * {@link #createConstructionRecipe(TypeToken)}
          */
-        public SupplierRecipe createConcreteConstructionRecipe(
-                TypeToken<?> boundType, RecipeCreationContext ctx) {
+        public SupplierRecipe createConcreteConstructionRecipe(TypeToken<?> boundType, RecipeCreationContext ctx) {
 
             // create seed recipe
-            Optional<Function<RecipeCreationContext, SupplierRecipe>> seedRecipe = createConstructionRecipe(
-                    boundType);
+            Optional<Function<RecipeCreationContext, SupplierRecipe>> seedRecipe = createConstructionRecipe(boundType);
             if (!seedRecipe.isPresent())
-                throw new SaltaException(
-                        "Cannot find construction recipe for " + boundType);
+                throw new SaltaException("Cannot find construction recipe for " + boundType);
 
             return seedRecipe.get().apply(ctx);
         }
@@ -179,33 +170,26 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
          * Create a construction recipe based on a {@link RecipeInstantiator}
          * and the members injectors, initializers and enhancers configured here
          */
-        public SupplierRecipe createConstructionRecipe(
-                RecipeCreationContext ctx, TypeToken<?> type,
+        public SupplierRecipe createConstructionRecipe(RecipeCreationContext ctx, TypeToken<?> type,
                 RecipeInstantiator recipeInstantiator) {
 
-            List<RecipeMembersInjector> memberInjectors = createRecipeMembersInjectors(
-                    ctx, type);
-            List<RecipeInitializer> initializers = createInitializers(ctx,
-                    type);
+            List<RecipeMembersInjector> memberInjectors = createRecipeMembersInjectors(ctx, type);
+            List<RecipeInitializer> initializers = createInitializers(ctx, type);
 
             return new SupplierRecipe() {
 
                 @Override
-                public Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext compilationContext) {
+                public Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext compilationContext) {
                     // compile the instantiator
-                    Class<?> result = recipeInstantiator
-                            .compile(compilationContext);
+                    Class<?> result = recipeInstantiator.compile(compilationContext);
 
                     // apply members injectors
                     for (RecipeMembersInjector membersInjector : memberInjectors) {
-                        result = membersInjector.compile(result,
-                                compilationContext);
+                        result = membersInjector.compile(result, compilationContext);
                     }
                     // apply initializers
                     for (RecipeInitializer initializer : initializers) {
-                        result = initializer.compile(result,
-                                compilationContext);
+                        result = initializer.compile(result, compilationContext);
                     }
                     return result;
                 }
@@ -232,8 +216,7 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         public Optional<Function<RecipeCreationContext, RecipeInstantiator>> createRecipeInstantiator(
                 TypeToken<?> type) {
             for (InstantiatorRule rule : instantiatorRules) {
-                Optional<Function<RecipeCreationContext, RecipeInstantiator>> instantiator = rule
-                        .apply(type);
+                Optional<Function<RecipeCreationContext, RecipeInstantiator>> instantiator = rule.apply(type);
                 if (instantiator.isPresent()) {
                     return instantiator;
                 }
@@ -260,12 +243,10 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
          * {@link #membersInjectorRules} and as fallback the
          * {@link #membersInjectorFactories}
          */
-        public List<RecipeMembersInjector> createRecipeMembersInjectors(
-                RecipeCreationContext ctx, TypeToken<?> type) {
+        public List<RecipeMembersInjector> createRecipeMembersInjectors(RecipeCreationContext ctx, TypeToken<?> type) {
             // test rules
             for (MembersInjectorRule rule : membersInjectorRules) {
-                List<RecipeMembersInjector> membersInjectors = rule
-                        .getMembersInjectors(ctx, type);
+                List<RecipeMembersInjector> membersInjectors = rule.getMembersInjectors(ctx, type);
                 if (membersInjectors != null)
                     return membersInjectors;
             }
@@ -280,10 +261,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
 
         public final List<RecipeInitializerFactory> initializerFactories = new ArrayList<>();
 
-        public List<RecipeInitializer> createInitializers(
-                RecipeCreationContext ctx, TypeToken<?> type) {
-            return initializerFactories.stream()
-                    .flatMap(r -> r.getInitializers(ctx, type).stream())
+        public List<RecipeInitializer> createInitializers(RecipeCreationContext ctx, TypeToken<?> type) {
+            return initializerFactories.stream().flatMap(r -> r.getInitializers(ctx, type).stream())
                     .filter(x -> x != null).collect(toList());
         }
 
@@ -323,13 +302,10 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         public Scope getScope(AnnotatedElement element) {
             Scope scope = null;
             // scan scope annotation map
-            for (Entry<Class<? extends Annotation>, Scope> entry : scopeAnnotationMap
-                    .entrySet()) {
+            for (Entry<Class<? extends Annotation>, Scope> entry : scopeAnnotationMap.entrySet()) {
                 if (element.isAnnotationPresent(entry.getKey())) {
                     if (scope != null)
-                        throw new SaltaException(
-                                "Multiple scope annotations present on "
-                                        + element);
+                        throw new SaltaException("Multiple scope annotations present on " + element);
                     scope = entry.getValue();
                 }
             }
@@ -342,8 +318,7 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         public Scope getScope(Class<? extends Annotation> scopeAnnotation) {
             Scope scope = scopeAnnotationMap.get(scopeAnnotation);
             if (scope == null)
-                throw new SaltaException(
-                        "Unknown scope annotation " + scopeAnnotation);
+                throw new SaltaException("Unknown scope annotation " + scopeAnnotation);
             return scope;
         }
 
@@ -403,10 +378,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
                 coreCreationRuleSuppliers.add(jitRulesSupplier);
             }
 
-            public final Supplier<CreationRule> staticBindingsSupplier = () -> new StaticBindingSet(
-                    staticBindings);
-            public final Supplier<CreationRule> creationRulesSupplier = () -> CreationRule
-                    .combine(creationRules);
+            public final Supplier<CreationRule> staticBindingsSupplier = () -> new StaticBindingSet(staticBindings);
+            public final Supplier<CreationRule> creationRulesSupplier = () -> CreationRule.combine(creationRules);
 
             /**
              * Creation rules using the
@@ -414,8 +387,8 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
              * {@link CreationPipelineConfiguration#jitBindingRules} to creat
              * instances.
              */
-            public final Supplier<CreationRule> jitRulesSupplier = () -> new JITBindingCreationRule(
-                    jitBindingKeyRules, jitBindingRules);
+            public final Supplier<CreationRule> jitRulesSupplier = () -> new JITBindingCreationRule(jitBindingKeyRules,
+                    jitBindingRules);
         }
 
         public final CreationPipelineSuppliers suppliers = new CreationPipelineSuppliers();
@@ -476,42 +449,35 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
      * @param annotatedElement
      *            element to check for qualifiers
      */
-    public Annotation getRequiredQualifier(Object source,
-            AnnotatedElement annotatedElement) {
-        List<Annotation> qualifiers = requiredQualifierExtractors.stream()
-                .flatMap(f -> f.apply(annotatedElement)).collect(toList());
+    public Annotation getRequiredQualifier(Object source, AnnotatedElement annotatedElement) {
+        List<Annotation> qualifiers = requiredQualifierExtractors.stream().flatMap(f -> f.apply(annotatedElement))
+                .collect(toList());
         if (qualifiers.size() > 1)
-            throw new SaltaException("Multiple required qualifiers found on "
-                    + source + ": " + qualifiers);
+            throw new SaltaException("Multiple required qualifiers found on " + source + ": " + qualifiers);
         return Iterables.getOnlyElement(qualifiers, null);
     }
 
-    public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(
-            Annotation availableQualifier) {
+    public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(Annotation availableQualifier) {
         return new RequiredQualifierMatcher(this, availableQualifier);
     }
 
-    private static final class RequiredQualifierMatcher
-            implements Matcher<CoreDependencyKey<?>> {
+    private static final class RequiredQualifierMatcher implements Matcher<CoreDependencyKey<?>> {
         private Annotation availableQualifier;
         private StandardInjectorConfiguration config;
 
-        public RequiredQualifierMatcher(StandardInjectorConfiguration config,
-                Annotation availableQualifier) {
+        public RequiredQualifierMatcher(StandardInjectorConfiguration config, Annotation availableQualifier) {
             this.config = config;
             this.availableQualifier = availableQualifier;
         }
 
         @Override
         public boolean matches(CoreDependencyKey<?> key) {
-            return config.doQualifiersMatch(config.getRequiredQualifier(key),
-                    availableQualifier);
+            return config.doQualifiersMatch(config.getRequiredQualifier(key), availableQualifier);
         }
 
         @Override
         public int hashCode() {
-            return availableQualifier == null ? 0
-                    : availableQualifier.hashCode();
+            return availableQualifier == null ? 0 : availableQualifier.hashCode();
         }
 
         @Override
@@ -536,18 +502,15 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
      * Return a Matcher which matches if the key has a qualifier of the provided
      * type
      */
-    public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(
-            Class<? extends Annotation> availableQualifierType) {
+    public Matcher<CoreDependencyKey<?>> requredQualifierMatcher(Class<? extends Annotation> availableQualifierType) {
         return new RequiredQualifierTypeMatcher(this, availableQualifierType);
     }
 
-    private static final class RequiredQualifierTypeMatcher
-            implements Matcher<CoreDependencyKey<?>> {
+    private static final class RequiredQualifierTypeMatcher implements Matcher<CoreDependencyKey<?>> {
         private StandardInjectorConfiguration config;
         private Class<? extends Annotation> availableQualifierType;
 
-        public RequiredQualifierTypeMatcher(
-                StandardInjectorConfiguration config,
+        public RequiredQualifierTypeMatcher(StandardInjectorConfiguration config,
                 Class<? extends Annotation> availableQualifierType) {
             this.config = config;
             this.availableQualifierType = availableQualifierType;
@@ -556,14 +519,12 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         @Override
         public boolean matches(CoreDependencyKey<?> key) {
             Annotation requiredQualifier = config.getRequiredQualifier(key);
-            return config.doQualifiersMatch(requiredQualifier,
-                    availableQualifierType);
+            return config.doQualifiersMatch(requiredQualifier, availableQualifierType);
         }
 
         @Override
         public int hashCode() {
-            return availableQualifierType == null ? 0
-                    : availableQualifierType.hashCode();
+            return availableQualifierType == null ? 0 : availableQualifierType.hashCode();
         }
 
         @Override
@@ -575,8 +536,7 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
             if (obj.getClass() != getClass())
                 return false;
             RequiredQualifierTypeMatcher other = (RequiredQualifierTypeMatcher) obj;
-            return Objects.equals(availableQualifierType,
-                    other.availableQualifierType);
+            return Objects.equals(availableQualifierType, other.availableQualifierType);
         }
 
         @Override
@@ -597,11 +557,10 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
      * qualifier is found, an error is raised
      */
     public Annotation getAvailableQualifier(AnnotatedElement element) {
-        List<Annotation> qualifiers = availableQualifierExtractors.stream()
-                .flatMap(f -> f.apply(element)).collect(toList());
+        List<Annotation> qualifiers = availableQualifierExtractors.stream().flatMap(f -> f.apply(element))
+                .collect(toList());
         if (qualifiers.size() > 1)
-            throw new SaltaException("Multiple avalable qualifiers found on\n"
-                    + element + ":\n" + qualifiers);
+            throw new SaltaException("Multiple avalable qualifiers found on\n" + element + ":\n" + qualifiers);
         return Iterables.getOnlyElement(qualifiers, null);
     }
 
@@ -615,8 +574,7 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
     /**
      * Check if an available qualifier matches the reqired qualifier
      */
-    public boolean doQualifiersMatch(Annotation requiredQualifier,
-            Annotation availableQualifer) {
+    public boolean doQualifiersMatch(Annotation requiredQualifier, Annotation availableQualifer) {
         for (BiFunction<Annotation, Annotation, Boolean> func : qualifierMatchingAnnotationRules) {
             Boolean result = func.apply(requiredQualifier, availableQualifer);
             if (result != null)
@@ -636,11 +594,9 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
     /**
      * check if an available qualifier type matches a required qualifier
      */
-    public boolean doQualifiersMatch(Annotation requiredQualifier,
-            Class<?> availableQualiferType) {
+    public boolean doQualifiersMatch(Annotation requiredQualifier, Class<?> availableQualiferType) {
         for (BiFunction<Annotation, Class<?>, Boolean> func : qualifierMatchingTypeRules) {
-            Boolean result = func.apply(requiredQualifier,
-                    availableQualiferType);
+            Boolean result = func.apply(requiredQualifier, availableQualiferType);
             if (result != null)
                 return result;
         }
@@ -648,8 +604,7 @@ public class StandardInjectorConfiguration implements AttachedPropertyBearer {
         if (requiredQualifier == null)
             return availableQualiferType == null;
         else
-            return requiredQualifier.annotationType()
-                    .equals(availableQualiferType);
+            return requiredQualifier.annotationType().equals(availableQualiferType);
     }
 
     public MembersInjectorFactory membersInjectorFactory;

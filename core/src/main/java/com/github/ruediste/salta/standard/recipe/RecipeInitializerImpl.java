@@ -21,15 +21,13 @@ public class RecipeInitializerImpl implements RecipeInitializer {
     }
 
     @Override
-    public Class<?> compileImpl(Class<?> argumentType, GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    public Class<?> compileImpl(Class<?> argumentType, GeneratorAdapter mv, MethodCompilationContext ctx) {
         mv.dup();
         ctx.addFieldAndLoad(Consumer.class, consumer);
         mv.swap();
         if (argumentType.isPrimitive())
             mv.box(Type.getType(argumentType));
-        mv.invokeInterface(Type.getType(Consumer.class),
-                Method.getMethod("void accept(Object)"));
+        mv.invokeInterface(Type.getType(Consumer.class), Method.getMethod("void accept(Object)"));
         return argumentType;
     }
 

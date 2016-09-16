@@ -27,8 +27,7 @@ public class StaticBindingSet implements CreationRule {
             for (StaticBinding b : staticBindings) {
                 StaticBinding existing = map.put(b.getMatcher(), b);
                 if (existing != null) {
-                    throw new SaltaException("Duplicate static binding found\n"
-                            + b + "\n" + existing);
+                    throw new SaltaException("Duplicate static binding found\n" + b + "\n" + existing);
                 }
             }
         }
@@ -53,18 +52,15 @@ public class StaticBindingSet implements CreationRule {
 
     public StaticBinding getBinding(CoreDependencyKey<?> key) {
         StaticBinding binding = null;
-        List<StaticBinding> typeSpecificBindings = staticBindingMap
-                .get(key.getType());
+        List<StaticBinding> typeSpecificBindings = staticBindingMap.get(key.getType());
         if (typeSpecificBindings == null)
             typeSpecificBindings = Collections.emptyList();
 
-        for (StaticBinding b : Iterables.concat(nonTypeSpecificStaticBindings,
-                typeSpecificBindings)) {
+        for (StaticBinding b : Iterables.concat(nonTypeSpecificStaticBindings, typeSpecificBindings)) {
             if (b.getMatcher().matches(key)) {
                 if (binding != null)
                     throw new SaltaException(
-                            "multiple bindings match dependency " + key
-                                    + "\n * " + binding + "\n * " + b);
+                            "multiple bindings match dependency " + key + "\n * " + binding + "\n * " + b);
                 binding = b;
             }
         }
@@ -73,12 +69,11 @@ public class StaticBindingSet implements CreationRule {
     }
 
     @Override
-    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(
-            CoreDependencyKey<?> key, CoreInjector injector) {
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> apply(CoreDependencyKey<?> key,
+            CoreInjector injector) {
         StaticBinding binding = getBinding(key);
         if (binding != null) {
-            return Optional.of(
-                    ctx -> binding.getScope().createRecipe(ctx, binding, key));
+            return Optional.of(ctx -> binding.getScope().createRecipe(ctx, binding, key));
         }
         return Optional.empty();
     }

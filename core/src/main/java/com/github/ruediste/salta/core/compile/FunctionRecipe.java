@@ -18,8 +18,7 @@ public interface FunctionRecipe {
      * @return type of the result
      * 
      */
-    default Class<?> compile(Class<?> argumentType,
-            MethodCompilationContext ctx) {
+    default Class<?> compile(Class<?> argumentType, MethodCompilationContext ctx) {
         return compileImpl(argumentType, ctx.getMv(), ctx);
     }
 
@@ -33,6 +32,5 @@ public interface FunctionRecipe {
      * @return type of the supplied instance
      * 
      */
-    Class<?> compileImpl(Class<?> argumentType, GeneratorAdapter mv,
-            MethodCompilationContext ctx);
+    Class<?> compileImpl(Class<?> argumentType, GeneratorAdapter mv, MethodCompilationContext ctx);
 }

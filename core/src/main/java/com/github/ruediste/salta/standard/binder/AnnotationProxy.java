@@ -40,8 +40,7 @@ import java.util.Map.Entry;
  *            The annotation type has to be proxed.
  * @version $Id$
  */
-public final class AnnotationProxy<A extends Annotation>
-        implements Annotation, InvocationHandler {
+public final class AnnotationProxy<A extends Annotation> implements Annotation, InvocationHandler {
 
     /**
      * Creates a new annotation proxy.
@@ -52,11 +51,9 @@ public final class AnnotationProxy<A extends Annotation>
      *            the annotation type class has to be proxed.
      * @return a new annotation proxy.
      */
-    public static <A extends Annotation> AnnotationProxy<A> newProxy(
-            Class<A> annotationType) {
+    public static <A extends Annotation> AnnotationProxy<A> newProxy(Class<A> annotationType) {
         if (annotationType == null) {
-            throw new IllegalArgumentException(
-                    "Parameter 'annotationType' must be not null");
+            throw new IllegalArgumentException("Parameter 'annotationType' must be not null");
         }
         return new AnnotationProxy<A>(annotationType);
     }
@@ -87,13 +84,11 @@ public final class AnnotationProxy<A extends Annotation>
      *            the annotation type class.
      * @return the declared methods of an annotation, given the type.
      */
-    private static <A extends Annotation> Method[] getDeclaredMethods(
-            final Class<A> annotationType) {
+    private static <A extends Annotation> Method[] getDeclaredMethods(final Class<A> annotationType) {
         return AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
             @Override
             public Method[] run() {
-                final Method[] declaredMethods = annotationType
-                        .getDeclaredMethods();
+                final Method[] declaredMethods = annotationType.getDeclaredMethods();
                 AccessibleObject.setAccessible(declaredMethods, true);
                 return declaredMethods;
             }
@@ -132,15 +127,13 @@ public final class AnnotationProxy<A extends Annotation>
             returnType = method.getReturnType();
             defaultValue = method.getDefaultValue();
 
-            AnnotationProperty property = new AnnotationProperty(propertyName,
-                    returnType);
+            AnnotationProperty property = new AnnotationProperty(propertyName, returnType);
             property.setValue(defaultValue);
             this.properties.put(propertyName, property);
         }
 
         this.proxedAnnotation = annotationType
-                .cast(Proxy.newProxyInstance(annotationType.getClassLoader(),
-                        new Class<?>[] { annotationType }, this));
+                .cast(Proxy.newProxyInstance(annotationType.getClassLoader(), new Class<?>[] { annotationType }, this));
     }
 
     /**
@@ -153,17 +146,14 @@ public final class AnnotationProxy<A extends Annotation>
      */
     public void setProperty(String name, Object value) {
         if (name == null) {
-            throw new IllegalArgumentException(
-                    "Parameter 'name' must be not null");
+            throw new IllegalArgumentException("Parameter 'name' must be not null");
         }
         if (value == null) {
-            throw new IllegalArgumentException(
-                    "Parameter 'value' must be not null");
+            throw new IllegalArgumentException("Parameter 'value' must be not null");
         }
 
         if (!this.properties.containsKey(name)) {
-            throw new IllegalArgumentException("Annotation '"
-                    + this.annotationType.getName()
+            throw new IllegalArgumentException("Annotation '" + this.annotationType.getName()
                     + "' does not contain a property named '" + name + "'");
         }
 
@@ -179,8 +169,7 @@ public final class AnnotationProxy<A extends Annotation>
      */
     public Object getProperty(String name) {
         if (name == null) {
-            throw new IllegalArgumentException(
-                    "Parameter 'name' must be not null");
+            throw new IllegalArgumentException("Parameter 'name' must be not null");
         }
         return this.properties.get(name).getValue();
     }
@@ -189,8 +178,7 @@ public final class AnnotationProxy<A extends Annotation>
      * {@inheritDoc}
      */
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args)
-            throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String name = method.getName();
         if (this.properties.containsKey(name)) {
             return this.properties.get(name).getValue();
@@ -242,8 +230,7 @@ public final class AnnotationProxy<A extends Annotation>
             }
 
             expected = this.properties.get(propertyName);
-            AnnotationProperty actual = new AnnotationProperty(propertyName,
-                    method.getReturnType());
+            AnnotationProperty actual = new AnnotationProperty(propertyName, method.getReturnType());
 
             AnnotationProxy<?> proxy = getAnnotationProxy(obj);
             if (proxy != null) {
@@ -275,10 +262,8 @@ public final class AnnotationProxy<A extends Annotation>
     public int hashCode() {
         int hashCode = 0;
 
-        for (Entry<String, AnnotationProperty> property : this.properties
-                .entrySet()) {
-            hashCode += (127 * property.getKey().hashCode()
-                    ^ property.getValue().getValueHashCode());
+        for (Entry<String, AnnotationProperty> property : this.properties.entrySet()) {
+            hashCode += (127 * property.getKey().hashCode() ^ property.getValue().getValueHashCode());
         }
 
         return hashCode;
@@ -289,16 +274,13 @@ public final class AnnotationProxy<A extends Annotation>
      */
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("@")
-                .append(this.annotationType.getName()).append('(');
+        StringBuilder stringBuilder = new StringBuilder("@").append(this.annotationType.getName()).append('(');
         int counter = 0;
-        for (Entry<String, AnnotationProperty> property : this.properties
-                .entrySet()) {
+        for (Entry<String, AnnotationProperty> property : this.properties.entrySet()) {
             if (counter > 0) {
                 stringBuilder.append(", ");
             }
-            stringBuilder.append(property.getKey()).append('=')
-                    .append(property.getValue().valueToString());
+            stringBuilder.append(property.getKey()).append('=').append(property.getValue().valueToString());
             counter++;
         }
         return stringBuilder.append(')').toString();
@@ -374,27 +356,16 @@ public final class AnnotationProxy<A extends Annotation>
          */
         public void setValue(Object value) {
             if (value != null && !(this.type.isAssignableFrom(value.getClass())
-                    || (this.type == Boolean.TYPE
-                            && value.getClass() == Boolean.class)
-                    || (this.type == Byte.TYPE
-                            && value.getClass() == Byte.class)
-                    || (this.type == Character.TYPE
-                            && value.getClass() == Character.class)
-                    || (this.type == Double.TYPE
-                            && value.getClass() == Double.class)
-                    || (this.type == Float.TYPE
-                            && value.getClass() == Float.class)
-                    || (this.type == Integer.TYPE
-                            && value.getClass() == Integer.class)
-                    || (this.type == Long.TYPE
-                            && value.getClass() == Long.class)
-                    || (this.type == Short.TYPE
-                            && value.getClass() == Short.class))) {
-                throw new IllegalArgumentException(
-                        "Cannot assign value of type '"
-                                + value.getClass().getName() + "' to property '"
-                                + this.name + "' of type '"
-                                + this.type.getName() + "'");
+                    || (this.type == Boolean.TYPE && value.getClass() == Boolean.class)
+                    || (this.type == Byte.TYPE && value.getClass() == Byte.class)
+                    || (this.type == Character.TYPE && value.getClass() == Character.class)
+                    || (this.type == Double.TYPE && value.getClass() == Double.class)
+                    || (this.type == Float.TYPE && value.getClass() == Float.class)
+                    || (this.type == Integer.TYPE && value.getClass() == Integer.class)
+                    || (this.type == Long.TYPE && value.getClass() == Long.class)
+                    || (this.type == Short.TYPE && value.getClass() == Short.class))) {
+                throw new IllegalArgumentException("Cannot assign value of type '" + value.getClass().getName()
+                        + "' to property '" + this.name + "' of type '" + this.type.getName() + "'");
             }
             this.value = value;
         }
@@ -499,44 +470,34 @@ public final class AnnotationProxy<A extends Annotation>
                 }
 
                 // Check for array of string, class, enum const, annotation
-                if (this.value instanceof Object[]
-                        && other.getValue() instanceof Object[]) {
-                    Arrays.equals((Object[]) this.value,
-                            (Object[]) other.getValue());
+                if (this.value instanceof Object[] && other.getValue() instanceof Object[]) {
+                    Arrays.equals((Object[]) this.value, (Object[]) other.getValue());
                 }
 
                 // Deal with array of primitives
                 if (this.type == byte[].class) {
-                    return Arrays.equals((byte[]) this.value,
-                            (byte[]) other.getValue());
+                    return Arrays.equals((byte[]) this.value, (byte[]) other.getValue());
                 }
                 if (this.type == char[].class) {
-                    return Arrays.equals((char[]) this.value,
-                            (char[]) other.getValue());
+                    return Arrays.equals((char[]) this.value, (char[]) other.getValue());
                 }
                 if (this.type == double[].class) {
-                    return Arrays.equals((double[]) this.value,
-                            (double[]) other.getValue());
+                    return Arrays.equals((double[]) this.value, (double[]) other.getValue());
                 }
                 if (this.type == float[].class) {
-                    return Arrays.equals((float[]) this.value,
-                            (float[]) other.getValue());
+                    return Arrays.equals((float[]) this.value, (float[]) other.getValue());
                 }
                 if (this.type == int[].class) {
-                    return Arrays.equals((int[]) this.value,
-                            (int[]) other.getValue());
+                    return Arrays.equals((int[]) this.value, (int[]) other.getValue());
                 }
                 if (this.type == long[].class) {
-                    return Arrays.equals((long[]) this.value,
-                            (long[]) other.getValue());
+                    return Arrays.equals((long[]) this.value, (long[]) other.getValue());
                 }
                 if (this.type == short[].class) {
-                    return Arrays.equals((short[]) this.value,
-                            (short[]) other.getValue());
+                    return Arrays.equals((short[]) this.value, (short[]) other.getValue());
                 }
                 if (this.type == boolean[].class) {
-                    return Arrays.equals((boolean[]) this.value,
-                            (boolean[]) other.getValue());
+                    return Arrays.equals((boolean[]) this.value, (boolean[]) other.getValue());
                 }
             }
 
@@ -549,9 +510,7 @@ public final class AnnotationProxy<A extends Annotation>
         @Override
         public String toString() {
             return "(name=" + this.name + ", type="
-                    + (this.type.isArray()
-                            ? (this.type.getComponentType().getName() + "[]")
-                            : this.type.getName())
+                    + (this.type.isArray() ? (this.type.getComponentType().getName() + "[]") : this.type.getName())
                     + ", value=" + this.valueToString() + ")";
         }
 

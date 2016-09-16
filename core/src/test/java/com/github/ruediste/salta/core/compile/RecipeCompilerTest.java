@@ -22,11 +22,9 @@ public class RecipeCompilerTest {
         SupplierRecipe recipe = new SupplierRecipe() {
 
             @Override
-            protected Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                 mv.visitInsn(Opcodes.ICONST_3);
-                mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf",
-                        "(I)Ljava/lang/Integer;", false);
+                mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
                 return Integer.class;
             }
 
@@ -40,8 +38,7 @@ public class RecipeCompilerTest {
         SupplierRecipe recipe = new SupplierRecipe() {
 
             @Override
-            protected Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                 mv.visitInsn(Opcodes.ICONST_3);
                 return int.class;
             }
@@ -56,12 +53,10 @@ public class RecipeCompilerTest {
         FunctionRecipe recipe = new FunctionRecipe() {
 
             @Override
-            public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
                 mv.pop();
                 mv.visitInsn(Opcodes.ICONST_3);
-                mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf",
-                        "(I)Ljava/lang/Integer;", false);
+                mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
                 return Integer.class;
             }
 
@@ -75,8 +70,7 @@ public class RecipeCompilerTest {
         FunctionRecipe recipe = new FunctionRecipe() {
 
             @Override
-            public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
                 mv.pop();
                 mv.visitInsn(Opcodes.ICONST_3);
                 return int.class;

@@ -24,8 +24,7 @@ public class InjectionPoint<T> extends CoreDependencyKey<T> {
     private final int hashCode;
 
     @SuppressWarnings("unchecked")
-    public InjectionPoint(TypeToken<T> type, Member member,
-            AnnotatedElement annotated, Integer parameterIndex) {
+    public InjectionPoint(TypeToken<T> type, Member member, AnnotatedElement annotated, Integer parameterIndex) {
         this.type = type;
         this.rawType = (Class<T>) type.getRawType();
         this.member = member;
@@ -89,10 +88,8 @@ public class InjectionPoint<T> extends CoreDependencyKey<T> {
         if (!Objects.equals(getClass(), obj.getClass()))
             return false;
         InjectionPoint<?> other = (InjectionPoint<?>) obj;
-        return Objects.equals(type, other.type)
-                && Objects.equals(member, other.member)
-                && Objects.equals(annotated, other.annotated)
-                && Objects.equals(parameterIndex, other.parameterIndex);
+        return Objects.equals(type, other.type) && Objects.equals(member, other.member)
+                && Objects.equals(annotated, other.annotated) && Objects.equals(parameterIndex, other.parameterIndex);
     }
 
     @Override

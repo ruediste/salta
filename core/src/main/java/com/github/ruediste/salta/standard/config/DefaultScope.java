@@ -14,8 +14,7 @@ final class DefaultScope implements Scope {
     }
 
     @Override
-    public SupplierRecipe createRecipe(RecipeCreationContext ctx,
-            Binding binding, CoreDependencyKey<?> requestedKey) {
+    public SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding, CoreDependencyKey<?> requestedKey) {
         return binding.getOrCreateRecipe(ctx);
     }
 }

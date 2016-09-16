@@ -64,8 +64,7 @@ public interface Injector {
      * returns. Only a single token for a single value (compared by identity) is
      * ever created.
      */
-    <T> MembersInjectionToken<T> getMembersInjectionToken(T value,
-            TypeToken<T> type);
+    <T> MembersInjectionToken<T> getMembersInjectionToken(T value, TypeToken<T> type);
 
     /**
      * Returns the members injector used to inject dependencies into methods and

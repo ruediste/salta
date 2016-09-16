@@ -32,8 +32,7 @@ public class ProvidedByTest {
 
     @Test
     public void test() {
-        assertEquals(3,
-                ((A) Salta.createInjector().getInstance(IA.class)).value);
+        assertEquals(3, ((A) Salta.createInjector().getInstance(IA.class)).value);
     }
 
     @ProvidedBy(TestBProvider.class)

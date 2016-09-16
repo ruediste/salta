@@ -25,8 +25,8 @@ public class StandardInjectorConfigurationTest {
 
     @Test
     public void testScopeAnnotationNotInherited() {
-        StandardInjectorConfiguration config = new StandardInjectorConfiguration(
-                Stage.DEVELOPMENT, new CoreInjectorConfiguration());
+        StandardInjectorConfiguration config = new StandardInjectorConfiguration(Stage.DEVELOPMENT,
+                new CoreInjectorConfiguration());
         Scope singleton = mock(Scope.class);
         Scope def = mock(Scope.class);
         config.scopeAnnotationMap.put(Singleton.class, singleton);

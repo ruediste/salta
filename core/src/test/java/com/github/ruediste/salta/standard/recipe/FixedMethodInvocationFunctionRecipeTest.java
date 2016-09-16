@@ -22,9 +22,7 @@ public class FixedMethodInvocationFunctionRecipeTest {
 
     @Test
     public void assumption_voidClassEqualsVoidReturnType() throws Exception {
-        assertTrue(void.class.equals(
-                getClass().getMethod("assumption_voidClassEqualsVoidReturnType")
-                        .getReturnType()));
+        assertTrue(void.class.equals(getClass().getMethod("assumption_voidClassEqualsVoidReturnType").getReturnType()));
     }
 
     int count;
@@ -44,19 +42,16 @@ public class FixedMethodInvocationFunctionRecipeTest {
     public void compile_accessToProtectedMethod() throws Exception {
         FixedMethodInvocationFunctionRecipe recipe = new FixedMethodInvocationFunctionRecipe(
                 getClass().getDeclaredMethod("a"), Collections.emptyList());
-        CompiledSupplier compiled = compiler
-                .compileSupplier(new SupplierRecipe() {
+        CompiledSupplier compiled = compiler.compileSupplier(new SupplierRecipe() {
 
-                    @Override
-                    protected Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext ctx) {
-                        ctx.addFieldAndLoad(Object.class,
-                                FixedMethodInvocationFunctionRecipeTest.this);
-                        mv.dup();
-                        recipe.compile(Object.class, ctx);
-                        return Object.class;
-                    }
-                });
+            @Override
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+                ctx.addFieldAndLoad(Object.class, FixedMethodInvocationFunctionRecipeTest.this);
+                mv.dup();
+                recipe.compile(Object.class, ctx);
+                return Object.class;
+            }
+        });
         count = 0;
         assertSame(this, compiled.getNoThrow());
         assertEquals(1, count);
@@ -71,11 +66,9 @@ public class FixedMethodInvocationFunctionRecipeTest {
         }
 
         @Override
-        protected Class<?> loadClass(String name, boolean resolve)
-                throws ClassNotFoundException {
+        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
             if (name.startsWith(clsToLoad.getName())) {
-                InputStream in = getResourceAsStream(
-                        name.replace('.', '/') + ".class");
+                InputStream in = getResourceAsStream(name.replace('.', '/') + ".class");
                 try {
                     byte[] bb = ByteStreams.toByteArray(in);
                     return defineClass(name, bb, 0, bb.length);
@@ -100,24 +93,21 @@ public class FixedMethodInvocationFunctionRecipeTest {
 
     @Test
     public void compile_targetClassNotFoundByCtxClassLoader() throws Throwable {
-        LoadSingleClassClassLoader cl = new LoadSingleClassClassLoader(
-                getClass());
+        LoadSingleClassClassLoader cl = new LoadSingleClassClassLoader(getClass());
         Class<?> clsA = cl.loadClass(A.class.getName());
         FixedMethodInvocationFunctionRecipe recipe = new FixedMethodInvocationFunctionRecipe(
                 clsA.getDeclaredMethod("a"), Collections.emptyList());
         Object a = clsA.newInstance();
-        CompiledSupplier compiled = compiler
-                .compileSupplier(new SupplierRecipe() {
+        CompiledSupplier compiled = compiler.compileSupplier(new SupplierRecipe() {
 
-                    @Override
-                    protected Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext ctx) {
-                        ctx.addFieldAndLoad(Object.class, a);
-                        mv.dup();
-                        recipe.compile(Object.class, ctx);
-                        return Object.class;
-                    }
-                });
+            @Override
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+                ctx.addFieldAndLoad(Object.class, a);
+                mv.dup();
+                recipe.compile(Object.class, ctx);
+                return Object.class;
+            }
+        });
         assertSame(a, compiled.getNoThrow());
         assertEquals(1, clsA.getDeclaredField("count").get(a));
     }

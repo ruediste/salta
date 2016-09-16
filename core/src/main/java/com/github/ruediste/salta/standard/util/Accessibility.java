@@ -15,8 +15,7 @@ public class Accessibility {
     private Accessibility() {
     }
 
-    public static boolean isConstructorAccessible(Constructor<?> constructor,
-            ClassLoader cl) {
+    public static boolean isConstructorAccessible(Constructor<?> constructor, ClassLoader cl) {
         return isExecutableAccessible(constructor, cl);
     }
 
@@ -24,8 +23,7 @@ public class Accessibility {
         return isExecutableAccessible(m, cl);
     }
 
-    public static boolean isExecutableAccessible(Executable executable,
-            ClassLoader cl) {
+    public static boolean isExecutableAccessible(Executable executable, ClassLoader cl) {
         if (!Modifier.isPublic(executable.getModifiers()))
             return false;
         if (!isClassAccessible(executable.getDeclaringClass(), cl))

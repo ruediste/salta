@@ -44,8 +44,7 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
                     msg.add(b.toString());
             }
             msg.add(binding.toString());
-            throw new SaltaException("Detected Dependency Circle: "
-                    + msg.stream().collect(joining("\n", "\n", "\n")));
+            throw new SaltaException("Detected Dependency Circle: " + msg.stream().collect(joining("\n", "\n", "\n")));
         }
     }
 
@@ -97,15 +96,12 @@ public class RecipeCreationContextImpl implements RecipeCreationContext {
     }
 
     @Override
-    public Optional<SupplierRecipe> tryGetRecipe(
-            CoreDependencyKey<?> dependency) {
-        return coreInjector.tryGetRecipeFunc(dependency)
-                .map(f -> f.apply(this));
+    public Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency) {
+        return coreInjector.tryGetRecipeFunc(dependency).map(f -> f.apply(this));
     }
 
     @Override
-    public Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(
-            CoreDependencyKey<?> dependency) {
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(CoreDependencyKey<?> dependency) {
         return coreInjector.tryGetRecipeFunc(dependency);
     }
 

@@ -26,10 +26,8 @@ public class RecipeEnhancerWrapperImplTest {
         Object result = compiler.compileSupplier(new SupplierRecipe() {
 
             @Override
-            protected Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
-                return new RecipeEnhancerWrapperImpl(
-                        new Function<Supplier<Object>, Object>() {
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+                return new RecipeEnhancerWrapperImpl(new Function<Supplier<Object>, Object>() {
 
                     @Override
                     public Object apply(Supplier<Object> t) {
@@ -41,8 +39,7 @@ public class RecipeEnhancerWrapperImplTest {
                 }).compile(ctx, new SupplierRecipe() {
 
                     @Override
-                    protected Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext ctx) {
+                    protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                         mv.push(1);
                         return int.class;
                     }

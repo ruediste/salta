@@ -24,6 +24,5 @@ public interface RecipeCreationContext {
 
     Optional<SupplierRecipe> tryGetRecipe(CoreDependencyKey<?> dependency);
 
-    Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(
-            CoreDependencyKey<?> dep);
+    Optional<Function<RecipeCreationContext, SupplierRecipe>> tryGetRecipeFunc(CoreDependencyKey<?> dep);
 }

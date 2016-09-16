@@ -49,19 +49,17 @@ public class ProvidesMethodTest {
             }
 
         });
-        assertEquals("Hello World", injector.getInstance(DependencyKey
-                .of(String.class).withAnnotations(Names.named("works"))));
+        assertEquals("Hello World",
+                injector.getInstance(DependencyKey.of(String.class).withAnnotations(Names.named("works"))));
 
         try {
-            injector.getInstance(DependencyKey.of(String.class)
-                    .withAnnotations(Names.named("fails")));
+            injector.getInstance(DependencyKey.of(String.class).withAnnotations(Names.named("fails")));
             fail();
         } catch (SaltaException e) {
             assertTrue(e.getMessage().contains("boo"));
         }
         try {
-            injector.getInstance(DependencyKey.of(String.class)
-                    .withAnnotations(Names.named("failsChecked")));
+            injector.getInstance(DependencyKey.of(String.class).withAnnotations(Names.named("failsChecked")));
             fail();
         } catch (SaltaException e) {
             assertTrue(e.getMessage().contains("booChecked"));

@@ -35,9 +35,7 @@ public class Matchers {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof AndMatcher
-                    && ((AndMatcher) other).a.equals(a)
-                    && ((AndMatcher) other).b.equals(b);
+            return other instanceof AndMatcher && ((AndMatcher) other).a.equals(a) && ((AndMatcher) other).b.equals(b);
         }
 
         @Override
@@ -68,8 +66,7 @@ public class Matchers {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof OrMatcher && ((OrMatcher) other).a.equals(a)
-                    && ((OrMatcher) other).b.equals(b);
+            return other instanceof OrMatcher && ((OrMatcher) other).a.equals(a) && ((OrMatcher) other).b.equals(b);
         }
 
         @Override
@@ -133,8 +130,7 @@ public class Matchers {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof Not
-                    && ((Not) other).delegate.equals(delegate);
+            return other instanceof Not && ((Not) other).delegate.equals(delegate);
         }
 
         @Override
@@ -150,32 +146,25 @@ public class Matchers {
         private static final long serialVersionUID = 0;
     }
 
-    private static void checkForRuntimeRetention(
-            Class<? extends Annotation> annotationType) {
+    private static void checkForRuntimeRetention(Class<? extends Annotation> annotationType) {
         Retention retention = annotationType.getAnnotation(Retention.class);
-        checkArgument(
-                retention != null
-                        && retention.value() == RetentionPolicy.RUNTIME,
-                "Annotation %s is missing RUNTIME retention",
-                annotationType.getSimpleName());
+        checkArgument(retention != null && retention.value() == RetentionPolicy.RUNTIME,
+                "Annotation %s is missing RUNTIME retention", annotationType.getSimpleName());
     }
 
     /**
      * Returns a matcher which matches elements (methods, classes, etc.) with a
      * given annotation.
      */
-    public static Matcher<AnnotatedElement> annotatedWith(
-            final Class<? extends Annotation> annotationType) {
+    public static Matcher<AnnotatedElement> annotatedWith(final Class<? extends Annotation> annotationType) {
         return new AnnotatedWithType(annotationType);
     }
 
-    private static class AnnotatedWithType
-            implements Matcher<AnnotatedElement>, Serializable {
+    private static class AnnotatedWithType implements Matcher<AnnotatedElement>, Serializable {
         private final Class<? extends Annotation> annotationType;
 
         public AnnotatedWithType(Class<? extends Annotation> annotationType) {
-            this.annotationType = checkNotNull(annotationType,
-                    "annotation type");
+            this.annotationType = checkNotNull(annotationType, "annotation type");
             checkForRuntimeRetention(annotationType);
         }
 
@@ -187,8 +176,7 @@ public class Matchers {
         @Override
         public boolean equals(Object other) {
             return other instanceof AnnotatedWithType
-                    && ((AnnotatedWithType) other).annotationType
-                            .equals(annotationType);
+                    && ((AnnotatedWithType) other).annotationType.equals(annotationType);
         }
 
         @Override
@@ -198,8 +186,7 @@ public class Matchers {
 
         @Override
         public String toString() {
-            return "annotatedWith(" + annotationType.getSimpleName()
-                    + ".class)";
+            return "annotatedWith(" + annotationType.getSimpleName() + ".class)";
         }
 
         private static final long serialVersionUID = 0;
@@ -209,13 +196,11 @@ public class Matchers {
      * Returns a matcher which matches elements (methods, classes, etc.) with a
      * given annotation.
      */
-    public static Matcher<AnnotatedElement> annotatedWith(
-            final Annotation annotation) {
+    public static Matcher<AnnotatedElement> annotatedWith(final Annotation annotation) {
         return new AnnotatedWith(annotation);
     }
 
-    private static class AnnotatedWith
-            implements Matcher<AnnotatedElement>, Serializable {
+    private static class AnnotatedWith implements Matcher<AnnotatedElement>, Serializable {
         private final Annotation annotation;
 
         public AnnotatedWith(Annotation annotation) {
@@ -225,15 +210,13 @@ public class Matchers {
 
         @Override
         public boolean matches(AnnotatedElement element) {
-            Annotation fromElement = element
-                    .getAnnotation(annotation.annotationType());
+            Annotation fromElement = element.getAnnotation(annotation.annotationType());
             return fromElement != null && annotation.equals(fromElement);
         }
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof AnnotatedWith
-                    && ((AnnotatedWith) other).annotation.equals(annotation);
+            return other instanceof AnnotatedWith && ((AnnotatedWith) other).annotation.equals(annotation);
         }
 
         @Override
@@ -271,8 +254,7 @@ public class Matchers {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof SubclassesOf
-                    && ((SubclassesOf) other).superclass.equals(superclass);
+            return other instanceof SubclassesOf && ((SubclassesOf) other).superclass.equals(superclass);
         }
 
         @Override
@@ -346,8 +328,7 @@ public class Matchers {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof IdenticalTo
-                    && ((IdenticalTo) other).value == value;
+            return other instanceof IdenticalTo && ((IdenticalTo) other).value == value;
         }
 
         @Override
@@ -388,8 +369,7 @@ public class Matchers {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof InPackage
-                    && ((InPackage) other).targetPackage.equals(targetPackage);
+            return other instanceof InPackage && ((InPackage) other).targetPackage.equals(targetPackage);
         }
 
         @Override
@@ -430,15 +410,12 @@ public class Matchers {
         @Override
         public boolean matches(Class c) {
             String classPackageName = c.getPackage().getName();
-            return classPackageName.equals(targetPackageName)
-                    || classPackageName.startsWith(targetPackageName + ".");
+            return classPackageName.equals(targetPackageName) || classPackageName.startsWith(targetPackageName + ".");
         }
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof InSubpackage
-                    && ((InSubpackage) other).targetPackageName
-                            .equals(targetPackageName);
+            return other instanceof InSubpackage && ((InSubpackage) other).targetPackageName.equals(targetPackageName);
         }
 
         @Override
@@ -457,8 +434,7 @@ public class Matchers {
     /**
      * Returns a matcher which matches methods with matching return types.
      */
-    public static Matcher<Method> returns(
-            final Matcher<? super Class<?>> returnType) {
+    public static Matcher<Method> returns(final Matcher<? super Class<?>> returnType) {
         return new Returns(returnType);
     }
 
@@ -476,8 +452,7 @@ public class Matchers {
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof Returns
-                    && ((Returns) other).returnType.equals(returnType);
+            return other instanceof Returns && ((Returns) other).returnType.equals(returnType);
         }
 
         @Override

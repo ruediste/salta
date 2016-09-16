@@ -20,8 +20,7 @@ public class RecipeInitializerImplTest {
         Object result = compiler.compileSupplier(new SupplierRecipe() {
 
             @Override
-            protected Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                 mv.push(1);
                 return new RecipeInitializerImpl(x -> {
                     instance = x;

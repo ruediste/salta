@@ -25,13 +25,10 @@ public class DefaultConstructionRule implements ConstructionRule {
     }
 
     @Override
-    public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
-            TypeToken<?> type) {
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(TypeToken<?> type) {
         // create seed recipe
-        return config.construction.createRecipeInstantiator(type)
-                .map(instantiator -> ctx -> config.construction
-                        .createConstructionRecipe(ctx, type,
-                                instantiator.apply(ctx)));
+        return config.construction.createRecipeInstantiator(type).map(instantiator -> ctx -> config.construction
+                .createConstructionRecipe(ctx, type, instantiator.apply(ctx)));
 
     }
 }

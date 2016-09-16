@@ -30,8 +30,7 @@ public class JSR330ReflectionUtil {
         return annotation.annotationType().isAnnotationPresent(Qualifier.class);
     }
 
-    public static boolean areQualifiersMatching(
-            List<Annotation> presentQualifiers,
+    public static boolean areQualifiersMatching(List<Annotation> presentQualifiers,
             List<Annotation> requiredQualifiers) {
         outer: for (Annotation requiredQualifier : requiredQualifiers) {
             for (Annotation presentQualifier : presentQualifiers) {

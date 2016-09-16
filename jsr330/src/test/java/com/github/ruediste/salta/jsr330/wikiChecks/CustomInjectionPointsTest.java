@@ -41,32 +41,23 @@ public class CustomInjectionPointsTest {
 
                 bindMembersInjectorFactory(new RecipeMembersInjectorFactory() {
                     @Override
-                    public List<RecipeMembersInjector> createMembersInjectors(
-                            RecipeCreationContext ctx, TypeToken<?> type) {
+                    public List<RecipeMembersInjector> createMembersInjectors(RecipeCreationContext ctx,
+                            TypeToken<?> type) {
                         ArrayList<RecipeMembersInjector> result = new ArrayList<>();
                         // iterate all ancestors
                         for (TypeToken<?> currentType : type.getTypes()) {
 
                             // iterate the fields
-                            for (Field field : currentType.getRawType()
-                                    .getDeclaredFields()) {
+                            for (Field field : currentType.getRawType().getDeclaredFields()) {
 
                                 // try to get the resource annotation
-                                Resource resource = field
-                                        .getAnnotation(Resource.class);
+                                Resource resource = field.getAnnotation(Resource.class);
                                 if (resource != null) {
                                     // if the annotation is present,
                                     // register an injector
-                                    TypeToken<?> fieldType = currentType
-                                            .resolveType(
-                                                    field.getGenericType());
-                                    result.add(
-                                            new FixedFieldRecipeMembersInjector(
-                                                    field,
-                                                    new SupplierRecipeImpl(
-                                                            () -> retrieveResource(
-                                                                    fieldType,
-                                                                    resource))));
+                                    TypeToken<?> fieldType = currentType.resolveType(field.getGenericType());
+                                    result.add(new FixedFieldRecipeMembersInjector(field,
+                                            new SupplierRecipeImpl(() -> retrieveResource(fieldType, resource))));
                                 }
                             }
                         }

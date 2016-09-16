@@ -15,6 +15,5 @@ public interface RecipeMembersInjectorFactory {
     /**
      * Create {@link RecipeMembersInjector}s for the given type
      */
-    List<RecipeMembersInjector> createMembersInjectors(
-            RecipeCreationContext ctx, TypeToken<?> type);
+    List<RecipeMembersInjector> createMembersInjectors(RecipeCreationContext ctx, TypeToken<?> type);
 }

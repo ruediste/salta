@@ -42,21 +42,18 @@ public abstract class StaticMembersInjectorBase {
      * Injects all
      * {@link StandardInjectorConfiguration#requestedStaticInjections}
      */
-    public void injectStaticMembers(StandardInjectorConfiguration config,
-            StandardInjector injector) {
+    public void injectStaticMembers(StandardInjectorConfiguration config, StandardInjector injector) {
         Set<Class<?>> injectedClasses = new HashSet<>();
         for (Class<?> cls : config.requestedStaticInjections) {
             performStaticInjections(cls, injector, injectedClasses);
         }
     }
 
-    private void performStaticInjections(Class<?> cls,
-            StandardInjector injector, Set<Class<?>> injectedClasses) {
+    private void performStaticInjections(Class<?> cls, StandardInjector injector, Set<Class<?>> injectedClasses) {
         if (cls == null)
             return;
         if (injectedClasses.add(cls)) {
-            performStaticInjections(cls.getSuperclass(), injector,
-                    injectedClasses);
+            performStaticInjections(cls.getSuperclass(), injector, injectedClasses);
 
             performStaticInjections(injector.getCoreInjector(), cls);
         }
@@ -70,18 +67,14 @@ public abstract class StaticMembersInjectorBase {
             InjectionInstruction injectionInstruction = shouldInject(f);
             if (injectionInstruction == InjectionInstruction.NO_INJECT)
                 continue;
-            InjectionPoint<?> d = new InjectionPoint<>(
-                    TypeToken.of(f.getGenericType()), f, f, null);
+            InjectionPoint<?> d = new InjectionPoint<>(TypeToken.of(f.getGenericType()), f, f, null);
             f.setAccessible(true);
-            Optional<CompiledSupplier> instance = injector
-                    .tryGetCompiledRecipe(d);
-            if (instance.isPresent()
-                    || injectionInstruction != InjectionInstruction.INJECT_OPTIONAL)
+            Optional<CompiledSupplier> instance = injector.tryGetCompiledRecipe(d);
+            if (instance.isPresent() || injectionInstruction != InjectionInstruction.INJECT_OPTIONAL)
                 try {
                     f.set(null, instance.get().getNoThrow());
                 } catch (IllegalArgumentException | IllegalAccessException e) {
-                    throw new SaltaException("Error while setting static " + f,
-                            e);
+                    throw new SaltaException("Error while setting static " + f, e);
                 }
         }
 
@@ -96,11 +89,9 @@ public abstract class StaticMembersInjectorBase {
             Parameter[] parameters = m.getParameters();
             for (int i = 0; i < parameters.length; i++) {
                 Parameter p = parameters[i];
-                CoreDependencyKey<?> d = new InjectionPoint<>(
-                        TypeToken.of(p.getParameterizedType()), m, p, i);
+                CoreDependencyKey<?> d = new InjectionPoint<>(TypeToken.of(p.getParameterizedType()), m, p, i);
                 if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
-                    Optional<CompiledSupplier> tmp = injector
-                            .tryGetCompiledRecipe(d);
+                    Optional<CompiledSupplier> tmp = injector.tryGetCompiledRecipe(d);
                     if (!tmp.isPresent())
                         continue methodLoop;
                     args.add(tmp.get().getNoThrow());
@@ -114,8 +105,7 @@ public abstract class StaticMembersInjectorBase {
             } catch (IllegalArgumentException | IllegalAccessException e) {
                 throw new SaltaException("Error while setting static " + m, e);
             } catch (InvocationTargetException e) {
-                throw new SaltaException("Error while setting static " + m,
-                        e.getCause());
+                throw new SaltaException("Error while setting static " + m, e.getCause());
             }
 
         }

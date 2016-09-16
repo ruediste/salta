@@ -20,6 +20,5 @@ public abstract class MethodRecipe {
     /**
      * Emit the code for the method
      */
-    protected abstract void compileImpl(GeneratorAdapter mv,
-            MethodCompilationContext ctx);
+    protected abstract void compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx);
 }

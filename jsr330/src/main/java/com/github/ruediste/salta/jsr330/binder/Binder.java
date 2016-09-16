@@ -233,8 +233,7 @@ public class Binder {
     public Binder(JSR330InjectorConfiguration config, InjectorImpl injector) {
         this.config = config;
         this.injector = injector;
-        this.delegate = new StandardBinder(config.standardConfig,
-                injector.getDelegate());
+        this.delegate = new StandardBinder(config.standardConfig, injector.getDelegate());
     }
 
     /**
@@ -256,8 +255,7 @@ public class Binder {
     /**
      * Binds a scope to an annotation.
      */
-    public void bindScope(Class<? extends Annotation> annotationType,
-            Scope scope) {
+    public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
         delegate.bindScope(annotationType, scope);
     }
 
@@ -455,10 +453,8 @@ public class Binder {
         config.standardConfig.creationPipeline.creationRules.add(rule);
     }
 
-    public void bindMembersInjectorFactory(
-            RecipeMembersInjectorFactory factory) {
-        config().standardConfig.construction.membersInjectorFactories
-                .add(factory);
+    public void bindMembersInjectorFactory(RecipeMembersInjectorFactory factory) {
+        config().standardConfig.construction.membersInjectorFactories.add(factory);
     }
 
     /**
@@ -480,10 +476,8 @@ public class Binder {
      * @param saltaInterceptor
      *            intercepts the method calls
      */
-    public final void bindInterceptor(
-            Matcher<? super CoreDependencyKey<?>> keyMatcher,
-            Matcher<? super Method> methodMatcher,
-            SaltaMethodInterceptor saltaInterceptor) {
+    public final void bindInterceptor(Matcher<? super CoreDependencyKey<?>> keyMatcher,
+            Matcher<? super Method> methodMatcher, SaltaMethodInterceptor saltaInterceptor) {
         delegate.bindInterceptor(keyMatcher, methodMatcher, saltaInterceptor);
     }
 }

@@ -57,8 +57,7 @@ public class StandardBinder {
 
     protected StandardBindingBuilderImpl<?> currentBindingBuilder;
 
-    public StandardBinder(StandardInjectorConfiguration config,
-            StandardInjector injector) {
+    public StandardBinder(StandardInjectorConfiguration config, StandardInjector injector) {
         this.config = config;
         this.injector = injector;
 
@@ -83,8 +82,7 @@ public class StandardBinder {
     /**
      * Binds a scope to an annotation.
      */
-    public void bindScope(Class<? extends Annotation> annotationType,
-            Scope scope) {
+    public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
 
         // put the annotation to the map for further use by other binders
         config.scopeAnnotationMap.put(annotationType, scope);
@@ -105,10 +103,8 @@ public class StandardBinder {
      * This metod is used by {@link #bind(TypeToken)} to instantiate a binding
      * builder and can be used to instantiate a subclass
      */
-    protected <T> StandardBindingBuilderImpl<T> createBindingBuilder(
-            TypeToken<T> type) {
-        return new StandardBindingBuilderImpl<>(
-                CoreDependencyKey.typeMatcher(type), type, config, injector);
+    protected <T> StandardBindingBuilderImpl<T> createBindingBuilder(TypeToken<T> type) {
+        return new StandardBindingBuilderImpl<>(CoreDependencyKey.typeMatcher(type), type, config, injector);
     }
 
     public void close() {
@@ -141,8 +137,7 @@ public class StandardBinder {
      * @since 2.0
      */
     public <T> void requestInjection(TypeToken<T> type, T instance) {
-        config.dynamicInitializers
-                .add(() -> injector.injectMembers(type, instance));
+        config.dynamicInitializers.add(() -> injector.injectMembers(type, instance));
     }
 
     /**
@@ -189,8 +184,7 @@ public class StandardBinder {
      * message.
      */
     public void addError(String message, Object... arguments) {
-        config.errorMessages
-                .add(new Message(String.format(message, arguments)));
+        config.errorMessages.add(new Message(String.format(message, arguments)));
     }
 
     /**
@@ -305,22 +299,18 @@ public class StandardBinder {
      * @param saltaInterceptor
      *            intercepts the method calls
      */
-    public final void bindInterceptor(
-            Matcher<? super CoreDependencyKey<?>> keyMatcher,
-            Matcher<? super Method> methodMatcher,
-            SaltaMethodInterceptor saltaInterceptor) {
+    public final void bindInterceptor(Matcher<? super CoreDependencyKey<?>> keyMatcher,
+            Matcher<? super Method> methodMatcher, SaltaMethodInterceptor saltaInterceptor) {
 
         config.config.enhancerFactories.add(new EnhancerFactory() {
 
             @Override
-            public RecipeEnhancer getEnhancer(RecipeCreationContext ctx,
-                    CoreDependencyKey<?> requestedKey) {
+            public RecipeEnhancer getEnhancer(RecipeCreationContext ctx, CoreDependencyKey<?> requestedKey) {
 
                 if (keyMatcher.matches(requestedKey)) {
 
                     boolean found = false;
-                    typeLoop: for (TypeToken<?> t : requestedKey.getType()
-                            .getTypes()) {
+                    typeLoop: for (TypeToken<?> t : requestedKey.getType().getTypes()) {
                         for (Method m : t.getRawType().getDeclaredMethods()) {
                             if (Modifier.isStatic(m.getModifiers()))
                                 continue;
@@ -351,16 +341,13 @@ public class StandardBinder {
                             MethodInterceptor interceptor = new MethodInterceptor() {
 
                                 @Override
-                                public Object intercept(Object obj,
-                                        Method method, Object[] args,
-                                        MethodProxy proxy) throws Throwable {
-                                    return saltaInterceptor.intercept(inner,
-                                            method, args, proxy);
+                                public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy)
+                                        throws Throwable {
+                                    return saltaInterceptor.intercept(inner, method, args, proxy);
                                 }
                             };
                             e.setSuperclass(requestedKey.getRawType());
-                            e.setCallbacks(
-                                    new Callback[] { loader, interceptor });
+                            e.setCallbacks(new Callback[] { loader, interceptor });
                             e.setCallbackFilter(new CallbackFilter() {
 
                                 @Override
@@ -373,10 +360,7 @@ public class StandardBinder {
                             });
                             return e.create();
                         } catch (Throwable t) {
-                            throw new SaltaException(
-                                    "Error while creating proxy to enhance "
-                                            + requestedKey,
-                                    t);
+                            throw new SaltaException("Error while creating proxy to enhance " + requestedKey, t);
                         }
                     });
                 }

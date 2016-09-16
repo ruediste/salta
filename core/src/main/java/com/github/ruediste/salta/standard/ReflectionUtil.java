@@ -11,12 +11,10 @@ public class ReflectionUtil {
     }
 
     public static Annotation createAnnotation(Class<?> annotationClass) {
-        return (Annotation) Proxy.newProxyInstance(
-                annotationClass.getClassLoader(),
-                new Class[] { Annotation.class }, new InvocationHandler() {
+        return (Annotation) Proxy.newProxyInstance(annotationClass.getClassLoader(), new Class[] { Annotation.class },
+                new InvocationHandler() {
                     @Override
-                    public Object invoke(Object proxy, Method method,
-                            Object[] args) {
+                    public Object invoke(Object proxy, Method method, Object[] args) {
                         return annotationClass; // only getClass() or
                                                 // annotationType()
                         // should be called.

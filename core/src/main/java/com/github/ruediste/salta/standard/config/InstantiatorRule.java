@@ -16,6 +16,5 @@ public interface InstantiatorRule {
      * Return a function creating a {@link RecipeInstantiator}, or
      * {@link Optional#empty()} if the next rule should be tried
      */
-    Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(
-            TypeToken<?> type);
+    Optional<Function<RecipeCreationContext, RecipeInstantiator>> apply(TypeToken<?> type);
 }

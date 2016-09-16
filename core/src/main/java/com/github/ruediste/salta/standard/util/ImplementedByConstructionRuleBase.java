@@ -14,8 +14,7 @@ import com.github.ruediste.salta.standard.config.ConstructionRule;
 import com.github.ruediste.salta.standard.recipe.RecipeInstantiator;
 import com.google.common.reflect.TypeToken;
 
-public abstract class ImplementedByConstructionRuleBase
-        implements ConstructionRule {
+public abstract class ImplementedByConstructionRuleBase implements ConstructionRule {
 
     public ImplementedByConstructionRuleBase() {
         super();
@@ -35,13 +34,11 @@ public abstract class ImplementedByConstructionRuleBase
     }
 
     @Override
-    public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(
-            TypeToken<?> type) {
+    public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(TypeToken<?> type) {
         DependencyKey<?> implementorKey = getImplementorKey(type);
         if (implementorKey != null) {
             if (!type.isAssignableFrom(implementorKey.getType())) {
-                throw new SaltaException("Implementation " + implementorKey
-                        + " specified by " + getAnnotationName()
+                throw new SaltaException("Implementation " + implementorKey + " specified by " + getAnnotationName()
                         + " does not implement " + type);
             }
             return Optional.of(ctx -> {
@@ -49,8 +46,7 @@ public abstract class ImplementedByConstructionRuleBase
                 return new RecipeInstantiator() {
 
                     @Override
-                    protected Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext ctx) {
+                    protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                         return recipe.compile(ctx);
                     }
                 };

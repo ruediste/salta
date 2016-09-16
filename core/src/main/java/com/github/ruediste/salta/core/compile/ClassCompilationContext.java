@@ -36,8 +36,7 @@ public class ClassCompilationContext {
 
     private final RecipeCompiler compiler;
 
-    public ClassCompilationContext(ClassNode clazz, boolean codeSizeEvaluation,
-            RecipeCompiler compiler) {
+    public ClassCompilationContext(ClassNode clazz, boolean codeSizeEvaluation, RecipeCompiler compiler) {
         this.clazz = clazz;
         this.codeSizeEvaluation = codeSizeEvaluation;
         this.compiler = compiler;
@@ -49,8 +48,7 @@ public class ClassCompilationContext {
         entry.value = value;
         fields.add(entry);
 
-        getClazz().visitField(ACC_PUBLIC + ACC_STATIC, entry.name,
-                Type.getDescriptor(fieldType), null, null);
+        getClazz().visitField(ACC_PUBLIC + ACC_STATIC, entry.name, Type.getDescriptor(fieldType), null, null);
 
         return new FieldHandle(fieldType, entry.name);
     }
@@ -75,10 +73,8 @@ public class ClassCompilationContext {
      *             If a subclass calls this constructor.
      * @return name of the generated method
      */
-    public String addMethod(final int access, final String desc,
-            final String[] exceptions, MethodRecipe recipe) {
-        return addMethod(access, "method" + methodNr++, desc, exceptions,
-                recipe);
+    public String addMethod(final int access, final String desc, final String[] exceptions, MethodRecipe recipe) {
+        return addMethod(access, "method" + methodNr++, desc, exceptions, recipe);
 
     }
 
@@ -101,14 +97,13 @@ public class ClassCompilationContext {
      *             If a subclass calls this constructor.
      * @return name of the generated method
      */
-    public String addMethod(final int access, String name, final String desc,
-            final String[] exceptions, MethodRecipe recipe) {
+    public String addMethod(final int access, String name, final String desc, final String[] exceptions,
+            MethodRecipe recipe) {
         if (codeSizeEvaluation)
             return name;
         MethodNode m = new MethodNode(access, name, desc, null, exceptions);
         getClazz().methods.add(m);
-        GeneratorAdapter mv = new GeneratorAdapter(m.access,
-                new Method(m.name, m.desc), m);
+        GeneratorAdapter mv = new GeneratorAdapter(m.access, new Method(m.name, m.desc), m);
         mv.visitCode();
         recipe.compile(new MethodCompilationContext(this, mv, access, desc));
         mv.visitMaxs(0, 0);
@@ -141,12 +136,10 @@ public class ClassCompilationContext {
             try {
                 Field field = recipeClass.getField(entry.name);
                 field.setAccessible(true);
-                modifiersField.setInt(field,
-                        field.getModifiers() & ~Modifier.FINAL);
+                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
                 field.set(null, entry.value);
             } catch (Exception e) {
-                throw new SaltaException(
-                        "Error while setting parameter " + entry.name, e);
+                throw new SaltaException("Error while setting parameter " + entry.name, e);
             }
         }
     }

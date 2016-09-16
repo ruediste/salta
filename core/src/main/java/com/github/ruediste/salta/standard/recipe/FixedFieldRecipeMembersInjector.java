@@ -32,17 +32,14 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
     }
 
     @Override
-    public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
-        if (Accessibility.isFieldAccessible(field,
-                ctx.getCompiledCodeClassLoader()))
+    public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
+        if (Accessibility.isFieldAccessible(field, ctx.getCompiledCodeClassLoader()))
             return compileDirect(argType, mv, ctx);
         else
             return compileDynamic(argType, mv, ctx);
     }
 
-    protected Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    protected Class<?> compileDirect(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
         argType = ctx.castToPublic(argType, field.getDeclaringClass());
         mv.dup();
         {
@@ -50,14 +47,12 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
             ctx.castToPublic(t, field.getType());
         }
 
-        mv.putField(Type.getType(field.getDeclaringClass()), field.getName(),
-                Type.getType(field.getType()));
+        mv.putField(Type.getType(field.getDeclaringClass()), field.getName(), Type.getType(field.getType()));
 
         return argType;
     }
 
-    protected Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    protected Class<?> compileDynamic(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
 
         // cast receiver
         argType = ctx.castToPublic(argType, field.getDeclaringClass());
@@ -71,13 +66,11 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
         }
 
         String bootstrapDesc = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;";
-        String bootstrapName = ctx.getClassCtx().addMethod(
-                ACC_PRIVATE + ACC_STATIC, bootstrapDesc, null,
+        String bootstrapName = ctx.getClassCtx().addMethod(ACC_PRIVATE + ACC_STATIC, bootstrapDesc, null,
                 new MethodRecipe() {
 
                     @Override
-                    protected void compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext ctx) {
+                    protected void compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                         // start constructing the constant CallSite to be
                         // returned
                         mv.newInstance(Type.getType(ConstantCallSite.class));
@@ -90,24 +83,18 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
                         ctx.addFieldAndLoad(Field.class, field);
 
                         // unreflect
-                        mv.visitMethodInsn(INVOKEVIRTUAL,
-                                "java/lang/invoke/MethodHandles$Lookup",
-                                "unreflectSetter",
-                                "(Ljava/lang/reflect/Field;)Ljava/lang/invoke/MethodHandle;",
-                                false);
+                        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/invoke/MethodHandles$Lookup", "unreflectSetter",
+                                "(Ljava/lang/reflect/Field;)Ljava/lang/invoke/MethodHandle;", false);
 
                         // load the target method type
                         mv.loadArg(2);
 
                         // asType
-                        mv.visitMethodInsn(INVOKEVIRTUAL,
-                                "java/lang/invoke/MethodHandle", "asType",
-                                "(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
-                                false);
+                        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/invoke/MethodHandle", "asType",
+                                "(Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;", false);
 
                         // invoke the constructor of the callsite
-                        mv.visitMethodInsn(INVOKESPECIAL,
-                                "java/lang/invoke/ConstantCallSite", "<init>",
+                        mv.visitMethodInsn(INVOKESPECIAL, "java/lang/invoke/ConstantCallSite", "<init>",
                                 "(Ljava/lang/invoke/MethodHandle;)V", false);
 
                         // return
@@ -116,13 +103,9 @@ public class FixedFieldRecipeMembersInjector implements RecipeMembersInjector {
                 });
 
         // set field
-        Handle bsm = new Handle(H_INVOKESTATIC,
-                ctx.getClassCtx().getInternalClassName(), bootstrapName,
-                bootstrapDesc);
+        Handle bsm = new Handle(H_INVOKESTATIC, ctx.getClassCtx().getInternalClassName(), bootstrapName, bootstrapDesc);
 
-        mv.invokeDynamic("field",
-                Type.getMethodDescriptor(Type.getType(void.class),
-                        Type.getType(argType), valueType),
+        mv.invokeDynamic("field", Type.getMethodDescriptor(Type.getType(void.class), Type.getType(argType), valueType),
                 bsm);
         return argType;
     }

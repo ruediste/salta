@@ -43,8 +43,8 @@ public abstract class SimpleScopeManagerBase implements ScopeHandler {
      *             if no scope is active
      */
     public Map<Binding, Object> getValueMap() {
-        return tryGetValueMap().orElseThrow(() -> new RuntimeException(
-                "Cannot access value map outside of scope " + scopeName));
+        return tryGetValueMap()
+                .orElseThrow(() -> new RuntimeException("Cannot access value map outside of scope " + scopeName));
     }
 
     /**

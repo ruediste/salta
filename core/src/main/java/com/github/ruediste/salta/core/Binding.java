@@ -12,8 +12,7 @@ public abstract class Binding extends AttachedPropertyBearerBase {
     private Scope scope;
     boolean creatingRecipe;
 
-    public static class RecursiveRecipeCreationDetectedException
-            extends SaltaException {
+    public static class RecursiveRecipeCreationDetectedException extends SaltaException {
         private static final long serialVersionUID = 1L;
 
         RecursiveRecipeCreationDetectedException() {

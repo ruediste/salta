@@ -12,26 +12,22 @@ import com.google.common.reflect.TypeToken;
  *
  * @author crazybob@google.com (Bob Lee)
  */
-public interface StandardLinkedBindingBuilder<T>
-        extends StandardScopedBindingBuilder<T> {
+public interface StandardLinkedBindingBuilder<T> extends StandardScopedBindingBuilder<T> {
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
      */
-    public StandardScopedBindingBuilder<T> to(
-            Class<? extends T> implementation);
+    public StandardScopedBindingBuilder<T> to(Class<? extends T> implementation);
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
      */
-    public StandardScopedBindingBuilder<T> to(
-            TypeToken<? extends T> implementation);
+    public StandardScopedBindingBuilder<T> to(TypeToken<? extends T> implementation);
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
      */
-    public StandardScopedBindingBuilder<T> to(
-            CoreDependencyKey<? extends T> implementation);
+    public StandardScopedBindingBuilder<T> to(CoreDependencyKey<? extends T> implementation);
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
@@ -42,8 +38,7 @@ public interface StandardLinkedBindingBuilder<T>
      * See the EDSL examples at {@link StandardBinder}.
      *
      */
-    public StandardScopedBindingBuilder<T> toProvider(
-            Supplier<? extends T> provider);
+    public StandardScopedBindingBuilder<T> toProvider(Supplier<? extends T> provider);
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
@@ -53,8 +48,7 @@ public interface StandardLinkedBindingBuilder<T>
      * However, a wrapper to {@link Supplier} has to be provided
      * </p>
      */
-    public <P> StandardScopedBindingBuilder<T> toProvider(
-            CoreDependencyKey<P> providerKey,
+    public <P> StandardScopedBindingBuilder<T> toProvider(CoreDependencyKey<P> providerKey,
             Function<? super P, ? extends T> providerWrapper);
 
     /**
@@ -62,16 +56,15 @@ public interface StandardLinkedBindingBuilder<T>
      * 
      * @since 3.0
      */
-    public <S extends T> StandardScopedBindingBuilder<T> toConstructor(
-            Constructor<S> constructor);
+    public <S extends T> StandardScopedBindingBuilder<T> toConstructor(Constructor<S> constructor);
 
     /**
      * See the EDSL examples at {@link StandardBinder}.
      * 
      * @since 3.0
      */
-    public <S extends T> StandardScopedBindingBuilder<T> toConstructor(
-            Constructor<S> constructor, TypeToken<? extends S> type);
+    public <S extends T> StandardScopedBindingBuilder<T> toConstructor(Constructor<S> constructor,
+            TypeToken<? extends S> type);
 
     public <P> StandardScopedBindingBuilder<T> toProviderInstance(P provider,
             Function<P, Supplier<? extends T>> providerWrapper);

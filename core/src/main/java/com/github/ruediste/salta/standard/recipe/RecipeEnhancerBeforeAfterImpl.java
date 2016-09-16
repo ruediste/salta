@@ -16,8 +16,7 @@ public class RecipeEnhancerBeforeAfterImpl implements RecipeEnhancer {
 
     private BeforeAfterEnhancer beforeAfterEnhancer;
 
-    public RecipeEnhancerBeforeAfterImpl(
-            BeforeAfterEnhancer beforeAfterEnhancer) {
+    public RecipeEnhancerBeforeAfterImpl(BeforeAfterEnhancer beforeAfterEnhancer) {
         this.beforeAfterEnhancer = beforeAfterEnhancer;
     }
 
@@ -28,20 +27,16 @@ public class RecipeEnhancerBeforeAfterImpl implements RecipeEnhancer {
     }
 
     @Override
-    public Class<?> compile(MethodCompilationContext compilationContext,
-            SupplierRecipe innerRecipe) {
+    public Class<?> compile(MethodCompilationContext compilationContext, SupplierRecipe innerRecipe) {
         GeneratorAdapter mv = compilationContext.getMv();
 
-        compilationContext.addFieldAndLoad(BeforeAfterEnhancer.class,
-                beforeAfterEnhancer);
+        compilationContext.addFieldAndLoad(BeforeAfterEnhancer.class, beforeAfterEnhancer);
         mv.dup();
-        mv.invokeInterface(Type.getType(BeforeAfterEnhancer.class),
-                Method.getMethod("void before()"));
+        mv.invokeInterface(Type.getType(BeforeAfterEnhancer.class), Method.getMethod("void before()"));
         Class<?> t = innerRecipe.compile(compilationContext);
         if (t.isPrimitive())
             mv.box(Type.getType(t));
-        mv.invokeInterface(Type.getType(BeforeAfterEnhancer.class),
-                Method.getMethod("Object after(Object)"));
+        mv.invokeInterface(Type.getType(BeforeAfterEnhancer.class), Method.getMethod("Object after(Object)"));
         return Object.class;
     }
 

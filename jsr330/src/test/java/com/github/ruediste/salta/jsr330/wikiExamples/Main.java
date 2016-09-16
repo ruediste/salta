@@ -15,10 +15,8 @@ public class Main {
         /*
          * Now that we've got the injector, we can build objects.
          */
-        BillingService billingService = injector
-                .getInstance(BillingService.class);
+        BillingService billingService = injector.getInstance(BillingService.class);
 
-        billingService.bill(new Order("Napkins", 10),
-                new CreditCard("John Doe"));
+        billingService.bill(new Order("Napkins", 10), new CreditCard("John Doe"));
     }
 }

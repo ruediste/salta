@@ -8,8 +8,7 @@ import com.github.ruediste.salta.core.CoreDependencyKey;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.google.common.reflect.TypeToken;
 
-public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>
-        implements LinkedBindingBuilder<T> {
+public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>implements LinkedBindingBuilder<T> {
 
     private com.github.ruediste.salta.standard.binder.StandardLinkedBindingBuilder<T> delegate;
 
@@ -30,8 +29,7 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>
     }
 
     @Override
-    public ScopedBindingBuilder<T> to(
-            CoreDependencyKey<? extends T> implementation) {
+    public ScopedBindingBuilder<T> to(CoreDependencyKey<? extends T> implementation) {
         return new ScopedBindingBuilderImpl<>(delegate.to(implementation));
     }
 
@@ -43,41 +41,33 @@ public class LinkedBindingBuilderImpl<T> extends ScopedBindingBuilderImpl<T>
 
     @Override
     public ScopedBindingBuilder<T> toProvider(Provider<? extends T> provider) {
-        return new ScopedBindingBuilderImpl<>(
-                delegate.toProviderInstance(provider, x -> () -> x.get()));
+        return new ScopedBindingBuilderImpl<>(delegate.toProviderInstance(provider, x -> () -> x.get()));
     }
 
     @Override
-    public ScopedBindingBuilder<T> toProvider(
-            Class<? extends Provider<? extends T>> providerType) {
+    public ScopedBindingBuilder<T> toProvider(Class<? extends Provider<? extends T>> providerType) {
         return toProvider(DependencyKey.of(providerType));
     }
 
     @Override
-    public ScopedBindingBuilder<T> toProvider(
-            TypeToken<? extends Provider<? extends T>> providerType) {
+    public ScopedBindingBuilder<T> toProvider(TypeToken<? extends Provider<? extends T>> providerType) {
         return toProvider(DependencyKey.of(providerType));
     }
 
     @Override
-    public <P extends Provider<? extends T>> ScopedBindingBuilder<T> toProvider(
-            CoreDependencyKey<P> providerKey) {
-        return new ScopedBindingBuilderImpl<>(
-                delegate.toProvider(providerKey, p -> p.get()));
+    public <P extends Provider<? extends T>> ScopedBindingBuilder<T> toProvider(CoreDependencyKey<P> providerKey) {
+        return new ScopedBindingBuilderImpl<>(delegate.toProvider(providerKey, p -> p.get()));
     }
 
     @Override
-    public <S extends T> ScopedBindingBuilder<T> toConstructor(
-            Constructor<S> constructor) {
-        return toConstructor(constructor,
-                TypeToken.of(constructor.getDeclaringClass()));
+    public <S extends T> ScopedBindingBuilder<T> toConstructor(Constructor<S> constructor) {
+        return toConstructor(constructor, TypeToken.of(constructor.getDeclaringClass()));
     }
 
     @Override
-    public <S extends T> ScopedBindingBuilder<T> toConstructor(
-            Constructor<S> constructor, TypeToken<? extends S> type) {
-        return new ScopedBindingBuilderImpl<>(
-                delegate.toConstructor(constructor, type));
+    public <S extends T> ScopedBindingBuilder<T> toConstructor(Constructor<S> constructor,
+            TypeToken<? extends S> type) {
+        return new ScopedBindingBuilderImpl<>(delegate.toConstructor(constructor, type));
     }
 
 }

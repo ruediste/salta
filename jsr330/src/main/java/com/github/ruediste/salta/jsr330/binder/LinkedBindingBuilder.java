@@ -27,8 +27,7 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
     /**
      * See the EDSL examples at {@link Binder}.
      */
-    public ScopedBindingBuilder<T> to(
-            CoreDependencyKey<? extends T> implementation);
+    public ScopedBindingBuilder<T> to(CoreDependencyKey<? extends T> implementation);
 
     /**
      * See the EDSL examples at {@link Binder}.
@@ -44,34 +43,29 @@ public interface LinkedBindingBuilder<T> extends ScopedBindingBuilder<T> {
     /**
      * See the EDSL examples at {@link Binder}.
      */
-    public ScopedBindingBuilder<T> toProvider(
-            Class<? extends Provider<? extends T>> providerType);
+    public ScopedBindingBuilder<T> toProvider(Class<? extends Provider<? extends T>> providerType);
 
     /**
      * See the EDSL examples at {@link Binder}.
      */
-    public ScopedBindingBuilder<T> toProvider(
-            TypeToken<? extends Provider<? extends T>> providerType);
+    public ScopedBindingBuilder<T> toProvider(TypeToken<? extends Provider<? extends T>> providerType);
 
     /**
      * See the EDSL examples at {@link Binder}.
      */
-    public <P extends Provider<? extends T>> ScopedBindingBuilder<T> toProvider(
-            CoreDependencyKey<P> providerKey);
-
-    /**
-     * See the EDSL examples at {@link Binder}.
-     * 
-     * @since 3.0
-     */
-    public <S extends T> ScopedBindingBuilder<T> toConstructor(
-            Constructor<S> constructor);
+    public <P extends Provider<? extends T>> ScopedBindingBuilder<T> toProvider(CoreDependencyKey<P> providerKey);
 
     /**
      * See the EDSL examples at {@link Binder}.
      * 
      * @since 3.0
      */
-    public <S extends T> ScopedBindingBuilder<T> toConstructor(
-            Constructor<S> constructor, TypeToken<? extends S> type);
+    public <S extends T> ScopedBindingBuilder<T> toConstructor(Constructor<S> constructor);
+
+    /**
+     * See the EDSL examples at {@link Binder}.
+     * 
+     * @since 3.0
+     */
+    public <S extends T> ScopedBindingBuilder<T> toConstructor(Constructor<S> constructor, TypeToken<? extends S> type);
 }

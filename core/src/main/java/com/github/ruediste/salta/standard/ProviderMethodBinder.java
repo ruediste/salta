@@ -31,16 +31,14 @@ public abstract class ProviderMethodBinder {
     }
 
     public void bindProviderMethodsOf(Object instance) {
-        MethodOverrideIndex index = new MethodOverrideIndex(
-                TypeToken.of(instance.getClass()));
+        MethodOverrideIndex index = new MethodOverrideIndex(TypeToken.of(instance.getClass()));
         for (TypeToken<?> t : index.getAncestors()) {
             Class<?> rawType = t.getRawType();
             if (rawType.isInterface())
                 continue;
 
             for (Method m : rawType.getDeclaredMethods()) {
-                if (Modifier.isStatic(m.getModifiers()) || m.isBridge()
-                        || m.isSynthetic()) {
+                if (Modifier.isStatic(m.getModifiers()) || m.isBridge() || m.isSynthetic()) {
                     continue;
                 }
                 if (index.isOverridden(m))
@@ -51,35 +49,27 @@ public abstract class ProviderMethodBinder {
                 }
                 m.setAccessible(true);
 
-                TypeToken<?> boundType = t
-                        .resolveType(m.getGenericReturnType());
-                Matcher<CoreDependencyKey<?>> matcher = CoreDependencyKey
-                        .typeMatcher(boundType)
-                        .and(config.requredQualifierMatcher(
-                                config.getAvailableQualifier(m)));
+                TypeToken<?> boundType = t.resolveType(m.getGenericReturnType());
+                Matcher<CoreDependencyKey<?>> matcher = CoreDependencyKey.typeMatcher(boundType)
+                        .and(config.requredQualifierMatcher(config.getAvailableQualifier(m)));
 
                 config.creationPipeline.staticBindings.add(new StaticBinding() {
 
                     @Override
-                    protected SupplierRecipe createRecipe(
-                            RecipeCreationContext ctx) {
+                    protected SupplierRecipe createRecipe(RecipeCreationContext ctx) {
                         ArrayList<SupplierRecipe> args = new ArrayList<>();
                         Parameter[] parameters = m.getParameters();
                         for (int i = 0; i < parameters.length; i++) {
                             Parameter p = parameters[i];
-                            args.add(
-                                    ctx.getRecipe(new InjectionPoint<>(
-                                            t.resolveType(
-                                                    p.getParameterizedType()),
-                                            m, p, i)));
+                            args.add(ctx
+                                    .getRecipe(new InjectionPoint<>(t.resolveType(p.getParameterizedType()), m, p, i)));
                         }
-                        FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(
-                                m, args);
+                        FixedMethodInvocationFunctionRecipe methodRecipe = new FixedMethodInvocationFunctionRecipe(m,
+                                args);
                         return new SupplierRecipe() {
 
                             @Override
-                            protected Class<?> compileImpl(GeneratorAdapter mv,
-                                    MethodCompilationContext ctx) {
+                            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                                 ctx.addFieldAndLoad(Object.class, instance);
                                 return methodRecipe.compile(Object.class, ctx);
                             }

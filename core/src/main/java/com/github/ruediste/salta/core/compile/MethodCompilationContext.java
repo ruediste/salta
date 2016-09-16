@@ -33,8 +33,7 @@ public class MethodCompilationContext {
     private int access;
     private String desc;
 
-    public MethodCompilationContext(ClassCompilationContext classCtx,
-            GeneratorAdapter mv, int access, String desc) {
+    public MethodCompilationContext(ClassCompilationContext classCtx, GeneratorAdapter mv, int access, String desc) {
         this.classCtx = classCtx;
         this.mv = mv;
         this.access = access;
@@ -57,9 +56,8 @@ public class MethodCompilationContext {
 
     public void loadField(FieldHandle handle) {
         // getMv().loadThis();
-        getMv().getStatic(
-                Type.getObjectType(getClassCtx().getInternalClassName()),
-                handle.name, Type.getType(handle.type));
+        getMv().getStatic(Type.getObjectType(getClassCtx().getInternalClassName()), handle.name,
+                Type.getType(handle.type));
     }
 
     private String desc(Class<?> returnType, Class<?>... parameterTypes) {
@@ -79,12 +77,11 @@ public class MethodCompilationContext {
         String lambdaName;
         // generate lambda method
         {
-            lambdaName = getClassCtx().addMethod(ACC_PRIVATE + ACC_SYNTHETIC,
-                    "()Ljava/lang/Object;", null, new MethodRecipe() {
+            lambdaName = getClassCtx().addMethod(ACC_PRIVATE + ACC_SYNTHETIC, "()Ljava/lang/Object;", null,
+                    new MethodRecipe() {
 
                         @Override
-                        protected void compileImpl(GeneratorAdapter mv,
-                                MethodCompilationContext ctx) {
+                        protected void compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
 
                             Class<?> t = recipe.compile(ctx);
                             if (t.isPrimitive())
@@ -97,18 +94,13 @@ public class MethodCompilationContext {
         getMv().visitVarInsn(ALOAD, 0);
         getMv().visitInvokeDynamicInsn("get",
                 Type.getMethodDescriptor(Type.getType(Supplier.class),
-                        Type.getObjectType(
-                                getClassCtx().getInternalClassName())),
-                new Handle(Opcodes.H_INVOKESTATIC,
-                        "java/lang/invoke/LambdaMetafactory", "metafactory",
-                        desc(CallSite.class, MethodHandles.Lookup.class,
-                                String.class, MethodType.class,
-                                MethodType.class, MethodHandle.class,
-                                MethodType.class)),
-                new Object[] { Type.getType("()Ljava/lang/Object;"),
-                        new Handle(Opcodes.H_INVOKESPECIAL,
-                                getClassCtx().getInternalClassName(),
-                                lambdaName, "()Ljava/lang/Object;"),
+                        Type.getObjectType(getClassCtx().getInternalClassName())),
+                new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
+                        desc(CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class,
+                                MethodType.class, MethodHandle.class, MethodType.class)),
+                new Object[] {
+                        Type.getType("()Ljava/lang/Object;"), new Handle(Opcodes.H_INVOKESPECIAL,
+                                getClassCtx().getInternalClassName(), lambdaName, "()Ljava/lang/Object;"),
                         Type.getType("()Ljava/lang/Object;") });
 
     }
@@ -203,12 +195,10 @@ public class MethodCompilationContext {
     public CodeSizeHelper getCodeSizeHelper() {
         ClassNode node = new ClassNode();
         node.name = getClassCtx().getClazz().name;
-        ClassCompilationContext ccc = new ClassCompilationContext(node, true,
-                classCtx.getCompiler());
+        ClassCompilationContext ccc = new ClassCompilationContext(node, true, classCtx.getCompiler());
         CodeSizeEvaluator cse = new CodeSizeEvaluator(null);
         MethodCompilationContext mcc = new MethodCompilationContext(ccc,
-                new GeneratorAdapter(cse, access, "method", desc), access,
-                desc);
+                new GeneratorAdapter(cse, access, "method", desc), access, desc);
         CodeSizeHelper helper = new CodeSizeHelper();
         helper.ctx = mcc;
         helper.cse = cse;
@@ -217,8 +207,7 @@ public class MethodCompilationContext {
 
     private boolean separateSubRecipes;
 
-    public <T> T withSeparateSubRecipes(final boolean separateSubRecipes,
-            Function<GeneratorAdapter, T> compileFunc) {
+    public <T> T withSeparateSubRecipes(final boolean separateSubRecipes, Function<GeneratorAdapter, T> compileFunc) {
         boolean old = this.isSeparateSubRecipes();
         this.separateSubRecipes = separateSubRecipes;
         try {

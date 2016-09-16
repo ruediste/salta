@@ -100,8 +100,7 @@ public class InjectorImpl implements Injector {
     }
 
     @Override
-    public <T> MembersInjectionToken<T> getMembersInjectionToken(T value,
-            TypeToken<T> type) {
+    public <T> MembersInjectionToken<T> getMembersInjectionToken(T value, TypeToken<T> type) {
         return delegate.getMembersInjectionToken(value, type);
     }
 

@@ -21,28 +21,24 @@ public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
      */
     public final List<EnhancerFactory> enhancerFactories = new ArrayList<>();
 
-    public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx,
-            CoreDependencyKey<?> requestedKey) {
-        return enhancerFactories.stream()
-                .map(r -> r.getEnhancer(ctx, requestedKey))
-                .filter(x -> x != null).collect(toList());
+    public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx, CoreDependencyKey<?> requestedKey) {
+        return enhancerFactories.stream().map(r -> r.getEnhancer(ctx, requestedKey)).filter(x -> x != null)
+                .collect(toList());
     }
 
-    public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
-            RecipeCreationContext ctx, CoreDependencyKey<?> requestedKey) {
+    public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe, RecipeCreationContext ctx,
+            CoreDependencyKey<?> requestedKey) {
         return applyEnhancers(seedRecipe, createEnhancers(ctx, requestedKey));
     }
 
-    public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe,
-            List<RecipeEnhancer> enhancers) {
+    public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe, List<RecipeEnhancer> enhancers) {
         SupplierRecipe result = seedRecipe;
         for (RecipeEnhancer enhancer : enhancers) {
             SupplierRecipe innerRecipe = result;
             result = new SupplierRecipe() {
 
                 @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext ctx) {
+                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                     return enhancer.compile(ctx, innerRecipe);
                 }
 
@@ -51,6 +47,5 @@ public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
         return result;
     }
 
-    public ClassLoader generatedCodeParentClassLoader = Thread.currentThread()
-            .getContextClassLoader();
+    public ClassLoader generatedCodeParentClassLoader = Thread.currentThread().getContextClassLoader();
 }

@@ -21,11 +21,9 @@ public class JSR330TckTest {
             @Override
             protected void configure() {
                 bind(Car.class).to(Convertible.class);
-                bind(Seat.class).annotatedWith(Drivers.class)
-                        .to(DriversSeat.class);
+                bind(Seat.class).annotatedWith(Drivers.class).to(DriversSeat.class);
                 bind(Engine.class).to(V8Engine.class);
-                bind(Tire.class).annotatedWith(Names.named("spare"))
-                        .to(SpareTire.class);
+                bind(Tire.class).annotatedWith(Names.named("spare")).to(SpareTire.class);
                 requestStaticInjection(Convertible.class);
                 requestStaticInjection(Tire.class);
                 requestStaticInjection(SpareTire.class);

@@ -48,25 +48,19 @@ public class SimpleProxyScopeManager extends SimpleScopeManagerBase {
     }
 
     @Override
-    public Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-            CoreDependencyKey<?> requestedKey) {
+    public Supplier<Object> scope(Supplier<Object> supplier, Binding binding, CoreDependencyKey<?> requestedKey) {
 
         // create the proxy right away, such that it can be reused
         // afterwards
-        Object proxy = Enhancer.create(requestedKey.getRawType(),
-                new Dispatcher() {
+        Object proxy = Enhancer.create(requestedKey.getRawType(), new Dispatcher() {
 
-                    @Override
-                    public Object loadObject() throws Exception {
-                        Map<Binding, Object> scopedObjects = tryGetValueMap()
-                                .orElseThrow(() -> new RuntimeException(
-                                        "Cannot access " + requestedKey
-                                                + " outside of scope "
-                                                + scopeName));
-                        return scopedObjects.computeIfAbsent(binding,
-                                b -> supplier.get());
-                    }
-                });
+            @Override
+            public Object loadObject() throws Exception {
+                Map<Binding, Object> scopedObjects = tryGetValueMap().orElseThrow(
+                        () -> new RuntimeException("Cannot access " + requestedKey + " outside of scope " + scopeName));
+                return scopedObjects.computeIfAbsent(binding, b -> supplier.get());
+            }
+        });
 
         return () -> proxy;
     }

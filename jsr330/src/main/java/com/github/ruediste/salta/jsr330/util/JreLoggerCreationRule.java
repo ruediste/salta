@@ -8,8 +8,7 @@ import java.util.logging.Logger;
  */
 public class JreLoggerCreationRule extends LoggerCreationRule {
     public JreLoggerCreationRule() {
-        super(Logger.class,
-                declaringClass -> Logger.getLogger(declaringClass.getName()));
+        super(Logger.class, declaringClass -> Logger.getLogger(declaringClass.getName()));
     }
 
 }

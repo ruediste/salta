@@ -37,8 +37,7 @@ public abstract class CoreDependencyKey<T> {
         return new TypeTokenMatcher(type);
     }
 
-    private static final class EqualityMatcher
-            implements Matcher<CoreDependencyKey<?>> {
+    private static final class EqualityMatcher implements Matcher<CoreDependencyKey<?>> {
         private CoreDependencyKey<?> key;
 
         public EqualityMatcher(CoreDependencyKey<?> key) {
@@ -71,8 +70,7 @@ public abstract class CoreDependencyKey<T> {
         }
     }
 
-    public static class TypeTokenMatcher
-            implements Matcher<CoreDependencyKey<?>> {
+    public static class TypeTokenMatcher implements Matcher<CoreDependencyKey<?>> {
 
         private TypeToken<?> type;
 
@@ -113,8 +111,7 @@ public abstract class CoreDependencyKey<T> {
         return new RawTypeTokenMatcher(type);
     }
 
-    public static class RawTypeTokenMatcher
-            implements Matcher<CoreDependencyKey<?>> {
+    public static class RawTypeTokenMatcher implements Matcher<CoreDependencyKey<?>> {
 
         private Class<?> type;
 
@@ -145,8 +142,7 @@ public abstract class CoreDependencyKey<T> {
         }
     }
 
-    public static Matcher<CoreDependencyKey<?>> matcher(
-            CoreDependencyKey<?> key) {
+    public static Matcher<CoreDependencyKey<?>> matcher(CoreDependencyKey<?> key) {
         return new EqualityMatcher(key);
 
     }

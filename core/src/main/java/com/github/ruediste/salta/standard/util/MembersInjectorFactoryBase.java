@@ -23,8 +23,7 @@ import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
 import com.google.common.base.Defaults;
 import com.google.common.reflect.TypeToken;
 
-public abstract class MembersInjectorFactoryBase
-        implements RecipeMembersInjectorFactory {
+public abstract class MembersInjectorFactoryBase implements RecipeMembersInjectorFactory {
 
     private StandardInjectorConfiguration config;
 
@@ -37,8 +36,7 @@ public abstract class MembersInjectorFactoryBase
     }
 
     @Override
-    public List<RecipeMembersInjector> createMembersInjectors(
-            RecipeCreationContext ctx, TypeToken<?> typeToken) {
+    public List<RecipeMembersInjector> createMembersInjectors(RecipeCreationContext ctx, TypeToken<?> typeToken) {
         ArrayList<RecipeMembersInjector> result = new ArrayList<>();
 
         MethodOverrideIndex overrideIndex = new MethodOverrideIndex(typeToken);
@@ -46,45 +44,37 @@ public abstract class MembersInjectorFactoryBase
         // subtypes
         for (TypeToken<?> t : overrideIndex.getAncestors()) {
             for (Field f : t.getRawType().getDeclaredFields()) {
-                InjectionInstruction injectionInstruction = getInjectionInstruction(
-                        t, f);
+                InjectionInstruction injectionInstruction = getInjectionInstruction(t, f);
                 if (injectionInstruction != InjectionInstruction.NO_INJECTION) {
                     f.setAccessible(true);
 
                     // create dependency
-                    CoreDependencyKey<?> dependency = new InjectionPoint<>(
-                            t.resolveType(f.getGenericType()), f, f, null);
+                    CoreDependencyKey<?> dependency = new InjectionPoint<>(t.resolveType(f.getGenericType()), f, f,
+                            null);
 
                     // add injector
                     Optional<SupplierRecipe> recipe;
                     recipe = ctx.tryGetRecipe(dependency);
                     if (recipe.isPresent()) {
-                        result.add(new FixedFieldRecipeMembersInjector(f,
-                                recipe.get()));
+                        result.add(new FixedFieldRecipeMembersInjector(f, recipe.get()));
                     } else {
                         if (injectionInstruction != InjectionInstruction.INJECT_OPTIONAL) {
-                            Annotation qualifier = config
-                                    .getRequiredQualifier(f, f);
+                            Annotation qualifier = config.getRequiredQualifier(f, f);
                             if (qualifier != null)
                                 throw new SaltaException(
-                                        "No recipe found for field\n" + f
-                                                + "\nAnnotated with "
-                                                + qualifier);
+                                        "No recipe found for field\n" + f + "\nAnnotated with " + qualifier);
                             else
-                                throw new SaltaException(
-                                        "No recipe found for field\n" + f);
+                                throw new SaltaException("No recipe found for field\n" + f);
                         }
                     }
 
                 }
             }
 
-            methodLoop: for (Method method : t.getRawType()
-                    .getDeclaredMethods()) {
+            methodLoop: for (Method method : t.getRawType().getDeclaredMethods()) {
                 if (Modifier.isStatic(method.getModifiers()))
                     continue;
-                InjectionInstruction injectionInstruction = getInjectionInstruction(
-                        t, method, overrideIndex);
+                InjectionInstruction injectionInstruction = getInjectionInstruction(t, method, overrideIndex);
                 if (injectionInstruction != InjectionInstruction.NO_INJECTION) {
                     method.setAccessible(true);
 
@@ -97,17 +87,15 @@ public abstract class MembersInjectorFactoryBase
                          * matching field.
                          */
                         boolean fieldFound = false;
-                        for (Field f : method.getDeclaringClass()
-                                .getDeclaredFields()) {
+                        for (Field f : method.getDeclaringClass().getDeclaredFields()) {
                             if (f.getName().equals(method.getName())) {
                                 fieldFound = true;
                                 break;
                             }
                         }
                         if (!fieldFound)
-                            throw new SaltaException(
-                                    "Qualifier has been specified on " + method
-                                            + ".\nSpecify qualifiers on parameters instead");
+                            throw new SaltaException("Qualifier has been specified on " + method
+                                    + ".\nSpecify qualifiers on parameters instead");
                     }
 
                     // create dependencies
@@ -117,15 +105,12 @@ public abstract class MembersInjectorFactoryBase
                         Parameter parameter = parameters[i];
                         @SuppressWarnings({ "unchecked", "rawtypes" })
                         CoreDependencyKey<Object> dependency = new InjectionPoint<>(
-                                (TypeToken) t.resolveType(
-                                        parameter.getParameterizedType()),
-                                method, parameter, i);
+                                (TypeToken) t.resolveType(parameter.getParameterizedType()), method, parameter, i);
                         Optional<SupplierRecipe> recipe;
                         recipe = ctx.tryGetRecipe(dependency);
                         if (!recipe.isPresent()) {
                             if (config.isInjectionOptional(parameter)) {
-                                args.add(new SupplierRecipeImpl(() -> Defaults
-                                        .defaultValue(parameter.getType())));
+                                args.add(new SupplierRecipeImpl(() -> Defaults.defaultValue(parameter.getType())));
                                 continue parameterLoop;
                             }
                             if (injectionInstruction == InjectionInstruction.INJECT_OPTIONAL) {
@@ -134,24 +119,20 @@ public abstract class MembersInjectorFactoryBase
                         }
 
                         args.add(recipe.orElseThrow(() -> new SaltaException(
-                                "Unable to get recipe for parameter of method "
-                                        + method + ":\n" + parameter)));
+                                "Unable to get recipe for parameter of method " + method + ":\n" + parameter)));
                     }
 
                     // add injector
-                    result.add(
-                            new FixedMethodRecipeMembersInjector(method, args));
+                    result.add(new FixedMethodRecipeMembersInjector(method, args));
                 }
             }
         }
         return result;
     }
 
-    protected abstract InjectionInstruction getInjectionInstruction(
-            TypeToken<?> declaringType, Field field);
+    protected abstract InjectionInstruction getInjectionInstruction(TypeToken<?> declaringType, Field field);
 
-    protected abstract InjectionInstruction getInjectionInstruction(
-            TypeToken<?> declaringType, Method method,
+    protected abstract InjectionInstruction getInjectionInstruction(TypeToken<?> declaringType, Method method,
             MethodOverrideIndex overrideIndex);
 
 }

@@ -20,8 +20,7 @@ import com.github.ruediste.salta.standard.recipe.RecipeInitializer;
 import com.google.common.base.Defaults;
 import com.google.common.reflect.TypeToken;
 
-public abstract class RecipeInitializerFactoryBase
-        implements RecipeInitializerFactory {
+public abstract class RecipeInitializerFactoryBase implements RecipeInitializerFactory {
 
     private StandardInjectorConfiguration config;
 
@@ -31,8 +30,7 @@ public abstract class RecipeInitializerFactoryBase
     }
 
     @Override
-    public List<RecipeInitializer> getInitializers(RecipeCreationContext ctx,
-            TypeToken<?> typeToken) {
+    public List<RecipeInitializer> getInitializers(RecipeCreationContext ctx, TypeToken<?> typeToken) {
         ArrayList<RecipeInitializer> result = new ArrayList<>();
 
         MethodOverrideIndex overrideIndex = new MethodOverrideIndex(typeToken);
@@ -41,8 +39,7 @@ public abstract class RecipeInitializerFactoryBase
         for (TypeToken<?> t : overrideIndex.getAncestors()) {
 
             for (Method method : t.getRawType().getDeclaredMethods()) {
-                if (Modifier.isStatic(method.getModifiers())
-                        || Modifier.isAbstract(method.getModifiers()))
+                if (Modifier.isStatic(method.getModifiers()) || Modifier.isAbstract(method.getModifiers()))
                     continue;
                 if (isInitializer(t, method, overrideIndex)) {
                     method.setAccessible(true);
@@ -54,21 +51,16 @@ public abstract class RecipeInitializerFactoryBase
                         Parameter parameter = parameters[i];
                         @SuppressWarnings({ "unchecked", "rawtypes" })
                         CoreDependencyKey<Object> dependency = new InjectionPoint<>(
-                                (TypeToken) t.resolveType(
-                                        parameter.getParameterizedType()),
-                                method, parameter, i);
-                        Optional<SupplierRecipe> recipe = ctx
-                                .tryGetRecipe(dependency);
+                                (TypeToken) t.resolveType(parameter.getParameterizedType()), method, parameter, i);
+                        Optional<SupplierRecipe> recipe = ctx.tryGetRecipe(dependency);
 
                         if (recipe.isPresent())
                             args.add(recipe.get());
                         else if (config.isInjectionOptional(parameter))
-                            args.add(new SupplierRecipeImpl(() -> Defaults
-                                    .defaultValue(parameter.getType())));
+                            args.add(new SupplierRecipeImpl(() -> Defaults.defaultValue(parameter.getType())));
                         else
                             throw new SaltaException(
-                                    "Cannot resolve initializer parameter of "
-                                            + method + ":\n" + parameter);
+                                    "Cannot resolve initializer parameter of " + method + ":\n" + parameter);
 
                     }
 
@@ -80,7 +72,7 @@ public abstract class RecipeInitializerFactoryBase
         return result;
     }
 
-    protected abstract boolean isInitializer(TypeToken<?> declaringType,
-            Method method, MethodOverrideIndex overrideIndex);
+    protected abstract boolean isInitializer(TypeToken<?> declaringType, Method method,
+            MethodOverrideIndex overrideIndex);
 
 }

@@ -25,10 +25,8 @@ public class RecipeEnhancerBeforeAfterImplTest {
         Object result = compiler.compileSupplier(new SupplierRecipe() {
 
             @Override
-            protected Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
-                return new RecipeEnhancerBeforeAfterImpl(
-                        new BeforeAfterEnhancer() {
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+                return new RecipeEnhancerBeforeAfterImpl(new BeforeAfterEnhancer() {
 
                     @Override
                     public void before() {
@@ -46,8 +44,7 @@ public class RecipeEnhancerBeforeAfterImplTest {
                 }).compile(ctx, new SupplierRecipe() {
 
                     @Override
-                    protected Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext ctx) {
+                    protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                         mv.push(1);
                         return int.class;
                     }

@@ -14,8 +14,7 @@ import com.github.ruediste.salta.standard.util.Accessibility;
 
 public class SingletonScope implements Scope {
 
-    private static AttachedProperty<Binding, Object> instance = new AttachedProperty<>(
-            "singleton instance");
+    private static AttachedProperty<Binding, Object> instance = new AttachedProperty<>("singleton instance");
 
     @Override
     public String toString() {
@@ -23,8 +22,7 @@ public class SingletonScope implements Scope {
     }
 
     @Override
-    public SupplierRecipe createRecipe(RecipeCreationContext ctx,
-            Binding binding, CoreDependencyKey<?> requestedKey) {
+    public SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding, CoreDependencyKey<?> requestedKey) {
         // make sure to create the instance when first creating the recipe
         instantiate(ctx, binding);
 
@@ -32,12 +30,10 @@ public class SingletonScope implements Scope {
 
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
-            public Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            public Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
 
                 Class<?> fieldType = requestedKey.getRawType();
-                if (!Accessibility.isClassAccessible(fieldType,
-                        ctx.getCompiledCodeClassLoader())) {
+                if (!Accessibility.isClassAccessible(fieldType, ctx.getCompiledCodeClassLoader())) {
                     fieldType = Object.class;
                 }
                 ctx.addFieldAndLoad((Class) fieldType, instance.get(binding));
@@ -47,8 +43,7 @@ public class SingletonScope implements Scope {
     }
 
     @Override
-    public void performEagerInstantiation(RecipeCreationContext ctx,
-            Binding binding) {
+    public void performEagerInstantiation(RecipeCreationContext ctx, Binding binding) {
         instantiate(ctx, binding);
     }
 
@@ -59,11 +54,9 @@ public class SingletonScope implements Scope {
         if (!instance.isSet(binding)) {
             SupplierRecipe innerRecipe = binding.getOrCreateRecipe(ctx);
             try {
-                instance.set(binding,
-                        ctx.getCompiler().compileSupplier(innerRecipe).get());
+                instance.set(binding, ctx.getCompiler().compileSupplier(innerRecipe).get());
             } catch (Throwable t) {
-                throw new SaltaException(
-                        "Error while instantiating instance for " + binding, t);
+                throw new SaltaException("Error while instantiating instance for " + binding, t);
             }
         }
     }

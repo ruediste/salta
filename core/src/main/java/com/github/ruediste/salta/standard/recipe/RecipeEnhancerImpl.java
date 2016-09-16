@@ -21,14 +21,12 @@ public class RecipeEnhancerImpl implements RecipeEnhancer {
     }
 
     @Override
-    public Class<?> compile(MethodCompilationContext ctx,
-            SupplierRecipe innerRecipe) {
+    public Class<?> compile(MethodCompilationContext ctx, SupplierRecipe innerRecipe) {
         ctx.addFieldAndLoad(Function.class, function);
         Class<?> tos = innerRecipe.compile(ctx);
         if (tos.isPrimitive())
             ctx.getMv().box(Type.getType(tos));
-        ctx.getMv().invokeInterface(Type.getType(Function.class),
-                Method.getMethod("Object apply(Object)"));
+        ctx.getMv().invokeInterface(Type.getType(Function.class), Method.getMethod("Object apply(Object)"));
         return Object.class;
     }
 }

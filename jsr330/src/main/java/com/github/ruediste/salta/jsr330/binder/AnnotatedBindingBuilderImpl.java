@@ -4,8 +4,7 @@ import java.lang.annotation.Annotation;
 
 import com.github.ruediste.salta.jsr330.util.Names;
 
-public class AnnotatedBindingBuilderImpl<T> extends LinkedBindingBuilderImpl<T>
-        implements AnnotatedBindingBuilder<T> {
+public class AnnotatedBindingBuilderImpl<T> extends LinkedBindingBuilderImpl<T>implements AnnotatedBindingBuilder<T> {
 
     private com.github.ruediste.salta.standard.binder.StandardAnnotatedBindingBuilder<T> delegate;
 
@@ -16,23 +15,18 @@ public class AnnotatedBindingBuilderImpl<T> extends LinkedBindingBuilderImpl<T>
     }
 
     @Override
-    public LinkedBindingBuilder<T> annotatedWith(
-            Class<? extends Annotation> availableAnnotationType) {
-        return new LinkedBindingBuilderImpl<>(
-                delegate.annotatedWith(availableAnnotationType));
+    public LinkedBindingBuilder<T> annotatedWith(Class<? extends Annotation> availableAnnotationType) {
+        return new LinkedBindingBuilderImpl<>(delegate.annotatedWith(availableAnnotationType));
     }
 
     @Override
-    public LinkedBindingBuilder<T> annotatedWith(
-            Annotation availableAnnotation) {
-        return new LinkedBindingBuilderImpl<>(
-                delegate.annotatedWith(availableAnnotation));
+    public LinkedBindingBuilder<T> annotatedWith(Annotation availableAnnotation) {
+        return new LinkedBindingBuilderImpl<>(delegate.annotatedWith(availableAnnotation));
     }
 
     @Override
     public LinkedBindingBuilder<T> named(String name) {
-        return new LinkedBindingBuilderImpl<>(
-                delegate.annotatedWith(Names.named(name)));
+        return new LinkedBindingBuilderImpl<>(delegate.annotatedWith(Names.named(name)));
     }
 
 }

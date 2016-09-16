@@ -27,8 +27,7 @@ public class ScopesTest {
     @Test
     public void scopeOnClass() {
         Injector injector = Salta.createInjector();
-        assertSame(injector.getInstance(A.class),
-                injector.getInstance(A.class));
+        assertSame(injector.getInstance(A.class), injector.getInstance(A.class));
     }
 
     @Test
@@ -40,8 +39,7 @@ public class ScopesTest {
                 bind(A.class).in(DefaultScope.class);
             }
         });
-        assertNotSame(injector.getInstance(A.class),
-                injector.getInstance(A.class));
+        assertNotSame(injector.getInstance(A.class), injector.getInstance(A.class));
     }
 
     @Test
@@ -53,8 +51,7 @@ public class ScopesTest {
                 bind(IA.class).to(A.class);
             }
         });
-        assertSame(injector.getInstance(IA.class),
-                injector.getInstance(IA.class));
+        assertSame(injector.getInstance(IA.class), injector.getInstance(IA.class));
     }
 
     private interface IB {
@@ -72,8 +69,7 @@ public class ScopesTest {
                 bind(B.class).in(Singleton.class);
             }
         });
-        assertSame(injector.getInstance(B.class),
-                injector.getInstance(B.class));
+        assertSame(injector.getInstance(B.class), injector.getInstance(B.class));
     }
 
     @Test
@@ -90,8 +86,7 @@ public class ScopesTest {
                 return new B();
             }
         });
-        assertSame(injector.getInstance(IB.class),
-                injector.getInstance(IB.class));
+        assertSame(injector.getInstance(IB.class), injector.getInstance(IB.class));
     }
 
     private interface Bar {
@@ -113,8 +108,7 @@ public class ScopesTest {
                 bind(Grill.class).to(Applebees.class).in(Singleton.class);
             }
         });
-        assertNotSame(injector.getInstance(Bar.class),
-                injector.getInstance(Grill.class));
+        assertNotSame(injector.getInstance(Bar.class), injector.getInstance(Grill.class));
     }
 
     @Test
@@ -136,8 +130,7 @@ public class ScopesTest {
                 return c;
             }
         });
-        assertSame(injector.getInstance(Bar.class),
-                injector.getInstance(Grill.class));
+        assertSame(injector.getInstance(Bar.class), injector.getInstance(Grill.class));
     }
 
     private static class C {

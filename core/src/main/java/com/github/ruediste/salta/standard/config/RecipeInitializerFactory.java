@@ -14,6 +14,5 @@ public interface RecipeInitializerFactory {
     /**
      * Create a {@link RecipeInitializer}s based on a type. never return null.
      */
-    List<RecipeInitializer> getInitializers(RecipeCreationContext ctx,
-            TypeToken<?> type);
+    List<RecipeInitializer> getInitializers(RecipeCreationContext ctx, TypeToken<?> type);
 }

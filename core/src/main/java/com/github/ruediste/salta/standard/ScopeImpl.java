@@ -34,8 +34,7 @@ public class ScopeImpl implements Scope {
          *            Key beeing requested. Be aware that the same binding can
          *            be requested using different keys.
          */
-        Supplier<Object> scope(Supplier<Object> supplier, Binding binding,
-                CoreDependencyKey<?> requestedKey);
+        Supplier<Object> scope(Supplier<Object> supplier, Binding binding, CoreDependencyKey<?> requestedKey);
     }
 
     public ScopeImpl(ScopeHandler handler) {
@@ -43,21 +42,16 @@ public class ScopeImpl implements Scope {
     }
 
     @Override
-    public SupplierRecipe createRecipe(RecipeCreationContext ctx,
-            Binding binding, CoreDependencyKey<?> requestedKey) {
-        CompiledSupplier compilerInnerRecipe = ctx.getCompiler()
-                .compileSupplier(binding.getOrCreateRecipe(ctx));
+    public SupplierRecipe createRecipe(RecipeCreationContext ctx, Binding binding, CoreDependencyKey<?> requestedKey) {
+        CompiledSupplier compilerInnerRecipe = ctx.getCompiler().compileSupplier(binding.getOrCreateRecipe(ctx));
 
-        Supplier<Object> scoped = handler.scope(compilerInnerRecipe::getNoThrow,
-                binding, requestedKey);
+        Supplier<Object> scoped = handler.scope(compilerInnerRecipe::getNoThrow, binding, requestedKey);
         return new SupplierRecipe() {
 
             @Override
-            protected Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                 ctx.addFieldAndLoad(Supplier.class, scoped);
-                mv.invokeInterface(Type.getType(Supplier.class),
-                        Method.getMethod("Object get()"));
+                mv.invokeInterface(Type.getType(Supplier.class), Method.getMethod("Object get()"));
                 return Object.class;
             }
         };

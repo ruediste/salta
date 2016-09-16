@@ -62,30 +62,26 @@ public class FixedFieldRecipeMembersInjectorTest {
         String m;
         private MethodCompilationContext ctx;
 
-        public Builder(GeneratorAdapter mv, MethodCompilationContext ctx,
-                String m) {
+        public Builder(GeneratorAdapter mv, MethodCompilationContext ctx, String m) {
             this.mv = mv;
             this.ctx = ctx;
             this.m = m;
         }
 
         void f(Class<?> param, SupplierRecipe recipe) throws Exception {
-            new FixedFieldRecipeMembersInjector(TestMain.class
-                    .getDeclaredField(m + "_" + param.getSimpleName()), recipe)
-                            .compile(TestMain.class, ctx);
+            new FixedFieldRecipeMembersInjector(TestMain.class.getDeclaredField(m + "_" + param.getSimpleName()),
+                    recipe).compile(TestMain.class, ctx);
         }
 
         SupplierRecipe toObject(SupplierRecipe arg) {
             return new SupplierRecipe() {
 
                 @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext ctx) {
+                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                     arg.compile(ctx);
                     mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
-                            "toObject",
-                            "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+                            "toObject", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
                     return Object.class;
                 }
             };
@@ -96,8 +92,7 @@ public class FixedFieldRecipeMembersInjectorTest {
             return new SupplierRecipe() {
 
                 @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext ctx) {
+                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                     mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
                             "getPub",
@@ -113,8 +108,7 @@ public class FixedFieldRecipeMembersInjectorTest {
             return new SupplierRecipe() {
 
                 @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext ctx) {
+                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                     mv.visitMethodInsn(INVOKESTATIC,
                             "com/github/ruediste/salta/standard/recipe/FixedFieldRecipeMembersInjectorTest$Helper",
                             "getPriv", "()Ljava/lang/Object;", false);
@@ -128,8 +122,7 @@ public class FixedFieldRecipeMembersInjectorTest {
             return new SupplierRecipe() {
 
                 @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext ctx) {
+                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                     mv.push(1);
                     return int.class;
                 }
@@ -140,8 +133,7 @@ public class FixedFieldRecipeMembersInjectorTest {
             return new SupplierRecipe() {
 
                 @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext ctx) {
+                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                     mv.push(1);
                     mv.box(Type.getType(int.class));
                     return Integer.class;
@@ -153,8 +145,7 @@ public class FixedFieldRecipeMembersInjectorTest {
             return new SupplierRecipe() {
 
                 @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext ctx) {
+                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                     mv.push(1.2);
                     return double.class;
                 }
@@ -165,8 +156,7 @@ public class FixedFieldRecipeMembersInjectorTest {
             return new SupplierRecipe() {
 
                 @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv,
-                        MethodCompilationContext ctx) {
+                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                     mv.push(1.2);
                     mv.box(Type.getType(double.class));
                     return Double.class;
@@ -194,8 +184,7 @@ public class FixedFieldRecipeMembersInjectorTest {
         SupplierRecipe recipe = new SupplierRecipe() {
 
             @Override
-            protected Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
 
                 Builder b = new Builder(mv, ctx, m);
 

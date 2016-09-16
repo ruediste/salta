@@ -15,6 +15,5 @@ public interface FixedConstructorInstantiationRule {
      * Create the {@link RecipeInstantiator} for the given constructor in type
      * typeToken
      */
-    Optional<RecipeInstantiator> create(TypeToken<?> typeToken,
-            RecipeCreationContext ctx, Constructor<?> constructor);
+    Optional<RecipeInstantiator> create(TypeToken<?> typeToken, RecipeCreationContext ctx, Constructor<?> constructor);
 }

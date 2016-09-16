@@ -16,7 +16,6 @@ public interface MembersInjectorRule {
      * Create the {@link RecipeMembersInjector}s. If null is returned, the next
      * rule is tried
      */
-    List<RecipeMembersInjector> getMembersInjectors(RecipeCreationContext ctx,
-            TypeToken<?> type);
+    List<RecipeMembersInjector> getMembersInjectors(RecipeCreationContext ctx, TypeToken<?> type);
 
 }

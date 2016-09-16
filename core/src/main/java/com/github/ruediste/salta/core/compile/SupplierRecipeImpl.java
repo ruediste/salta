@@ -19,11 +19,9 @@ public class SupplierRecipeImpl extends SupplierRecipe {
     }
 
     @Override
-    protected Class<?> compileImpl(GeneratorAdapter mv,
-            MethodCompilationContext ctx) {
+    protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
         ctx.addFieldAndLoad(Supplier.class, supplier);
-        mv.invokeInterface(Type.getType(Supplier.class),
-                Method.getMethod("Object get()"));
+        mv.invokeInterface(Type.getType(Supplier.class), Method.getMethod("Object get()"));
 
         return Object.class;
     }

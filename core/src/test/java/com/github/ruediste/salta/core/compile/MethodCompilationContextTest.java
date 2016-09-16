@@ -54,8 +54,7 @@ public class MethodCompilationContextTest {
         FunctionRecipe recipe = new FunctionRecipe() {
 
             @Override
-            public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            public Class<?> compileImpl(Class<?> argType, GeneratorAdapter mv, MethodCompilationContext ctx) {
                 // primitive to boxed
                 mv.push(4);
                 ctx.castToPublic(int.class, Integer.class);
@@ -100,34 +99,29 @@ public class MethodCompilationContextTest {
             }
 
             protected void acceptArray(GeneratorAdapter mv) {
-                mv.visitMethodInsn(INVOKESTATIC,
-                        Type.getInternalName(CastTestHelper.class),
-                        "acceptArray", "([Ljava/lang/Object;)V", false);
+                mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CastTestHelper.class), "acceptArray",
+                        "([Ljava/lang/Object;)V", false);
             }
 
             protected void toInteger(GeneratorAdapter mv) {
-                mv.visitMethodInsn(INVOKESTATIC,
-                        Type.getInternalName(CastTestHelper.class), "toInteger",
+                mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CastTestHelper.class), "toInteger",
                         "(Ljava/lang/Integer;)Ljava/lang/Integer;", false);
             }
 
             protected void acceptInt(GeneratorAdapter mv) {
-                mv.visitMethodInsn(INVOKESTATIC,
-                        Type.getInternalName(CastTestHelper.class), "acceptInt",
-                        "(I)V", false);
+                mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CastTestHelper.class), "acceptInt", "(I)V",
+                        false);
             }
 
             protected void toObject(GeneratorAdapter mv) {
-                mv.visitMethodInsn(INVOKESTATIC,
-                        Type.getInternalName(CastTestHelper.class), "toObject",
+                mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CastTestHelper.class), "toObject",
                         "(Ljava/lang/Object;)Ljava/lang/Object;", false);
             }
 
             protected void acceptInteger(GeneratorAdapter mv) {
                 mv.visitMethodInsn(INVOKESTATIC,
 
-                Type.getInternalName(CastTestHelper.class), "acceptInteger",
-                        "(Ljava/lang/Integer;)V", false);
+                Type.getInternalName(CastTestHelper.class), "acceptInteger", "(Ljava/lang/Integer;)V", false);
             }
 
         };
@@ -137,8 +131,7 @@ public class MethodCompilationContextTest {
 
     @Test
     public void assumptions() {
-        assertTrue(Accessibility.isClassAccessible(int.class,
-                getClass().getClassLoader()));
+        assertTrue(Accessibility.isClassAccessible(int.class, getClass().getClassLoader()));
         assertFalse(Object.class.isAssignableFrom(int.class));
     }
 
@@ -147,19 +140,16 @@ public class MethodCompilationContextTest {
         Object result = compiler.compileSupplier(new SupplierRecipe() {
 
             @Override
-            protected Class<?> compileImpl(GeneratorAdapter mv,
-                    MethodCompilationContext ctx) {
+            protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                 ctx.compileToSupplier(new SupplierRecipe() {
 
                     @Override
-                    protected Class<?> compileImpl(GeneratorAdapter mv,
-                            MethodCompilationContext ctx) {
+                    protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
                         mv.push(1);
                         return int.class;
                     }
                 });
-                mv.invokeInterface(Type.getType(Supplier.class),
-                        Method.getMethod("Object get()"));
+                mv.invokeInterface(Type.getType(Supplier.class), Method.getMethod("Object get()"));
                 return Object.class;
             }
         }).get();
