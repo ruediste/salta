@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.github.ruediste.salta</groupId>
 		<artifactId>salta-parent</artifactId>
-		<version>0.3-SNAPSHOT</version>
+		<version>0.3</version>
 	</parent>
 
 	<artifactId>salta-guice</artifactId>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.github.ruediste.salta</groupId>
 			<artifactId>salta-core</artifactId>
-			<version>0.3-SNAPSHOT</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
