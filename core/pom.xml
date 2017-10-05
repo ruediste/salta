@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>com.github.ruediste</groupId>
 			<artifactId>attached-properties-4j</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
