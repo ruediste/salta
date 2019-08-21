@@ -16,12 +16,7 @@
 		<dependency>
 				<groupId>javax.inject</groupId>
 				<artifactId>javax.inject-tck</artifactId>
-		</dependency>	
-<!-- 		<dependency> -->
-<!--     		<groupId>aopalliance</groupId> -->
-<!--     		<artifactId>aopalliance</artifactId> -->
-<!--     		<version>1.0</version> -->
-<!-- 		</dependency> -->
+		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-testlib</artifactId>
@@ -38,7 +33,7 @@
 			<artifactId>javax.inject</artifactId>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>test</testSourceDirectory>

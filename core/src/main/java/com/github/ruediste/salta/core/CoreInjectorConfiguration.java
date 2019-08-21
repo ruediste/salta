@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import com.github.ruediste.attachedProperties4J.AttachedPropertyBearerBase;
+import com.github.ruediste.salta.core.attachedProperties.AttachedPropertyBearerBase;
 import com.github.ruediste.salta.core.compile.MethodCompilationContext;
 import com.github.ruediste.salta.core.compile.SupplierRecipe;
 
@@ -16,36 +16,36 @@ import com.github.ruediste.salta.core.compile.SupplierRecipe;
  */
 public class CoreInjectorConfiguration extends AttachedPropertyBearerBase {
 
-    /**
-     * List of enhancer factories. The enhancers of all factories are combined.
-     */
-    public final List<EnhancerFactory> enhancerFactories = new ArrayList<>();
+	/**
+	 * List of enhancer factories. The enhancers of all factories are combined.
+	 */
+	public final List<EnhancerFactory> enhancerFactories = new ArrayList<>();
 
-    public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx, CoreDependencyKey<?> requestedKey) {
-        return enhancerFactories.stream().map(r -> r.getEnhancer(ctx, requestedKey)).filter(x -> x != null)
-                .collect(toList());
-    }
+	public List<RecipeEnhancer> createEnhancers(RecipeCreationContext ctx, CoreDependencyKey<?> requestedKey) {
+		return enhancerFactories.stream().map(r -> r.getEnhancer(ctx, requestedKey)).filter(x -> x != null)
+				.collect(toList());
+	}
 
-    public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe, RecipeCreationContext ctx,
-            CoreDependencyKey<?> requestedKey) {
-        return applyEnhancers(seedRecipe, createEnhancers(ctx, requestedKey));
-    }
+	public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe, RecipeCreationContext ctx,
+			CoreDependencyKey<?> requestedKey) {
+		return applyEnhancers(seedRecipe, createEnhancers(ctx, requestedKey));
+	}
 
-    public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe, List<RecipeEnhancer> enhancers) {
-        SupplierRecipe result = seedRecipe;
-        for (RecipeEnhancer enhancer : enhancers) {
-            SupplierRecipe innerRecipe = result;
-            result = new SupplierRecipe() {
+	public SupplierRecipe applyEnhancers(SupplierRecipe seedRecipe, List<RecipeEnhancer> enhancers) {
+		SupplierRecipe result = seedRecipe;
+		for (RecipeEnhancer enhancer : enhancers) {
+			SupplierRecipe innerRecipe = result;
+			result = new SupplierRecipe() {
 
-                @Override
-                protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
-                    return enhancer.compile(ctx, innerRecipe);
-                }
+				@Override
+				protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+					return enhancer.compile(ctx, innerRecipe);
+				}
 
-            };
-        }
-        return result;
-    }
+			};
+		}
+		return result;
+	}
 
-    public ClassLoader generatedCodeParentClassLoader = Thread.currentThread().getContextClassLoader();
+	public ClassLoader generatedCodeParentClassLoader = Thread.currentThread().getContextClassLoader();
 }

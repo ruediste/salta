@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2014 Ruedi Steinmann
- * 
+ *
  * Copyright (C) 2007 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@
 package com.github.ruediste.salta.jsr330.binder;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -38,11 +37,9 @@ import com.github.ruediste.salta.jsr330.JSR330InjectorConfiguration;
 import com.github.ruediste.salta.jsr330.MembersInjector;
 import com.github.ruediste.salta.jsr330.ProvidedBy;
 import com.github.ruediste.salta.jsr330.SaltaModule;
-import com.github.ruediste.salta.matchers.Matcher;
 import com.github.ruediste.salta.standard.DependencyKey;
 import com.github.ruediste.salta.standard.Message;
 import com.github.ruediste.salta.standard.Stage;
-import com.github.ruediste.salta.standard.binder.SaltaMethodInterceptor;
 import com.github.ruediste.salta.standard.binder.StandardAnnotatedConstantBindingBuilder;
 import com.github.ruediste.salta.standard.binder.StandardBinder;
 import com.github.ruediste.salta.standard.recipe.RecipeMembersInjectorFactory;
@@ -83,9 +80,9 @@ import com.google.common.reflect.TypeToken;
  * annotations should be treated as if it were a request for a
  * {@code ServiceImpl} instance. This <i>overrides</i> the function of any
  * {@link ImplementedBy @ImplementedBy} or {@link ProvidedBy @ProvidedBy}
- * annotations found on {@code Service}, since Guice will have already
- * "moved on" to {@code ServiceImpl} before it reaches the point when it starts
- * looking for these annotations.
+ * annotations found on {@code Service}, since Guice will have already "moved
+ * on" to {@code ServiceImpl} before it reaches the point when it starts looking
+ * for these annotations.
  *
  * <pre>
  * bind(Service.class).toProvider(ServiceProvider.class);
@@ -102,8 +99,8 @@ import com.google.common.reflect.TypeToken;
  * The {@link Provider} you use here does not have to be a "factory"; that is, a
  * provider which always <i>creates</i> each instance it provides. However, this
  * is generally a good practice to follow. You can then use Guice's concept of
- * {@link Scope scopes} to guide when creation should happen --
- * "letting Guice work for you".
+ * {@link Scope scopes} to guide when creation should happen -- "letting Guice
+ * work for you".
  *
  * <pre>
  * bind(Service.class).annotatedWith(Red.class).to(ServiceImpl.class);
@@ -114,7 +111,7 @@ import com.google.common.reflect.TypeToken;
  * for particular <i>values</i> of the {@code @Red} annotation (see below), then
  * this binding will serve as a "catch-all" for any values of {@code @Red} that
  * have no exact match in the bindings.
- * 
+ *
  * <pre>
  * bind(ServiceImpl.class).in(Singleton.class);
  * // or, alternatively
@@ -133,7 +130,7 @@ import com.google.common.reflect.TypeToken;
  * <p>
  * <b>Note:</b> a scope specified in this way <i>overrides</i> any scope that
  * was specified with an annotation on the {@code ServiceImpl} class.
- * 
+ *
  * <p>
  * Besides {@link Singleton}, your Modules can contribute their own custom
  * scopes for use here as well.
@@ -226,258 +223,229 @@ import com.google.common.reflect.TypeToken;
  */
 public class Binder {
 
-    StandardBinder delegate;
-    private JSR330InjectorConfiguration config;
-    private InjectorImpl injector;
+	StandardBinder delegate;
+	private JSR330InjectorConfiguration config;
+	private InjectorImpl injector;
 
-    public Binder(JSR330InjectorConfiguration config, InjectorImpl injector) {
-        this.config = config;
-        this.injector = injector;
-        this.delegate = new StandardBinder(config.standardConfig, injector.getDelegate());
-    }
+	public Binder(JSR330InjectorConfiguration config, InjectorImpl injector) {
+		this.config = config;
+		this.injector = injector;
+		this.delegate = new StandardBinder(config.standardConfig, injector.getDelegate());
+	}
 
-    /**
-     * Return the configuration modified by this Binder
-     */
-    public JSR330InjectorConfiguration config() {
-        return config;
-    }
+	/**
+	 * Return the configuration modified by this Binder
+	 */
+	public JSR330InjectorConfiguration config() {
+		return config;
+	}
 
-    /**
-     * Return the injector of this Binder. The injector is not initialized
-     * during configuration, so it can not be used to create or inject
-     * instances. But it is possible to store a reference for later use.
-     */
-    public Injector getInjector() {
-        return injector;
-    }
+	/**
+	 * Return the injector of this Binder. The injector is not initialized during
+	 * configuration, so it can not be used to create or inject instances. But it is
+	 * possible to store a reference for later use.
+	 */
+	public Injector getInjector() {
+		return injector;
+	}
 
-    /**
-     * Binds a scope to an annotation.
-     */
-    public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
-        delegate.bindScope(annotationType, scope);
-    }
+	/**
+	 * Binds a scope to an annotation.
+	 */
+	public void bindScope(Class<? extends Annotation> annotationType, Scope scope) {
+		delegate.bindScope(annotationType, scope);
+	}
 
-    /**
-     * See the EDSL examples at {@link Binder}.
-     */
-    public <T> ScopedBindingBuilder<T> bind(TypeToken<T> type) {
-        return new ScopedBindingBuilderImpl<>(delegate.bind(type));
-    }
+	/**
+	 * See the EDSL examples at {@link Binder}.
+	 */
+	public <T> ScopedBindingBuilder<T> bind(TypeToken<T> type) {
+		return new ScopedBindingBuilderImpl<>(delegate.bind(type));
+	}
 
-    public void close() {
-        delegate.close();
-    }
+	public void close() {
+		delegate.close();
+	}
 
-    /**
-     * See the EDSL examples at {@link Binder}.
-     */
-    public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
-        return new AnnotatedBindingBuilderImpl<>(delegate.bind(type));
-    }
+	/**
+	 * See the EDSL examples at {@link Binder}.
+	 */
+	public <T> AnnotatedBindingBuilder<T> bind(Class<T> type) {
+		return new AnnotatedBindingBuilderImpl<>(delegate.bind(type));
+	}
 
-    /**
-     * See the EDSL examples at {@link Binder}.
-     */
-    public StandardAnnotatedConstantBindingBuilder bindConstant() {
-        return delegate.bindConstant();
-    }
+	/**
+	 * See the EDSL examples at {@link Binder}.
+	 */
+	public StandardAnnotatedConstantBindingBuilder bindConstant() {
+		return delegate.bindConstant();
+	}
 
-    /**
-     * Upon successful creation, the {@link Injector} will inject instance
-     * fields and methods of the given object.
-     *
-     * @param type
-     *            of instance
-     * @param instance
-     *            for which members will be injected
-     * @since 2.0
-     */
-    public <T> void requestInjection(TypeToken<T> type, T instance) {
-        delegate.requestInjection(type, instance);
-    }
+	/**
+	 * Upon successful creation, the {@link Injector} will inject instance fields
+	 * and methods of the given object.
+	 *
+	 * @param type     of instance
+	 * @param instance for which members will be injected
+	 * @since 2.0
+	 */
+	public <T> void requestInjection(TypeToken<T> type, T instance) {
+		delegate.requestInjection(type, instance);
+	}
 
-    /**
-     * Upon successful creation, the {@link Injector} will inject instance
-     * fields and methods of the given object.
-     *
-     * @param instance
-     *            for which members will be injected
-     * @since 2.0
-     */
-    public void requestInjection(Object instance) {
-        delegate.requestInjection(instance);
-    }
+	/**
+	 * Upon successful creation, the {@link Injector} will inject instance fields
+	 * and methods of the given object.
+	 *
+	 * @param instance for which members will be injected
+	 * @since 2.0
+	 */
+	public void requestInjection(Object instance) {
+		delegate.requestInjection(instance);
+	}
 
-    /**
-     * Upon successful creation, the {@link Injector} will inject static fields
-     * and methods in the given classes.
-     *
-     * @param types
-     *            for which static members will be injected
-     */
-    public void requestStaticInjection(Class<?>... types) {
-        delegate.requestStaticInjection(types);
-    }
+	/**
+	 * Upon successful creation, the {@link Injector} will inject static fields and
+	 * methods in the given classes.
+	 *
+	 * @param types for which static members will be injected
+	 */
+	public void requestStaticInjection(Class<?>... types) {
+		delegate.requestStaticInjection(types);
+	}
 
-    /**
-     * Uses the given module to configure more bindings.
-     */
-    public void install(SaltaModule module) {
-        config.modules.add(module);
-        module.configure(this);
-    }
+	/**
+	 * Uses the given module to configure more bindings.
+	 */
+	public void install(SaltaModule module) {
+		config.modules.add(module);
+		module.configure(this);
+	}
 
-    /**
-     * Gets the current stage.
-     */
-    public Stage currentStage() {
-        return delegate.currentStage();
-    }
+	/**
+	 * Gets the current stage.
+	 */
+	public Stage currentStage() {
+		return delegate.currentStage();
+	}
 
-    /**
-     * Records an error message which will be presented to the user at a later
-     * time. Unlike throwing an exception, this enable us to continue
-     * configuring the Injector and discover more errors. Uses
-     * {@link String#format(String, Object[])} to insert the arguments into the
-     * message.
-     */
-    public void addError(String message, Object... arguments) {
-        delegate.addError(message, arguments);
-    }
+	/**
+	 * Records an error message which will be presented to the user at a later time.
+	 * Unlike throwing an exception, this enable us to continue configuring the
+	 * Injector and discover more errors. Uses
+	 * {@link String#format(String, Object[])} to insert the arguments into the
+	 * message.
+	 */
+	public void addError(String message, Object... arguments) {
+		delegate.addError(message, arguments);
+	}
 
-    /**
-     * Records an exception, the full details of which will be logged, and the
-     * message of which will be presented to the user at a later time. If your
-     * Module calls something that you worry may fail, you should catch the
-     * exception and pass it into this.
-     */
-    public void addError(Throwable t) {
-        delegate.addError(t);
-    }
+	/**
+	 * Records an exception, the full details of which will be logged, and the
+	 * message of which will be presented to the user at a later time. If your
+	 * Module calls something that you worry may fail, you should catch the
+	 * exception and pass it into this.
+	 */
+	public void addError(Throwable t) {
+		delegate.addError(t);
+	}
 
-    /**
-     * Records an error message to be presented to the user at a later time.
-     *
-     * @since 2.0
-     */
-    public void addError(Message message) {
-        delegate.addError(message);
+	/**
+	 * Records an error message to be presented to the user at a later time.
+	 *
+	 * @since 2.0
+	 */
+	public void addError(Message message) {
+		delegate.addError(message);
 
-    }
+	}
 
-    /**
-     * Returns the provider used to obtain instances for the given injection
-     * key. The returned provider will not be valid until the {@link Injector}
-     * has been created. The provider will throw an
-     * {@code IllegalStateException} if you try to use it beforehand.
-     *
-     * @since 2.0
-     */
-    public <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
-        Supplier<T> result = delegate.getProvider(key);
-        return new Provider<T>() {
+	/**
+	 * Returns the provider used to obtain instances for the given injection key.
+	 * The returned provider will not be valid until the {@link Injector} has been
+	 * created. The provider will throw an {@code IllegalStateException} if you try
+	 * to use it beforehand.
+	 *
+	 * @since 2.0
+	 */
+	public <T> Provider<T> getProvider(CoreDependencyKey<T> key) {
+		Supplier<T> result = delegate.getProvider(key);
+		return new Provider<T>() {
 
-            @Override
-            public T get() {
-                return result.get();
-            }
+			@Override
+			public T get() {
+				return result.get();
+			}
 
-            @Override
-            public String toString() {
-                return result.toString();
-            }
-        };
-    }
+			@Override
+			public String toString() {
+				return result.toString();
+			}
+		};
+	}
 
-    /**
-     * Returns the provider used to obtain instances for the given injection
-     * type. The returned provider will not be valid until the {@link Injector}
-     * has been created. The provider will throw an
-     * {@code IllegalStateException} if you try to use it beforehand.
-     *
-     * @since 2.0
-     */
-    public <T> Provider<T> getProvider(Class<T> type) {
-        return getProvider(DependencyKey.of(type));
-    }
+	/**
+	 * Returns the provider used to obtain instances for the given injection type.
+	 * The returned provider will not be valid until the {@link Injector} has been
+	 * created. The provider will throw an {@code IllegalStateException} if you try
+	 * to use it beforehand.
+	 *
+	 * @since 2.0
+	 */
+	public <T> Provider<T> getProvider(Class<T> type) {
+		return getProvider(DependencyKey.of(type));
+	}
 
-    /**
-     * Returns the members injector used to inject dependencies into methods and
-     * fields on instances of the given type {@code T}. The returned members
-     * injector will not be valid until the main {@link Injector} has been
-     * created. The members injector will throw an {@code IllegalStateException}
-     * if you try to use it beforehand.
-     *
-     * @param typeLiteral
-     *            type to get members injector for
-     * @since 2.0
-     */
-    public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
-        Consumer<T> inner = delegate.getMembersInjector(typeLiteral);
-        return new MembersInjector<T>() {
+	/**
+	 * Returns the members injector used to inject dependencies into methods and
+	 * fields on instances of the given type {@code T}. The returned members
+	 * injector will not be valid until the main {@link Injector} has been created.
+	 * The members injector will throw an {@code IllegalStateException} if you try
+	 * to use it beforehand.
+	 *
+	 * @param typeLiteral type to get members injector for
+	 * @since 2.0
+	 */
+	public <T> MembersInjector<T> getMembersInjector(TypeToken<T> typeLiteral) {
+		Consumer<T> inner = delegate.getMembersInjector(typeLiteral);
+		return new MembersInjector<T>() {
 
-            @Override
-            public void injectMembers(T instance) {
-                inner.accept(instance);
-            }
+			@Override
+			public void injectMembers(T instance) {
+				inner.accept(instance);
+			}
 
-            @Override
-            public String toString() {
-                return inner.toString();
-            }
-        };
-    }
+			@Override
+			public String toString() {
+				return inner.toString();
+			}
+		};
+	}
 
-    /**
-     * Returns the members injector used to inject dependencies into methods and
-     * fields on instances of the given type {@code T}. The returned members
-     * injector will not be valid until the main {@link Injector} has been
-     * created. The members injector will throw an {@code IllegalStateException}
-     * if you try to use it beforehand.
-     *
-     * @param type
-     *            type to get members injector for
-     * @since 2.0
-     */
-    public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
-        return getMembersInjector(TypeToken.of(type));
-    }
+	/**
+	 * Returns the members injector used to inject dependencies into methods and
+	 * fields on instances of the given type {@code T}. The returned members
+	 * injector will not be valid until the main {@link Injector} has been created.
+	 * The members injector will throw an {@code IllegalStateException} if you try
+	 * to use it beforehand.
+	 *
+	 * @param type type to get members injector for
+	 * @since 2.0
+	 */
+	public <T> MembersInjector<T> getMembersInjector(Class<T> type) {
+		return getMembersInjector(TypeToken.of(type));
+	}
 
-    /**
-     * Bind a creation rule allowing the creation of injection point specific
-     * instances.
-     */
-    public void bindCreationRule(CreationRule rule) {
-        config.standardConfig.creationPipeline.creationRules.add(rule);
-    }
+	/**
+	 * Bind a creation rule allowing the creation of injection point specific
+	 * instances.
+	 */
+	public void bindCreationRule(CreationRule rule) {
+		config.standardConfig.creationPipeline.creationRules.add(rule);
+	}
 
-    public void bindMembersInjectorFactory(RecipeMembersInjectorFactory factory) {
-        config().standardConfig.construction.membersInjectorFactories.add(factory);
-    }
+	public void bindMembersInjectorFactory(RecipeMembersInjectorFactory factory) {
+		config().standardConfig.construction.membersInjectorFactories.add(factory);
+	}
 
-    /**
-     * Binds method interceptor[s] to methods matched by class and method
-     * matchers. A method is eligible for interception if:
-     *
-     * <ul>
-     * <li>Salta created the instance the method is on</li>
-     * <li>Neither the enclosing type nor the method is final</li>
-     * <li>And the method is package-private, protected, or public</li>
-     * </ul>
-     *
-     * @param keyMatcher
-     *            matches keys the interceptor should apply to. For example:
-     *            {@code only(Runnable.class)}.
-     * @param methodMatcher
-     *            matches methods the interceptor should apply to. For example:
-     *            {@code annotatedWith(Transactional.class)}.
-     * @param saltaInterceptor
-     *            intercepts the method calls
-     */
-    public final void bindInterceptor(Matcher<? super CoreDependencyKey<?>> keyMatcher,
-            Matcher<? super Method> methodMatcher, SaltaMethodInterceptor saltaInterceptor) {
-        delegate.bindInterceptor(keyMatcher, methodMatcher, saltaInterceptor);
-    }
 }

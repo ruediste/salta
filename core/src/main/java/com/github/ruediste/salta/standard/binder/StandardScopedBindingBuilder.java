@@ -2,31 +2,21 @@ package com.github.ruediste.salta.standard.binder;
 
 import java.lang.annotation.Annotation;
 
-import javax.xml.bind.Binder;
-
 import com.github.ruediste.salta.core.Scope;
 
 /**
- * See the EDSL examples at {@link Binder}.
- *
- * @author crazybob@google.com (Bob Lee)
+ * Since many API types are not present in the core, the documentation has been
+ * moved to the Binder classes of the JSR330 or the Guice API.
  */
 public interface StandardScopedBindingBuilder<T> {
 
-    /**
-     * See the EDSL examples at {@link Binder}.
-     */
-    void in(Class<? extends Annotation> scopeAnnotation);
+	void in(Class<? extends Annotation> scopeAnnotation);
 
-    /**
-     * See the EDSL examples at {@link Binder}.
-     */
-    void in(Scope scope);
+	void in(Scope scope);
 
-    /**
-     * Instructs the injector to eagerly initialize this singleton-scoped
-     * binding upon creation. Useful for application initialization logic. See
-     * the EDSL examples at {@link Binder}.
-     */
-    void asEagerSingleton();
+	/**
+	 * Instructs the injector to eagerly initialize this singleton-scoped binding
+	 * upon creation. Useful for application initialization logic.
+	 */
+	void asEagerSingleton();
 }
