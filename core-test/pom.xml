@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>com.github.ruediste.salta</groupId>
 		<artifactId>salta-parent</artifactId>
-		<version>1.0</version>
+		<version>1.1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -22,12 +22,12 @@
 		<dependency>
 			<groupId>com.github.ruediste.salta</groupId>
 			<artifactId>salta-core</artifactId>
-			<version>1.0</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ruediste.salta</groupId>
 			<artifactId>salta-jsr330</artifactId>
-			<version>1.0</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
