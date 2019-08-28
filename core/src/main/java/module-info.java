@@ -2,10 +2,10 @@ module com.github.ruediste.salta.core {
 	requires org.objectweb.asm;
 	requires org.objectweb.asm.commons;
 	requires org.objectweb.asm.util;
-	requires transitive guava;
 	requires net.bytebuddy;
 	requires net.bytebuddy.agent;
 	requires transitive jdk.attach;
+	requires com.google.common;
 
 	exports com.github.ruediste.salta.core;
 	exports com.github.ruediste.salta.core.compile;

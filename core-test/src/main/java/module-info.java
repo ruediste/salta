@@ -6,7 +6,6 @@ open module com.github.ruediste.salta.test {
 	requires junit;
 	requires java.logging;
 	requires org.mockito;
-	requires guava;
 	requires javax.inject.tck;
 	requires net.bytebuddy;
 	requires net.bytebuddy.agent;

@@ -16,44 +16,44 @@ import com.google.common.reflect.TypeToken;
 
 public abstract class ImplementedByConstructionRuleBase implements ConstructionRule {
 
-    public ImplementedByConstructionRuleBase() {
-        super();
-    }
+	public ImplementedByConstructionRuleBase() {
+		super();
+	}
 
-    /**
-     * Get the key of the implementation to be used. If null is returned, the
-     * rule does not match
-     */
-    protected abstract DependencyKey<?> getImplementorKey(TypeToken<?> type);
+	/**
+	 * Get the key of the implementation to be used. If null is returned, the rule
+	 * does not match
+	 */
+	protected abstract DependencyKey<?> getImplementorKey(TypeToken<?> type);
 
-    /**
-     * Name of the annotation, used to generate exception messages
-     */
-    protected String getAnnotationName() {
-        return "@ImplementedBy";
-    }
+	/**
+	 * Name of the annotation, used to generate exception messages
+	 */
+	protected String getAnnotationName() {
+		return "@ImplementedBy";
+	}
 
-    @Override
-    public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(TypeToken<?> type) {
-        DependencyKey<?> implementorKey = getImplementorKey(type);
-        if (implementorKey != null) {
-            if (!type.isAssignableFrom(implementorKey.getType())) {
-                throw new SaltaException("Implementation " + implementorKey + " specified by " + getAnnotationName()
-                        + " does not implement " + type);
-            }
-            return Optional.of(ctx -> {
-                SupplierRecipe recipe = ctx.getRecipe(implementorKey);
-                return new RecipeInstantiator() {
+	@Override
+	public Optional<Function<RecipeCreationContext, SupplierRecipe>> createConstructionRecipe(TypeToken<?> type) {
+		DependencyKey<?> implementorKey = getImplementorKey(type);
+		if (implementorKey != null) {
+			if (!type.isSupertypeOf(implementorKey.getType())) {
+				throw new SaltaException("Implementation " + implementorKey + " specified by " + getAnnotationName()
+						+ " does not implement " + type);
+			}
+			return Optional.of(ctx -> {
+				SupplierRecipe recipe = ctx.getRecipe(implementorKey);
+				return new RecipeInstantiator() {
 
-                    @Override
-                    protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
-                        return recipe.compile(ctx);
-                    }
-                };
-            });
-        }
+					@Override
+					protected Class<?> compileImpl(GeneratorAdapter mv, MethodCompilationContext ctx) {
+						return recipe.compile(ctx);
+					}
+				};
+			});
+		}
 
-        return Optional.empty();
-    }
+		return Optional.empty();
+	}
 
 }

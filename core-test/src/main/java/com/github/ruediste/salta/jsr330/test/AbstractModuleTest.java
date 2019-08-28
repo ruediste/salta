@@ -8,18 +8,18 @@ import com.github.ruediste.salta.jsr330.Salta;
 
 public class AbstractModuleTest {
 
-    private static class A {
+	private static class A {
 
-    }
+	}
 
-    @Test(expected = SaltaException.class)
-    public void constructorBindingCanThrowException() {
-        Salta.createInjector(new AbstractModule() {
+	@Test(expected = SaltaException.class)
+	public void constructorBindingCanThrowException() {
+		Salta.createInjector(new AbstractModule() {
 
-            @Override
-            protected void configure() throws Exception {
-                bind(A.class).toConstructor(A.class.getConstructor(int.class));
-            }
-        }).getInstance(A.class);
-    }
+			@Override
+			protected void configure() throws Exception {
+				bind(A.class).toConstructor(A.class.getConstructor(int.class));
+			}
+		}).getInstance(A.class);
+	}
 }
